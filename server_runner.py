@@ -1,11 +1,11 @@
 """
 Server Automated Execution & Keep-Alive Daemon.
-Designed for Marimo container environments with 96GB VRAM GPUs.
+Designed for high-throughput GPU environments (e.g. 96GB VRAM GPUs).
 Features:
-  - Anti-idle Heartbeat: keeps the Marimo session actively stimulated to prevent disconnection.
-  - Sequential/Batch Model Training across Table 2, 3, 4, 5, 6.
+  - Anti-idle Heartbeat: keeps the remote session actively stimulated to prevent disconnection.
+  - Sequential/Batch Model Training across Table 2, 3, 4, 5, 6 with optimized batch_size 16.
   - Real-time checkpoint & report uploading to Hugging Face Hub.
-  - Progress reporting every 15 minutes and on each experiment completion.
+  - Progress reporting and dual checkpointing (best & last).
   - Consolidated single Markdown report: outputs/EXPERIMENT_RESULTS.md.
 """
 
@@ -24,12 +24,125 @@ LOG_FILE = ROOT_DIR / "outputs" / "server_runner.log"
 STATUS_FILE = ROOT_DIR / "outputs" / "server_status.json"
 REPORT_FILE = ROOT_DIR / "outputs" / "EXPERIMENT_RESULTS.md"
 
+DEFAULT_EXPERIMENTS = [
+    {
+        "name": "Table2_Transformer_12rel_4",
+        "cmd": [
+            "run.py", "train",
+            "--model", "Transformer",
+            "--feature", "12rel_4",
+            "--augment", "none",
+            "--epochs", "100",
+            "--batch_size", "16",
+            "--device", "cuda",
+            "--use_amp",
+            "--amp_dtype", "bfloat16",
+            "--in_memory",
+            "--push_to_hf"
+        ]
+    },
+    {
+        "name": "Table2_BiLSTM_12rel_4",
+        "cmd": [
+            "run.py", "train",
+            "--model", "BiLSTM",
+            "--feature", "12rel_4",
+            "--augment", "none",
+            "--epochs", "100",
+            "--batch_size", "16",
+            "--device", "cuda",
+            "--use_amp",
+            "--amp_dtype", "bfloat16",
+            "--in_memory",
+            "--push_to_hf"
+        ]
+    },
+    {
+        "name": "Table2_LSTM_12rel_4",
+        "cmd": [
+            "run.py", "train",
+            "--model", "LSTM",
+            "--feature", "12rel_4",
+            "--augment", "none",
+            "--epochs", "100",
+            "--batch_size", "16",
+            "--device", "cuda",
+            "--use_amp",
+            "--amp_dtype", "bfloat16",
+            "--in_memory",
+            "--push_to_hf"
+        ]
+    },
+    {
+        "name": "Table3_Transformer_Rotate",
+        "cmd": [
+            "run.py", "train",
+            "--model", "Transformer",
+            "--feature", "12rel_4",
+            "--augment", "rotate",
+            "--epochs", "100",
+            "--batch_size", "16",
+            "--device", "cuda",
+            "--use_amp",
+            "--amp_dtype", "bfloat16",
+            "--in_memory",
+            "--push_to_hf"
+        ]
+    },
+    {
+        "name": "Table4_Transformer_BranchConcat",
+        "cmd": [
+            "run.py", "train",
+            "--model", "Transformer",
+            "--feature", "branch_concat",
+            "--augment", "none",
+            "--epochs", "100",
+            "--batch_size", "16",
+            "--device", "cuda",
+            "--use_amp",
+            "--amp_dtype", "bfloat16",
+            "--in_memory",
+            "--push_to_hf"
+        ]
+    },
+    {
+        "name": "Table5_STGCN_Full4",
+        "cmd": [
+            "run.py", "train",
+            "--model", "STGCN",
+            "--feature", "full_4",
+            "--augment", "none",
+            "--epochs", "100",
+            "--batch_size", "16",
+            "--device", "cuda",
+            "--use_amp",
+            "--amp_dtype", "bfloat16",
+            "--in_memory",
+            "--push_to_hf"
+        ]
+    },
+    {
+        "name": "Table6_Ensemble_Stacking",
+        "cmd": [
+            "run.py", "ensemble",
+            "--checkpoints",
+            "checkpoints/best_Transformer_12rel_4_aug_none.pt",
+            "checkpoints/best_BiLSTM_12rel_4_aug_none.pt",
+            "checkpoints/best_LSTM_12rel_4_aug_none.pt",
+            "--method", "stacking",
+            "--batch_size", "16",
+            "--device", "cuda",
+            "--push_to_hf"
+        ]
+    }
+]
+
 class ServerDaemon:
     def __init__(
         self,
         hf_token: Optional[str] = None,
-        heartbeat_interval: int = 120,  # 2 minutes
-        report_interval: int = 900       # 15 minutes
+        heartbeat_interval: int = 30,
+        report_interval: int = 900
     ):
         self.hf_token = hf_token or os.environ.get("HF_TOKEN", "")
         self.heartbeat_interval = heartbeat_interval
@@ -52,62 +165,26 @@ class ServerDaemon:
             f.write(formatted + "\n")
 
     def _heartbeat_loop(self):
-        """
-        Background loop to prevent container idle shutdown.
-        Sends toasts to Marimo and touches keepalive timestamps.
-        """
+        """Background loop to prevent container idle shutdown."""
         count = 0
         while self.running:
             time.sleep(self.heartbeat_interval)
             count += 1
-            elapsed_min = (time.time() - self.start_time) / 60.0
-
-            # Attempt to trigger marimo toast
+            self.log(f"[HEARTBEAT #{count}] Daemon active. Current: {self.current_experiment}")
             try:
-                import marimo as mo
-                mo.status.toast(
-                    f"⚡ Server Active: [{self.current_experiment}] Running for {elapsed_min:.1f}m (Done: {len(self.completed_experiments)})",
-                    kind="info"
-                )
+                status = {
+                    "timestamp": time.time(),
+                    "current_task": self.current_experiment,
+                    "heartbeat_count": count,
+                    "status": "running"
+                }
+                with open(STATUS_FILE, "w", encoding="utf-8") as f:
+                    json.dump(status, f, indent=2)
             except Exception:
                 pass
 
-            self.log(f"[HEARTBEAT #{count}] Training active ({elapsed_min:.1f} min elapsed). Current task: {self.current_experiment}")
-
-            # Check 15-minute report interval
-            if time.time() - self.last_report_time >= self.report_interval:
-                self.generate_progress_report()
-                self.last_report_time = time.time()
-
-    def generate_progress_report(self):
-        """
-        Generates and logs 15-minute periodic progress status.
-        """
-        elapsed_hr = (time.time() - self.start_time) / 3600.0
-        msg = (
-            f"=== 15-MINUTE PROGRESS REPORT ===\n"
-            f"Total Uptime: {elapsed_hr:.2f} hours\n"
-            f"Current Experiment: {self.current_experiment}\n"
-            f"Completed Experiments ({len(self.completed_experiments)}):\n"
-        )
-        for exp in self.completed_experiments:
-            msg += f"  - {exp['name']}: Test Acc={exp.get('acc', 0.0):.2f}%, F1={exp.get('f1', 0.0):.4f}\n"
-
-        self.log(msg)
-        status_data = {
-            "uptime_hours": elapsed_hr,
-            "current_experiment": self.current_experiment,
-            "completed_count": len(self.completed_experiments),
-            "completed": self.completed_experiments,
-            "last_update": datetime.now().isoformat()
-        }
-        with open(STATUS_FILE, "w", encoding="utf-8") as f:
-            json.dump(status_data, f, indent=2)
-
     def run_cmd(self, cmd_args: list) -> subprocess.CompletedProcess:
-        """
-        Executes a CLI command in the workspace directory.
-        """
+        """Executes a CLI command in the workspace directory."""
         cmd_str = " ".join(cmd_args)
         self.log(f"Executing: {cmd_str}")
         res = subprocess.run(
@@ -123,14 +200,15 @@ class ServerDaemon:
             self.log(f"[SUCCESS] Command completed successfully.")
         return res
 
-    def start_pipeline(self, experiments: list):
-        """
-        Starts heartbeat thread and executes experiment list sequentially.
-        """
+    def start_pipeline(self, experiments: Optional[list] = None):
+        """Starts heartbeat thread and executes experiment list sequentially."""
+        if experiments is None:
+            experiments = DEFAULT_EXPERIMENTS
+
         hb_thread = threading.Thread(target=self._heartbeat_loop, daemon=True)
         hb_thread.start()
 
-        self.log("ServerDaemon started with Keep-Alive heartbeat.")
+        self.log(f"ServerDaemon started with Keep-Alive heartbeat for {len(experiments)} experiments.")
 
         for idx, exp in enumerate(experiments, 1):
             name = exp["name"]
@@ -143,7 +221,6 @@ class ServerDaemon:
             res = self.run_cmd(exp["cmd"])
             duration = time.time() - t0
 
-            # Parse metrics from stdout or output files
             acc = 0.0
             f1 = 0.0
             for line in res.stdout.splitlines():
@@ -163,11 +240,10 @@ class ServerDaemon:
                 "status": "success" if res.returncode == 0 else "failed"
             }
             self.completed_experiments.append(exp_record)
-            self.generate_progress_report()
 
         self.running = False
         self.log("All planned experiments completed successfully!")
 
 if __name__ == "__main__":
     daemon = ServerDaemon()
-    print("ServerDaemon ready.")
+    daemon.start_pipeline()
