@@ -167,7 +167,8 @@ def cmd_data_report(args):
             metadata_path=args.metadata,
             smoke_test=args.smoke_test,
             smoke_class=args.smoke_class,
-            zip_output=True
+            zip_output=True,
+            num_workers=getattr(args, "num_workers", 8)
         )
         logger.info(f"Landmark packaging complete: {pkg_path}")
         if getattr(args, "push_to_hf", False) and pkg_path:
@@ -412,11 +413,13 @@ def cmd_evaluate(args):
 def cmd_ensemble(args):
     """
     Ensemble multiple trained models using hard voting, soft voting, or stacking.
+    Dynamically loads appropriate dataloader for each model architecture and feature type.
     """
     device = torch.device("cuda" if torch.cuda.is_available() and args.device == "cuda" else "cpu")
-    logger.info(f"Running Ensemble method: {args.method.upper()} on checkpoints:\n{args.checkpoints}")
+    logger.info(f"Running Ensemble method: {args.method.upper()} on {len(args.checkpoints)} checkpoints.")
 
-    models = []
+    model_entries = []
+    models_only = []
     for ckpt in args.checkpoints:
         p = Path(ckpt)
         if "STGCN" in p.name:
@@ -424,6 +427,9 @@ def cmd_ensemble(args):
             f_type = "full_4" if "full_4" in p.name else "full_rel_4"
         elif "BiLSTM" in p.name:
             m_type = "BiLSTM"
+            f_type = "branch_concat" if "branch" in p.name else "12rel_4"
+        elif "LSTM" in p.name:
+            m_type = "LSTM"
             f_type = "branch_concat" if "branch" in p.name else "12rel_4"
         else:
             m_type = "Transformer"
@@ -433,24 +439,26 @@ def cmd_ensemble(args):
         m.load_state_dict(torch.load(p, map_location=device))
         m.to(device)
         m.eval()
-        models.append(m)
+        model_entries.append((m, m_type, f_type, p.name))
+        models_only.append(m)
 
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-
-    _, _, test_loader = get_dataloaders(
-        metadata_path=args.metadata,
-        feature_method="12rel_4",
-        batch_size=args.batch_size if hasattr(args, "batch_size") else 16,
-        landmark_dir=args.landmark_dir,
-        num_workers=0
-    )
 
     all_preds_list = []
     all_probs_list = []
     y_test_final = None
 
-    for m in models:
+    for m, m_type, f_type, ckpt_name in model_entries:
+        logger.info(f"Generating predictions for {m_type} ({f_type}) from {ckpt_name} ...")
+        _, _, test_loader = get_dataloaders(
+            metadata_path=args.metadata,
+            feature_method=f_type,
+            batch_size=getattr(args, "batch_size", 64),
+            landmark_dir=args.landmark_dir,
+            num_workers=0,
+            in_memory=True
+        )
         tr = Trainer(model=m, device=device)
         y_t, y_p, y_pr = tr.predict(test_loader)
         all_preds_list.append(y_p)
@@ -459,13 +467,13 @@ def cmd_ensemble(args):
             y_test_final = y_t
 
     if args.method == "hard":
-        ens = HardVotingEnsemble(models)
+        ens = HardVotingEnsemble(models_only)
         final_preds = ens.predict(all_preds_list)
     elif args.method == "soft":
-        ens = SoftVotingEnsemble(models)
+        ens = SoftVotingEnsemble(models_only)
         final_preds = ens.predict(all_probs_list)
     elif args.method == "stacking":
-        ens = StackingEnsemble(models, num_classes=NUM_CLASSES)
+        ens = StackingEnsemble(models_only, num_classes=NUM_CLASSES)
         ens.fit(all_probs_list, y_test_final)
         final_preds = ens.predict(all_probs_list)
 
@@ -475,6 +483,22 @@ def cmd_ensemble(args):
     cm_path = out_dir / f"cm_ensemble_{args.method}.png"
     plot_confusion_matrix(y_test_final, final_preds, str(cm_path), title=f"Ensemble ({args.method.upper()})")
     logger.info(f"Saved ensemble confusion matrix: {cm_path}")
+
+    report_file = getattr(args, "report_file", "outputs/EXPERIMENT_RESULTS.md")
+    if report_file:
+        now_str = time.strftime("%Y-%m-%d %H:%M:%S")
+        is_hf = "Yes" if getattr(args, "push_to_hf", False) else "No"
+        row = f"| {now_str} | Ensemble_{args.method.upper()} | multi | none | - | - | - | - | {metrics['accuracy']*100:.2f}% | {metrics['macro_f1']:.4f} | `ensemble_{args.method}` | {is_hf} |\n"
+        with open(report_file, "a", encoding="utf-8") as rf:
+            rf.write(row)
+        logger.info(f"Recorded ensemble results to {report_file}")
+
+    if getattr(args, "push_to_hf", False):
+        token = getattr(args, "hf_token", None)
+        repo = getattr(args, "hf_repo", DEFAULT_MODEL_REPO)
+        upload_file_to_hf(str(cm_path), repo_id=repo, path_in_repo=f"plots/{cm_path.name}", token=token)
+        if os.path.exists(report_file):
+            upload_file_to_hf(report_file, repo_id=repo, path_in_repo="reports/EXPERIMENT_RESULTS.md", token=token)
 
     return metrics
 
@@ -575,6 +599,7 @@ def create_parser() -> argparse.ArgumentParser:
     p_rep_data.add_argument("--landmark_dir", type=str, default="data/landmarks", help="Output directory for landmark CSVs")
     p_rep_data.add_argument("--smoke_test", action="store_true", help="Smoke test extraction: minimal samples for 1 class")
     p_rep_data.add_argument("--smoke_class", type=str, default="barbell biceps curl", help="Target class for smoke test")
+    p_rep_data.add_argument("--num_workers", type=int, default=8, help="Number of parallel worker processes for MediaPipe extraction")
     p_rep_data.add_argument("--push_to_hf", action="store_true", default=False, help="Upload extracted landmarks ZIP to Hugging Face Hub")
     p_rep_data.add_argument("--hf_dataset_repo", type=str, default=DEFAULT_DATASET_REPO, help="Hugging Face dataset repo ID")
     p_rep_data.add_argument("--hf_token", type=str, default=None, help="Hugging Face authentication token")
@@ -651,7 +676,10 @@ def create_parser() -> argparse.ArgumentParser:
     p_ens.add_argument("--metadata", type=str, default="Final_dataset_metadata.csv")
     p_ens.add_argument("--landmark_dir", type=str, default="data/landmarks")
     p_ens.add_argument("--output_dir", type=str, default="outputs/ensemble")
+    p_ens.add_argument("--batch_size", type=int, default=128)
     p_ens.add_argument("--device", type=str, default="cuda")
+    p_ens.add_argument("--push_to_hf", action="store_true", default=False, help="Push ensemble plots and report to Hugging Face")
+    p_ens.add_argument("--report_file", type=str, default="outputs/EXPERIMENT_RESULTS.md", help="Single consolidated results file")
 
     # Reproduce
     p_rep = subparsers.add_parser("reproduce", help="Automated reproduction for paper tables")

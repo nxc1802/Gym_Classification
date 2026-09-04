@@ -7,7 +7,8 @@ and packages landmark CSVs for cloud/server deployment without heavy videos.
 import os
 import zipfile
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import pandas as pd
 import numpy as np
 
@@ -126,16 +127,32 @@ def generate_dataset_report(
         "tex_path": str(tex_path)
     }
 
+def _extract_single_video_worker(task: Tuple[str, str]) -> Tuple[bool, str, Optional[str]]:
+    """
+    Worker function to process one video and write out its landmark CSV.
+    """
+    vid_file_str, out_file_str = task
+    try:
+        out_p = Path(out_file_str)
+        if not out_p.exists() or out_p.stat().st_size == 0:
+            out_p.parent.mkdir(parents=True, exist_ok=True)
+            extract_landmarks_from_video(vid_file_str, out_file_str)
+        return True, Path(vid_file_str).name, None
+    except Exception as e:
+        return False, Path(vid_file_str).name, str(e)
+
 def run_mediapipe_extraction_pipeline(
     raw_dataset_dir: str,
     output_landmark_dir: str = "data/landmarks",
     metadata_path: str = "Final_dataset_metadata.csv",
     smoke_test: bool = False,
     smoke_class: str = "barbell biceps curl",
-    zip_output: bool = True
+    zip_output: bool = True,
+    num_workers: int = 8
 ) -> str:
     """
     Extracts MediaPipe landmarks from video files in raw_dataset_dir.
+    Supports multiprocessing with num_workers to utilize server CPU cores.
     If smoke_test is True, processes only smoke_class with minimal video count.
     Saves landmark CSV files and optionally creates a ZIP archive for server upload.
     """
@@ -154,22 +171,20 @@ def run_mediapipe_extraction_pipeline(
         meta_df = pd.concat([train_samples, val_samples, test_samples]).reset_index(drop=True)
         print(f"Smoke test video count: {len(meta_df)} (Train: {len(train_samples)}, Val: {len(val_samples)}, Test: {len(test_samples)})")
 
-    extracted_count = 0
+    tasks = []
     missing_count = 0
 
     for idx, row in meta_df.iterrows():
-        rel_path = row["filepath"]  # e.g. Final_dataset/test/barbell biceps curl/barbell biceps curl_1.mp4
+        rel_path = row["filepath"]
         split = row["split"]
         act = row["class"]
 
-        # Search for video file across raw_dir
         candidates = [
             raw_dir / rel_path,
             raw_dir / Path(rel_path).name,
             raw_dir / split / act / Path(rel_path).name,
             raw_dir / act / Path(rel_path).name
         ]
-        # Also recursive search if not in standard layout
         vid_file = None
         for c in candidates:
             if c.exists():
@@ -183,15 +198,36 @@ def run_mediapipe_extraction_pipeline(
 
         if vid_file and vid_file.exists():
             out_file = out_dir / split / act / f"{vid_file.stem}.csv"
-            out_file.parent.mkdir(parents=True, exist_ok=True)
-            if not out_file.exists() or out_file.stat().st_size == 0:
-                print(f"[{extracted_count+1}/{len(meta_df)}] Extracting landmarks: {vid_file.name}")
-                extract_landmarks_from_video(str(vid_file), str(out_file))
-            extracted_count += 1
+            tasks.append((str(vid_file), str(out_file)))
         else:
             missing_count += 1
 
-    print(f"\nMediaPipe Extraction finished: {extracted_count} extracted, {missing_count} not found in {raw_dataset_dir}.")
+    total_tasks = len(tasks)
+    print(f"Found {total_tasks} valid videos to process ({missing_count} missing from metadata).")
+    extracted_count = 0
+
+    if num_workers > 1 and total_tasks > 1:
+        print(f"Starting parallel extraction using {num_workers} worker processes...")
+        with ProcessPoolExecutor(max_workers=num_workers) as executor:
+            future_to_video = {executor.submit(_extract_single_video_worker, t): t[0] for t in tasks}
+            for future in as_completed(future_to_video):
+                success, vname, err = future.result()
+                extracted_count += 1
+                if success:
+                    if extracted_count % 25 == 0 or extracted_count == total_tasks:
+                        print(f"[{extracted_count}/{total_tasks}] Extracted landmarks: {vname}")
+                else:
+                    print(f"[{extracted_count}/{total_tasks}] ERROR extracting {vname}: {err}")
+    else:
+        for t in tasks:
+            success, vname, err = _extract_single_video_worker(t)
+            extracted_count += 1
+            if success:
+                print(f"[{extracted_count}/{total_tasks}] Extracted landmarks: {vname}")
+            else:
+                print(f"[{extracted_count}/{total_tasks}] ERROR extracting {vname}: {err}")
+
+    print(f"\nMediaPipe Extraction finished: {extracted_count} processed, {missing_count} missing.")
 
     # Zip output for server transfer
     if zip_output and extracted_count > 0:
