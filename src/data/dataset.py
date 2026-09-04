@@ -95,11 +95,14 @@ class GymDataset(Dataset):
         if in_memory and len(samples) > 0:
             self.tensor_labels = torch.tensor(labels, dtype=torch.long)
             if is_branch:
-                self.t1_list = torch.from_numpy(np.stack([s[0] for s in samples])).float()
-                self.t2_list = torch.from_numpy(np.stack([s[1] for s in samples])).float()
+                t1_arr = np.nan_to_num(np.stack([s[0] for s in samples]), nan=0.0)
+                t2_arr = np.nan_to_num(np.stack([s[1] for s in samples]), nan=0.0)
+                self.t1_list = torch.from_numpy(t1_arr).float()
+                self.t2_list = torch.from_numpy(t2_arr).float()
                 self.samples = None
             else:
-                self.tensor_samples = torch.from_numpy(np.stack(samples)).float()
+                stacked = np.nan_to_num(np.stack(samples), nan=0.0)
+                self.tensor_samples = torch.from_numpy(stacked).float()
                 self.samples = None
         else:
             self.samples = samples
@@ -170,48 +173,88 @@ def build_dataset_from_csvs(
     all_samples = []
     all_labels = []
 
-    for _, row in split_df.iterrows():
-        action_name = row["class"]
-        if action_name not in ACTION_TO_IDX:
-            continue
-        class_idx = ACTION_TO_IDX[action_name]
+    has_folder_structure = False
+    if landmark_dir:
+        split_dir = Path(landmark_dir) / split
+        if split_dir.exists() and any(split_dir.iterdir()):
+            has_folder_structure = True
 
-        csv_path = None
-        if landmark_dir:
-            cand1 = Path(landmark_dir) / f"{Path(row['filepath']).stem}.csv"
-            cand2 = Path(landmark_dir) / split / action_name / f"{Path(row['filepath']).stem}.csv"
-            cand3 = Path(landmark_dir) / action_name / f"{Path(row['filepath']).stem}.csv"
-            for c in [cand1, cand2, cand3]:
-                if c.exists():
-                    csv_path = c
-                    break
+    if has_folder_structure:
+        action_names = sorted([d.name for d in (Path(landmark_dir) / split).iterdir() if d.is_dir() and d.name in ACTION_TO_IDX])
+        if smoke_test:
+            action_names = [smoke_class] if smoke_class in action_names else action_names[:1]
 
-        if csv_path and csv_path.exists():
-            df = pd.read_csv(csv_path)
-            s, e = parse_segment_range(row["label_content"], len(df))
-            df_segment = df.iloc[s:e].reset_index(drop=True)
-            feat = extract_features_by_method(df_segment, feature_method)
-        else:
-            n_frames = int(row.get("num_frames", 75))
-            dummy_cols = ["Frame"] + [f"{pt}_{d}" for pt in ["NOSE", "LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_ELBOW", "RIGHT_ELBOW", "LEFT_WRIST", "RIGHT_WRIST", "LEFT_HIP", "RIGHT_HIP", "LEFT_KNEE", "RIGHT_KNEE", "LEFT_ANKLE", "RIGHT_ANKLE"] for d in ["x", "y", "z", "visibility"]]
-            df = pd.DataFrame(np.random.randn(n_frames, len(dummy_cols)), columns=dummy_cols)
-            s, e = parse_segment_range(row["label_content"], n_frames)
-            df_segment = df.iloc[s:e].reset_index(drop=True)
-            feat = extract_features_by_method(df_segment, feature_method)
+        for action_name in action_names:
+            class_idx = ACTION_TO_IDX[action_name]
+            class_dir = Path(landmark_dir) / split / action_name
+            csv_files = sorted(list(class_dir.glob("*.csv")))
+            if smoke_test:
+                csv_files = csv_files[:(2 if split == "train" else 1)]
 
-        if is_branch:
-            f1, f2 = feat
-            w1 = sliding_windows(f1, seq_len, stride)
-            w2 = sliding_windows(f2, seq_len, stride)
-            n_wins = min(len(w1), len(w2))
-            for i in range(n_wins):
-                all_samples.append((w1[i], w2[i]))
-                all_labels.append(class_idx)
-        else:
-            wins = sliding_windows(feat, seq_len, stride)
-            for w in wins:
-                all_samples.append(w)
-                all_labels.append(class_idx)
+            for csv_path in csv_files:
+                try:
+                    df = pd.read_csv(csv_path)
+                    if len(df) == 0:
+                        continue
+                    feat = extract_features_by_method(df, feature_method)
+                    if is_branch:
+                        f1, f2 = feat
+                        w1 = sliding_windows(f1, seq_len, stride)
+                        w2 = sliding_windows(f2, seq_len, stride)
+                        n_wins = min(len(w1), len(w2))
+                        for i in range(n_wins):
+                            all_samples.append((w1[i], w2[i]))
+                            all_labels.append(class_idx)
+                    else:
+                        wins = sliding_windows(feat, seq_len, stride)
+                        for w in wins:
+                            all_samples.append(w)
+                            all_labels.append(class_idx)
+                except Exception:
+                    continue
+    else:
+        for _, row in split_df.iterrows():
+            action_name = row["class"]
+            if action_name not in ACTION_TO_IDX:
+                continue
+            class_idx = ACTION_TO_IDX[action_name]
+
+            csv_path = None
+            if landmark_dir:
+                cand1 = Path(landmark_dir) / f"{Path(row['filepath']).stem}.csv"
+                cand2 = Path(landmark_dir) / split / action_name / f"{Path(row['filepath']).stem}.csv"
+                cand3 = Path(landmark_dir) / action_name / f"{Path(row['filepath']).stem}.csv"
+                for c in [cand1, cand2, cand3]:
+                    if c.exists():
+                        csv_path = c
+                        break
+
+            if csv_path and csv_path.exists():
+                df = pd.read_csv(csv_path)
+                s, e = parse_segment_range(row["label_content"], len(df))
+                df_segment = df.iloc[s:e].reset_index(drop=True)
+                feat = extract_features_by_method(df_segment, feature_method)
+            else:
+                n_frames = int(row.get("num_frames", 75))
+                dummy_cols = ["Frame"] + [f"{pt}_{d}" for pt in ["NOSE", "LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_ELBOW", "RIGHT_ELBOW", "LEFT_WRIST", "RIGHT_WRIST", "LEFT_HIP", "RIGHT_HIP", "LEFT_KNEE", "RIGHT_KNEE", "LEFT_ANKLE", "RIGHT_ANKLE"] for d in ["x", "y", "z", "visibility"]]
+                df = pd.DataFrame(np.random.randn(n_frames, len(dummy_cols)), columns=dummy_cols)
+                s, e = parse_segment_range(row["label_content"], n_frames)
+                df_segment = df.iloc[s:e].reset_index(drop=True)
+                feat = extract_features_by_method(df_segment, feature_method)
+
+            if is_branch:
+                f1, f2 = feat
+                w1 = sliding_windows(f1, seq_len, stride)
+                w2 = sliding_windows(f2, seq_len, stride)
+                n_wins = min(len(w1), len(w2))
+                for i in range(n_wins):
+                    all_samples.append((w1[i], w2[i]))
+                    all_labels.append(class_idx)
+            else:
+                wins = sliding_windows(feat, seq_len, stride)
+                for w in wins:
+                    all_samples.append(w)
+                    all_labels.append(class_idx)
 
     return GymDataset(
         samples=all_samples,
