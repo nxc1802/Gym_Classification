@@ -1,0 +1,15 @@
+# Experiment Table 5: ST-GCN on Raw vs Relative Landmark Inputs
+# Model: ST-GCN
+# Inputs: Raw 33x4 vs Rel. 32x4+1
+
+model: "STGCN"
+
+features:
+  - "full_4"
+  - "full_rel_4"
+
+hyperparameters:
+  batch_size: 16
+  epochs: 100
+  patience: 20
+  learning_rate: 0.0001

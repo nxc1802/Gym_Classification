@@ -1,0 +1,178 @@
+\begin{tikzpicture}[
+% Control the style of the blocks
+%     node distance=1cm and 0.8cm,
+%     base/.style={draw, fill=blue!20, text centered, minimum height=3em, rounded corners=3pt, font=\sffamily\small},
+%     block/.style={base, text width=7em},
+%     wideblock/.style={base, text width=9em},
+    block/.style={
+        draw,
+        line width=0.3mm,
+%         fill=red!10,
+        minimum width=2.5cm,   % Your original width (1 - 0)
+        minimum height=2cm,  % Your original height (1.5 - -2.5)
+        align=center,
+        font = \Large,
+%         rotate=-90           % This rotates the whole box and text
+    },
+        blockfe/.style={
+        draw,
+        line width=0.3mm,
+        fill=red!10,
+        minimum width=3cm,   % Your original width (1 - 0)
+        minimum height=4cm,  % Your original height (1.5 - -2.5)
+        align=center,
+        font = \Large,
+%         rotate=-90           % This rotates the whole box and text
+    },
+    dataset/.style={
+        draw,
+        line width=0.3mm,
+        fill=green!10,
+        minimum width=4cm,   % Your original width (1 - 0)
+%         width = 1cm,
+        minimum height=1cm,  % Your original height (1.5 - -2.5)
+        align=center,
+        font = \Large,
+%         rotate=-90           % This rotates the whole box and text
+    },
+    database/.style={
+        draw, 
+        cylinder, 
+        aspect=0.3, 
+        shape border rotate=90, 
+        line width=0.3mm,
+        minimum width=6em, 
+        minimum height=8em, 
+        text centered, 
+        align=center,
+       font = \Large,
+    },
+    sum/.style={
+        draw,
+        line width=0.3mm,
+        circle,
+        minimum size=0.5cm, % Matches your 0.25 radius
+        inner sep=0pt,      % Ensures the '+' is perfectly centered
+%         font=\small
+    },
+   model/.style = {
+   draw, 
+   rectangle, 
+    minimum width=3cm, 
+    minimum height=2cm, 
+    line width = 0.3mm,
+    align=center,
+     font = \Large,
+   },
+    line/.style={draw, -Stealth, thick}, % stealth , -latex
+    arrow/.style={draw, -Stealth, thick}
+]
+
+
+
+
+
+% \draw [line] (10,0) -- (11,1.5)-- (14,1.5)-- (14.5,1.5);
+% \draw [line] (10,-0.5) -- (11,1)-- (14,1)-- (14.5,1);
+% \draw [line] (10,-1) -- (11,0.5)-- (14,0.5)-- (14.5,0.5);
+
+% \draw [line] (10,0) -- (11,-1.5)-- (14,-1.5)-- (14.5,-1.5);
+% \draw [line] (10,-0.5) -- (11,-2)-- (14,-2)-- (14.5,-2);
+% \draw [line] (10,-1) -- (11,-2.5)-- (14,-2.5)-- (14.5,-2.5);
+
+% Nodes
+%     \node [block] (segment) {Segment};
+    \node [database] (database) at (-1,-0.5) {Video \\ dataset};
+    \node [dataset] (training) at (4.5,1) {Training set};
+     \node [dataset] (validation) at (4.5,-0.5) {Validation set};
+     \node [dataset] (testing) at (4.5,-2) {Testing set};
+%     \node [block, right=of data] (preproc) {Pre-Processing};
+%     \node [block, right=of preproc] (pose) {Pose Estimation};
+%     \node [block, right=of pose] (landmarks) {Landmarks};
+
+\draw [line] (0,-0.5) -- (1,-0.5)-- (1,1)-- (training);
+\draw [line]  (1,-0.5)-- (2,-0.5)-- (validation);
+\draw [line]  (1,-0.5)-- (1,-2)-- (testing);
+
+
+
+
+  
+%   \node [sum] (sum1) at (16.5,-0.5) {+};
+%  \draw [arrow] (14.5,1) -- (sum1.west);
+%   \draw [arrow] (14.5,-2) -- (sum1.west);
+%   
+%     \node [sum] (sum2) at (16.5,-2) {+};
+%  \draw [arrow] (14.5,0.5) -- (sum2.west);
+%   \draw [arrow] (14.5,-2.5) -- (sum2.west);
+  
+   \node [dataset] (trainingfm) at (13.5,1) {Training set \\ feature maps};
+     \node [dataset] (validationfm) at (13.5,-0.5) {Validation set\\ feature maps};
+     \node [dataset] (testingfm) at (13.5,-2) {Testing set\\ feature maps};
+     
+        
+\draw [arrow] (training.east) -- (trainingfm);
+\draw [line] (validation.east) -- (validationfm);
+\draw [line] (testing.east)-- (testingfm);
+
+     
+     \node [blockfe, fill opacity=0.9, text opacity=1] (feature) at (9,-0.5) {Feature \\ Extraction};
+    
+%     \draw [arrow] (sum.east) -- (trainingfm);
+%     \draw [arrow] (sum1.east) -- (validationfm);
+%     \draw [arrow] (sum2.east) -- (testingfm);
+    \node [block] (seg) at (1,5.75) {\Large Segment};
+    \node [block] (preproc) at (4.5,5.75) {\Large Preprocessing};
+     \node [block] (pose) at (8.5,5.75) {\Large Mediapie-based \\ \Large pose landmark \\ \Large estimation};
+%      \node [block] (landm) at (8.5,-6) {Landmark \\ extraction};
+      \node [block, fill=cyan!10, fill opacity=0.9, text opacity=1] (angle) at (12.5,7.25) {\Large Angle \\ \Large Extraction};
+    \node [block, fill=yellow!10, fill opacity=0.9, text opacity=1] (rel) at (12.5,4.25) {\Large Relative \\ \Large Landmark \\ \Large Extraction};
+%       \node [sum] (sum) at (14,-6) {+};
+      
+       \draw [arrow] (-1,5.75) -- (seg) ;
+        \draw [arrow] (seg) -- (preproc) ;
+     \draw [arrow] (preproc.east) -- (pose) ;
+%        \draw [arrow] (pose.east) -- (landm) ;
+       \draw [arrow] (pose) -- (10.75,5.75)  -- (10.75,7.25)-- (angle);
+       \draw [arrow] (10.75,5.75)  -- (10.75,4.25)-- (rel);
+    
+   
+%  \draw [arrow] (angle)--(14,-5) -- (sum.north);
+%   \draw [arrow] (rel)--(14,-7) -- (sum.south);
+%     \draw [arrow] (sum)--(15,-6) ;
+    
+    \draw[dashed, line width = 0.3mm, red](-0.75,3) rectangle(16,8.5);
+    
+    \draw[ cyan!10,  fill = cyan!10 , line width = 0.3mm](15,5.75) rectangle(15.5,7.5);
+    \draw[  yellow!10, fill = yellow!10 , line width = 0.3mm](15,4) rectangle(15.5,5.75);
+     \draw[ black , line width = 0.3mm](15,4) rectangle(15.5,7.5);
+     \draw[dashed](15,5.75)--(15.5,5.75);
+    
+    \draw [arrow] (angle)  -- (15,7.25);
+    \draw [arrow] (rel)  -- (15,4.25);
+    \draw [arrow] (15.5,5.75)  -- (16.25,5.75);
+    
+    \draw[dashed](-0.75,3)--(7.5,1.5);
+      \draw[dashed](16,3)--(10.5,1.5);
+
+\node[align = center, red] at (4.75,9) {\Large proposed feature extraction method for each frame};
+\node[align = center] at (14.75,9) {\Large feature map};
+\node[align = center, rotate = -90] at (14.75,5.75) {\Large concatenate};
+ \draw[arrow, dashed](15.25,8.75)--(15.25,7.75);
+ 
+ \node[model] (model) at (18,-0.5) {LSTM/ \\ BiLSTM/ \\ Transformer};
+ \draw[arrow] (trainingfm) --(18,1)-- (model);
+  \draw[arrow] (validationfm) -- (model);
+  
+  \node[model, red] (bestm) at (13.5,-4.75) {Best models};
+   \draw[arrow] (model) --(18,-4.75)-- (bestm);
+   \draw[arrow] (testingfm) -- (bestm);
+   
+   \draw[line width = 0.5mm] (8.75,-4.75) ellipse (1.5cm and 0.75cm);
+\node[align = center] at (8.75,-4.75) {\Large Evaluations};
+ \draw[arrow] (bestm) --(10.25,-4.75);
+ 
+ \node[align = center] at (16.75,1.25) {\Large training};
+  \node[align = center] at (14.5,-3.25) {\Large testing};
+ 
+\end{tikzpicture}

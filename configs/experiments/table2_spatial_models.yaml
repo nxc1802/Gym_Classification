@@ -1,0 +1,24 @@
+# Experiment Table 2: Temporal Models on Different Landmark Feature Sets
+# Models: LSTM, Bi-LSTM, Transformer (4x8)
+# Features: Raw 33x4, Rel. 32x4+1, Raw 13x4, Rel. 12x4+1, Angle (angle3)
+
+models:
+  - "LSTM"
+  - "BiLSTM"
+  - "Transformer"
+
+features:
+  - "full_4"
+  - "full_rel_4"
+  - "13_4"
+  - "12rel_4"
+  - "angle3"
+
+hyperparameters:
+  batch_size: 16
+  epochs: 100
+  patience: 20
+  learning_rate: 0.0001
+  seq_len: 32
+  train_stride: 16
+  val_test_stride: 32

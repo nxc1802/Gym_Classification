@@ -1,0 +1,1027 @@
+filepath,labelpath,size_MB,resolution,num_frames,class,label_content,type,split
+Final_dataset/test/barbell biceps curl/barbell biceps curl_1.mp4,Final_labels/test/barbell biceps curl/barbell biceps curl_1/action.txt,0.31,1920x1080,75,barbell biceps curl,frame_000000 frame_000074,mp4,test
+Final_dataset/test/barbell biceps curl/barbell biceps curl_10.mp4,Final_labels/test/barbell biceps curl/barbell biceps curl_10/action.txt,1.96,1280x720,132,barbell biceps curl,frame_000000 frame_000131,mp4,test
+Final_dataset/test/barbell biceps curl/barbell biceps curl_11.mp4,Final_labels/test/barbell biceps curl/barbell biceps curl_11/action.txt,1.22,1280x720,70,barbell biceps curl,frame_000002 frame_000069,mp4,test
+Final_dataset/test/barbell biceps curl/barbell biceps curl_12.mp4,Final_labels/test/barbell biceps curl/barbell biceps curl_12/action.txt,4.07,1280x720,234,barbell biceps curl,frame_000000 frame_000233,mp4,test
+Final_dataset/test/barbell biceps curl/barbell biceps curl_13.mp4,Final_labels/test/barbell biceps curl/barbell biceps curl_13/action.txt,3.65,1280x720,194,barbell biceps curl,frame_000000 frame_000193,mp4,test
+Final_dataset/test/barbell biceps curl/barbell biceps curl_14.mp4,Final_labels/test/barbell biceps curl/barbell biceps curl_14/action.txt,2.47,1280x720,98,barbell biceps curl,frame_000000 frame_000097,mp4,test
+Final_dataset/test/barbell biceps curl/barbell biceps curl_15.mp4,Final_labels/test/barbell biceps curl/barbell biceps curl_15/action.txt,0.29,1920x1080,72,barbell biceps curl,frame_000000 frame_000071,mp4,test
+Final_dataset/test/barbell biceps curl/barbell biceps curl_2.mp4,Final_labels/test/barbell biceps curl/barbell biceps curl_2/action.txt,0.5,1920x1080,122,barbell biceps curl,frame_000000 frame_000121,mp4,test
+Final_dataset/test/barbell biceps curl/barbell biceps curl_3.mp4,Final_labels/test/barbell biceps curl/barbell biceps curl_3/action.txt,0.27,1920x1080,65,barbell biceps curl,frame_000000 frame_000064,mp4,test
+Final_dataset/test/barbell biceps curl/barbell biceps curl_4.mp4,Final_labels/test/barbell biceps curl/barbell biceps curl_4/action.txt,0.26,1920x1080,63,barbell biceps curl,frame_000000 frame_000062,mp4,test
+Final_dataset/test/barbell biceps curl/barbell biceps curl_5.mp4,Final_labels/test/barbell biceps curl/barbell biceps curl_5/action.txt,0.25,1920x1080,60,barbell biceps curl,frame_000000 frame_000059,mp4,test
+Final_dataset/test/barbell biceps curl/barbell biceps curl_6.mp4,Final_labels/test/barbell biceps curl/barbell biceps curl_6/action.txt,28.47,720x1280,861,barbell biceps curl,frame_000000 frame_000860,mp4,test
+Final_dataset/test/barbell biceps curl/barbell biceps curl_7.mp4,Final_labels/test/barbell biceps curl/barbell biceps curl_7/action.txt,0.24,1920x1080,58,barbell biceps curl,frame_000000 frame_000057,mp4,test
+Final_dataset/test/barbell biceps curl/barbell biceps curl_8.mp4,Final_labels/test/barbell biceps curl/barbell biceps curl_8/action.txt,0.24,1920x1080,58,barbell biceps curl,frame_000000 frame_000057,mp4,test
+Final_dataset/test/barbell biceps curl/barbell biceps curl_9.mp4,Final_labels/test/barbell biceps curl/barbell biceps curl_9/action.txt,1.85,1280x720,141,barbell biceps curl,frame_000000 frame_000140,mp4,test
+Final_dataset/test/bench press/bench press_1.mp4,Final_labels/test/bench press/bench press_1/action.txt,26.83,720x1280,809,bench press,frame_000000 frame_000808,mp4,test
+Final_dataset/test/bench press/bench press_10.mp4,Final_labels/test/bench press/bench press_10/action.txt,3.04,1280x720,125,bench press,frame_000000 frame_000124,mp4,test
+Final_dataset/test/bench press/bench press_11.mp4,Final_labels/test/bench press/bench press_11/action.txt,1.22,1280x720,45,bench press,frame_000000 frame_000044,mp4,test
+Final_dataset/test/bench press/bench press_12.mp4,Final_labels/test/bench press/bench press_12/action.txt,2.12,1280x720,82,bench press,frame_000000 frame_000081,mp4,test
+Final_dataset/test/bench press/bench press_13.mp4,Final_labels/test/bench press/bench press_13/action.txt,0.66,1280x720,30,bench press,frame_000000 frame_000029,mp4,test
+Final_dataset/test/bench press/bench press_14.mp4,Final_labels/test/bench press/bench press_14/action.txt,20.65,720x1280,628,bench press,frame_000000 frame_000627,mp4,test
+Final_dataset/test/bench press/bench press_2.mp4,Final_labels/test/bench press/bench press_2/action.txt,0.41,1920x1080,99,bench press,frame_000000 frame_000098,mp4,test
+Final_dataset/test/bench press/bench press_3.mp4,Final_labels/test/bench press/bench press_3/action.txt,0.33,1920x1080,81,bench press,frame_000000 frame_000080,mp4,test
+Final_dataset/test/bench press/bench press_4.mp4,Final_labels/test/bench press/bench press_4/action.txt,0.24,1920x1080,58,bench press,frame_000000 frame_000057,mp4,test
+Final_dataset/test/bench press/bench press_5.mp4,Final_labels/test/bench press/bench press_5/action.txt,0.29,1920x1080,70,bench press,frame_000000 frame_000069,mp4,test
+Final_dataset/test/bench press/bench press_50.mp4,Final_labels/test/bench press/bench press_50/action.txt,6.1,1364x720,318,bench press,frame_000000 frame_000317,mp4,test
+Final_dataset/test/bench press/bench press_6.mp4,Final_labels/test/bench press/bench press_6/action.txt,0.35,1920x1080,86,bench press,frame_000000 frame_000085,mp4,test
+Final_dataset/test/bench press/bench press_7.mp4,Final_labels/test/bench press/bench press_7/action.txt,3.8,1280x720,146,bench press,frame_000000 frame_000145,mp4,test
+Final_dataset/test/bench press/bench press_8.mp4,Final_labels/test/bench press/bench press_8/action.txt,3.63,1280x720,139,bench press,frame_000000 frame_000138,mp4,test
+Final_dataset/test/bench press/bench press_9.mp4,Final_labels/test/bench press/bench press_9/action.txt,9.34,1280x720,388,bench press,frame_000000 frame_000387,mp4,test
+Final_dataset/test/chest fly machine/chest fly machine_1.mp4,Final_labels/test/chest fly machine/chest fly machine_1/action.txt,0.54,1920x1080,132,chest fly machine,frame_000000 frame_000131,mp4,test
+Final_dataset/test/chest fly machine/chest fly machine_2.mp4,Final_labels/test/chest fly machine/chest fly machine_2/action.txt,2.9,1280x720,180,chest fly machine,frame_000000 frame_000179,mp4,test
+Final_dataset/test/chest fly machine/chest fly machine_3.mp4,Final_labels/test/chest fly machine/chest fly machine_3/action.txt,21.13,1280x720,756,chest fly machine,frame_000000 frame_000755,mp4,test
+Final_dataset/test/chest fly machine/chest fly machine_4.mp4,Final_labels/test/chest fly machine/chest fly machine_4/action.txt,1.08,988x556,90,chest fly machine,frame_000000 frame_000089,mp4,test
+Final_dataset/test/chest fly machine/chest fly machine_5.mp4,Final_labels/test/chest fly machine/chest fly machine_5/action.txt,0.95,988x556,78,chest fly machine,frame_000000 frame_000077,mp4,test
+Final_dataset/test/chest fly machine/chest fly machine_6.mp4,Final_labels/test/chest fly machine/chest fly machine_6/action.txt,0.33,1920x1080,80,chest fly machine,frame_000000 frame_000079,mp4,test
+Final_dataset/test/chest fly machine/chest fly machine_7.mp4,Final_labels/test/chest fly machine/chest fly machine_7/action.txt,21.74,720x1280,662,chest fly machine,frame_000000 frame_000661,mp4,test
+Final_dataset/test/chest fly machine/chest fly machine_8.mp4,Final_labels/test/chest fly machine/chest fly machine_8/action.txt,20.24,720x1280,615,chest fly machine,frame_000000 frame_000614,mp4,test
+Final_dataset/test/deadlift/deadlift_1.mp4,Final_labels/test/deadlift/deadlift_1/action.txt,0.61,1920x1080,150,deadlift,frame_000000 frame_000149,mp4,test
+Final_dataset/test/deadlift/deadlift_2.mp4,Final_labels/test/deadlift/deadlift_2/action.txt,0.28,1920x1080,68,deadlift,frame_000000 frame_000067,mp4,test
+Final_dataset/test/deadlift/deadlift_29.mp4,Final_labels/test/deadlift/deadlift_29/action.txt,2.22,1280x720,121,deadlift,frame_000000 frame_000120,mp4,test
+Final_dataset/test/deadlift/deadlift_3.mp4,Final_labels/test/deadlift/deadlift_3/action.txt,0.6,1920x1080,147,deadlift,frame_000000 frame_000146,mp4,test
+Final_dataset/test/deadlift/deadlift_34.mp4,Final_labels/test/deadlift/deadlift_34/action.txt,24.4,3840x2160,233,deadlift,frame_000000 frame_000232,mp4,test
+Final_dataset/test/deadlift/deadlift_4.mp4,Final_labels/test/deadlift/deadlift_4/action.txt,0.24,1920x1080,59,deadlift,frame_000000 frame_000058,mp4,test
+Final_dataset/test/deadlift/deadlift_5.mp4,Final_labels/test/deadlift/deadlift_5/action.txt,0.79,1920x1080,195,deadlift,frame_000000 frame_000194,mp4,test
+Final_dataset/test/deadlift/deadlift_6.mp4,Final_labels/test/deadlift/deadlift_6/action.txt,0.3,1920x1080,72,deadlift,frame_000000 frame_000071,mp4,test
+Final_dataset/test/deadlift/deadlift_7.mp4,Final_labels/test/deadlift/deadlift_7/action.txt,3.88,1280x720,165,deadlift,frame_000000 frame_000164,mp4,test
+Final_dataset/test/deadlift/deadlift_8.mp4,Final_labels/test/deadlift/deadlift_8/action.txt,30.6,720x1280,921,deadlift,frame_000000 frame_000920,mp4,test
+Final_dataset/test/decline bench press/decline bench press_1.mp4,Final_labels/test/decline bench press/decline bench press_1/action.txt,5.34,360x640,1805,decline bench press,frame_000926 frame_0001658,mp4,test
+Final_dataset/test/decline bench press/decline bench press_2.mp4,Final_labels/test/decline bench press/decline bench press_2/action.txt,0.46,568x320,227,decline bench press,frame_000000 frame_000226,mp4,test
+Final_dataset/test/decline bench press/decline bench press_3.mp4,Final_labels/test/decline bench press/decline bench press_3/action.txt,4.21,320x240,541,decline bench press,frame_000101 frame_000540,mp4,test
+Final_dataset/test/decline bench press/decline bench press_4.MOV,Final_labels/test/decline bench press/decline bench press_4/action.txt,51.28,1920x1080,421,decline bench press,frame_000000 frame_000420,mov,test
+Final_dataset/test/decline bench press/decline bench press_5.MOV,Final_labels/test/decline bench press/decline bench press_5/action.txt,24.59,1920x1080,201,decline bench press,frame_000000 frame_000003 frame_000018 frame_000200,mov,test
+Final_dataset/test/decline bench press/decline bench press_6.MOV,Final_labels/test/decline bench press/decline bench press_6/action.txt,84.17,1920x1080,694,decline bench press,frame_000000 frame_000693,mov,test
+Final_dataset/test/decline bench press/decline bench press_7.MOV,Final_labels/test/decline bench press/decline bench press_7/action.txt,85.13,1920x1080,801,decline bench press,frame_000000 frame_000800,mov,test
+Final_dataset/test/decline bench press/decline bench press_8.MOV,Final_labels/test/decline bench press/decline bench press_8/action.txt,79.25,1920x1080,758,decline bench press,frame_000000 frame_000757,mov,test
+Final_dataset/test/decline bench press/decline bench press_9.MOV,Final_labels/test/decline bench press/decline bench press_9/action.txt,74.92,1920x1080,718,decline bench press,frame_000000 frame_000717,mov,test
+Final_dataset/test/hammer curl/hammer curl_1.mp4,Final_labels/test/hammer curl/hammer curl_1/action.txt,0.98,360x640,451,hammer curl,frame_000074 frame_000450,mp4,test
+Final_dataset/test/hammer curl/hammer curl_10.MOV,Final_labels/test/hammer curl/hammer curl_10/action.txt,42.72,1920x1080,430,hammer curl,frame_000036 frame_000426,mov,test
+Final_dataset/test/hammer curl/hammer curl_11.MOV,Final_labels/test/hammer curl/hammer curl_11/action.txt,38.02,1920x1080,366,hammer curl,frame_000000 frame_000365,mov,test
+Final_dataset/test/hammer curl/hammer curl_12.MOV,Final_labels/test/hammer curl/hammer curl_12/action.txt,47.93,1920x1080,480,hammer curl,frame_000000 frame_000479,mov,test
+Final_dataset/test/hammer curl/hammer curl_13.mp4,Final_labels/test/hammer curl/hammer curl_13/action.txt,1.21,480x360,600,hammer curl,frame_000061 frame_000599,mp4,test
+Final_dataset/test/hammer curl/hammer curl_2.MOV,Final_labels/test/hammer curl/hammer curl_2/action.txt,41.47,1920x1080,394,hammer curl,frame_000000 frame_000393,mov,test
+Final_dataset/test/hammer curl/hammer curl_26.mp4,Final_labels/test/hammer curl/hammer curl_26/action.txt,6.51,1280x720,331,hammer curl,frame_000000 frame_000330,mp4,test
+Final_dataset/test/hammer curl/hammer curl_3.mp4,Final_labels/test/hammer curl/hammer curl_3/action.txt,2.14,1280x720,84,hammer curl,frame_000000 frame_000083,mp4,test
+Final_dataset/test/hammer curl/hammer curl_4.mp4,Final_labels/test/hammer curl/hammer curl_4/action.txt,2.19,1280x720,93,hammer curl,frame_000000 frame_000092,mp4,test
+Final_dataset/test/hammer curl/hammer curl_5.mp4,Final_labels/test/hammer curl/hammer curl_5/action.txt,6.64,1280x720,291,hammer curl,frame_000000 frame_000290,mp4,test
+Final_dataset/test/hammer curl/hammer curl_6.MOV,Final_labels/test/hammer curl/hammer curl_6/action.txt,39.97,1920x1080,381,hammer curl,frame_000000 frame_000380,mov,test
+Final_dataset/test/hammer curl/hammer curl_7.MOV,Final_labels/test/hammer curl/hammer curl_7/action.txt,51.58,1920x1080,491,hammer curl,frame_000041 frame_000490,mov,test
+Final_dataset/test/hammer curl/hammer curl_8.mp4,Final_labels/test/hammer curl/hammer curl_8/action.txt,19.87,720x1280,604,hammer curl,frame_000000 frame_000603,mp4,test
+Final_dataset/test/hammer curl/hammer curl_9.MOV,Final_labels/test/hammer curl/hammer curl_9/action.txt,46.2,1920x1080,439,hammer curl,frame_000036 frame_000438,mov,test
+Final_dataset/test/hip thrust/hip thrust_1.mp4,Final_labels/test/hip thrust/hip thrust_1/action.txt,31.63,640x360,13688,hip thrust,frame_000000 frame_000196 frame_002355 frame_003900 frame_005375 frame_006410 frame_007450 frame_008200 frame_008765 frame_009505 frame_010600 frame_011060 frame_012135 frame_012600,mp4,test
+Final_dataset/test/hip thrust/hip thrust_2.mp4,Final_labels/test/hip thrust/hip thrust_2/action.txt,1.23,854x480,476,hip thrust,frame_000076 frame_000399,mp4,test
+Final_dataset/test/hip thrust/hip thrust_3.MOV,Final_labels/test/hip thrust/hip thrust_3/action.txt,34.69,1920x1440,425,hip thrust,frame_000000 frame_000410,mov,test
+Final_dataset/test/hip thrust/hip thrust_4.mp4,Final_labels/test/hip thrust/hip thrust_4/action.txt,8.49,1280x720,381,hip thrust,frame_000000 frame_000380,mp4,test
+Final_dataset/test/hip thrust/hip thrust_5.mp4,Final_labels/test/hip thrust/hip thrust_5/action.txt,4.31,1280x720,153,hip thrust,frame_000000 frame_000152,mp4,test
+Final_dataset/test/hip thrust/hip thrust_6.MOV,Final_labels/test/hip thrust/hip thrust_6/action.txt,41.93,1920x1440,514,hip thrust,frame_000000 frame_000486,mov,test
+Final_dataset/test/hip thrust/hip thrust_7.MOV,Final_labels/test/hip thrust/hip thrust_7/action.txt,39.03,1920x1440,479,hip thrust,frame_000000 frame_000454,mov,test
+Final_dataset/test/hip thrust/hip thrust_8.MOV,Final_labels/test/hip thrust/hip thrust_8/action.txt,44.95,1920x1440,549,hip thrust,frame_000000 frame_000546,mov,test
+Final_dataset/test/hip thrust/hip thrust_9.mp4,Final_labels/test/hip thrust/hip thrust_9/action.txt,6.76,1280x720,299,hip thrust,frame_000000 frame_000298,mp4,test
+Final_dataset/test/incline bench press/incline bench press_1.mp4,Final_labels/test/incline bench press/incline bench press_1/action.txt,32.17,720x1280,991,incline bench press,frame_000000 frame_000990,mp4,test
+Final_dataset/test/incline bench press/incline bench press_2.mp4,Final_labels/test/incline bench press/incline bench press_2/action.txt,0.49,1920x1080,120,incline bench press,frame_000000 frame_000119,mp4,test
+Final_dataset/test/incline bench press/incline bench press_29.mp4,Final_labels/test/incline bench press/incline bench press_29/action.txt,4.65,1364x720,239,incline bench press,frame_000000 frame_000238,mp4,test
+Final_dataset/test/incline bench press/incline bench press_3.mp4,Final_labels/test/incline bench press/incline bench press_3/action.txt,0.22,1920x1080,52,incline bench press,frame_000000 frame_000051,mp4,test
+Final_dataset/test/incline bench press/incline bench press_4.mp4,Final_labels/test/incline bench press/incline bench press_4/action.txt,0.35,1920x1080,87,incline bench press,frame_000000 frame_000086,mp4,test
+Final_dataset/test/incline bench press/incline bench press_5.mp4,Final_labels/test/incline bench press/incline bench press_5/action.txt,25.86,720x1280,784,incline bench press,frame_000000 frame_000783,mp4,test
+Final_dataset/test/incline bench press/incline bench press_6.mp4,Final_labels/test/incline bench press/incline bench press_6/action.txt,0.26,1920x1080,62,incline bench press,frame_000000 frame_000061,mp4,test
+Final_dataset/test/incline bench press/incline bench press_7.mp4,Final_labels/test/incline bench press/incline bench press_7/action.txt,3.35,1280x720,137,incline bench press,frame_000000 frame_000136,mp4,test
+Final_dataset/test/incline bench press/incline bench press_8.mp4,Final_labels/test/incline bench press/incline bench press_8/action.txt,0.22,1920x1080,45,incline bench press,frame_000000 frame_000044,mp4,test
+Final_dataset/test/lat pulldown/lat pulldown_1.mp4,Final_labels/test/lat pulldown/lat pulldown_1/action.txt,0.54,1920x1080,131,lat pulldown,frame_000000 frame_000130,mp4,test
+Final_dataset/test/lat pulldown/lat pulldown_10.mp4,Final_labels/test/lat pulldown/lat pulldown_10/action.txt,2.25,1280x720,77,lat pulldown,frame_000003 frame_000076,mp4,test
+Final_dataset/test/lat pulldown/lat pulldown_11.mp4,Final_labels/test/lat pulldown/lat pulldown_11/action.txt,21.21,720x1280,644,lat pulldown,frame_000000 frame_000643,mp4,test
+Final_dataset/test/lat pulldown/lat pulldown_12.mp4,Final_labels/test/lat pulldown/lat pulldown_12/action.txt,0.61,1920x1080,149,lat pulldown,frame_000000 frame_000148,mp4,test
+Final_dataset/test/lat pulldown/lat pulldown_2.mp4,Final_labels/test/lat pulldown/lat pulldown_2/action.txt,0.16,1920x1080,38,lat pulldown,frame_000000 frame_000037,mp4,test
+Final_dataset/test/lat pulldown/lat pulldown_3.mp4,Final_labels/test/lat pulldown/lat pulldown_3/action.txt,0.44,1920x1080,109,lat pulldown,frame_000000 frame_000108,mp4,test
+Final_dataset/test/lat pulldown/lat pulldown_4.mp4,Final_labels/test/lat pulldown/lat pulldown_4/action.txt,0.3,1920x1080,74,lat pulldown,frame_000000 frame_000073,mp4,test
+Final_dataset/test/lat pulldown/lat pulldown_43.mp4,Final_labels/test/lat pulldown/lat pulldown_43/action.txt,7.22,1280x1280,381,lat pulldown,frame_000000 frame_000380,mp4,test
+Final_dataset/test/lat pulldown/lat pulldown_48.mp4,Final_labels/test/lat pulldown/lat pulldown_48/action.txt,2.09,1280x720,322,lat pulldown,frame_000000 frame_000321,mp4,test
+Final_dataset/test/lat pulldown/lat pulldown_5.mp4,Final_labels/test/lat pulldown/lat pulldown_5/action.txt,0.4,1920x1080,98,lat pulldown,frame_000000 frame_000097,mp4,test
+Final_dataset/test/lat pulldown/lat pulldown_6.mp4,Final_labels/test/lat pulldown/lat pulldown_6/action.txt,9.61,1280x720,350,lat pulldown,frame_000000 frame_000349,mp4,test
+Final_dataset/test/lat pulldown/lat pulldown_7.mp4,Final_labels/test/lat pulldown/lat pulldown_7/action.txt,1.71,1280x720,58,lat pulldown,frame_000000 frame_000057,mp4,test
+Final_dataset/test/lat pulldown/lat pulldown_8.mp4,Final_labels/test/lat pulldown/lat pulldown_8/action.txt,22.43,720x1280,684,lat pulldown,frame_000000 frame_000693,mp4,test
+Final_dataset/test/lat pulldown/lat pulldown_9.mp4,Final_labels/test/lat pulldown/lat pulldown_9/action.txt,6.13,1280x720,287,lat pulldown,frame_000000 frame_000139 frame_000199 frame_000286,mp4,test
+Final_dataset/test/lateral raise/lateral raise_1.MOV,Final_labels/test/lateral raise/lateral raise_1/action.txt,44.25,1920x1080,421,lateral raise,frame_000000 frame_000400,mov,test
+Final_dataset/test/lateral raise/lateral raise_10.mp4,Final_labels/test/lateral raise/lateral raise_10/action.txt,6.62,1280x720,294,lateral raise,frame_000000 frame_000293,mp4,test
+Final_dataset/test/lateral raise/lateral raise_11.mp4,Final_labels/test/lateral raise/lateral raise_11/action.txt,7.61,1280x720,333,lateral raise,frame_000000 frame_000332,mp4,test
+Final_dataset/test/lateral raise/lateral raise_12.MOV,Final_labels/test/lateral raise/lateral raise_12/action.txt,48.24,1920x1080,458,lateral raise,frame_000000 frame_000425,mov,test
+Final_dataset/test/lateral raise/lateral raise_13.MOV,Final_labels/test/lateral raise/lateral raise_13/action.txt,61.34,1920x1080,585,lateral raise,frame_000000 frame_000584,mov,test
+Final_dataset/test/lateral raise/lateral raise_14.MOV,Final_labels/test/lateral raise/lateral raise_14/action.txt,49.81,1920x1080,550,lateral raise,frame_000000 frame_000538,mov,test
+Final_dataset/test/lateral raise/lateral raise_15.mp4,Final_labels/test/lateral raise/lateral raise_15/action.txt,4.85,1280x720,166,lateral raise,frame_000003 frame_000165,mp4,test
+Final_dataset/test/lateral raise/lateral raise_2.mp4,Final_labels/test/lateral raise/lateral raise_2/action.txt,3.03,1280x720,149,lateral raise,frame_000000 frame_000148,mp4,test
+Final_dataset/test/lateral raise/lateral raise_3.mp4,Final_labels/test/lateral raise/lateral raise_3/action.txt,7.89,1280x720,278,lateral raise,frame_000000 frame_000277,mp4,test
+Final_dataset/test/lateral raise/lateral raise_4.mp4,Final_labels/test/lateral raise/lateral raise_4/action.txt,2.2,1280x720,89,lateral raise,frame_000000 frame_000088,mp4,test
+Final_dataset/test/lateral raise/lateral raise_5.mp4,Final_labels/test/lateral raise/lateral raise_5/action.txt,2.19,1280x720,81,lateral raise,frame_000000 frame_000080,mp4,test
+Final_dataset/test/lateral raise/lateral raise_6.mp4,Final_labels/test/lateral raise/lateral raise_6/action.txt,25.87,720x1280,784,lateral raise,frame_000000 frame_000783,mp4,test
+Final_dataset/test/lateral raise/lateral raise_7.MOV,Final_labels/test/lateral raise/lateral raise_7/action.txt,42.74,1920x1080,395,lateral raise,frame_000000 frame_000375,mov,test
+Final_dataset/test/lateral raise/lateral raise_8.mp4,Final_labels/test/lateral raise/lateral raise_8/action.txt,2.59,1280x720,99,lateral raise,frame_000000 frame_000098,mp4,test
+Final_dataset/test/lateral raise/lateral raise_9.MOV,Final_labels/test/lateral raise/lateral raise_9/action.txt,45.49,1920x1080,432,lateral raise,frame_000000 frame_000415,mov,test
+Final_dataset/test/leg extension/leg extension_1.mp4,Final_labels/test/leg extension/leg extension_1/action.txt,1.81,854x480,553,leg extension,frame_000271 frame_000506,mp4,test
+Final_dataset/test/leg extension/leg extension_10.MOV,Final_labels/test/leg extension/leg extension_10/action.txt,26.01,1920x1080,371,leg extension,frame_000000 frame_000370,mov,test
+Final_dataset/test/leg extension/leg extension_11.MOV,Final_labels/test/leg extension/leg extension_11/action.txt,26.5,1920x1080,378,leg extension,frame_000000 frame_000377,mov,test
+Final_dataset/test/leg extension/leg extension_12.MOV,Final_labels/test/leg extension/leg extension_12/action.txt,26.07,1920x1080,373,leg extension,frame_000000 frame_000372,mov,test
+Final_dataset/test/leg extension/leg extension_13.mp4,Final_labels/test/leg extension/leg extension_13/action.txt,1.85,1280x720,74,leg extension,frame_000000 frame_000073,mp4,test
+Final_dataset/test/leg extension/leg extension_2.mp4,Final_labels/test/leg extension/leg extension_2/action.txt,1.48,854x480,258,leg extension,frame_000000 frame_000250,mp4,test
+Final_dataset/test/leg extension/leg extension_3.MOV,Final_labels/test/leg extension/leg extension_3/action.txt,28.64,1920x1080,410,leg extension,frame_000271 frame_000409,mov,test
+Final_dataset/test/leg extension/leg extension_4.mp4,Final_labels/test/leg extension/leg extension_4/action.txt,2.85,1280x720,151,leg extension,frame_000000 frame_000150,mp4,test
+Final_dataset/test/leg extension/leg extension_5.mp4,Final_labels/test/leg extension/leg extension_5/action.txt,2.81,1280x720,337,leg extension,frame_000000 frame_000336,mp4,test
+Final_dataset/test/leg extension/leg extension_6.mp4,Final_labels/test/leg extension/leg extension_6/action.txt,2.19,1280x720,96,leg extension,frame_000000 frame_000095,mp4,test
+Final_dataset/test/leg extension/leg extension_7.mp4,Final_labels/test/leg extension/leg extension_7/action.txt,30.34,720x1280,929,leg extension,frame_000000 frame_000928,mp4,test
+Final_dataset/test/leg extension/leg extension_8.MOV,Final_labels/test/leg extension/leg extension_8/action.txt,20.15,1920x1080,289,leg extension,frame_000000 frame_000288,mov,test
+Final_dataset/test/leg extension/leg extension_9.MOV,Final_labels/test/leg extension/leg extension_9/action.txt,25.58,1920x1080,365,leg extension,frame_000000 frame_000364,mov,test
+Final_dataset/test/leg raises/leg raises_1.MOV,Final_labels/test/leg raises/leg raises_1/action.txt,28.71,1920x1080,410,leg raises,frame_000000 frame_000107,mov,test
+Final_dataset/test/leg raises/leg raises_10.MOV,Final_labels/test/leg raises/leg raises_10/action.txt,24.55,1920x1080,351,leg raises,frame_000000 frame_000350,mov,test
+Final_dataset/test/leg raises/leg raises_11.mp4,Final_labels/test/leg raises/leg raises_11/action.txt,20.26,720x1280,618,leg raises,frame_000000 frame_000617,mp4,test
+Final_dataset/test/leg raises/leg raises_2.mp4,Final_labels/test/leg raises/leg raises_2/action.txt,4.76,1280x720,248,leg raises,frame_000000 frame_000247,mp4,test
+Final_dataset/test/leg raises/leg raises_3.mp4,Final_labels/test/leg raises/leg raises_3/action.txt,5.29,1280x720,295,leg raises,frame_000000 frame_000294,mp4,test
+Final_dataset/test/leg raises/leg raises_4.mp4,Final_labels/test/leg raises/leg raises_4/action.txt,3.04,1280x720,212,leg raises,frame_000000 frame_000211,mp4,test
+Final_dataset/test/leg raises/leg raises_5.MOV,Final_labels/test/leg raises/leg raises_5/action.txt,30.83,1920x1080,444,leg raises,frame_000000 frame_000443,mov,test
+Final_dataset/test/leg raises/leg raises_6.mp4,Final_labels/test/leg raises/leg raises_6/action.txt,1.78,1280x720,60,leg raises,frame_000000 frame_000059,mp4,test
+Final_dataset/test/leg raises/leg raises_7.MOV,Final_labels/test/leg raises/leg raises_7/action.txt,25.21,1920x1080,361,leg raises,frame_000000 frame_000360,mov,test
+Final_dataset/test/leg raises/leg raises_8.MOV,Final_labels/test/leg raises/leg raises_8/action.txt,15.69,1920x1080,225,leg raises,frame_000000 frame_000224,mov,test
+Final_dataset/test/leg raises/leg raises_9.MOV,Final_labels/test/leg raises/leg raises_9/action.txt,33.09,1920x1080,474,leg raises,frame_000000 frame_000473,mov,test
+Final_dataset/test/plank/plank_1.MOV,Final_labels/test/plank/plank_1/action.txt,76.63,1920x1080,1104,plank,frame_000000 frame_000103,mov,test
+Final_dataset/test/plank/plank_2.mp4,Final_labels/test/plank/plank_2/action.txt,12.24,1280x720,664,plank,frame_000000 frame_000663,mp4,test
+Final_dataset/test/pull Up/pull Up_1.mp4,Final_labels/test/pull Up/pull Up_1/action.txt,1.78,1280x720,220,pull Up,frame_000000 frame_000219,mp4,test
+Final_dataset/test/pull Up/pull Up_2.mp4,Final_labels/test/pull Up/pull Up_2/action.txt,3.4,1280x720,202,pull Up,frame_000000 frame_000201,mp4,test
+Final_dataset/test/pull Up/pull Up_27.mp4,Final_labels/test/pull Up/pull Up_27/action.txt,12.06,1280x720,624,pull Up,frame_000000 frame_000623,mp4,test
+Final_dataset/test/pull Up/pull Up_3.mp4,Final_labels/test/pull Up/pull Up_3/action.txt,4.75,1280x720,165,pull Up,frame_000000 frame_000201,mp4,test
+Final_dataset/test/pull Up/pull Up_36.mp4,Final_labels/test/pull Up/pull Up_36/action.txt,21.62,2160x4096,203,pull Up,frame_000000 frame_000202,mp4,test
+Final_dataset/test/pull Up/pull Up_4.mp4,Final_labels/test/pull Up/pull Up_4/action.txt,1.43,1280x720,46,pull Up,frame_000000 frame_000045,mp4,test
+Final_dataset/test/pull Up/pull Up_5.mp4,Final_labels/test/pull Up/pull Up_5/action.txt,1.95,1280x720,81,pull Up,frame_000000 frame_000080,mp4,test
+Final_dataset/test/pull Up/pull Up_6.mp4,Final_labels/test/pull Up/pull Up_6/action.txt,23.69,1920x1080,575,pull Up,frame_000160 frame_000550,mp4,test
+Final_dataset/test/pull Up/pull Up_7.mp4,Final_labels/test/pull Up/pull Up_7/action.txt,14.66,720x1280,439,pull Up,frame_000000 frame_000438,mp4,test
+Final_dataset/test/pull Up/pull Up_8.mp4,Final_labels/test/pull Up/pull Up_8/action.txt,2.11,1280x720,270,pull Up,frame_000000 frame_000269,mp4,test
+Final_dataset/test/push-up/push-up_1.mp4,Final_labels/test/push-up/push-up_1/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,test
+Final_dataset/test/push-up/push-up_10.mp4,Final_labels/test/push-up/push-up_10/action.txt,11.14,1280x720,475,push-up,frame_000000 frame_000777,mp4,test
+Final_dataset/test/push-up/push-up_11.mp4,Final_labels/test/push-up/push-up_11/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,test
+Final_dataset/test/push-up/push-up_2.mp4,Final_labels/test/push-up/push-up_2/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,test
+Final_dataset/test/push-up/push-up_3.mp4,Final_labels/test/push-up/push-up_3/action.txt,0.47,1920x1080,116,push-up,frame_000000 frame_000115,mp4,test
+Final_dataset/test/push-up/push-up_4.mp4,Final_labels/test/push-up/push-up_4/action.txt,0.52,1920x1080,126,push-up,frame_000000 frame_000125,mp4,test
+Final_dataset/test/push-up/push-up_43.mp4,Final_labels/test/push-up/push-up_43/action.txt,32.3,3840x2160,285,push-up,frame_000000 frame_000284,mp4,test
+Final_dataset/test/push-up/push-up_5.mp4,Final_labels/test/push-up/push-up_5/action.txt,0.59,1920x1080,146,push-up,frame_000000 frame_000145,mp4,test
+Final_dataset/test/push-up/push-up_6.mp4,Final_labels/test/push-up/push-up_6/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,test
+Final_dataset/test/push-up/push-up_7.mp4,Final_labels/test/push-up/push-up_7/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,test
+Final_dataset/test/push-up/push-up_8.mp4,Final_labels/test/push-up/push-up_8/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,test
+Final_dataset/test/push-up/push-up_9.mp4,Final_labels/test/push-up/push-up_9/action.txt,5.73,1280x720,778,push-up,frame_000000 frame_000777,mp4,test
+Final_dataset/test/romanian deadlift/romanian deadlift_1.MOV,Final_labels/test/romanian deadlift/romanian deadlift_1/action.txt,40.59,1920x1440,498,romanian deadlift,frame_000000 frame_000490,mov,test
+Final_dataset/test/romanian deadlift/romanian deadlift_2.mp4,Final_labels/test/romanian deadlift/romanian deadlift_2/action.txt,20.88,720x1280,632,romanian deadlift,frame_000000 frame_000149,mp4,test
+Final_dataset/test/romanian deadlift/romanian deadlift_3.MOV,Final_labels/test/romanian deadlift/romanian deadlift_3/action.txt,30.6,1920x1440,376,romanian deadlift,frame_000000 frame_000349,mov,test
+Final_dataset/test/romanian deadlift/romanian deadlift_4.mp4,Final_labels/test/romanian deadlift/romanian deadlift_4/action.txt,21.98,720x1280,672,romanian deadlift,frame_000000 frame_000671,mp4,test
+Final_dataset/test/romanian deadlift/romanian deadlift_5.mp4,Final_labels/test/romanian deadlift/romanian deadlift_5/action.txt,70.63,1280x720,2558,romanian deadlift,frame_000000 frame_000150 frame_000219 frame_002048 frame_002291 frame_002480,mp4,test
+Final_dataset/test/romanian deadlift/romanian deadlift_6.mp4,Final_labels/test/romanian deadlift/romanian deadlift_6/action.txt,17.48,1280x720,618,romanian deadlift,frame_000002 frame_000617,mp4,test
+Final_dataset/test/russian twist/russian twist_1.mp4,Final_labels/test/russian twist/russian twist_1/action.txt,1.85,854x480,490,russian twist,frame_000000 frame_000489,mp4,test
+Final_dataset/test/russian twist/russian twist_2.mp4,Final_labels/test/russian twist/russian twist_2/action.txt,1.34,854x480,864,russian twist,frame_000050 frame_000700,mp4,test
+Final_dataset/test/russian twist/russian twist_3.mp4,Final_labels/test/russian twist/russian twist_3/action.txt,1.31,854x480,428,russian twist,frame_000070 frame_000360,mp4,test
+Final_dataset/test/russian twist/russian twist_4.MOV,Final_labels/test/russian twist/russian twist_4/action.txt,73.15,1920x1080,1054,russian twist,frame_000000 frame_001053,mov,test
+Final_dataset/test/russian twist/russian twist_5.mp4,Final_labels/test/russian twist/russian twist_5/action.txt,14.53,1280x720,1445,russian twist,frame_000000 frame_001444,mp4,test
+Final_dataset/test/russian twist/russian twist_6.mp4,Final_labels/test/russian twist/russian twist_6/action.txt,10.14,1280x714,526,russian twist,frame_000000 frame_000525,mp4,test
+Final_dataset/test/shoulder press/shoulder press_1.mp4,Final_labels/test/shoulder press/shoulder press_1/action.txt,1.6,854x480,710,shoulder press,frame_000163 frame_000149 frame_000439 frame_000578,mp4,test
+Final_dataset/test/shoulder press/shoulder press_10.MOV,Final_labels/test/shoulder press/shoulder press_10/action.txt,51.39,1920x1080,420,shoulder press,frame_000000 frame_000149,mov,test
+Final_dataset/test/shoulder press/shoulder press_11.mp4,Final_labels/test/shoulder press/shoulder press_11/action.txt,21.17,720x1280,630,shoulder press,frame_000000 frame_000149,mp4,test
+Final_dataset/test/shoulder press/shoulder press_12.mp4,Final_labels/test/shoulder press/shoulder press_12/action.txt,8.22,1280x720,292,shoulder press,frame_000000 frame_000149,mp4,test
+Final_dataset/test/shoulder press/shoulder press_2.mp4,Final_labels/test/shoulder press/shoulder press_2/action.txt,3.97,854x480,1347,shoulder press,frame_000780 frame_001346,mp4,test
+Final_dataset/test/shoulder press/shoulder press_3.mp4,Final_labels/test/shoulder press/shoulder press_3/action.txt,3.35,854x480,976,shoulder press,frame_000590 frame_000973,mp4,test
+Final_dataset/test/shoulder press/shoulder press_31.mp4,Final_labels/test/shoulder press/shoulder press_31/action.txt,7.41,1920x1080,466,shoulder press,frame_000000 frame_000465,mp4,test
+Final_dataset/test/shoulder press/shoulder press_4.mp4,Final_labels/test/shoulder press/shoulder press_4/action.txt,1.77,854x480,302,shoulder press,frame_000000 frame_000928,mp4,test
+Final_dataset/test/shoulder press/shoulder press_5.MOV,Final_labels/test/shoulder press/shoulder press_5/action.txt,62.36,1920x1080,513,shoulder press,frame_000000 frame_000149,mov,test
+Final_dataset/test/shoulder press/shoulder press_6.mp4,Final_labels/test/shoulder press/shoulder press_6/action.txt,3.72,640x360,210,shoulder press,frame_000000 frame_000149,mp4,test
+Final_dataset/test/shoulder press/shoulder press_7.mp4,Final_labels/test/shoulder press/shoulder press_7/action.txt,3.48,640x360,204,shoulder press,frame_000000 frame_000149,mp4,test
+Final_dataset/test/shoulder press/shoulder press_8.MOV,Final_labels/test/shoulder press/shoulder press_8/action.txt,71.03,1920x1080,585,shoulder press,frame_000000 frame_000149,mov,test
+Final_dataset/test/shoulder press/shoulder press_9.MOV,Final_labels/test/shoulder press/shoulder press_9/action.txt,43.81,1920x1080,396,shoulder press,frame_000000 frame_000149,mov,test
+Final_dataset/test/squat/squat_1.mp4,Final_labels/test/squat/squat_1/action.txt,1.56,854x480,363,squat,frame_000000 frame_000358,mp4,test
+Final_dataset/test/squat/squat_10.MOV,Final_labels/test/squat/squat_10/action.txt,62.73,1920x1080,600,squat,frame_000000 frame_000599,mov,test
+Final_dataset/test/squat/squat_11.MOV,Final_labels/test/squat/squat_11/action.txt,56.78,1920x1080,656,squat,frame_000000 frame_000655,mov,test
+Final_dataset/test/squat/squat_12.MOV,Final_labels/test/squat/squat_12/action.txt,65.98,1920x1080,664,squat,frame_000000 frame_000663,mov,test
+Final_dataset/test/squat/squat_13.mp4,Final_labels/test/squat/squat_13/action.txt,2.86,1280x720,101,squat,frame_000000 frame_000100,mp4,test
+Final_dataset/test/squat/squat_2.mp4,Final_labels/test/squat/squat_2/action.txt,4.71,854x480,1580,squat,frame_000000 frame_000083 frame_000374 frame_000940 frame_001031 frame_001483,mp4,test
+Final_dataset/test/squat/squat_21.mp4,Final_labels/test/squat/squat_21/action.txt,17.05,1280x720,1075,squat,frame_000000 frame_001074,mp4,test
+Final_dataset/test/squat/squat_29.mp4,Final_labels/test/squat/squat_29/action.txt,21.51,2160x3840,304,squat,frame_000000 frame_000303,mp4,test
+Final_dataset/test/squat/squat_3.mp4,Final_labels/test/squat/squat_3/action.txt,2.69,854x480,601,squat,frame_000000 frame_000149,mp4,test
+Final_dataset/test/squat/squat_4.MOV,Final_labels/test/squat/squat_4/action.txt,61.52,1920x1080,587,squat,frame_000000 frame_000586,mov,test
+Final_dataset/test/squat/squat_5.mp4,Final_labels/test/squat/squat_5/action.txt,6.56,1280x720,280,squat,frame_000000 frame_000586,mp4,test
+Final_dataset/test/squat/squat_6.mp4,Final_labels/test/squat/squat_6/action.txt,1.72,1280x720,110,squat,frame_000000 frame_000109,mp4,test
+Final_dataset/test/squat/squat_7.MOV,Final_labels/test/squat/squat_7/action.txt,45.28,1920x1080,430,squat,frame_000000 frame_000429,mov,test
+Final_dataset/test/squat/squat_8.mp4,Final_labels/test/squat/squat_8/action.txt,3.94,1280x720,198,squat,frame_000000 frame_000197,mp4,test
+Final_dataset/test/squat/squat_9.MOV,Final_labels/test/squat/squat_9/action.txt,60.91,1920x1080,639,squat,frame_000000 frame_000638,mov,test
+Final_dataset/test/t bar row/t bar row_1.MOV,Final_labels/test/t bar row/t bar row_1/action.txt,23.4,1920x1080,334,t bar row,frame_000000 frame_000295,mov,test
+Final_dataset/test/t bar row/t bar row_10.mp4,Final_labels/test/t bar row/t bar row_10/action.txt,4.83,1280x720,175,t bar row,frame_000000 frame_000174,mp4,test
+Final_dataset/test/t bar row/t bar row_2.mp4,Final_labels/test/t bar row/t bar row_2/action.txt,3.83,1280x720,139,t bar row,frame_000000 frame_000138,mp4,test
+Final_dataset/test/t bar row/t bar row_3.MOV,Final_labels/test/t bar row/t bar row_3/action.txt,36.11,1920x1080,514,t bar row,frame_000000 frame_000482,mov,test
+Final_dataset/test/t bar row/t bar row_4.mp4,Final_labels/test/t bar row/t bar row_4/action.txt,16.71,1280x720,752,t bar row,frame_000000 frame_000751,mp4,test
+Final_dataset/test/t bar row/t bar row_5.MOV,Final_labels/test/t bar row/t bar row_5/action.txt,28.82,1920x1080,414,t bar row,frame_000055 frame_000400,mov,test
+Final_dataset/test/t bar row/t bar row_6.MOV,Final_labels/test/t bar row/t bar row_6/action.txt,30.91,1920x1080,445,t bar row,frame_000110 frame_000444,mov,test
+Final_dataset/test/t bar row/t bar row_7.MOV,Final_labels/test/t bar row/t bar row_7/action.txt,30.81,1920x1080,445,t bar row,frame_000061 frame_000444,mov,test
+Final_dataset/test/t bar row/t bar row_8.MOV,Final_labels/test/t bar row/t bar row_8/action.txt,27.97,1920x1080,404,t bar row,frame_000000 frame_000403,mov,test
+Final_dataset/test/t bar row/t bar row_9.MOV,Final_labels/test/t bar row/t bar row_9/action.txt,34.86,1920x1080,503,t bar row,frame_000070 frame_000502,mov,test
+Final_dataset/test/tricep Pushdown/tricep Pushdown_1.mp4,Final_labels/test/tricep Pushdown/tricep Pushdown_1/action.txt,28.49,720x1280,874,tricep Pushdown,frame_000000 frame_000873,mp4,test
+Final_dataset/test/tricep Pushdown/tricep Pushdown_10.mp4,Final_labels/test/tricep Pushdown/tricep Pushdown_10/action.txt,0.27,1920x1080,64,tricep Pushdown,frame_000000 frame_000063,mp4,test
+Final_dataset/test/tricep Pushdown/tricep Pushdown_11.mp4,Final_labels/test/tricep Pushdown/tricep Pushdown_11/action.txt,4.3,1280x720,209,tricep Pushdown,frame_000000 frame_000208,mp4,test
+Final_dataset/test/tricep Pushdown/tricep Pushdown_12.mp4,Final_labels/test/tricep Pushdown/tricep Pushdown_12/action.txt,1.78,1280x720,99,tricep Pushdown,frame_000000 frame_000098,mp4,test
+Final_dataset/test/tricep Pushdown/tricep Pushdown_2.mp4,Final_labels/test/tricep Pushdown/tricep Pushdown_2/action.txt,21.84,720x1280,669,tricep Pushdown,frame_000000 frame_000668,mp4,test
+Final_dataset/test/tricep Pushdown/tricep Pushdown_3.mp4,Final_labels/test/tricep Pushdown/tricep Pushdown_3/action.txt,20.77,720x1280,633,tricep Pushdown,frame_000000 frame_000632,mp4,test
+Final_dataset/test/tricep Pushdown/tricep Pushdown_4.mp4,Final_labels/test/tricep Pushdown/tricep Pushdown_4/action.txt,0.21,1920x1080,52,tricep Pushdown,frame_000000 frame_000051,mp4,test
+Final_dataset/test/tricep Pushdown/tricep Pushdown_5.mp4,Final_labels/test/tricep Pushdown/tricep Pushdown_5/action.txt,0.24,1920x1080,59,tricep Pushdown,frame_000000 frame_000058,mp4,test
+Final_dataset/test/tricep Pushdown/tricep Pushdown_6.mp4,Final_labels/test/tricep Pushdown/tricep Pushdown_6/action.txt,0.3,1920x1080,74,tricep Pushdown,frame_000000 frame_000073,mp4,test
+Final_dataset/test/tricep Pushdown/tricep Pushdown_7.mp4,Final_labels/test/tricep Pushdown/tricep Pushdown_7/action.txt,0.37,1920x1080,91,tricep Pushdown,frame_000000 frame_000090,mp4,test
+Final_dataset/test/tricep Pushdown/tricep Pushdown_8.mp4,Final_labels/test/tricep Pushdown/tricep Pushdown_8/action.txt,0.24,1920x1080,57,tricep Pushdown,frame_000000 frame_000056,mp4,test
+Final_dataset/test/tricep Pushdown/tricep Pushdown_9.mp4,Final_labels/test/tricep Pushdown/tricep Pushdown_9/action.txt,0.2,1920x1080,50,tricep Pushdown,frame_000000 frame_000049,mp4,test
+Final_dataset/test/tricep dips/tricep dips_1.mp4,Final_labels/test/tricep dips/tricep dips_1/action.txt,18.67,854x480,8557,tricep dips,frame_000400 frame_001065 frame_001415 frame_001880 frame_002328 frame_002637 frame_002970 frame_003285 frame_004070 frame_004385 frame_005225 frame_005530 frame_006145 frame_006465 frame_007140 frame_007450 frame_007810 frame_008040,mp4,test
+Final_dataset/test/tricep dips/tricep dips_2.MOV,Final_labels/test/tricep dips/tricep dips_2/action.txt,41.27,1920x1080,594,tricep dips,frame_000271 frame_000399 frame_001064 frame_001414 frame_001879 frame_002327 frame_002637 frame_002969 frame_003284 frame_004069 frame_004384 frame_005224 frame_005529 frame_006144 frame_006464 frame_007139 frame_007449 frame_007809,mov,test
+Final_dataset/test/tricep dips/tricep dips_3.mp4,Final_labels/test/tricep dips/tricep dips_3/action.txt,13.97,1280x720,606,tricep dips,frame_000000 frame_000605,mp4,test
+Final_dataset/test/tricep dips/tricep dips_4.mp4,Final_labels/test/tricep dips/tricep dips_4/action.txt,11.02,1280x720,501,tricep dips,frame_000000 frame_000500,mp4,test
+Final_dataset/test/tricep dips/tricep dips_5.mp4,Final_labels/test/tricep dips/tricep dips_5/action.txt,14.85,720x1280,448,tricep dips,frame_000030 frame_000447,mp4,test
+Final_dataset/test/tricep dips/tricep dips_6.MOV,Final_labels/test/tricep dips/tricep dips_6/action.txt,55.39,1920x1080,799,tricep dips,frame_000000 frame_000770,mov,test
+Final_dataset/test/tricep dips/tricep dips_7.MOV,Final_labels/test/tricep dips/tricep dips_7/action.txt,34.53,1920x1080,494,tricep dips,frame_000000 frame_000460,mov,test
+Final_dataset/test/tricep dips/tricep dips_8.MOV,Final_labels/test/tricep dips/tricep dips_8/action.txt,13.56,1920x1080,191,tricep dips,frame_000000 frame_000190,mov,test
+Final_dataset/test/tricep dips/tricep dips_9.mp4,Final_labels/test/tricep dips/tricep dips_9/action.txt,21.77,720x1280,659,tricep dips,frame_000000 frame_000658,mp4,test
+Final_dataset/train/barbell biceps curl/barbell biceps curl_1.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_1/action.txt,1.63,480x854,407,barbell biceps curl,frame_000093 frame_000406,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_10.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_10/action.txt,0.23,1920x1080,56,barbell biceps curl,frame_000000 frame_000055,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_11.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_11/action.txt,0.24,1920x1080,58,barbell biceps curl,frame_000000 frame_000057,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_12.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_12/action.txt,0.34,1920x1080,84,barbell biceps curl,frame_000000 frame_000083,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_13.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_13/action.txt,0.32,1920x1080,78,barbell biceps curl,frame_000000 frame_000077,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_14.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_14/action.txt,0.33,1920x1080,80,barbell biceps curl,frame_000000 frame_000079,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_15.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_15/action.txt,0.23,1920x1080,55,barbell biceps curl,frame_000000 frame_000054,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_16.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_16/action.txt,0.25,1920x1080,61,barbell biceps curl,frame_000000 frame_000060,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_17.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_17/action.txt,22.34,720x1280,681,barbell biceps curl,frame_000000 frame_000680,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_18.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_18/action.txt,0.3,1920x1080,73,barbell biceps curl,frame_000000 frame_000072,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_19.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_19/action.txt,0.21,1920x1080,49,barbell biceps curl,frame_000000 frame_000048,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_2.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_2/action.txt,0.74,854x450,258,barbell biceps curl,frame_000000 frame_000257,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_20.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_20/action.txt,0.27,1920x1080,65,barbell biceps curl,frame_000000 frame_000064,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_21.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_21/action.txt,0.26,1920x1080,63,barbell biceps curl,frame_000000 frame_000062,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_22.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_22/action.txt,0.24,1920x1080,58,barbell biceps curl,frame_000000 frame_000057,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_23.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_23/action.txt,0.24,1920x1080,59,barbell biceps curl,frame_000000 frame_000058,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_24.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_24/action.txt,0.22,1920x1080,54,barbell biceps curl,frame_000000 frame_000053,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_25.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_25/action.txt,21.94,720x1280,668,barbell biceps curl,frame_000000 frame_000667,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_26.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_26/action.txt,0.22,1920x1080,53,barbell biceps curl,frame_000000 frame_000052,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_27.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_27/action.txt,4.09,1280x720,201,barbell biceps curl,frame_000000 frame_000200,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_28.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_28/action.txt,3.73,1280x720,229,barbell biceps curl,frame_000000 frame_000228,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_29.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_29/action.txt,0.88,1280x720,421,barbell biceps curl,frame_000000 frame_000420,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_3.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_3/action.txt,0.43,854x480,421,barbell biceps curl,frame_000000 frame_000420,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_30.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_30/action.txt,1.67,1280x720,94,barbell biceps curl,frame_000000 frame_000093,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_31.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_31/action.txt,2.31,1280x720,120,barbell biceps curl,frame_000000 frame_000119,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_32.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_32/action.txt,25.53,720x1280,776,barbell biceps curl,frame_000000 frame_000775,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_33.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_33/action.txt,0.35,1920x1080,82,barbell biceps curl,frame_000000 frame_000081,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_34.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_34/action.txt,2.3,1280x720,150,barbell biceps curl,frame_000000 frame_000149,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_35.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_35/action.txt,3.58,1280x720,176,barbell biceps curl,frame_000000 frame_000175,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_36.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_36/action.txt,2.56,1280x720,132,barbell biceps curl,frame_000000 frame_000131,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_37.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_37/action.txt,2.53,1280x720,147,barbell biceps curl,frame_000000 frame_000146,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_38.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_38/action.txt,4.43,1280x720,213,barbell biceps curl,frame_000000 frame_000212,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_39.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_39/action.txt,2.58,1280x720,162,barbell biceps curl,frame_000000 frame_000161,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_4.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_4/action.txt,5.2,480x854,1148,barbell biceps curl,frame_000000 frame_000187 frame_000450 frame_001030,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_40.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_40/action.txt,20.96,720x1280,634,barbell biceps curl,frame_000000 frame_000633,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_41.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_41/action.txt,0.5,1920x1080,123,barbell biceps curl,frame_000000 frame_000122,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_42.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_42/action.txt,4.58,1280x720,246,barbell biceps curl,frame_000000 frame_000245,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_43.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_43/action.txt,1.79,1280x720,70,barbell biceps curl,frame_000000 frame_000069,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_44.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_44/action.txt,22.73,720x1280,692,barbell biceps curl,frame_000000 frame_000691,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_45.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_45/action.txt,0.56,1920x1080,138,barbell biceps curl,frame_000000 frame_000137,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_46.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_46/action.txt,11.63,1280x720,617,barbell biceps curl,frame_000000 frame_000616,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_47.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_47/action.txt,11.47,1280x720,734,barbell biceps curl,frame_000000 frame_000733,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_48.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_48/action.txt,6.08,1280x720,329,barbell biceps curl,frame_000000 frame_000328,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_49.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_49/action.txt,5.96,1280x720,342,barbell biceps curl,frame_000000 frame_000341,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_5.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_5/action.txt,30.58,720x1280,927,barbell biceps curl,frame_000000 frame_000926,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_52.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_52/action.txt,22.08,3840x2160,269,barbell biceps curl,frame_000000 frame_000268,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_53.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_53/action.txt,9.13,1920x1080,439,barbell biceps curl,frame_000000 frame_000438,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_54.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_54/action.txt,66.48,4096x2160,868,barbell biceps curl,frame_000000 frame_000867,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_6.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_6/action.txt,0.39,1920x1080,94,barbell biceps curl,frame_000000 frame_000093,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_7.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_7/action.txt,0.28,1920x1080,69,barbell biceps curl,frame_000000 frame_000068,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_8.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_8/action.txt,0.28,1920x1080,67,barbell biceps curl,frame_000000 frame_000066,mp4,train
+Final_dataset/train/barbell biceps curl/barbell biceps curl_9.mp4,Final_labels/train/barbell biceps curl/barbell biceps curl_9/action.txt,0.32,1920x1080,77,barbell biceps curl,frame_000000 frame_000076,mp4,train
+Final_dataset/train/bench press/bench press_1.mp4,Final_labels/train/bench press/bench press_1/action.txt,0.24,1920x1080,58,bench press,frame_000000 frame_000057,mp4,train
+Final_dataset/train/bench press/bench press_10.mp4,Final_labels/train/bench press/bench press_10/action.txt,29.75,720x1280,909,bench press,frame_000000 frame_000908,mp4,train
+Final_dataset/train/bench press/bench press_11.mp4,Final_labels/train/bench press/bench press_11/action.txt,0.27,1920x1080,65,bench press,frame_000000 frame_000064,mp4,train
+Final_dataset/train/bench press/bench press_12.mp4,Final_labels/train/bench press/bench press_12/action.txt,0.34,1920x1080,82,bench press,frame_000000 frame_000081,mp4,train
+Final_dataset/train/bench press/bench press_13.mp4,Final_labels/train/bench press/bench press_13/action.txt,0.26,1920x1080,62,bench press,frame_000000 frame_000061,mp4,train
+Final_dataset/train/bench press/bench press_14.mp4,Final_labels/train/bench press/bench press_14/action.txt,0.27,1920x1080,64,bench press,frame_000000 frame_000063,mp4,train
+Final_dataset/train/bench press/bench press_15.mp4,Final_labels/train/bench press/bench press_15/action.txt,0.26,1920x1080,62,bench press,frame_000000 frame_000061,mp4,train
+Final_dataset/train/bench press/bench press_16.mp4,Final_labels/train/bench press/bench press_16/action.txt,0.26,1920x1080,62,bench press,frame_000000 frame_000061,mp4,train
+Final_dataset/train/bench press/bench press_17.mp4,Final_labels/train/bench press/bench press_17/action.txt,5.26,1280x720,208,bench press,frame_000000 frame_000207,mp4,train
+Final_dataset/train/bench press/bench press_18.mp4,Final_labels/train/bench press/bench press_18/action.txt,19.91,720x1280,608,bench press,frame_000000 frame_000607,mp4,train
+Final_dataset/train/bench press/bench press_19.mp4,Final_labels/train/bench press/bench press_19/action.txt,2.0,1280x720,77,bench press,frame_000000 frame_000076,mp4,train
+Final_dataset/train/bench press/bench press_2.mp4,Final_labels/train/bench press/bench press_2/action.txt,0.22,1920x1080,53,bench press,frame_000000 frame_000052,mp4,train
+Final_dataset/train/bench press/bench press_20.mp4,Final_labels/train/bench press/bench press_20/action.txt,2.69,1280x720,115,bench press,frame_000000 frame_000114,mp4,train
+Final_dataset/train/bench press/bench press_21.mp4,Final_labels/train/bench press/bench press_21/action.txt,1.7,1280x720,70,bench press,frame_000000 frame_000069,mp4,train
+Final_dataset/train/bench press/bench press_22.mp4,Final_labels/train/bench press/bench press_22/action.txt,1.25,1280x720,66,bench press,frame_000000 frame_000065,mp4,train
+Final_dataset/train/bench press/bench press_23.mp4,Final_labels/train/bench press/bench press_23/action.txt,20.46,1280x720,755,bench press,frame_000000 frame_000754,mp4,train
+Final_dataset/train/bench press/bench press_24.mp4,Final_labels/train/bench press/bench press_24/action.txt,21.51,720x1280,655,bench press,frame_000000 frame_000654,mp4,train
+Final_dataset/train/bench press/bench press_25.mp4,Final_labels/train/bench press/bench press_25/action.txt,6.19,1280x720,225,bench press,frame_000000 frame_000224,mp4,train
+Final_dataset/train/bench press/bench press_26.mp4,Final_labels/train/bench press/bench press_26/action.txt,3.39,1280x720,125,bench press,frame_000000 frame_000124,mp4,train
+Final_dataset/train/bench press/bench press_27.mp4,Final_labels/train/bench press/bench press_27/action.txt,2.28,1280x720,90,bench press,frame_000000 frame_000089,mp4,train
+Final_dataset/train/bench press/bench press_28.mp4,Final_labels/train/bench press/bench press_28/action.txt,4.28,1280x720,160,bench press,frame_000000 frame_000159,mp4,train
+Final_dataset/train/bench press/bench press_29.mp4,Final_labels/train/bench press/bench press_29/action.txt,1.81,1280x720,75,bench press,frame_000000 frame_000074,mp4,train
+Final_dataset/train/bench press/bench press_3.mp4,Final_labels/train/bench press/bench press_3/action.txt,0.17,1920x1080,39,bench press,frame_000000 frame_000038,mp4,train
+Final_dataset/train/bench press/bench press_30.mp4,Final_labels/train/bench press/bench press_30/action.txt,1.34,1280x720,58,bench press,frame_000000 frame_000057,mp4,train
+Final_dataset/train/bench press/bench press_31.mp4,Final_labels/train/bench press/bench press_31/action.txt,0.83,1280x720,35,bench press,frame_000000 frame_000034,mp4,train
+Final_dataset/train/bench press/bench press_32.mp4,Final_labels/train/bench press/bench press_32/action.txt,1.13,1280x720,43,bench press,frame_000000 frame_000042,mp4,train
+Final_dataset/train/bench press/bench press_33.mp4,Final_labels/train/bench press/bench press_33/action.txt,2.96,1280x720,107,bench press,frame_000000 frame_000106,mp4,train
+Final_dataset/train/bench press/bench press_34.mp4,Final_labels/train/bench press/bench press_34/action.txt,2.5,1280x720,100,bench press,frame_000000 frame_000099,mp4,train
+Final_dataset/train/bench press/bench press_35.mp4,Final_labels/train/bench press/bench press_35/action.txt,1.21,1280x720,46,bench press,frame_000000 frame_000045,mp4,train
+Final_dataset/train/bench press/bench press_36.mp4,Final_labels/train/bench press/bench press_36/action.txt,3.33,1280x720,150,bench press,frame_000000 frame_000149,mp4,train
+Final_dataset/train/bench press/bench press_37.mp4,Final_labels/train/bench press/bench press_37/action.txt,3.31,1280x720,141,bench press,frame_000000 frame_000140,mp4,train
+Final_dataset/train/bench press/bench press_38.mp4,Final_labels/train/bench press/bench press_38/action.txt,20.18,720x1280,613,bench press,frame_000000 frame_000612,mp4,train
+Final_dataset/train/bench press/bench press_39.mp4,Final_labels/train/bench press/bench press_39/action.txt,21.35,720x1280,651,bench press,frame_000000 frame_000650,mp4,train
+Final_dataset/train/bench press/bench press_4.mp4,Final_labels/train/bench press/bench press_4/action.txt,0.62,1920x1080,150,bench press,frame_000000 frame_000149,mp4,train
+Final_dataset/train/bench press/bench press_40.mp4,Final_labels/train/bench press/bench press_40/action.txt,0.34,1920x1080,83,bench press,frame_000000 frame_000082,mp4,train
+Final_dataset/train/bench press/bench press_41.mp4,Final_labels/train/bench press/bench press_41/action.txt,0.2,1920x1080,47,bench press,frame_000000 frame_000046,mp4,train
+Final_dataset/train/bench press/bench press_42.mp4,Final_labels/train/bench press/bench press_42/action.txt,10.6,1280x720,560,bench press,frame_000000 frame_000559,mp4,train
+Final_dataset/train/bench press/bench press_43.mp4,Final_labels/train/bench press/bench press_43/action.txt,12.06,1280x720,761,bench press,frame_000000 frame_000760,mp4,train
+Final_dataset/train/bench press/bench press_44.mp4,Final_labels/train/bench press/bench press_44/action.txt,8.41,1364x720,444,bench press,frame_000000 frame_000443,mp4,train
+Final_dataset/train/bench press/bench press_45.mp4,Final_labels/train/bench press/bench press_45/action.txt,7.56,1280x720,380,bench press,frame_000000 frame_000379,mp4,train
+Final_dataset/train/bench press/bench press_46.mp4,Final_labels/train/bench press/bench press_46/action.txt,10.97,1280x720,705,bench press,frame_000000 frame_000704,mp4,train
+Final_dataset/train/bench press/bench press_47.mp4,Final_labels/train/bench press/bench press_47/action.txt,5.93,1280x720,314,bench press,frame_000000 frame_000313,mp4,train
+Final_dataset/train/bench press/bench press_5.mp4,Final_labels/train/bench press/bench press_5/action.txt,0.32,1920x1080,78,bench press,frame_000000 frame_000077,mp4,train
+Final_dataset/train/bench press/bench press_51.mp4,Final_labels/train/bench press/bench press_51/action.txt,50.14,4096x2160,588,bench press,frame_000000 frame_000587,mp4,train
+Final_dataset/train/bench press/bench press_52.mp4,Final_labels/train/bench press/bench press_52/action.txt,40.61,3840x2160,560,bench press,frame_000000 frame_000559,mp4,train
+Final_dataset/train/bench press/bench press_53.mp4,Final_labels/train/bench press/bench press_53/action.txt,68.51,4096x2160,748,bench press,frame_000000 frame_000747,mp4,train
+Final_dataset/train/bench press/bench press_54.mp4,Final_labels/train/bench press/bench press_54/action.txt,13.49,2560x1440,611,bench press,frame_000000 frame_000610,mp4,train
+Final_dataset/train/bench press/bench press_6.mp4,Final_labels/train/bench press/bench press_6/action.txt,0.22,1920x1080,54,bench press,frame_000000 frame_000053,mp4,train
+Final_dataset/train/bench press/bench press_7.mp4,Final_labels/train/bench press/bench press_7/action.txt,0.29,1920x1080,72,bench press,frame_000000 frame_000071,mp4,train
+Final_dataset/train/bench press/bench press_8.mp4,Final_labels/train/bench press/bench press_8/action.txt,0.43,1920x1080,104,bench press,frame_000000 frame_000103,mp4,train
+Final_dataset/train/bench press/bench press_9.mp4,Final_labels/train/bench press/bench press_9/action.txt,0.29,1920x1080,71,bench press,frame_000000 frame_000070,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_1.mp4,Final_labels/train/chest fly machine/chest fly machine_1/action.txt,0.77,360x640,524,chest fly machine,frame_000000 frame_000523,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_10.mp4,Final_labels/train/chest fly machine/chest fly machine_10/action.txt,1.26,1920x1080,312,chest fly machine,frame_000000 frame_000311,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_11.mp4,Final_labels/train/chest fly machine/chest fly machine_11/action.txt,21.63,720x1280,658,chest fly machine,frame_000000 frame_000657,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_12.mp4,Final_labels/train/chest fly machine/chest fly machine_12/action.txt,0.82,1920x1080,204,chest fly machine,frame_000000 frame_000203,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_13.mp4,Final_labels/train/chest fly machine/chest fly machine_13/action.txt,0.87,1920x1080,215,chest fly machine,frame_000000 frame_000214,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_14.mp4,Final_labels/train/chest fly machine/chest fly machine_14/action.txt,2.37,1280x676,453,chest fly machine,frame_000000 frame_000452,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_15.mp4,Final_labels/train/chest fly machine/chest fly machine_15/action.txt,9.44,1280x720,420,chest fly machine,frame_000000 frame_000419,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_16.mp4,Final_labels/train/chest fly machine/chest fly machine_16/action.txt,5.91,1280x720,255,chest fly machine,frame_000000 frame_000254,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_17.mp4,Final_labels/train/chest fly machine/chest fly machine_17/action.txt,30.57,720x1280,929,chest fly machine,frame_000000 frame_000928,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_18.mp4,Final_labels/train/chest fly machine/chest fly machine_18/action.txt,20.65,720x1280,630,chest fly machine,frame_000000 frame_000629,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_19.mp4,Final_labels/train/chest fly machine/chest fly machine_19/action.txt,0.55,1920x1080,135,chest fly machine,frame_000000 frame_000134,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_2.mp4,Final_labels/train/chest fly machine/chest fly machine_2/action.txt,1.19,640x360,929,chest fly machine,frame_000376 frame_000582 frame_000595 frame_000863,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_20.mp4,Final_labels/train/chest fly machine/chest fly machine_20/action.txt,0.53,1920x1080,129,chest fly machine,frame_000000 frame_000128,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_21.mp4,Final_labels/train/chest fly machine/chest fly machine_21/action.txt,21.46,720x1280,660,chest fly machine,frame_000000 frame_000659,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_22.mp4,Final_labels/train/chest fly machine/chest fly machine_22/action.txt,0.4,1920x1080,97,chest fly machine,frame_000000 frame_000096,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_23.mp4,Final_labels/train/chest fly machine/chest fly machine_23/action.txt,0.62,1920x1080,153,chest fly machine,frame_000000 frame_000152,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_24.mp4,Final_labels/train/chest fly machine/chest fly machine_24/action.txt,4.68,1280x720,299,chest fly machine,frame_000000 frame_000298,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_25.mp4,Final_labels/train/chest fly machine/chest fly machine_25/action.txt,7.75,1280x720,400,chest fly machine,frame_000000 frame_000399,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_26.mp4,Final_labels/train/chest fly machine/chest fly machine_26/action.txt,3.82,1280x720,500,chest fly machine,frame_000000 frame_000499,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_28.mp4,Final_labels/train/chest fly machine/chest fly machine_28/action.txt,10.59,1920x1080,406,chest fly machine,frame_000000 frame_000405,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_29.mp4,Final_labels/train/chest fly machine/chest fly machine_29/action.txt,5.84,1920x1080,249,chest fly machine,frame_000000 frame_000248,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_3.mp4,Final_labels/train/chest fly machine/chest fly machine_3/action.txt,0.77,640x338,453,chest fly machine,frame_000000 frame_000452,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_4.mp4,Final_labels/train/chest fly machine/chest fly machine_4/action.txt,33.68,720x1280,1038,chest fly machine,frame_000000 frame_001037,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_5.mp4,Final_labels/train/chest fly machine/chest fly machine_5/action.txt,0.61,1920x1080,150,chest fly machine,frame_000000 frame_000149,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_6.mp4,Final_labels/train/chest fly machine/chest fly machine_6/action.txt,0.43,1920x1080,106,chest fly machine,frame_000000 frame_000105,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_7.mp4,Final_labels/train/chest fly machine/chest fly machine_7/action.txt,0.38,1920x1080,93,chest fly machine,frame_000000 frame_000092,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_8.mp4,Final_labels/train/chest fly machine/chest fly machine_8/action.txt,0.6,1920x1080,148,chest fly machine,frame_000000 frame_000147,mp4,train
+Final_dataset/train/chest fly machine/chest fly machine_9.mp4,Final_labels/train/chest fly machine/chest fly machine_9/action.txt,0.33,1920x1080,80,chest fly machine,frame_000000 frame_000079,mp4,train
+Final_dataset/train/deadlift/deadlift_1.mp4,Final_labels/train/deadlift/deadlift_1/action.txt,21.87,720x1280,672,deadlift,frame_000000 frame_000671,mp4,train
+Final_dataset/train/deadlift/deadlift_10.mp4,Final_labels/train/deadlift/deadlift_10/action.txt,0.3,1920x1080,70,deadlift,frame_000000 frame_000069,mp4,train
+Final_dataset/train/deadlift/deadlift_11.mp4,Final_labels/train/deadlift/deadlift_11/action.txt,0.42,1920x1080,103,deadlift,frame_000000 frame_000102,mp4,train
+Final_dataset/train/deadlift/deadlift_12.mp4,Final_labels/train/deadlift/deadlift_12/action.txt,25.5,1280x720,938,deadlift,frame_000000 frame_000937,mp4,train
+Final_dataset/train/deadlift/deadlift_13.mp4,Final_labels/train/deadlift/deadlift_13/action.txt,4.04,1280x720,180,deadlift,frame_000000 frame_000179,mp4,train
+Final_dataset/train/deadlift/deadlift_14.mp4,Final_labels/train/deadlift/deadlift_14/action.txt,21.01,720x1280,647,deadlift,frame_000000 frame_000646,mp4,train
+Final_dataset/train/deadlift/deadlift_15.mp4,Final_labels/train/deadlift/deadlift_15/action.txt,0.61,1920x1080,150,deadlift,frame_000000 frame_000149,mp4,train
+Final_dataset/train/deadlift/deadlift_16.mp4,Final_labels/train/deadlift/deadlift_16/action.txt,4.84,1280x720,185,deadlift,frame_000000 frame_000184,mp4,train
+Final_dataset/train/deadlift/deadlift_17.mp4,Final_labels/train/deadlift/deadlift_17/action.txt,3.84,1280x720,144,deadlift,frame_000000 frame_000143,mp4,train
+Final_dataset/train/deadlift/deadlift_18.mp4,Final_labels/train/deadlift/deadlift_18/action.txt,2.61,1280x720,105,deadlift,frame_000000 frame_000104,mp4,train
+Final_dataset/train/deadlift/deadlift_19.mp4,Final_labels/train/deadlift/deadlift_19/action.txt,22.27,720x1280,673,deadlift,frame_000000 frame_000672,mp4,train
+Final_dataset/train/deadlift/deadlift_2.mp4,Final_labels/train/deadlift/deadlift_2/action.txt,0.61,1920x1080,150,deadlift,frame_000000 frame_000149,mp4,train
+Final_dataset/train/deadlift/deadlift_20.mp4,Final_labels/train/deadlift/deadlift_20/action.txt,0.6,1920x1080,150,deadlift,frame_000000 frame_000149,mp4,train
+Final_dataset/train/deadlift/deadlift_21.mp4,Final_labels/train/deadlift/deadlift_21/action.txt,20.64,720x1280,634,deadlift,frame_000000 frame_000633,mp4,train
+Final_dataset/train/deadlift/deadlift_22.mp4,Final_labels/train/deadlift/deadlift_22/action.txt,0.61,1920x1080,150,deadlift,frame_000000 frame_000149,mp4,train
+Final_dataset/train/deadlift/deadlift_23.mp4,Final_labels/train/deadlift/deadlift_23/action.txt,21.14,720x1280,632,deadlift,frame_000000 frame_000631,mp4,train
+Final_dataset/train/deadlift/deadlift_24.mp4,Final_labels/train/deadlift/deadlift_24/action.txt,0.61,1920x1080,147,deadlift,frame_000000 frame_000146,mp4,train
+Final_dataset/train/deadlift/deadlift_25.mp4,Final_labels/train/deadlift/deadlift_25/action.txt,14.49,1364x720,917,deadlift,frame_000000 frame_000916,mp4,train
+Final_dataset/train/deadlift/deadlift_26.mp4,Final_labels/train/deadlift/deadlift_26/action.txt,9.16,1364x720,483,deadlift,frame_000000 frame_000482,mp4,train
+Final_dataset/train/deadlift/deadlift_27.mp4,Final_labels/train/deadlift/deadlift_27/action.txt,5.2,1280x720,335,deadlift,frame_000000 frame_000334,mp4,train
+Final_dataset/train/deadlift/deadlift_3.mp4,Final_labels/train/deadlift/deadlift_3/action.txt,0.5,1920x1080,121,deadlift,frame_000000 frame_000120,mp4,train
+Final_dataset/train/deadlift/deadlift_30.mp4,Final_labels/train/deadlift/deadlift_30/action.txt,37.95,4096x2160,341,deadlift,frame_000000 frame_000340,mp4,train
+Final_dataset/train/deadlift/deadlift_31.mp4,Final_labels/train/deadlift/deadlift_31/action.txt,41.96,4096x2048,325,deadlift,frame_000000 frame_000324,mp4,train
+Final_dataset/train/deadlift/deadlift_32.mp4,Final_labels/train/deadlift/deadlift_32/action.txt,5.08,1920x1080,207,deadlift,frame_000000 frame_000206,mp4,train
+Final_dataset/train/deadlift/deadlift_4.mp4,Final_labels/train/deadlift/deadlift_4/action.txt,1.06,1920x1080,263,deadlift,frame_000000 frame_000262,mp4,train
+Final_dataset/train/deadlift/deadlift_5.mp4,Final_labels/train/deadlift/deadlift_5/action.txt,0.61,1920x1080,150,deadlift,frame_000000 frame_000149,mp4,train
+Final_dataset/train/deadlift/deadlift_6.mp4,Final_labels/train/deadlift/deadlift_6/action.txt,0.44,1920x1080,109,deadlift,frame_000000 frame_000108,mp4,train
+Final_dataset/train/deadlift/deadlift_7.mp4,Final_labels/train/deadlift/deadlift_7/action.txt,0.26,1920x1080,62,deadlift,frame_000000 frame_000061,mp4,train
+Final_dataset/train/deadlift/deadlift_8.mp4,Final_labels/train/deadlift/deadlift_8/action.txt,22.42,720x1280,683,deadlift,frame_000000 frame_000682,mp4,train
+Final_dataset/train/deadlift/deadlift_9.mp4,Final_labels/train/deadlift/deadlift_9/action.txt,0.61,1920x1080,150,deadlift,frame_000000 frame_000149,mp4,train
+Final_dataset/train/decline bench press/decline bench press_1.mp4,Final_labels/train/decline bench press/decline bench press_1/action.txt,2.49,640x360,1004,decline bench press,frame_000330 frame_001003,mp4,train
+Final_dataset/train/decline bench press/decline bench press_10.mp4,Final_labels/train/decline bench press/decline bench press_10/action.txt,4.27,640x360,1805,decline bench press,frame_000821 frame_001430,mp4,train
+Final_dataset/train/decline bench press/decline bench press_11.mp4,Final_labels/train/decline bench press/decline bench press_11/action.txt,20.05,640x360,8258,decline bench press,frame_000181 frame_000680 frame_001011 frame_001370 frame_002021 frame_002520 frame_003301 frame_003900 frame_004261 frame_004850 frame_005651 frame_006430 frame_007061 frame_007470 frame_007851 frame_008070,mp4,train
+Final_dataset/train/decline bench press/decline bench press_12.mp4,Final_labels/train/decline bench press/decline bench press_12/action.txt,1.73,640x360,2117,decline bench press,frame_000446 frame_001180 frame_001316 frame_002000,mp4,train
+Final_dataset/train/decline bench press/decline bench press_13.mp4,Final_labels/train/decline bench press/decline bench press_13/action.txt,0.86,360x640,586,decline bench press,frame_000246 frame_000585,mp4,train
+Final_dataset/train/decline bench press/decline bench press_14.mp4,Final_labels/train/decline bench press/decline bench press_14/action.txt,4.11,640x360,2782,decline bench press,frame_001471 frame_002180,mp4,train
+Final_dataset/train/decline bench press/decline bench press_15.mp4,Final_labels/train/decline bench press/decline bench press_15/action.txt,7.06,1280x720,327,decline bench press,frame_000000 frame_000326,mp4,train
+Final_dataset/train/decline bench press/decline bench press_16.mp4,Final_labels/train/decline bench press/decline bench press_16/action.txt,1.92,1280x720,68,decline bench press,frame_000000 frame_000067,mp4,train
+Final_dataset/train/decline bench press/decline bench press_17.mp4,Final_labels/train/decline bench press/decline bench press_17/action.txt,12.18,1280x720,652,decline bench press,frame_000000 frame_000651,mp4,train
+Final_dataset/train/decline bench press/decline bench press_18.mp4,Final_labels/train/decline bench press/decline bench press_18/action.txt,2.3,1280x720,124,decline bench press,frame_000000 frame_000123,mp4,train
+Final_dataset/train/decline bench press/decline bench press_2.mp4,Final_labels/train/decline bench press/decline bench press_2/action.txt,2.28,360x640,1174,decline bench press,frame_000000 frame_001173,mp4,train
+Final_dataset/train/decline bench press/decline bench press_3.mp4,Final_labels/train/decline bench press/decline bench press_3/action.txt,3.86,640x360,2133,decline bench press,frame_000881 frame_001670,mp4,train
+Final_dataset/train/decline bench press/decline bench press_4.mp4,Final_labels/train/decline bench press/decline bench press_4/action.txt,0.54,640x360,294,decline bench press,frame_000136 frame_000293,mp4,train
+Final_dataset/train/decline bench press/decline bench press_5.mp4,Final_labels/train/decline bench press/decline bench press_5/action.txt,5.25,640x360,3508,decline bench press,frame_001630 frame_001960,mp4,train
+Final_dataset/train/decline bench press/decline bench press_6.mp4,Final_labels/train/decline bench press/decline bench press_6/action.txt,48.61,720x1280,6490,decline bench press,frame_000000 frame_006487,mp4,train
+Final_dataset/train/decline bench press/decline bench press_7.mp4,Final_labels/train/decline bench press/decline bench press_7/action.txt,2.33,640x360,1410,decline bench press,frame_000630 frame_000691 frame_000692 frame_000808 frame_000809 frame_000985 frame_000986 frame_001250,mp4,train
+Final_dataset/train/decline bench press/decline bench press_8.mp4,Final_labels/train/decline bench press/decline bench press_8/action.txt,7.55,480x360,4583,decline bench press,frame_002031 frame_002980,mp4,train
+Final_dataset/train/decline bench press/decline bench press_9.mp4,Final_labels/train/decline bench press/decline bench press_9/action.txt,2.14,640x360,1251,decline bench press,frame_000316 frame_001097,mp4,train
+Final_dataset/train/hammer curl/hammer curl_1.mp4,Final_labels/train/hammer curl/hammer curl_1/action.txt,27.11,640x360,14347,hammer curl,frame_001785 frame_006650 frame_007951 frame_012790,mp4,train
+Final_dataset/train/hammer curl/hammer curl_10.mp4,Final_labels/train/hammer curl/hammer curl_10/action.txt,6.89,1280x720,303,hammer curl,frame_000000 frame_000302,mp4,train
+Final_dataset/train/hammer curl/hammer curl_11.mp4,Final_labels/train/hammer curl/hammer curl_11/action.txt,6.06,1080x608,323,hammer curl,frame_000000 frame_000322,mp4,train
+Final_dataset/train/hammer curl/hammer curl_12.mp4,Final_labels/train/hammer curl/hammer curl_12/action.txt,1.6,1080x608,93,hammer curl,frame_000000 frame_000092,mp4,train
+Final_dataset/train/hammer curl/hammer curl_13.mp4,Final_labels/train/hammer curl/hammer curl_13/action.txt,26.01,720x1280,796,hammer curl,frame_000000 frame_000795,mp4,train
+Final_dataset/train/hammer curl/hammer curl_14.mp4,Final_labels/train/hammer curl/hammer curl_14/action.txt,21.19,720x1280,654,hammer curl,frame_000000 frame_000653,mp4,train
+Final_dataset/train/hammer curl/hammer curl_15.mp4,Final_labels/train/hammer curl/hammer curl_15/action.txt,21.02,720x1280,639,hammer curl,frame_000000 frame_000638,mp4,train
+Final_dataset/train/hammer curl/hammer curl_16.mp4,Final_labels/train/hammer curl/hammer curl_16/action.txt,23.49,720x1280,727,hammer curl,frame_000000 frame_000726,mp4,train
+Final_dataset/train/hammer curl/hammer curl_17.mp4,Final_labels/train/hammer curl/hammer curl_17/action.txt,21.67,720x1280,663,hammer curl,frame_000000 frame_000662,mp4,train
+Final_dataset/train/hammer curl/hammer curl_18.mp4,Final_labels/train/hammer curl/hammer curl_18/action.txt,6.15,1280x720,249,hammer curl,frame_000000 frame_000248,mp4,train
+Final_dataset/train/hammer curl/hammer curl_19.mp4,Final_labels/train/hammer curl/hammer curl_19/action.txt,3.29,1280x720,141,hammer curl,frame_000000 frame_000140,mp4,train
+Final_dataset/train/hammer curl/hammer curl_2.mp4,Final_labels/train/hammer curl/hammer curl_2/action.txt,1.03,360x640,361,hammer curl,frame_000000 frame_000360,mp4,train
+Final_dataset/train/hammer curl/hammer curl_20.mp4,Final_labels/train/hammer curl/hammer curl_20/action.txt,3.98,360x640,1177,hammer curl,frame_000340 frame_001000,mp4,train
+Final_dataset/train/hammer curl/hammer curl_21.mp4,Final_labels/train/hammer curl/hammer curl_21/action.txt,1.33,360x640,560,hammer curl,frame_000000 frame_000176 frame_000444 frame_000559,mp4,train
+Final_dataset/train/hammer curl/hammer curl_22.mp4,Final_labels/train/hammer curl/hammer curl_22/action.txt,7.1,1280x720,455,hammer curl,frame_000000 frame_000454,mp4,train
+Final_dataset/train/hammer curl/hammer curl_23.mp4,Final_labels/train/hammer curl/hammer curl_23/action.txt,8.25,1280x720,437,hammer curl,frame_000000 frame_000436,mp4,train
+Final_dataset/train/hammer curl/hammer curl_24.mp4,Final_labels/train/hammer curl/hammer curl_24/action.txt,7.3,1364x720,716,hammer curl,frame_000000 frame_000715,mp4,train
+Final_dataset/train/hammer curl/hammer curl_3.mp4,Final_labels/train/hammer curl/hammer curl_3/action.txt,1.59,540x1080,231,hammer curl,frame_000000 frame_000230,mp4,train
+Final_dataset/train/hammer curl/hammer curl_4.mp4,Final_labels/train/hammer curl/hammer curl_4/action.txt,2.17,202x360,1796,hammer curl,frame_000000 frame_001795,mp4,train
+Final_dataset/train/hammer curl/hammer curl_5.mp4,Final_labels/train/hammer curl/hammer curl_5/action.txt,4.11,480x854,1214,hammer curl,frame_000101 frame_001000,mp4,train
+Final_dataset/train/hammer curl/hammer curl_6.mp4,Final_labels/train/hammer curl/hammer curl_6/action.txt,0.66,360x640,314,hammer curl,frame_000058 frame_000162 frame_000163 frame_000195 frame_000196 frame_000313,mp4,train
+Final_dataset/train/hammer curl/hammer curl_7.mp4,Final_labels/train/hammer curl/hammer curl_7/action.txt,0.45,202x360,375,hammer curl,frame_000000 frame_000374,mp4,train
+Final_dataset/train/hammer curl/hammer curl_8.mp4,Final_labels/train/hammer curl/hammer curl_8/action.txt,32.82,720x1280,989,hammer curl,frame_000000 frame_000988,mp4,train
+Final_dataset/train/hammer curl/hammer curl_9.mp4,Final_labels/train/hammer curl/hammer curl_9/action.txt,11.84,1280x720,528,hammer curl,frame_000000 frame_000527,mp4,train
+Final_dataset/train/hip thrust/hip thrust_1.mp4,Final_labels/train/hip thrust/hip thrust_1/action.txt,6.51,480x854,1622,hip thrust,frame_000362 frame_000573 frame_000709 frame_001259,mp4,train
+Final_dataset/train/hip thrust/hip thrust_10.mp4,Final_labels/train/hip thrust/hip thrust_10/action.txt,2.54,1280x720,144,hip thrust,frame_000000 frame_000143,mp4,train
+Final_dataset/train/hip thrust/hip thrust_11.mp4,Final_labels/train/hip thrust/hip thrust_11/action.txt,7.7,1280x720,363,hip thrust,frame_000000 frame_000362,mp4,train
+Final_dataset/train/hip thrust/hip thrust_12.mp4,Final_labels/train/hip thrust/hip thrust_12/action.txt,1.83,1280x720,73,hip thrust,frame_000000 frame_000072,mp4,train
+Final_dataset/train/hip thrust/hip thrust_13.mp4,Final_labels/train/hip thrust/hip thrust_13/action.txt,21.92,1280x720,1012,hip thrust,frame_000024 frame_000135 frame_000504 frame_000562 frame_000563 frame_000759 frame_000788 frame_000904 frame_000905 frame_001011,mp4,train
+Final_dataset/train/hip thrust/hip thrust_14.mp4,Final_labels/train/hip thrust/hip thrust_14/action.txt,8.91,1280x720,389,hip thrust,frame_000000 frame_000388,mp4,train
+Final_dataset/train/hip thrust/hip thrust_2.mp4,Final_labels/train/hip thrust/hip thrust_2/action.txt,1.94,480x854,403,hip thrust,frame_000061 frame_000290,mp4,train
+Final_dataset/train/hip thrust/hip thrust_3.mp4,Final_labels/train/hip thrust/hip thrust_3/action.txt,10.86,480x854,2268,hip thrust,frame_000211 frame_002220,mp4,train
+Final_dataset/train/hip thrust/hip thrust_4.mp4,Final_labels/train/hip thrust/hip thrust_4/action.txt,1.59,1080x608,120,hip thrust,frame_000000 frame_000119,mp4,train
+Final_dataset/train/hip thrust/hip thrust_5.mp4,Final_labels/train/hip thrust/hip thrust_5/action.txt,3.09,480x854,652,hip thrust,frame_000000 frame_000651,mp4,train
+Final_dataset/train/hip thrust/hip thrust_6.mp4,Final_labels/train/hip thrust/hip thrust_6/action.txt,4.93,480x360,3453,hip thrust,frame_000161 frame_002500,mp4,train
+Final_dataset/train/hip thrust/hip thrust_7.mp4,Final_labels/train/hip thrust/hip thrust_7/action.txt,5.33,640x360,3299,hip thrust,frame_001501 frame_002620,mp4,train
+Final_dataset/train/hip thrust/hip thrust_8.mp4,Final_labels/train/hip thrust/hip thrust_8/action.txt,0.8,480x854,347,hip thrust,frame_000000 frame_000270,mp4,train
+Final_dataset/train/hip thrust/hip thrust_9.mp4,Final_labels/train/hip thrust/hip thrust_9/action.txt,2.14,1280x720,105,hip thrust,frame_000002 frame_000104,mp4,train
+Final_dataset/train/incline bench press/incline bench press_1.mp4,Final_labels/train/incline bench press/incline bench press_1/action.txt,0.27,1920x1080,65,incline bench press,frame_000000 frame_000064,mp4,train
+Final_dataset/train/incline bench press/incline bench press_10.mp4,Final_labels/train/incline bench press/incline bench press_10/action.txt,0.33,1920x1080,78,incline bench press,frame_000000 frame_000077,mp4,train
+Final_dataset/train/incline bench press/incline bench press_11.mp4,Final_labels/train/incline bench press/incline bench press_11/action.txt,0.32,1920x1080,74,incline bench press,frame_000000 frame_000073,mp4,train
+Final_dataset/train/incline bench press/incline bench press_12.mp4,Final_labels/train/incline bench press/incline bench press_12/action.txt,22.15,1280x720,989,incline bench press,frame_000000 frame_000988,mp4,train
+Final_dataset/train/incline bench press/incline bench press_13.mp4,Final_labels/train/incline bench press/incline bench press_13/action.txt,19.95,1280x720,792,incline bench press,frame_000000 frame_000791,mp4,train
+Final_dataset/train/incline bench press/incline bench press_14.mp4,Final_labels/train/incline bench press/incline bench press_14/action.txt,21.04,720x1280,642,incline bench press,frame_000000 frame_000641,mp4,train
+Final_dataset/train/incline bench press/incline bench press_15.mp4,Final_labels/train/incline bench press/incline bench press_15/action.txt,18.41,1280x720,725,incline bench press,frame_000000 frame_000724,mp4,train
+Final_dataset/train/incline bench press/incline bench press_16.mp4,Final_labels/train/incline bench press/incline bench press_16/action.txt,2.11,1280x720,72,incline bench press,frame_000000 frame_000071,mp4,train
+Final_dataset/train/incline bench press/incline bench press_17.mp4,Final_labels/train/incline bench press/incline bench press_17/action.txt,0.22,1920x1080,53,incline bench press,frame_000000 frame_000052,mp4,train
+Final_dataset/train/incline bench press/incline bench press_18.mp4,Final_labels/train/incline bench press/incline bench press_18/action.txt,21.31,720x1280,651,incline bench press,frame_000000 frame_000650,mp4,train
+Final_dataset/train/incline bench press/incline bench press_19.mp4,Final_labels/train/incline bench press/incline bench press_19/action.txt,0.17,1920x1080,40,incline bench press,frame_000000 frame_000039,mp4,train
+Final_dataset/train/incline bench press/incline bench press_2.mp4,Final_labels/train/incline bench press/incline bench press_2/action.txt,0.23,1920x1080,47,incline bench press,frame_000000 frame_000046,mp4,train
+Final_dataset/train/incline bench press/incline bench press_20.mp4,Final_labels/train/incline bench press/incline bench press_20/action.txt,20.62,720x1280,628,incline bench press,frame_000000 frame_000627,mp4,train
+Final_dataset/train/incline bench press/incline bench press_21.mp4,Final_labels/train/incline bench press/incline bench press_21/action.txt,20.42,720x1280,623,incline bench press,frame_000000 frame_000622,mp4,train
+Final_dataset/train/incline bench press/incline bench press_22.mp4,Final_labels/train/incline bench press/incline bench press_22/action.txt,0.2,1920x1080,40,incline bench press,frame_000000 frame_000039,mp4,train
+Final_dataset/train/incline bench press/incline bench press_23.mp4,Final_labels/train/incline bench press/incline bench press_23/action.txt,21.12,720x1280,639,incline bench press,frame_000000 frame_000638,mp4,train
+Final_dataset/train/incline bench press/incline bench press_24.mp4,Final_labels/train/incline bench press/incline bench press_24/action.txt,0.29,1920x1080,71,incline bench press,frame_000000 frame_000070,mp4,train
+Final_dataset/train/incline bench press/incline bench press_25.mp4,Final_labels/train/incline bench press/incline bench press_25/action.txt,4.23,1280x720,227,incline bench press,frame_000000 frame_000226,mp4,train
+Final_dataset/train/incline bench press/incline bench press_26.mp4,Final_labels/train/incline bench press/incline bench press_26/action.txt,10.2,1280x720,539,incline bench press,frame_000000 frame_000538,mp4,train
+Final_dataset/train/incline bench press/incline bench press_27.mp4,Final_labels/train/incline bench press/incline bench press_27/action.txt,7.24,1280x720,471,incline bench press,frame_000000 frame_000470,mp4,train
+Final_dataset/train/incline bench press/incline bench press_3.mp4,Final_labels/train/incline bench press/incline bench press_3/action.txt,0.31,1920x1080,74,incline bench press,frame_000000 frame_000073,mp4,train
+Final_dataset/train/incline bench press/incline bench press_4.mp4,Final_labels/train/incline bench press/incline bench press_4/action.txt,0.26,1920x1080,62,incline bench press,frame_000000 frame_000061,mp4,train
+Final_dataset/train/incline bench press/incline bench press_5.mp4,Final_labels/train/incline bench press/incline bench press_5/action.txt,0.31,1920x1080,75,incline bench press,frame_000000 frame_000074,mp4,train
+Final_dataset/train/incline bench press/incline bench press_6.mp4,Final_labels/train/incline bench press/incline bench press_6/action.txt,0.45,1920x1080,110,incline bench press,frame_000000 frame_000109,mp4,train
+Final_dataset/train/incline bench press/incline bench press_7.mp4,Final_labels/train/incline bench press/incline bench press_7/action.txt,0.35,1920x1080,85,incline bench press,frame_000000 frame_000084,mp4,train
+Final_dataset/train/incline bench press/incline bench press_8.mp4,Final_labels/train/incline bench press/incline bench press_8/action.txt,0.39,1920x1080,94,incline bench press,frame_000000 frame_000093,mp4,train
+Final_dataset/train/incline bench press/incline bench press_9.mp4,Final_labels/train/incline bench press/incline bench press_9/action.txt,0.3,1920x1080,72,incline bench press,frame_000000 frame_000071,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_1.mp4,Final_labels/train/lat pulldown/lat pulldown_1/action.txt,35.08,720x1280,1067,lat pulldown,frame_000000 frame_001066,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_10.mp4,Final_labels/train/lat pulldown/lat pulldown_10/action.txt,0.29,1920x1080,72,lat pulldown,frame_000000 frame_000071,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_11.mp4,Final_labels/train/lat pulldown/lat pulldown_11/action.txt,0.43,1920x1080,106,lat pulldown,frame_000000 frame_000105,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_12.mp4,Final_labels/train/lat pulldown/lat pulldown_12/action.txt,0.3,1920x1080,74,lat pulldown,frame_000000 frame_000073,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_13.mp4,Final_labels/train/lat pulldown/lat pulldown_13/action.txt,4.16,1280x720,158,lat pulldown,frame_000000 frame_000157,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_14.mp4,Final_labels/train/lat pulldown/lat pulldown_14/action.txt,2.7,1280x720,97,lat pulldown,frame_000000 frame_000096,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_15.mp4,Final_labels/train/lat pulldown/lat pulldown_15/action.txt,2.72,1280x720,126,lat pulldown,frame_000000 frame_000125,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_16.mp4,Final_labels/train/lat pulldown/lat pulldown_16/action.txt,21.39,720x1280,649,lat pulldown,frame_000000 frame_000648,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_17.mp4,Final_labels/train/lat pulldown/lat pulldown_17/action.txt,0.29,1920x1080,69,lat pulldown,frame_000000 frame_000068,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_18.mp4,Final_labels/train/lat pulldown/lat pulldown_18/action.txt,3.22,1280x720,106,lat pulldown,frame_000000 frame_000105,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_19.mp4,Final_labels/train/lat pulldown/lat pulldown_19/action.txt,1.62,1280x720,79,lat pulldown,frame_000000 frame_000078,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_2.mp4,Final_labels/train/lat pulldown/lat pulldown_2/action.txt,0.41,1920x1080,101,lat pulldown,frame_000000 frame_000100,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_20.mp4,Final_labels/train/lat pulldown/lat pulldown_20/action.txt,1.84,1280x720,62,lat pulldown,frame_000000 frame_000061,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_21.mp4,Final_labels/train/lat pulldown/lat pulldown_21/action.txt,2.33,1280x720,79,lat pulldown,frame_000000 frame_000078,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_22.mp4,Final_labels/train/lat pulldown/lat pulldown_22/action.txt,3.08,1280x720,103,lat pulldown,frame_000000 frame_000102,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_23.mp4,Final_labels/train/lat pulldown/lat pulldown_23/action.txt,2.68,1280x720,96,lat pulldown,frame_000000 frame_000095,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_24.mp4,Final_labels/train/lat pulldown/lat pulldown_24/action.txt,6.82,1280x720,240,lat pulldown,frame_000000 frame_000239,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_25.mp4,Final_labels/train/lat pulldown/lat pulldown_25/action.txt,3.53,1280x720,159,lat pulldown,frame_000000 frame_000158,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_26.mp4,Final_labels/train/lat pulldown/lat pulldown_26/action.txt,3.49,1280x720,149,lat pulldown,frame_000000 frame_000148,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_27.mp4,Final_labels/train/lat pulldown/lat pulldown_27/action.txt,3.43,1280x720,153,lat pulldown,frame_000000 frame_000152,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_28.mp4,Final_labels/train/lat pulldown/lat pulldown_28/action.txt,5.02,1280x720,222,lat pulldown,frame_000000 frame_000221,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_29.mp4,Final_labels/train/lat pulldown/lat pulldown_29/action.txt,20.92,720x1280,643,lat pulldown,frame_000000 frame_000642,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_3.mp4,Final_labels/train/lat pulldown/lat pulldown_3/action.txt,0.65,1920x1080,160,lat pulldown,frame_000000 frame_000159,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_30.mp4,Final_labels/train/lat pulldown/lat pulldown_30/action.txt,0.28,1920x1080,68,lat pulldown,frame_000000 frame_000067,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_31.mp4,Final_labels/train/lat pulldown/lat pulldown_31/action.txt,21.34,720x1280,650,lat pulldown,frame_000000 frame_000649,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_32.mp4,Final_labels/train/lat pulldown/lat pulldown_32/action.txt,0.41,1920x1080,101,lat pulldown,frame_000000 frame_000100,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_33.mp4,Final_labels/train/lat pulldown/lat pulldown_33/action.txt,21.39,720x1280,645,lat pulldown,frame_000000 frame_000644,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_34.mp4,Final_labels/train/lat pulldown/lat pulldown_34/action.txt,0.61,1920x1080,150,lat pulldown,frame_000000 frame_000149,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_35.mp4,Final_labels/train/lat pulldown/lat pulldown_35/action.txt,0.42,1920x1080,103,lat pulldown,frame_000000 frame_000102,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_36.mp4,Final_labels/train/lat pulldown/lat pulldown_36/action.txt,5.52,1280x720,284,lat pulldown,frame_000000 frame_000283,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_37.mp4,Final_labels/train/lat pulldown/lat pulldown_37/action.txt,5.1,1280x720,272,lat pulldown,frame_000000 frame_000271,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_38.mp4,Final_labels/train/lat pulldown/lat pulldown_38/action.txt,10.97,1280x720,692,lat pulldown,frame_000000 frame_000691,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_39.mp4,Final_labels/train/lat pulldown/lat pulldown_39/action.txt,3.28,1364x720,172,lat pulldown,frame_000000 frame_000171,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_4.mp4,Final_labels/train/lat pulldown/lat pulldown_4/action.txt,0.61,1920x1080,150,lat pulldown,frame_000000 frame_000149,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_40.mp4,Final_labels/train/lat pulldown/lat pulldown_40/action.txt,3.6,1364x720,186,lat pulldown,frame_000000 frame_000185,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_44.mp4,Final_labels/train/lat pulldown/lat pulldown_44/action.txt,13.72,2560x1440,344,lat pulldown,frame_000000 frame_000343,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_45.mp4,Final_labels/train/lat pulldown/lat pulldown_45/action.txt,31.64,3840x2160,257,lat pulldown,frame_000000 frame_000256,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_46.mp4,Final_labels/train/lat pulldown/lat pulldown_46/action.txt,22.04,3840x2160,251,lat pulldown,frame_000000 frame_000250,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_5.mp4,Final_labels/train/lat pulldown/lat pulldown_5/action.txt,0.42,1920x1080,101,lat pulldown,frame_000000 frame_000100,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_6.mp4,Final_labels/train/lat pulldown/lat pulldown_6/action.txt,0.31,1920x1080,72,lat pulldown,frame_000000 frame_000071,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_7.mp4,Final_labels/train/lat pulldown/lat pulldown_7/action.txt,34.31,720x1280,1042,lat pulldown,frame_000000 frame_001041,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_8.mp4,Final_labels/train/lat pulldown/lat pulldown_8/action.txt,0.31,1920x1080,74,lat pulldown,frame_000000 frame_000073,mp4,train
+Final_dataset/train/lat pulldown/lat pulldown_9.mp4,Final_labels/train/lat pulldown/lat pulldown_9/action.txt,0.25,1920x1080,60,lat pulldown,frame_000000 frame_000059,mp4,train
+Final_dataset/train/lateral raise/lateral raise_1.mp4,Final_labels/train/lateral raise/lateral raise_1/action.txt,3.34,1280x720,188,lateral raise,frame_000000 frame_000187,mp4,train
+Final_dataset/train/lateral raise/lateral raise_10.mp4,Final_labels/train/lateral raise/lateral raise_10/action.txt,5.34,1280x720,188,lateral raise,frame_000000 frame_000187,mp4,train
+Final_dataset/train/lateral raise/lateral raise_11.mp4,Final_labels/train/lateral raise/lateral raise_11/action.txt,20.35,720x1280,626,lateral raise,frame_000000 frame_000625,mp4,train
+Final_dataset/train/lateral raise/lateral raise_12.mp4,Final_labels/train/lateral raise/lateral raise_12/action.txt,5.56,1280x720,216,lateral raise,frame_000000 frame_000215,mp4,train
+Final_dataset/train/lateral raise/lateral raise_13.mp4,Final_labels/train/lateral raise/lateral raise_13/action.txt,6.6,1280x720,294,lateral raise,frame_000000 frame_000293,mp4,train
+Final_dataset/train/lateral raise/lateral raise_14.mp4,Final_labels/train/lateral raise/lateral raise_14/action.txt,8.34,1280x720,372,lateral raise,frame_000000 frame_000371,mp4,train
+Final_dataset/train/lateral raise/lateral raise_15.mp4,Final_labels/train/lateral raise/lateral raise_15/action.txt,5.86,1280x720,261,lateral raise,frame_000000 frame_000260,mp4,train
+Final_dataset/train/lateral raise/lateral raise_16.mp4,Final_labels/train/lateral raise/lateral raise_16/action.txt,6.25,1280x720,275,lateral raise,frame_000000 frame_000274,mp4,train
+Final_dataset/train/lateral raise/lateral raise_17.mp4,Final_labels/train/lateral raise/lateral raise_17/action.txt,4.99,1280x720,212,lateral raise,frame_000000 frame_000211,mp4,train
+Final_dataset/train/lateral raise/lateral raise_18.mp4,Final_labels/train/lateral raise/lateral raise_18/action.txt,18.78,720x1280,558,lateral raise,frame_000000 frame_000557,mp4,train
+Final_dataset/train/lateral raise/lateral raise_19.mp4,Final_labels/train/lateral raise/lateral raise_19/action.txt,20.84,720x1280,632,lateral raise,frame_000000 frame_000631,mp4,train
+Final_dataset/train/lateral raise/lateral raise_2.mp4,Final_labels/train/lateral raise/lateral raise_2/action.txt,2.26,1280x720,120,lateral raise,frame_000000 frame_000119,mp4,train
+Final_dataset/train/lateral raise/lateral raise_20.mp4,Final_labels/train/lateral raise/lateral raise_20/action.txt,20.64,720x1280,631,lateral raise,frame_000000 frame_000630,mp4,train
+Final_dataset/train/lateral raise/lateral raise_21.mp4,Final_labels/train/lateral raise/lateral raise_21/action.txt,1.59,1280x720,60,lateral raise,frame_000000 frame_000059,mp4,train
+Final_dataset/train/lateral raise/lateral raise_22.mp4,Final_labels/train/lateral raise/lateral raise_22/action.txt,20.6,720x1280,631,lateral raise,frame_000000 frame_000630,mp4,train
+Final_dataset/train/lateral raise/lateral raise_23.mp4,Final_labels/train/lateral raise/lateral raise_23/action.txt,1.5,1280x720,58,lateral raise,frame_000000 frame_000057,mp4,train
+Final_dataset/train/lateral raise/lateral raise_24.mp4,Final_labels/train/lateral raise/lateral raise_24/action.txt,11.32,1280x720,719,lateral raise,frame_000000 frame_000718,mp4,train
+Final_dataset/train/lateral raise/lateral raise_3.mp4,Final_labels/train/lateral raise/lateral raise_3/action.txt,2.9,1280x720,120,lateral raise,frame_000000 frame_000119,mp4,train
+Final_dataset/train/lateral raise/lateral raise_4.mp4,Final_labels/train/lateral raise/lateral raise_4/action.txt,1.68,1280x720,77,lateral raise,frame_000000 frame_000076,mp4,train
+Final_dataset/train/lateral raise/lateral raise_5.mp4,Final_labels/train/lateral raise/lateral raise_5/action.txt,2.3,1280x720,87,lateral raise,frame_000000 frame_000086,mp4,train
+Final_dataset/train/lateral raise/lateral raise_6.mp4,Final_labels/train/lateral raise/lateral raise_6/action.txt,2.48,1280x720,175,lateral raise,frame_000000 frame_000174,mp4,train
+Final_dataset/train/lateral raise/lateral raise_7.mp4,Final_labels/train/lateral raise/lateral raise_7/action.txt,4.19,1280x720,166,lateral raise,frame_000000 frame_000165,mp4,train
+Final_dataset/train/lateral raise/lateral raise_8.mp4,Final_labels/train/lateral raise/lateral raise_8/action.txt,6.42,1280x720,245,lateral raise,frame_000000 frame_000244,mp4,train
+Final_dataset/train/lateral raise/lateral raise_9.mp4,Final_labels/train/lateral raise/lateral raise_9/action.txt,7.15,1280x720,271,lateral raise,frame_000000 frame_000270,mp4,train
+Final_dataset/train/leg extension/leg extension_1.mp4,Final_labels/train/leg extension/leg extension_1/action.txt,1.04,854x480,723,leg extension,frame_000261 frame_000722,mp4,train
+Final_dataset/train/leg extension/leg extension_10.mp4,Final_labels/train/leg extension/leg extension_10/action.txt,8.34,1280x720,372,leg extension,frame_000000 frame_000371,mp4,train
+Final_dataset/train/leg extension/leg extension_11.mp4,Final_labels/train/leg extension/leg extension_11/action.txt,4.26,1280x720,186,leg extension,frame_000000 frame_000185,mp4,train
+Final_dataset/train/leg extension/leg extension_12.mp4,Final_labels/train/leg extension/leg extension_12/action.txt,3.92,1280x720,177,leg extension,frame_000000 frame_000176,mp4,train
+Final_dataset/train/leg extension/leg extension_13.mp4,Final_labels/train/leg extension/leg extension_13/action.txt,4.79,1280x720,207,leg extension,frame_000000 frame_000206,mp4,train
+Final_dataset/train/leg extension/leg extension_14.mp4,Final_labels/train/leg extension/leg extension_14/action.txt,20.76,720x1280,632,leg extension,frame_000000 frame_000631,mp4,train
+Final_dataset/train/leg extension/leg extension_15.mp4,Final_labels/train/leg extension/leg extension_15/action.txt,20.68,720x1280,630,leg extension,frame_000000 frame_000629,mp4,train
+Final_dataset/train/leg extension/leg extension_16.mp4,Final_labels/train/leg extension/leg extension_16/action.txt,20.99,720x1280,646,leg extension,frame_000000 frame_000645,mp4,train
+Final_dataset/train/leg extension/leg extension_17.mp4,Final_labels/train/leg extension/leg extension_17/action.txt,20.27,720x1280,620,leg extension,frame_000000 frame_000619,mp4,train
+Final_dataset/train/leg extension/leg extension_18.mp4,Final_labels/train/leg extension/leg extension_18/action.txt,4.08,1280x720,161,leg extension,frame_000000 frame_000160,mp4,train
+Final_dataset/train/leg extension/leg extension_19.mp4,Final_labels/train/leg extension/leg extension_19/action.txt,1.53,1280x720,55,leg extension,frame_000000 frame_000054,mp4,train
+Final_dataset/train/leg extension/leg extension_2.mp4,Final_labels/train/leg extension/leg extension_2/action.txt,1.38,854x480,337,leg extension,frame_000000 frame_000336,mp4,train
+Final_dataset/train/leg extension/leg extension_20.mp4,Final_labels/train/leg extension/leg extension_20/action.txt,11.85,1280x720,1476,leg extension,frame_000000 frame_001475,mp4,train
+Final_dataset/train/leg extension/leg extension_21.mp4,Final_labels/train/leg extension/leg extension_21/action.txt,13.5,1280x720,715,leg extension,frame_000000 frame_000714,mp4,train
+Final_dataset/train/leg extension/leg extension_22.mp4,Final_labels/train/leg extension/leg extension_22/action.txt,7.57,1280x720,400,leg extension,frame_000000 frame_000399,mp4,train
+Final_dataset/train/leg extension/leg extension_3.mp4,Final_labels/train/leg extension/leg extension_3/action.txt,2.59,640x360,1277,leg extension,frame_000560 frame_000809 frame_000869 frame_001148,mp4,train
+Final_dataset/train/leg extension/leg extension_4.mp4,Final_labels/train/leg extension/leg extension_4/action.txt,5.57,640x360,3578,leg extension,frame_002770 frame_003380,mp4,train
+Final_dataset/train/leg extension/leg extension_5.mp4,Final_labels/train/leg extension/leg extension_5/action.txt,2.66,480x854,746,leg extension,frame_000000 frame_000072 frame_000126 frame_000163 frame_000209 frame_000237 frame_000472 frame_000591 frame_000666 frame_000745,mp4,train
+Final_dataset/train/leg extension/leg extension_6.mp4,Final_labels/train/leg extension/leg extension_6/action.txt,3.11,1280x720,116,leg extension,frame_000000 frame_000115,mp4,train
+Final_dataset/train/leg extension/leg extension_7.mp4,Final_labels/train/leg extension/leg extension_7/action.txt,2.46,1280x720,98,leg extension,frame_000000 frame_000097,mp4,train
+Final_dataset/train/leg extension/leg extension_8.mp4,Final_labels/train/leg extension/leg extension_8/action.txt,2.81,1280x720,258,leg extension,frame_000000 frame_000240,mp4,train
+Final_dataset/train/leg extension/leg extension_9.mp4,Final_labels/train/leg extension/leg extension_9/action.txt,10.94,1280x720,495,leg extension,frame_000000 frame_000494,mp4,train
+Final_dataset/train/leg raises/leg raises_1.mp4,Final_labels/train/leg raises/leg raises_1/action.txt,3.55,1280x720,181,leg raises,frame_000000 frame_000180,mp4,train
+Final_dataset/train/leg raises/leg raises_10.mp4,Final_labels/train/leg raises/leg raises_10/action.txt,19.0,720x1280,577,leg raises,frame_000000 frame_000576,mp4,train
+Final_dataset/train/leg raises/leg raises_11.mp4,Final_labels/train/leg raises/leg raises_11/action.txt,7.94,1280x720,354,leg raises,frame_000000 frame_000353,mp4,train
+Final_dataset/train/leg raises/leg raises_12.mp4,Final_labels/train/leg raises/leg raises_12/action.txt,6.76,1280x720,340,leg raises,frame_000000 frame_000339,mp4,train
+Final_dataset/train/leg raises/leg raises_13.mp4,Final_labels/train/leg raises/leg raises_13/action.txt,20.95,720x1280,631,leg raises,frame_000000 frame_000630,mp4,train
+Final_dataset/train/leg raises/leg raises_14.mp4,Final_labels/train/leg raises/leg raises_14/action.txt,69.7,2160x4096,593,leg raises,frame_000000 frame_000592,mp4,train
+Final_dataset/train/leg raises/leg raises_15.mp4,Final_labels/train/leg raises/leg raises_15/action.txt,29.39,2160x3840,240,leg raises,frame_000000 frame_000239,mp4,train
+Final_dataset/train/leg raises/leg raises_2.mp4,Final_labels/train/leg raises/leg raises_2/action.txt,2.76,1280x720,150,leg raises,frame_000000 frame_000149,mp4,train
+Final_dataset/train/leg raises/leg raises_3.mp4,Final_labels/train/leg raises/leg raises_3/action.txt,6.3,1280x720,219,leg raises,frame_000000 frame_000218,mp4,train
+Final_dataset/train/leg raises/leg raises_4.mp4,Final_labels/train/leg raises/leg raises_4/action.txt,8.9,1280x720,325,leg raises,frame_000000 frame_000324,mp4,train
+Final_dataset/train/leg raises/leg raises_5.mp4,Final_labels/train/leg raises/leg raises_5/action.txt,4.08,1280x720,144,leg raises,frame_000000 frame_000143,mp4,train
+Final_dataset/train/leg raises/leg raises_6.mp4,Final_labels/train/leg raises/leg raises_6/action.txt,26.05,720x1280,780,leg raises,frame_000000 frame_000779,mp4,train
+Final_dataset/train/leg raises/leg raises_7.mp4,Final_labels/train/leg raises/leg raises_7/action.txt,1.93,1280x720,67,leg raises,frame_000000 frame_000066,mp4,train
+Final_dataset/train/leg raises/leg raises_8.mp4,Final_labels/train/leg raises/leg raises_8/action.txt,20.32,720x1280,615,leg raises,frame_000000 frame_000614,mp4,train
+Final_dataset/train/leg raises/leg raises_9.mp4,Final_labels/train/leg raises/leg raises_9/action.txt,20.83,720x1280,633,leg raises,frame_000000 frame_000632,mp4,train
+Final_dataset/train/plank/plank_1.mp4,Final_labels/train/plank/plank_1/action.txt,6.84,1280x720,333,plank,frame_000000 frame_000332,mp4,train
+Final_dataset/train/plank/plank_2.mp4,Final_labels/train/plank/plank_2/action.txt,0.9,1280x720,77,plank,frame_000000 frame_000076,mp4,train
+Final_dataset/train/plank/plank_3.mp4,Final_labels/train/plank/plank_3/action.txt,1.28,1280x720,117,plank,frame_000000 frame_000116,mp4,train
+Final_dataset/train/plank/plank_4.mp4,Final_labels/train/plank/plank_4/action.txt,31.68,2160x4096,507,plank,frame_000000 frame_000506,mp4,train
+Final_dataset/train/plank/plank_5.mp4,Final_labels/train/plank/plank_5/action.txt,26.78,2160x3840,234,plank,frame_000000 frame_000233,mp4,train
+Final_dataset/train/pull Up/pull Up_1.mp4,Final_labels/train/pull Up/pull Up_1/action.txt,16.45,720x1280,487,pull Up,frame_000000 frame_000486,mp4,train
+Final_dataset/train/pull Up/pull Up_10.mp4,Final_labels/train/pull Up/pull Up_10/action.txt,5.45,1280x720,243,pull Up,frame_000000 frame_000242,mp4,train
+Final_dataset/train/pull Up/pull Up_11.mp4,Final_labels/train/pull Up/pull Up_11/action.txt,4.69,1280x720,210,pull Up,frame_000000 frame_000209,mp4,train
+Final_dataset/train/pull Up/pull Up_12.mp4,Final_labels/train/pull Up/pull Up_12/action.txt,2.54,1280x720,126,pull Up,frame_000000 frame_000125,mp4,train
+Final_dataset/train/pull Up/pull Up_13.mp4,Final_labels/train/pull Up/pull Up_13/action.txt,1.59,1280x720,90,pull Up,frame_000000 frame_000089,mp4,train
+Final_dataset/train/pull Up/pull Up_14.mp4,Final_labels/train/pull Up/pull Up_14/action.txt,14.21,720x1280,416,pull Up,frame_000000 frame_000415,mp4,train
+Final_dataset/train/pull Up/pull Up_15.mp4,Final_labels/train/pull Up/pull Up_15/action.txt,23.24,1920x1080,1132,pull Up,frame_000061 frame_001095,mp4,train
+Final_dataset/train/pull Up/pull Up_16.mp4,Final_labels/train/pull Up/pull Up_16/action.txt,15.84,720x1280,482,pull Up,frame_000000 frame_000481,mp4,train
+Final_dataset/train/pull Up/pull Up_17.mp4,Final_labels/train/pull Up/pull Up_17/action.txt,13.4,720x1280,401,pull Up,frame_000000 frame_000400,mp4,train
+Final_dataset/train/pull Up/pull Up_18.mp4,Final_labels/train/pull Up/pull Up_18/action.txt,2.87,1280x720,308,pull Up,frame_000000 frame_000307,mp4,train
+Final_dataset/train/pull Up/pull Up_19.mp4,Final_labels/train/pull Up/pull Up_19/action.txt,12.14,720x1280,366,pull Up,frame_000000 frame_000365,mp4,train
+Final_dataset/train/pull Up/pull Up_2.mp4,Final_labels/train/pull Up/pull Up_2/action.txt,16.07,1920x1080,526,pull Up,frame_000070 frame_000525,mp4,train
+Final_dataset/train/pull Up/pull Up_20.mp4,Final_labels/train/pull Up/pull Up_20/action.txt,2.42,1280x720,140,pull Up,frame_000000 frame_000139,mp4,train
+Final_dataset/train/pull Up/pull Up_21.mp4,Final_labels/train/pull Up/pull Up_21/action.txt,16.45,720x1280,498,pull Up,frame_000000 frame_000497,mp4,train
+Final_dataset/train/pull Up/pull Up_22.mp4,Final_labels/train/pull Up/pull Up_22/action.txt,2.63,1280x720,365,pull Up,frame_000000 frame_000364,mp4,train
+Final_dataset/train/pull Up/pull Up_23.mp4,Final_labels/train/pull Up/pull Up_23/action.txt,4.64,1280x720,249,pull Up,frame_000000 frame_000248,mp4,train
+Final_dataset/train/pull Up/pull Up_24.mp4,Final_labels/train/pull Up/pull Up_24/action.txt,4.76,1280x720,252,pull Up,frame_000000 frame_000251,mp4,train
+Final_dataset/train/pull Up/pull Up_25.mp4,Final_labels/train/pull Up/pull Up_25/action.txt,6.87,1280x720,367,pull Up,frame_000000 frame_000366,mp4,train
+Final_dataset/train/pull Up/pull Up_28.mp4,Final_labels/train/pull Up/pull Up_28/action.txt,4.96,2560x1440,298,pull Up,frame_000000 frame_000297,mp4,train
+Final_dataset/train/pull Up/pull Up_29.mp4,Final_labels/train/pull Up/pull Up_29/action.txt,6.52,1080x1920,252,pull Up,frame_000000 frame_000251,mp4,train
+Final_dataset/train/pull Up/pull Up_3.mp4,Final_labels/train/pull Up/pull Up_3/action.txt,1.99,1280x720,243,pull Up,frame_000000 frame_000242,mp4,train
+Final_dataset/train/pull Up/pull Up_30.mp4,Final_labels/train/pull Up/pull Up_30/action.txt,8.64,3840x2160,311,pull Up,frame_000000 frame_000310,mp4,train
+Final_dataset/train/pull Up/pull Up_31.mp4,Final_labels/train/pull Up/pull Up_31/action.txt,6.04,1920x1080,234,pull Up,frame_000000 frame_000233,mp4,train
+Final_dataset/train/pull Up/pull Up_32.mp4,Final_labels/train/pull Up/pull Up_32/action.txt,12.32,1080x1920,466,pull Up,frame_000000 frame_000465,mp4,train
+Final_dataset/train/pull Up/pull Up_33.mp4,Final_labels/train/pull Up/pull Up_33/action.txt,28.26,2160x3840,557,pull Up,frame_000000 frame_000556,mp4,train
+Final_dataset/train/pull Up/pull Up_4.mp4,Final_labels/train/pull Up/pull Up_4/action.txt,4.22,1280x720,195,pull Up,frame_000000 frame_000194,mp4,train
+Final_dataset/train/pull Up/pull Up_5.mp4,Final_labels/train/pull Up/pull Up_5/action.txt,3.08,1280x720,402,pull Up,frame_000000 frame_000401,mp4,train
+Final_dataset/train/pull Up/pull Up_6.mp4,Final_labels/train/pull Up/pull Up_6/action.txt,2.15,1280x720,75,pull Up,frame_000000 frame_000074,mp4,train
+Final_dataset/train/pull Up/pull Up_7.mp4,Final_labels/train/pull Up/pull Up_7/action.txt,2.63,1280x720,86,pull Up,frame_000000 frame_000085,mp4,train
+Final_dataset/train/pull Up/pull Up_8.mp4,Final_labels/train/pull Up/pull Up_8/action.txt,16.21,720x1280,491,pull Up,frame_000000 frame_000490,mp4,train
+Final_dataset/train/pull Up/pull Up_9.mp4,Final_labels/train/pull Up/pull Up_9/action.txt,14.22,1920x1080,434,pull Up,frame_000040 frame_000391,mp4,train
+Final_dataset/train/push-up/push-up_1.mp4,Final_labels/train/push-up/push-up_1/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_10.mp4,Final_labels/train/push-up/push-up_10/action.txt,0.4,1920x1080,98,push-up,frame_000000 frame_000097,mp4,train
+Final_dataset/train/push-up/push-up_11.mp4,Final_labels/train/push-up/push-up_11/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_12.mp4,Final_labels/train/push-up/push-up_12/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_13.mp4,Final_labels/train/push-up/push-up_13/action.txt,0.46,1920x1080,113,push-up,frame_000000 frame_000112,mp4,train
+Final_dataset/train/push-up/push-up_14.mp4,Final_labels/train/push-up/push-up_14/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_15.mp4,Final_labels/train/push-up/push-up_15/action.txt,0.57,1920x1080,140,push-up,frame_000000 frame_000139,mp4,train
+Final_dataset/train/push-up/push-up_16.mp4,Final_labels/train/push-up/push-up_16/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_17.mp4,Final_labels/train/push-up/push-up_17/action.txt,0.65,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_18.mp4,Final_labels/train/push-up/push-up_18/action.txt,0.46,1920x1080,114,push-up,frame_000000 frame_000113,mp4,train
+Final_dataset/train/push-up/push-up_19.mp4,Final_labels/train/push-up/push-up_19/action.txt,0.6,1920x1080,149,push-up,frame_000000 frame_000148,mp4,train
+Final_dataset/train/push-up/push-up_2.mp4,Final_labels/train/push-up/push-up_2/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_20.mp4,Final_labels/train/push-up/push-up_20/action.txt,0.58,1920x1080,145,push-up,frame_000000 frame_000144,mp4,train
+Final_dataset/train/push-up/push-up_21.mp4,Final_labels/train/push-up/push-up_21/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_22.mp4,Final_labels/train/push-up/push-up_22/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_23.mp4,Final_labels/train/push-up/push-up_23/action.txt,0.44,1920x1080,108,push-up,frame_000000 frame_000107,mp4,train
+Final_dataset/train/push-up/push-up_24.mp4,Final_labels/train/push-up/push-up_24/action.txt,0.33,1920x1080,82,push-up,frame_000000 frame_000081,mp4,train
+Final_dataset/train/push-up/push-up_25.mp4,Final_labels/train/push-up/push-up_25/action.txt,0.43,1920x1080,105,push-up,frame_000000 frame_000104,mp4,train
+Final_dataset/train/push-up/push-up_26.mp4,Final_labels/train/push-up/push-up_26/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_27.mp4,Final_labels/train/push-up/push-up_27/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_28.mp4,Final_labels/train/push-up/push-up_28/action.txt,1.98,1280x720,133,push-up,frame_000000 frame_000066 frame_000072 frame_000132,mp4,train
+Final_dataset/train/push-up/push-up_29.mp4,Final_labels/train/push-up/push-up_29/action.txt,5.17,1280x720,411,push-up,frame_000000 frame_000033 frame_000034 frame_000298 frame_000299 frame_000410,mp4,train
+Final_dataset/train/push-up/push-up_3.mp4,Final_labels/train/push-up/push-up_3/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_30.mp4,Final_labels/train/push-up/push-up_30/action.txt,7.97,1280x720,584,push-up,frame_000000 frame_000583,mp4,train
+Final_dataset/train/push-up/push-up_31.mp4,Final_labels/train/push-up/push-up_31/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_32.mp4,Final_labels/train/push-up/push-up_32/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_33.mp4,Final_labels/train/push-up/push-up_33/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_34.mp4,Final_labels/train/push-up/push-up_34/action.txt,13.04,1280x720,678,push-up,frame_000000 frame_000677,mp4,train
+Final_dataset/train/push-up/push-up_35.mp4,Final_labels/train/push-up/push-up_35/action.txt,7.1,1280x720,361,push-up,frame_000000 frame_000360,mp4,train
+Final_dataset/train/push-up/push-up_36.mp4,Final_labels/train/push-up/push-up_36/action.txt,13.65,1920x1080,516,push-up,frame_000000 frame_000515,mp4,train
+Final_dataset/train/push-up/push-up_37.mp4,Final_labels/train/push-up/push-up_37/action.txt,44.15,4096x2160,445,push-up,frame_000000 frame_000444,mp4,train
+Final_dataset/train/push-up/push-up_38.mp4,Final_labels/train/push-up/push-up_38/action.txt,10.4,1920x1080,391,push-up,frame_000000 frame_000390,mp4,train
+Final_dataset/train/push-up/push-up_39.mp4,Final_labels/train/push-up/push-up_39/action.txt,19.52,3840x2160,184,push-up,frame_000000 frame_000183,mp4,train
+Final_dataset/train/push-up/push-up_4.mp4,Final_labels/train/push-up/push-up_4/action.txt,0.34,1920x1080,83,push-up,frame_000000 frame_000082,mp4,train
+Final_dataset/train/push-up/push-up_40.mp4,Final_labels/train/push-up/push-up_40/action.txt,11.41,3840x2160,315,push-up,frame_000000 frame_000314,mp4,train
+Final_dataset/train/push-up/push-up_5.mp4,Final_labels/train/push-up/push-up_5/action.txt,0.56,1920x1080,140,push-up,frame_000000 frame_000139,mp4,train
+Final_dataset/train/push-up/push-up_6.mp4,Final_labels/train/push-up/push-up_6/action.txt,0.37,1920x1080,91,push-up,frame_000000 frame_000090,mp4,train
+Final_dataset/train/push-up/push-up_7.mp4,Final_labels/train/push-up/push-up_7/action.txt,0.29,1920x1080,70,push-up,frame_000000 frame_000069,mp4,train
+Final_dataset/train/push-up/push-up_8.mp4,Final_labels/train/push-up/push-up_8/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/push-up/push-up_9.mp4,Final_labels/train/push-up/push-up_9/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,train
+Final_dataset/train/romanian deadlift/romanian deadlift_1.mp4,Final_labels/train/romanian deadlift/romanian deadlift_1/action.txt,2.18,1280x720,102,romanian deadlift,frame_000000 frame_000101,mp4,train
+Final_dataset/train/romanian deadlift/romanian deadlift_10.mp4,Final_labels/train/romanian deadlift/romanian deadlift_10/action.txt,9.95,1364x720,615,romanian deadlift,frame_000000 frame_000614,mp4,train
+Final_dataset/train/romanian deadlift/romanian deadlift_11.mp4,Final_labels/train/romanian deadlift/romanian deadlift_11/action.txt,14.49,1364x720,917,romanian deadlift,frame_000000 frame_000916,mp4,train
+Final_dataset/train/romanian deadlift/romanian deadlift_12.mp4,Final_labels/train/romanian deadlift/romanian deadlift_12/action.txt,12.33,1364x720,772,romanian deadlift,frame_000000 frame_000771,mp4,train
+Final_dataset/train/romanian deadlift/romanian deadlift_2.mp4,Final_labels/train/romanian deadlift/romanian deadlift_2/action.txt,6.06,1280x720,225,romanian deadlift,frame_000000 frame_000224,mp4,train
+Final_dataset/train/romanian deadlift/romanian deadlift_3.mp4,Final_labels/train/romanian deadlift/romanian deadlift_3/action.txt,7.95,1280x720,290,romanian deadlift,frame_000000 frame_000289,mp4,train
+Final_dataset/train/romanian deadlift/romanian deadlift_4.mp4,Final_labels/train/romanian deadlift/romanian deadlift_4/action.txt,26.52,720x1280,797,romanian deadlift,frame_000000 frame_000796,mp4,train
+Final_dataset/train/romanian deadlift/romanian deadlift_5.mp4,Final_labels/train/romanian deadlift/romanian deadlift_5/action.txt,21.77,720x1280,667,romanian deadlift,frame_000000 frame_000666,mp4,train
+Final_dataset/train/romanian deadlift/romanian deadlift_6.mp4,Final_labels/train/romanian deadlift/romanian deadlift_6/action.txt,23.65,720x1280,720,romanian deadlift,frame_000000 frame_000719,mp4,train
+Final_dataset/train/romanian deadlift/romanian deadlift_7.mp4,Final_labels/train/romanian deadlift/romanian deadlift_7/action.txt,2.2,1280x720,88,romanian deadlift,frame_000000 frame_000087,mp4,train
+Final_dataset/train/romanian deadlift/romanian deadlift_8.mp4,Final_labels/train/romanian deadlift/romanian deadlift_8/action.txt,20.54,720x1280,623,romanian deadlift,frame_000000 frame_000622,mp4,train
+Final_dataset/train/romanian deadlift/romanian deadlift_9.mp4,Final_labels/train/romanian deadlift/romanian deadlift_9/action.txt,9.37,1280x720,366,romanian deadlift,frame_000000 frame_000067 frame_000314 frame_000365,mp4,train
+Final_dataset/train/russian twist/russian twist_1.mp4,Final_labels/train/russian twist/russian twist_1/action.txt,0.46,640x360,247,russian twist,frame_000000 frame_000246,mp4,train
+Final_dataset/train/russian twist/russian twist_10.mp4,Final_labels/train/russian twist/russian twist_10/action.txt,1.08,1280x720,146,russian twist,frame_000000 frame_000145,mp4,train
+Final_dataset/train/russian twist/russian twist_11.mp4,Final_labels/train/russian twist/russian twist_11/action.txt,1.54,1280x720,225,russian twist,frame_000000 frame_000224,mp4,train
+Final_dataset/train/russian twist/russian twist_12.mp4,Final_labels/train/russian twist/russian twist_12/action.txt,3.03,1280x720,214,russian twist,frame_000000 frame_000213,mp4,train
+Final_dataset/train/russian twist/russian twist_13.mp4,Final_labels/train/russian twist/russian twist_13/action.txt,4.54,1280x720,310,russian twist,frame_000000 frame_000309,mp4,train
+Final_dataset/train/russian twist/russian twist_14.mp4,Final_labels/train/russian twist/russian twist_14/action.txt,3.71,1280x720,244,russian twist,frame_000000 frame_000243,mp4,train
+Final_dataset/train/russian twist/russian twist_15.mp4,Final_labels/train/russian twist/russian twist_15/action.txt,26.0,3840x2160,309,russian twist,frame_000000 frame_000308,mp4,train
+Final_dataset/train/russian twist/russian twist_2.mp4,Final_labels/train/russian twist/russian twist_2/action.txt,2.01,854x480,829,russian twist,frame_000050 frame_000216 frame_000217 frame_000415 frame_000416 frame_000538 frame_000539 frame_000667,mp4,train
+Final_dataset/train/russian twist/russian twist_3.mp4,Final_labels/train/russian twist/russian twist_3/action.txt,0.87,854x480,401,russian twist,frame_000107 frame_000335,mp4,train
+Final_dataset/train/russian twist/russian twist_4.mp4,Final_labels/train/russian twist/russian twist_4/action.txt,1.69,608x1080,307,russian twist,frame_000000 frame_000192 frame_000193 frame_000306,mp4,train
+Final_dataset/train/russian twist/russian twist_5.mp4,Final_labels/train/russian twist/russian twist_5/action.txt,1.03,608x1080,341,russian twist,frame_000000 frame_000340,mp4,train
+Final_dataset/train/russian twist/russian twist_6.mp4,Final_labels/train/russian twist/russian twist_6/action.txt,1.13,854x480,358,russian twist,frame_000170 frame_000282,mp4,train
+Final_dataset/train/russian twist/russian twist_7.mp4,Final_labels/train/russian twist/russian twist_7/action.txt,1.22,854x480,514,russian twist,frame_000000 frame_000513,mp4,train
+Final_dataset/train/russian twist/russian twist_8.mp4,Final_labels/train/russian twist/russian twist_8/action.txt,1.34,1280x720,138,russian twist,frame_000000 frame_000137,mp4,train
+Final_dataset/train/russian twist/russian twist_9.mp4,Final_labels/train/russian twist/russian twist_9/action.txt,1.42,1280x720,183,russian twist,frame_000000 frame_000182,mp4,train
+Final_dataset/train/shoulder press/shoulder press_1.mp4,Final_labels/train/shoulder press/shoulder press_1/action.txt,0.95,854x480,562,shoulder press,frame_000250 frame_000489,mp4,train
+Final_dataset/train/shoulder press/shoulder press_10.mp4,Final_labels/train/shoulder press/shoulder press_10/action.txt,22.72,720x1280,681,shoulder press,frame_000000 frame_000680,mp4,train
+Final_dataset/train/shoulder press/shoulder press_11.mp4,Final_labels/train/shoulder press/shoulder press_11/action.txt,6.44,640x360,384,shoulder press,frame_000000 frame_000383,mp4,train
+Final_dataset/train/shoulder press/shoulder press_12.mp4,Final_labels/train/shoulder press/shoulder press_12/action.txt,4.54,640x360,272,shoulder press,frame_000000 frame_000271,mp4,train
+Final_dataset/train/shoulder press/shoulder press_13.mp4,Final_labels/train/shoulder press/shoulder press_13/action.txt,30.05,720x1280,911,shoulder press,frame_000000 frame_000910,mp4,train
+Final_dataset/train/shoulder press/shoulder press_14.mp4,Final_labels/train/shoulder press/shoulder press_14/action.txt,21.05,720x1280,639,shoulder press,frame_000000 frame_000638,mp4,train
+Final_dataset/train/shoulder press/shoulder press_15.mp4,Final_labels/train/shoulder press/shoulder press_15/action.txt,21.63,720x1280,651,shoulder press,frame_000000 frame_000650,mp4,train
+Final_dataset/train/shoulder press/shoulder press_16.mp4,Final_labels/train/shoulder press/shoulder press_16/action.txt,20.76,720x1280,625,shoulder press,frame_000000 frame_000624,mp4,train
+Final_dataset/train/shoulder press/shoulder press_17.mp4,Final_labels/train/shoulder press/shoulder press_17/action.txt,3.58,1280x720,156,shoulder press,frame_000000 frame_000155,mp4,train
+Final_dataset/train/shoulder press/shoulder press_18.mp4,Final_labels/train/shoulder press/shoulder press_18/action.txt,20.64,720x1280,632,shoulder press,frame_000000 frame_000631,mp4,train
+Final_dataset/train/shoulder press/shoulder press_19.mp4,Final_labels/train/shoulder press/shoulder press_19/action.txt,3.41,1280x720,118,shoulder press,frame_000000 frame_000117,mp4,train
+Final_dataset/train/shoulder press/shoulder press_2.mp4,Final_labels/train/shoulder press/shoulder press_2/action.txt,1.08,854x450,245,shoulder press,frame_000000 frame_000244,mp4,train
+Final_dataset/train/shoulder press/shoulder press_20.mp4,Final_labels/train/shoulder press/shoulder press_20/action.txt,7.25,1280x720,270,shoulder press,frame_000000 frame_000269,mp4,train
+Final_dataset/train/shoulder press/shoulder press_21.mp4,Final_labels/train/shoulder press/shoulder press_21/action.txt,5.99,1280x720,384,shoulder press,frame_000000 frame_000383,mp4,train
+Final_dataset/train/shoulder press/shoulder press_22.mp4,Final_labels/train/shoulder press/shoulder press_22/action.txt,7.96,1280x720,536,shoulder press,frame_000000 frame_000535,mp4,train
+Final_dataset/train/shoulder press/shoulder press_23.mp4,Final_labels/train/shoulder press/shoulder press_23/action.txt,9.5,1280x720,603,shoulder press,frame_000000 frame_000602,mp4,train
+Final_dataset/train/shoulder press/shoulder press_24.mp4,Final_labels/train/shoulder press/shoulder press_24/action.txt,2.7,1280x720,141,shoulder press,frame_000000 frame_000140,mp4,train
+Final_dataset/train/shoulder press/shoulder press_27.mp4,Final_labels/train/shoulder press/shoulder press_27/action.txt,14.17,3840x2160,128,shoulder press,frame_000000 frame_000127,mp4,train
+Final_dataset/train/shoulder press/shoulder press_28.mp4,Final_labels/train/shoulder press/shoulder press_28/action.txt,19.54,1080x1920,1414,shoulder press,frame_000000 frame_001413,mp4,train
+Final_dataset/train/shoulder press/shoulder press_29.mp4,Final_labels/train/shoulder press/shoulder press_29/action.txt,22.13,1080x1920,1800,shoulder press,frame_000000 frame_001799,mp4,train
+Final_dataset/train/shoulder press/shoulder press_3.mp4,Final_labels/train/shoulder press/shoulder press_3/action.txt,0.63,480x852,288,shoulder press,frame_000000 frame_000287,mp4,train
+Final_dataset/train/shoulder press/shoulder press_4.mp4,Final_labels/train/shoulder press/shoulder press_4/action.txt,3.27,480x854,1075,shoulder press,frame_000370 frame_001074,mp4,train
+Final_dataset/train/shoulder press/shoulder press_5.mp4,Final_labels/train/shoulder press/shoulder press_5/action.txt,1.73,1280x720,352,shoulder press,frame_000140 frame_000351,mp4,train
+Final_dataset/train/shoulder press/shoulder press_6.mp4,Final_labels/train/shoulder press/shoulder press_6/action.txt,3.67,480x854,1247,shoulder press,frame_000516 frame_001246,mp4,train
+Final_dataset/train/shoulder press/shoulder press_7.mp4,Final_labels/train/shoulder press/shoulder press_7/action.txt,3.72,854x480,1184,shoulder press,frame_000821 frame_001052 frame_001053 frame_001172,mp4,train
+Final_dataset/train/shoulder press/shoulder press_8.mp4,Final_labels/train/shoulder press/shoulder press_8/action.txt,1.56,480x854,435,shoulder press,frame_000000 frame_000395,mp4,train
+Final_dataset/train/shoulder press/shoulder press_9.mp4,Final_labels/train/shoulder press/shoulder press_9/action.txt,6.9,608x1080,1641,shoulder press,frame_000601 frame_001550,mp4,train
+Final_dataset/train/squat/squat_1.mp4,Final_labels/train/squat/squat_1/action.txt,1.99,854x480,1043,squat,frame_000007 frame_000278 frame_000294 frame_000565 frame_000581 frame_000852 frame_000862 frame_001042,mp4,train
+Final_dataset/train/squat/squat_10.mp4,Final_labels/train/squat/squat_10/action.txt,7.73,1280x720,348,squat,frame_000000 frame_000347,mp4,train
+Final_dataset/train/squat/squat_11.mp4,Final_labels/train/squat/squat_11/action.txt,8.14,1280x720,380,squat,frame_000000 frame_000379,mp4,train
+Final_dataset/train/squat/squat_12.mp4,Final_labels/train/squat/squat_12/action.txt,7.65,1280x720,368,squat,frame_000000 frame_000367,mp4,train
+Final_dataset/train/squat/squat_13.mp4,Final_labels/train/squat/squat_13/action.txt,8.71,1280x720,378,squat,frame_000000 frame_000377,mp4,train
+Final_dataset/train/squat/squat_14.mp4,Final_labels/train/squat/squat_14/action.txt,1.56,1280x720,55,squat,frame_000000 frame_000054,mp4,train
+Final_dataset/train/squat/squat_15.mp4,Final_labels/train/squat/squat_15/action.txt,1.39,1280x720,58,squat,frame_000000 frame_000057,mp4,train
+Final_dataset/train/squat/squat_16.mp4,Final_labels/train/squat/squat_16/action.txt,2.14,1280x720,72,squat,frame_000000 frame_000071,mp4,train
+Final_dataset/train/squat/squat_17.mp4,Final_labels/train/squat/squat_17/action.txt,18.64,1280x720,1173,squat,frame_000000 frame_001172,mp4,train
+Final_dataset/train/squat/squat_18.mp4,Final_labels/train/squat/squat_18/action.txt,6.67,1280x720,355,squat,frame_000000 frame_000354,mp4,train
+Final_dataset/train/squat/squat_19.mp4,Final_labels/train/squat/squat_19/action.txt,16.55,1280x720,1047,squat,frame_000000 frame_001046,mp4,train
+Final_dataset/train/squat/squat_2.mp4,Final_labels/train/squat/squat_2/action.txt,3.98,1280x720,144,squat,frame_000000 frame_000143,mp4,train
+Final_dataset/train/squat/squat_22.mp4,Final_labels/train/squat/squat_22/action.txt,19.29,3840x2160,477,squat,frame_000000 frame_000476,mp4,train
+Final_dataset/train/squat/squat_23.mp4,Final_labels/train/squat/squat_23/action.txt,13.08,1440x2732,480,squat,frame_000000 frame_000479,mp4,train
+Final_dataset/train/squat/squat_24.mp4,Final_labels/train/squat/squat_24/action.txt,15.44,1440x2732,639,squat,frame_000000 frame_000638,mp4,train
+Final_dataset/train/squat/squat_25.mp4,Final_labels/train/squat/squat_25/action.txt,7.98,1080x1920,280,squat,frame_000000 frame_000279,mp4,train
+Final_dataset/train/squat/squat_26.mp4,Final_labels/train/squat/squat_26/action.txt,45.65,4096x2160,583,squat,frame_000000 frame_000582,mp4,train
+Final_dataset/train/squat/squat_3.mp4,Final_labels/train/squat/squat_3/action.txt,3.14,1280x720,113,squat,frame_000000 frame_000112,mp4,train
+Final_dataset/train/squat/squat_4.mp4,Final_labels/train/squat/squat_4/action.txt,3.34,1280x720,130,squat,frame_000000 frame_000129,mp4,train
+Final_dataset/train/squat/squat_5.mp4,Final_labels/train/squat/squat_5/action.txt,2.42,1280x720,101,squat,frame_000000 frame_000100,mp4,train
+Final_dataset/train/squat/squat_6.mp4,Final_labels/train/squat/squat_6/action.txt,1.4,1280x720,47,squat,frame_000000 frame_000046,mp4,train
+Final_dataset/train/squat/squat_7.mp4,Final_labels/train/squat/squat_7/action.txt,1.52,1280x720,93,squat,frame_000000 frame_000092,mp4,train
+Final_dataset/train/squat/squat_8.mp4,Final_labels/train/squat/squat_8/action.txt,2.34,1280x720,143,squat,frame_000000 frame_000142,mp4,train
+Final_dataset/train/squat/squat_9.mp4,Final_labels/train/squat/squat_9/action.txt,5.6,1280x720,233,squat,frame_000000 frame_000232,mp4,train
+Final_dataset/train/t bar row/t bar row_1.mp4,Final_labels/train/t bar row/t bar row_1/action.txt,5.07,854x480,1411,t bar row,frame_000465 frame_000649 frame_000650 frame_000779 frame_000780 frame_001274,mp4,train
+Final_dataset/train/t bar row/t bar row_10.mp4,Final_labels/train/t bar row/t bar row_10/action.txt,2.45,1280x720,86,t bar row,frame_000000 frame_000085,mp4,train
+Final_dataset/train/t bar row/t bar row_11.mp4,Final_labels/train/t bar row/t bar row_11/action.txt,8.52,1280x720,390,t bar row,frame_000000 frame_000389,mp4,train
+Final_dataset/train/t bar row/t bar row_12.mp4,Final_labels/train/t bar row/t bar row_12/action.txt,9.11,1280x720,393,t bar row,frame_000000 frame_000392,mp4,train
+Final_dataset/train/t bar row/t bar row_13.mp4,Final_labels/train/t bar row/t bar row_13/action.txt,12.71,1280x720,558,t bar row,frame_000000 frame_000557,mp4,train
+Final_dataset/train/t bar row/t bar row_14.mp4,Final_labels/train/t bar row/t bar row_14/action.txt,9.73,1280x720,423,t bar row,frame_000000 frame_000422,mp4,train
+Final_dataset/train/t bar row/t bar row_15.mp4,Final_labels/train/t bar row/t bar row_15/action.txt,4.03,1280x720,142,t bar row,frame_000000 frame_000141,mp4,train
+Final_dataset/train/t bar row/t bar row_2.mp4,Final_labels/train/t bar row/t bar row_2/action.txt,0.66,854x450,253,t bar row,frame_000000 frame_000252,mp4,train
+Final_dataset/train/t bar row/t bar row_3.mp4,Final_labels/train/t bar row/t bar row_3/action.txt,3.9,854x480,1916,t bar row,frame_001071 frame_001870,mp4,train
+Final_dataset/train/t bar row/t bar row_4.mp4,Final_labels/train/t bar row/t bar row_4/action.txt,2.16,854x480,369,t bar row,frame_000000 frame_000360,mp4,train
+Final_dataset/train/t bar row/t bar row_5.mp4,Final_labels/train/t bar row/t bar row_5/action.txt,2.04,640x360,1106,t bar row,frame_000401 frame_000840,mp4,train
+Final_dataset/train/t bar row/t bar row_6.mp4,Final_labels/train/t bar row/t bar row_6/action.txt,2.51,1280x720,350,t bar row,frame_000031 frame_000310,mp4,train
+Final_dataset/train/t bar row/t bar row_7.mp4,Final_labels/train/t bar row/t bar row_7/action.txt,4.96,640x480,1621,t bar row,frame_001061 frame_001510,mp4,train
+Final_dataset/train/t bar row/t bar row_8.mp4,Final_labels/train/t bar row/t bar row_8/action.txt,3.63,1280x720,125,t bar row,frame_000000 frame_000124,mp4,train
+Final_dataset/train/t bar row/t bar row_9.mp4,Final_labels/train/t bar row/t bar row_9/action.txt,3.24,1280x720,124,t bar row,frame_000000 frame_000123,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_1.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_1/action.txt,30.98,720x1280,951,tricep Pushdown,frame_000000 frame_000950,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_10.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_10/action.txt,0.4,1920x1080,97,tricep Pushdown,frame_000000 frame_000096,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_11.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_11/action.txt,0.32,1920x1080,77,tricep Pushdown,frame_000000 frame_000076,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_12.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_12/action.txt,0.35,1920x1080,87,tricep Pushdown,frame_000000 frame_000086,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_13.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_13/action.txt,0.29,1920x1080,70,tricep Pushdown,frame_000000 frame_000069,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_14.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_14/action.txt,0.3,1920x1080,74,tricep Pushdown,frame_000000 frame_000073,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_15.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_15/action.txt,0.32,1920x1080,78,tricep Pushdown,frame_000000 frame_000077,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_16.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_16/action.txt,0.37,1920x1080,90,tricep Pushdown,frame_000000 frame_000089,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_17.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_17/action.txt,0.27,1920x1080,66,tricep Pushdown,frame_000000 frame_000065,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_18.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_18/action.txt,0.37,1920x1080,91,tricep Pushdown,frame_000000 frame_000090,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_19.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_19/action.txt,0.31,1920x1080,76,tricep Pushdown,frame_000000 frame_000075,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_2.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_2/action.txt,20.66,720x1280,629,tricep Pushdown,frame_000000 frame_000628,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_20.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_20/action.txt,0.25,1920x1080,61,tricep Pushdown,frame_000000 frame_000060,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_21.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_21/action.txt,0.25,1920x1080,60,tricep Pushdown,frame_000000 frame_000059,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_22.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_22/action.txt,0.17,1920x1080,41,tricep Pushdown,frame_000000 frame_000040,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_23.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_23/action.txt,2.18,1280x720,102,tricep Pushdown,frame_000000 frame_000101,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_24.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_24/action.txt,0.23,1920x1080,56,tricep Pushdown,frame_000000 frame_000055,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_25.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_25/action.txt,4.9,1280x720,222,tricep Pushdown,frame_000000 frame_000221,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_26.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_26/action.txt,10.39,1280x720,471,tricep Pushdown,frame_000000 frame_000470,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_27.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_27/action.txt,5.86,1280x720,194,tricep Pushdown,frame_000000 frame_000193,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_28.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_28/action.txt,4.95,1280x720,180,tricep Pushdown,frame_000000 frame_000179,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_29.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_29/action.txt,5.06,1280x720,225,tricep Pushdown,frame_000000 frame_000224,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_3.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_3/action.txt,21.26,720x1280,651,tricep Pushdown,frame_000000 frame_000650,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_30.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_30/action.txt,5.86,1280x720,257,tricep Pushdown,frame_000000 frame_000256,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_31.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_31/action.txt,9.66,1280x720,468,tricep Pushdown,frame_000000 frame_000467,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_32.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_32/action.txt,0.23,1920x1080,57,tricep Pushdown,frame_000000 frame_000056,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_33.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_33/action.txt,4.35,1280x720,192,tricep Pushdown,frame_000000 frame_000191,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_34.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_34/action.txt,0.29,1920x1080,70,tricep Pushdown,frame_000000 frame_000069,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_35.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_35/action.txt,0.32,1920x1080,78,tricep Pushdown,frame_000000 frame_000077,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_36.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_36/action.txt,7.62,1280x720,496,tricep Pushdown,frame_000000 frame_000495,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_37.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_37/action.txt,7.63,1280x720,495,tricep Pushdown,frame_000000 frame_000494,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_39.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_39/action.txt,33.38,2160x3840,572,tricep Pushdown,frame_000000 frame_000571,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_4.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_4/action.txt,23.48,720x1280,725,tricep Pushdown,frame_000000 frame_000724,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_40.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_40/action.txt,20.47,3840x2160,316,tricep Pushdown,frame_000000 frame_000315,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_5.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_5/action.txt,20.69,720x1280,631,tricep Pushdown,frame_000000 frame_000630,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_6.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_6/action.txt,0.32,1920x1080,79,tricep Pushdown,frame_000000 frame_000078,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_7.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_7/action.txt,0.41,1920x1080,98,tricep Pushdown,frame_000000 frame_000097,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_8.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_8/action.txt,0.27,1920x1080,65,tricep Pushdown,frame_000000 frame_000064,mp4,train
+Final_dataset/train/tricep Pushdown/tricep Pushdown_9.mp4,Final_labels/train/tricep Pushdown/tricep Pushdown_9/action.txt,0.35,1920x1080,87,tricep Pushdown,frame_000000 frame_000086,mp4,train
+Final_dataset/train/tricep dips/tricep dips_1.mp4,Final_labels/train/tricep dips/tricep dips_1/action.txt,3.01,854x480,875,tricep dips,frame_000071 frame_000800,mp4,train
+Final_dataset/train/tricep dips/tricep dips_10.mp4,Final_labels/train/tricep dips/tricep dips_10/action.txt,7.46,1280x720,324,tricep dips,frame_000000 frame_000323,mp4,train
+Final_dataset/train/tricep dips/tricep dips_11.mp4,Final_labels/train/tricep dips/tricep dips_11/action.txt,14.72,1280x720,669,tricep dips,frame_000000 frame_000668,mp4,train
+Final_dataset/train/tricep dips/tricep dips_12.mp4,Final_labels/train/tricep dips/tricep dips_12/action.txt,28.43,720x1280,863,tricep dips,frame_000000 frame_000862,mp4,train
+Final_dataset/train/tricep dips/tricep dips_13.mp4,Final_labels/train/tricep dips/tricep dips_13/action.txt,20.58,720x1280,627,tricep dips,frame_000000 frame_000626,mp4,train
+Final_dataset/train/tricep dips/tricep dips_14.mp4,Final_labels/train/tricep dips/tricep dips_14/action.txt,7.25,1280x720,348,tricep dips,frame_000000 frame_000347,mp4,train
+Final_dataset/train/tricep dips/tricep dips_15.mp4,Final_labels/train/tricep dips/tricep dips_15/action.txt,20.2,720x1280,620,tricep dips,frame_000000 frame_000619,mp4,train
+Final_dataset/train/tricep dips/tricep dips_16.mp4,Final_labels/train/tricep dips/tricep dips_16/action.txt,6.97,1280x720,333,tricep dips,frame_000000 frame_000332,mp4,train
+Final_dataset/train/tricep dips/tricep dips_17.mp4,Final_labels/train/tricep dips/tricep dips_17/action.txt,18.88,720x1280,575,tricep dips,frame_000000 frame_000574,mp4,train
+Final_dataset/train/tricep dips/tricep dips_18.mp4,Final_labels/train/tricep dips/tricep dips_18/action.txt,3.27,1280x720,174,tricep dips,frame_000000 frame_000173,mp4,train
+Final_dataset/train/tricep dips/tricep dips_19.mp4,Final_labels/train/tricep dips/tricep dips_19/action.txt,20.59,720x1280,628,tricep dips,frame_000000 frame_000627,mp4,train
+Final_dataset/train/tricep dips/tricep dips_2.mp4,Final_labels/train/tricep dips/tricep dips_2/action.txt,0.38,480x854,143,tricep dips,frame_000000 frame_000142,mp4,train
+Final_dataset/train/tricep dips/tricep dips_20.mp4,Final_labels/train/tricep dips/tricep dips_20/action.txt,8.83,1280x720,390,tricep dips,frame_000000 frame_000389,mp4,train
+Final_dataset/train/tricep dips/tricep dips_21.mp4,Final_labels/train/tricep dips/tricep dips_21/action.txt,6.17,1280x720,394,tricep dips,frame_000000 frame_000393,mp4,train
+Final_dataset/train/tricep dips/tricep dips_22.mp4,Final_labels/train/tricep dips/tricep dips_22/action.txt,4.49,1280x720,230,tricep dips,frame_000000 frame_000229,mp4,train
+Final_dataset/train/tricep dips/tricep dips_23.mp4,Final_labels/train/tricep dips/tricep dips_23/action.txt,15.4,3840x2160,265,tricep dips,frame_000000 frame_000264,mp4,train
+Final_dataset/train/tricep dips/tricep dips_24.mp4,Final_labels/train/tricep dips/tricep dips_24/action.txt,11.81,1920x1080,703,tricep dips,frame_000000 frame_000702,mp4,train
+Final_dataset/train/tricep dips/tricep dips_25.mp4,Final_labels/train/tricep dips/tricep dips_25/action.txt,24.67,3840x2160,347,tricep dips,frame_000000 frame_000346,mp4,train
+Final_dataset/train/tricep dips/tricep dips_3.mp4,Final_labels/train/tricep dips/tricep dips_3/action.txt,15.57,854x480,6288,tricep dips,frame_000563 frame_000749 frame_000750 frame_001035 frame_001036 frame_001229 frame_001230 frame_001438 frame_001439 frame_001564 frame_001565 frame_001759 frame_001760 frame_001967 frame_001968 frame_002186 frame_002187 frame_002396 frame_002709 frame_002875 frame_002876 frame_003103 frame_004341 frame_004458 frame_004459 frame_004628 frame_004629 frame_004850 frame_004851 frame_005269 frame_005270 frame_005408 frame_005409 frame_005547 frame_005548 frame_005739 frame_005740 frame_005910,mp4,train
+Final_dataset/train/tricep dips/tricep dips_4.mp4,Final_labels/train/tricep dips/tricep dips_4/action.txt,2.78,480x854,1077,tricep dips,frame_000551 frame_001076,mp4,train
+Final_dataset/train/tricep dips/tricep dips_5.mp4,Final_labels/train/tricep dips/tricep dips_5/action.txt,20.5,720x1280,626,tricep dips,frame_000000 frame_000625,mp4,train
+Final_dataset/train/tricep dips/tricep dips_6.mp4,Final_labels/train/tricep dips/tricep dips_6/action.txt,8.3,1280x720,369,tricep dips,frame_000000 frame_000368,mp4,train
+Final_dataset/train/tricep dips/tricep dips_7.mp4,Final_labels/train/tricep dips/tricep dips_7/action.txt,1.68,1280x720,55,tricep dips,frame_000000 frame_000054,mp4,train
+Final_dataset/train/tricep dips/tricep dips_8.mp4,Final_labels/train/tricep dips/tricep dips_8/action.txt,4.44,1280x720,162,tricep dips,frame_000000 frame_000161,mp4,train
+Final_dataset/train/tricep dips/tricep dips_9.mp4,Final_labels/train/tricep dips/tricep dips_9/action.txt,5.39,1280x720,195,tricep dips,frame_000000 frame_000194,mp4,train
+Final_dataset/val/barbell biceps curl/barbell biceps curl_1.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_1/action.txt,1.96,854x480,328,barbell biceps curl,frame_000000 frame_000323,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_10.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_10/action.txt,4.16,1280x720,201,barbell biceps curl,frame_000000 frame_000200,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_11.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_11/action.txt,1.15,1280x720,90,barbell biceps curl,frame_000000 frame_000089,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_12.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_12/action.txt,5.88,1280x720,282,barbell biceps curl,frame_000000 frame_000281,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_13.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_13/action.txt,7.58,1280x720,372,barbell biceps curl,frame_000002 frame_000371,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_14.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_14/action.txt,21.12,720x1280,638,barbell biceps curl,frame_000000 frame_000637,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_15.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_15/action.txt,0.4,1920x1080,98,barbell biceps curl,frame_000000 frame_000097,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_2.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_2/action.txt,0.46,1920x1080,114,barbell biceps curl,frame_000000 frame_000113,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_3.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_3/action.txt,0.5,1920x1080,123,barbell biceps curl,frame_000000 frame_000122,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_4.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_4/action.txt,0.25,1920x1080,61,barbell biceps curl,frame_000000 frame_0000600,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_5.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_5/action.txt,0.29,1920x1080,70,barbell biceps curl,frame_000000 frame_000069,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_50.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_50/action.txt,96.64,4096x2160,699,barbell biceps curl,frame_000000 frame_000698,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_51.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_51/action.txt,12.16,1280x720,766,barbell biceps curl,frame_000000 frame_000765,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_55.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_55/action.txt,38.31,3840x2160,783,barbell biceps curl,frame_000000 frame_000782,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_6.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_6/action.txt,0.27,1920x1080,65,barbell biceps curl,frame_000000 frame_000064,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_7.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_7/action.txt,0.26,1920x1080,62,barbell biceps curl,frame_000000 frame_000061,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_8.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_8/action.txt,0.21,1920x1080,50,barbell biceps curl,frame_000000 frame_000049,mp4,val
+Final_dataset/val/barbell biceps curl/barbell biceps curl_9.mp4,Final_labels/val/barbell biceps curl/barbell biceps curl_9/action.txt,0.24,1920x1080,59,barbell biceps curl,frame_000000 frame_000058,mp4,val
+Final_dataset/val/bench press/bench press_1.mp4,Final_labels/val/bench press/bench press_1/action.txt,0.21,1920x1080,51,bench press,frame_000000 frame_000050,mp4,val
+Final_dataset/val/bench press/bench press_10.mp4,Final_labels/val/bench press/bench press_10/action.txt,0.19,1920x1080,46,bench press,frame_000000 frame_000045,mp4,val
+Final_dataset/val/bench press/bench press_11.mp4,Final_labels/val/bench press/bench press_11/action.txt,1.05,1280x720,50,bench press,frame_000000 frame_000049,mp4,val
+Final_dataset/val/bench press/bench press_12.mp4,Final_labels/val/bench press/bench press_12/action.txt,0.26,1920x1080,63,bench press,frame_000000 frame_000062,mp4,val
+Final_dataset/val/bench press/bench press_13.mp4,Final_labels/val/bench press/bench press_13/action.txt,2.39,1280x720,105,bench press,frame_000000 frame_000104,mp4,val
+Final_dataset/val/bench press/bench press_14.mp4,Final_labels/val/bench press/bench press_14/action.txt,0.34,1920x1080,83,bench press,frame_000000 frame_000082,mp4,val
+Final_dataset/val/bench press/bench press_2.mp4,Final_labels/val/bench press/bench press_2/action.txt,0.42,1920x1080,103,bench press,frame_000000 frame_000102,mp4,val
+Final_dataset/val/bench press/bench press_3.mp4,Final_labels/val/bench press/bench press_3/action.txt,1.36,1280x720,65,bench press,frame_000000 frame_000064,mp4,val
+Final_dataset/val/bench press/bench press_4.mp4,Final_labels/val/bench press/bench press_4/action.txt,1.41,1280x720,60,bench press,frame_000000 frame_000059,mp4,val
+Final_dataset/val/bench press/bench press_48.mp4,Final_labels/val/bench press/bench press_48/action.txt,8.01,1280x720,410,bench press,frame_000000 frame_000409,mp4,val
+Final_dataset/val/bench press/bench press_49.mp4,Final_labels/val/bench press/bench press_49/action.txt,4.64,1280x720,237,bench press,frame_000000 frame_000236,mp4,val
+Final_dataset/val/bench press/bench press_5.mp4,Final_labels/val/bench press/bench press_5/action.txt,0.25,1920x1080,60,bench press,frame_000000 frame_000059,mp4,val
+Final_dataset/val/bench press/bench press_55.mp4,Final_labels/val/bench press/bench press_55/action.txt,57.91,4096x2160,552,bench press,frame_000000 frame_000551,mp4,val
+Final_dataset/val/bench press/bench press_56.mp4,Final_labels/val/bench press/bench press_56/action.txt,27.97,3840x2160,415,bench press,frame_000000 frame_000414,mp4,val
+Final_dataset/val/bench press/bench press_6.mp4,Final_labels/val/bench press/bench press_6/action.txt,1.69,1280x720,68,bench press,frame_000000 frame_000065,mp4,val
+Final_dataset/val/bench press/bench press_7.mp4,Final_labels/val/bench press/bench press_7/action.txt,1.6,1280x720,63,bench press,frame_000000 frame_000061,mp4,val
+Final_dataset/val/bench press/bench press_8.mp4,Final_labels/val/bench press/bench press_8/action.txt,1.4,1280x720,65,bench press,frame_000000 frame_000064,mp4,val
+Final_dataset/val/bench press/bench press_9.mp4,Final_labels/val/bench press/bench press_9/action.txt,21.23,720x1280,641,bench press,frame_00000 frame_000640,mp4,val
+Final_dataset/val/chest fly machine/chest fly machine_1.mp4,Final_labels/val/chest fly machine/chest fly machine_1/action.txt,0.42,1920x1080,102,chest fly machine,frame_000000 frame_000101,mp4,val
+Final_dataset/val/chest fly machine/chest fly machine_2.mp4,Final_labels/val/chest fly machine/chest fly machine_2/action.txt,0.44,1920x1080,108,chest fly machine,frame_000000 frame_000107,mp4,val
+Final_dataset/val/chest fly machine/chest fly machine_27.mp4,Final_labels/val/chest fly machine/chest fly machine_27/action.txt,8.05,1280x720,510,chest fly machine,frame_000000 frame_000509,mp4,val
+Final_dataset/val/chest fly machine/chest fly machine_3.mp4,Final_labels/val/chest fly machine/chest fly machine_3/action.txt,0.45,1920x1080,110,chest fly machine,frame_000000 frame_000109,mp4,val
+Final_dataset/val/chest fly machine/chest fly machine_4.mp4,Final_labels/val/chest fly machine/chest fly machine_4/action.txt,0.53,1920x1080,131,chest fly machine,frame_000000 frame_000130,mp4,val
+Final_dataset/val/chest fly machine/chest fly machine_5.mp4,Final_labels/val/chest fly machine/chest fly machine_5/action.txt,0.42,1920x1080,104,chest fly machine,frame_000000 frame_000103,mp4,val
+Final_dataset/val/chest fly machine/chest fly machine_6.mp4,Final_labels/val/chest fly machine/chest fly machine_6/action.txt,20.64,720x1280,631,chest fly machine,frame_000000 frame_000630,mp4,val
+Final_dataset/val/chest fly machine/chest fly machine_7.mp4,Final_labels/val/chest fly machine/chest fly machine_7/action.txt,0.4,1920x1080,97,chest fly machine,frame_000000 frame_000096,mp4,val
+Final_dataset/val/chest fly machine/chest fly machine_8.mp4,Final_labels/val/chest fly machine/chest fly machine_8/action.txt,0.62,1920x1080,153,chest fly machine,frame_000000 frame_000152,mp4,val
+Final_dataset/val/deadlift/deadlift_1.mp4,Final_labels/val/deadlift/deadlift_1/action.txt,0.39,1920x1080,94,deadlift,frame_000000 frame_000093,mp4,val
+Final_dataset/val/deadlift/deadlift_2.mp4,Final_labels/val/deadlift/deadlift_2/action.txt,0.42,1920x1080,105,deadlift,frame_000000 frame_000104,mp4,val
+Final_dataset/val/deadlift/deadlift_28.mp4,Final_labels/val/deadlift/deadlift_28/action.txt,4.86,1280x720,250,deadlift,frame_000000 frame_000249,mp4,val
+Final_dataset/val/deadlift/deadlift_3.mp4,Final_labels/val/deadlift/deadlift_3/action.txt,5.34,1280x720,192,deadlift,frame_000000 frame_000191,mp4,val
+Final_dataset/val/deadlift/deadlift_33.mp4,Final_labels/val/deadlift/deadlift_33/action.txt,34.67,3840x2160,495,deadlift,frame_000000 frame_000494,mp4,val
+Final_dataset/val/deadlift/deadlift_4.mp4,Final_labels/val/deadlift/deadlift_4/action.txt,2.56,1280x720,103,deadlift,frame_000000 frame_000102,mp4,val
+Final_dataset/val/deadlift/deadlift_5.mp4,Final_labels/val/deadlift/deadlift_5/action.txt,0.61,1920x1080,150,deadlift,frame_000000 frame_000149,mp4,val
+Final_dataset/val/deadlift/deadlift_6.mp4,Final_labels/val/deadlift/deadlift_6/action.txt,39.34,720x1280,1204,deadlift,frame_000000 frame_001203,mp4,val
+Final_dataset/val/deadlift/deadlift_7.mp4,Final_labels/val/deadlift/deadlift_7/action.txt,0.61,1920x1080,150,deadlift,frame_000000 frame_000149,mp4,val
+Final_dataset/val/deadlift/deadlift_8.mp4,Final_labels/val/deadlift/deadlift_8/action.txt,0.61,1920x1080,150,deadlift,frame_000000 frame_000149,mp4,val
+Final_dataset/val/decline bench press/decline bench press_1.mp4,Final_labels/val/decline bench press/decline bench press_1/action.txt,2.6,640x360,1402,decline bench press,frame_000226 frame_001305,mp4,val
+Final_dataset/val/decline bench press/decline bench press_2.mp4,Final_labels/val/decline bench press/decline bench press_2/action.txt,2.88,720x1280,558,decline bench press,frame_000000 frame_000555,mp4,val
+Final_dataset/val/decline bench press/decline bench press_3.mp4,Final_labels/val/decline bench press/decline bench press_3/action.txt,7.09,1280x720,324,decline bench press,frame_000000 frame_000323,mp4,val
+Final_dataset/val/decline bench press/decline bench press_4.mp4,Final_labels/val/decline bench press/decline bench press_4/action.txt,2.47,1280x720,125,decline bench press,frame_000000 frame_000124,mp4,val
+Final_dataset/val/decline bench press/decline bench press_5.mp4,Final_labels/val/decline bench press/decline bench press_5/action.txt,5.26,1280x720,192,decline bench press,frame_000000 frame_000191,mp4,val
+Final_dataset/val/hammer curl/hammer curl_1.mp4,Final_labels/val/hammer curl/hammer curl_1/action.txt,1.13,480x854,244,hammer curl,frame_000000 frame_000243,mp4,val
+Final_dataset/val/hammer curl/hammer curl_2.mp4,Final_labels/val/hammer curl/hammer curl_2/action.txt,0.84,608x1080,331,hammer curl,frame_000000 frame_000304,mp4,val
+Final_dataset/val/hammer curl/hammer curl_25.mp4,Final_labels/val/hammer curl/hammer curl_25/action.txt,7.76,1280x720,494,hammer curl,frame_000000 frame_000493,mp4,val
+Final_dataset/val/hammer curl/hammer curl_3.mp4,Final_labels/val/hammer curl/hammer curl_3/action.txt,1.13,1280x720,51,hammer curl,frame_000000 frame_000050,mp4,val
+Final_dataset/val/hammer curl/hammer curl_4.mp4,Final_labels/val/hammer curl/hammer curl_4/action.txt,2.7,1280x720,114,hammer curl,frame_000000 frame_000113,mp4,val
+Final_dataset/val/hammer curl/hammer curl_5.mp4,Final_labels/val/hammer curl/hammer curl_5/action.txt,6.12,1080x608,315,hammer curl,frame_000000 frame_000314,mp4,val
+Final_dataset/val/hammer curl/hammer curl_6.mp4,Final_labels/val/hammer curl/hammer curl_6/action.txt,21.48,720x1280,655,hammer curl,frame_000000 frame_000654,mp4,val
+Final_dataset/val/hammer curl/hammer curl_7.mp4,Final_labels/val/hammer curl/hammer curl_7/action.txt,0.73,360x640,216,hammer curl,frame_000000 frame_000215,mp4,val
+Final_dataset/val/hip thrust/hip thrust_1.mp4,Final_labels/val/hip thrust/hip thrust_1/action.txt,2.24,854x480,907,hip thrust,frame_000000 frame_000669,mp4,val
+Final_dataset/val/hip thrust/hip thrust_2.mp4,Final_labels/val/hip thrust/hip thrust_2/action.txt,1.27,360x640,500,hip thrust,frame_000000 frame_000499,mp4,val
+Final_dataset/val/hip thrust/hip thrust_3.mp4,Final_labels/val/hip thrust/hip thrust_3/action.txt,5.72,1280x720,267,hip thrust,frame_000099 frame_000266,mp4,val
+Final_dataset/val/hip thrust/hip thrust_4.mp4,Final_labels/val/hip thrust/hip thrust_4/action.txt,12.08,1280x720,540,hip thrust,frame_000000 frame_000539,mp4,val
+Final_dataset/val/hip thrust/hip thrust_5.mp4,Final_labels/val/hip thrust/hip thrust_5/action.txt,3.27,1280x720,113,hip thrust,frame_000002 frame_000112,mp4,val
+Final_dataset/val/hip thrust/hip thrust_6.mp4,Final_labels/val/hip thrust/hip thrust_6/action.txt,3.38,1280x720,150,hip thrust,frame_000000 frame_000149,mp4,val
+Final_dataset/val/incline bench press/incline bench press_1.mp4,Final_labels/val/incline bench press/incline bench press_1/action.txt,0.27,1920x1080,65,incline bench press,frame_000000 frame_000064,mp4,val
+Final_dataset/val/incline bench press/incline bench press_2.mp4,Final_labels/val/incline bench press/incline bench press_2/action.txt,0.38,1920x1080,93,incline bench press,frame_000000 frame_000092,mp4,val
+Final_dataset/val/incline bench press/incline bench press_28.mp4,Final_labels/val/incline bench press/incline bench press_28/action.txt,4.47,1280x720,246,incline bench press,frame_000000 frame_000245,mp4,val
+Final_dataset/val/incline bench press/incline bench press_3.mp4,Final_labels/val/incline bench press/incline bench press_3/action.txt,0.41,1920x1080,99,incline bench press,frame_000000 frame_000098,mp4,val
+Final_dataset/val/incline bench press/incline bench press_4.mp4,Final_labels/val/incline bench press/incline bench press_4/action.txt,19.34,1280x720,747,incline bench press,frame_000000 frame_000746,mp4,val
+Final_dataset/val/incline bench press/incline bench press_5.mp4,Final_labels/val/incline bench press/incline bench press_5/action.txt,0.19,1920x1080,46,incline bench press,frame_000000 frame_000045,mp4,val
+Final_dataset/val/incline bench press/incline bench press_6.mp4,Final_labels/val/incline bench press/incline bench press_6/action.txt,23.26,1280x720,887,incline bench press,frame_000000 frame_000886,mp4,val
+Final_dataset/val/incline bench press/incline bench press_7.mp4,Final_labels/val/incline bench press/incline bench press_7/action.txt,24.12,1280x720,937,incline bench press,frame_000000 frame_000936,mp4,val
+Final_dataset/val/incline bench press/incline bench press_8.mp4,Final_labels/val/incline bench press/incline bench press_8/action.txt,21.61,720x1280,655,incline bench press,frame_000000 frame_000654,mp4,val
+Final_dataset/val/incline bench press/incline bench press_9.mp4,Final_labels/val/incline bench press/incline bench press_9/action.txt,0.45,1920x1080,111,incline bench press,frame_000000 frame_000110,mp4,val
+Final_dataset/val/lat pulldown/lat pulldown_1.mp4,Final_labels/val/lat pulldown/lat pulldown_1/action.txt,0.25,1920x1080,61,lat pulldown,frame_000000 frame_000060,mp4,val
+Final_dataset/val/lat pulldown/lat pulldown_10.mp4,Final_labels/val/lat pulldown/lat pulldown_10/action.txt,2.01,1280x720,87,lat pulldown,frame_000000 frame_000086,mp4,val
+Final_dataset/val/lat pulldown/lat pulldown_11.mp4,Final_labels/val/lat pulldown/lat pulldown_11/action.txt,5.97,1280x720,258,lat pulldown,frame_000000 frame_000257,mp4,val
+Final_dataset/val/lat pulldown/lat pulldown_12.mp4,Final_labels/val/lat pulldown/lat pulldown_12/action.txt,2.67,1280x720,116,lat pulldown,frame_000000 frame_000115,mp4,val
+Final_dataset/val/lat pulldown/lat pulldown_2.mp4,Final_labels/val/lat pulldown/lat pulldown_2/action.txt,0.3,1920x1080,70,lat pulldown,frame_000000 frame_000069,mp4,val
+Final_dataset/val/lat pulldown/lat pulldown_3.mp4,Final_labels/val/lat pulldown/lat pulldown_3/action.txt,0.29,1920x1080,70,lat pulldown,frame_000000 frame_000069,mp4,val
+Final_dataset/val/lat pulldown/lat pulldown_4.mp4,Final_labels/val/lat pulldown/lat pulldown_4/action.txt,5.62,1280x720,263,lat pulldown,frame_000000 frame_000262,mp4,val
+Final_dataset/val/lat pulldown/lat pulldown_41.mp4,Final_labels/val/lat pulldown/lat pulldown_41/action.txt,8.15,1280x720,522,lat pulldown,frame_000000 frame_000521,mp4,val
+Final_dataset/val/lat pulldown/lat pulldown_42.mp4,Final_labels/val/lat pulldown/lat pulldown_42/action.txt,3.83,1280x720,211,lat pulldown,frame_000000 frame_000210,mp4,val
+Final_dataset/val/lat pulldown/lat pulldown_47.mp4,Final_labels/val/lat pulldown/lat pulldown_47/action.txt,8.71,1920x1080,478,lat pulldown,frame_000000 frame_000477,mp4,val
+Final_dataset/val/lat pulldown/lat pulldown_5.mp4,Final_labels/val/lat pulldown/lat pulldown_5/action.txt,3.21,1280x720,134,lat pulldown,frame_000000 frame_000133,mp4,val
+Final_dataset/val/lat pulldown/lat pulldown_6.mp4,Final_labels/val/lat pulldown/lat pulldown_6/action.txt,1.98,1280x720,69,lat pulldown,frame_000000 frame_000068,mp4,val
+Final_dataset/val/lat pulldown/lat pulldown_7.mp4,Final_labels/val/lat pulldown/lat pulldown_7/action.txt,0.27,1920x1080,65,lat pulldown,frame_000000 frame_000064,mp4,val
+Final_dataset/val/lat pulldown/lat pulldown_8.mp4,Final_labels/val/lat pulldown/lat pulldown_8/action.txt,2.64,1280x720,117,lat pulldown,frame_000002 frame_000116,mp4,val
+Final_dataset/val/lat pulldown/lat pulldown_9.mp4,Final_labels/val/lat pulldown/lat pulldown_9/action.txt,7.21,1280x720,305,lat pulldown,frame_000000 frame_000304,mp4,val
+Final_dataset/val/lateral raise/lateral raise_1.mp4,Final_labels/val/lateral raise/lateral raise_1/action.txt,16.17,720x1280,501,lateral raise,frame_000000 frame_000500,mp4,val
+Final_dataset/val/lateral raise/lateral raise_2.mp4,Final_labels/val/lateral raise/lateral raise_2/action.txt,2.87,1280x720,98,lateral raise,frame_000000 frame_000097,mp4,val
+Final_dataset/val/lateral raise/lateral raise_3.mp4,Final_labels/val/lateral raise/lateral raise_3/action.txt,2.95,1280x720,110,lateral raise,frame_000000 frame_000109,mp4,val
+Final_dataset/val/lateral raise/lateral raise_4.mp4,Final_labels/val/lateral raise/lateral raise_4/action.txt,4.48,1280x720,171,lateral raise,frame_000000 frame_000170,mp4,val
+Final_dataset/val/lateral raise/lateral raise_5.mp4,Final_labels/val/lateral raise/lateral raise_5/action.txt,1.76,1280x720,86,lateral raise,frame_000000 frame_000085,mp4,val
+Final_dataset/val/lateral raise/lateral raise_6.mp4,Final_labels/val/lateral raise/lateral raise_6/action.txt,3.05,1280x720,180,lateral raise,frame_000000 frame_000179,mp4,val
+Final_dataset/val/lateral raise/lateral raise_7.mp4,Final_labels/val/lateral raise/lateral raise_7/action.txt,20.26,720x1280,614,lateral raise,frame_000000 frame_000613,mp4,val
+Final_dataset/val/lateral raise/lateral raise_8.mp4,Final_labels/val/lateral raise/lateral raise_8/action.txt,18.95,720x1280,573,lateral raise,frame_000000 frame_000572,mp4,val
+Final_dataset/val/leg extension/leg extension_1.mp4,Final_labels/val/leg extension/leg extension_1/action.txt,28.19,720x1280,891,leg extension,frame_000000 frame_000890,mp4,val
+Final_dataset/val/leg extension/leg extension_2.mp4,Final_labels/val/leg extension/leg extension_2/action.txt,4.69,1280x720,171,leg extension,frame_000002 frame_000170,mp4,val
+Final_dataset/val/leg extension/leg extension_23.mp4,Final_labels/val/leg extension/leg extension_23/action.txt,7.05,1364x720,750,leg extension,frame_000000 frame_000749,mp4,val
+Final_dataset/val/leg extension/leg extension_3.mp4,Final_labels/val/leg extension/leg extension_3/action.txt,2.87,1280x720,101,leg extension,frame_000000 frame_000100,mp4,val
+Final_dataset/val/leg extension/leg extension_4.mp4,Final_labels/val/leg extension/leg extension_4/action.txt,4.35,1280x720,171,leg extension,frame_000000 frame_000170,mp4,val
+Final_dataset/val/leg extension/leg extension_5.mp4,Final_labels/val/leg extension/leg extension_5/action.txt,3.12,1280x720,141,leg extension,frame_000000 frame_000140,mp4,val
+Final_dataset/val/leg extension/leg extension_6.mp4,Final_labels/val/leg extension/leg extension_6/action.txt,5.04,1280x720,219,leg extension,frame_000000 frame_000218,mp4,val
+Final_dataset/val/leg extension/leg extension_7.mp4,Final_labels/val/leg extension/leg extension_7/action.txt,20.33,720x1280,622,leg extension,frame_000000 frame_000621,mp4,val
+Final_dataset/val/leg extension/leg extension_8.mp4,Final_labels/val/leg extension/leg extension_8/action.txt,22.19,720x1280,683,leg extension,frame_000000 frame_000682,mp4,val
+Final_dataset/val/leg raises/leg raises_1.mp4,Final_labels/val/leg raises/leg raises_1/action.txt,30.54,720x1280,916,leg raises,frame_000000 frame_000915,mp4,val
+Final_dataset/val/leg raises/leg raises_16.mp4,Final_labels/val/leg raises/leg raises_16/action.txt,22.32,3840x2160,428,leg raises,frame_000000 frame_000427,mp4,val
+Final_dataset/val/leg raises/leg raises_2.mp4,Final_labels/val/leg raises/leg raises_2/action.txt,3.08,1280x720,187,leg raises,frame_000000 frame_000186,mp4,val
+Final_dataset/val/leg raises/leg raises_3.mp4,Final_labels/val/leg raises/leg raises_3/action.txt,3.43,1280x720,190,leg raises,frame_000000 frame_000189,mp4,val
+Final_dataset/val/leg raises/leg raises_4.mp4,Final_labels/val/leg raises/leg raises_4/action.txt,20.69,720x1280,627,leg raises,frame_000000 frame_000626,mp4,val
+Final_dataset/val/leg raises/leg raises_5.mp4,Final_labels/val/leg raises/leg raises_5/action.txt,4.19,1280x720,211,leg raises,frame_000002 frame_000210,mp4,val
+Final_dataset/val/plank/plank_1.mp4,Final_labels/val/plank/plank_1/action.txt,9.88,1280x720,752,plank,frame_000000 frame_000751,mp4,val
+Final_dataset/val/plank/plank_2.mp4,Final_labels/val/plank/plank_2/action.txt,55.59,640x360,6840,plank,frame_000000 frame_006839,mp4,val
+Final_dataset/val/pull Up/pull Up_1.mp4,Final_labels/val/pull Up/pull Up_1/action.txt,13.31,720x1280,404,pull Up,frame_000000 frame_000403,mp4,val
+Final_dataset/val/pull Up/pull Up_2.mp4,Final_labels/val/pull Up/pull Up_2/action.txt,13.24,720x1280,397,pull Up,frame_000000 frame_000396,mp4,val
+Final_dataset/val/pull Up/pull Up_26.mp4,Final_labels/val/pull Up/pull Up_26/action.txt,9.81,1280x720,513,pull Up,frame_000000 frame_000512,mp4,val
+Final_dataset/val/pull Up/pull Up_3.mp4,Final_labels/val/pull Up/pull Up_3/action.txt,14.96,720x1280,450,pull Up,frame_000000 frame_000449,mp4,val
+Final_dataset/val/pull Up/pull Up_34.mp4,Final_labels/val/pull Up/pull Up_34/action.txt,61.95,2160x3840,720,pull Up,frame_000000 frame_000719,mp4,val
+Final_dataset/val/pull Up/pull Up_35.mp4,Final_labels/val/pull Up/pull Up_35/action.txt,35.22,4096x2160,380,pull Up,frame_000000 frame_000379,mp4,val
+Final_dataset/val/pull Up/pull Up_4.mp4,Final_labels/val/pull Up/pull Up_4/action.txt,1.71,1280x720,58,pull Up,frame_000000 frame_000057,mp4,val
+Final_dataset/val/pull Up/pull Up_5.mp4,Final_labels/val/pull Up/pull Up_5/action.txt,5.84,1280x720,255,pull Up,frame_000021 frame_000254,mp4,val
+Final_dataset/val/pull Up/pull Up_6.mp4,Final_labels/val/pull Up/pull Up_6/action.txt,2.16,1280x720,93,pull Up,frame_000000 frame_000092,mp4,val
+Final_dataset/val/pull Up/pull Up_7.mp4,Final_labels/val/pull Up/pull Up_7/action.txt,1.43,1280x720,145,pull Up,frame_000000 frame_000144,mp4,val
+Final_dataset/val/pull Up/pull Up_8.mp4,Final_labels/val/pull Up/pull Up_8/action.txt,14.18,720x1280,422,pull Up,frame_000000 frame_000421,mp4,val
+Final_dataset/val/push-up/push-up_1.mp4,Final_labels/val/push-up/push-up_1/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,val
+Final_dataset/val/push-up/push-up_10.mp4,Final_labels/val/push-up/push-up_10/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,val
+Final_dataset/val/push-up/push-up_11.mp4,Final_labels/val/push-up/push-up_11/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,val
+Final_dataset/val/push-up/push-up_12.mp4,Final_labels/val/push-up/push-up_12/action.txt,8.62,1280x720,663,push-up,frame_000000 frame_000662,mp4,val
+Final_dataset/val/push-up/push-up_2.mp4,Final_labels/val/push-up/push-up_2/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,val
+Final_dataset/val/push-up/push-up_3.mp4,Final_labels/val/push-up/push-up_3/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,val
+Final_dataset/val/push-up/push-up_4.mp4,Final_labels/val/push-up/push-up_4/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,val
+Final_dataset/val/push-up/push-up_41.mp4,Final_labels/val/push-up/push-up_41/action.txt,25.29,2160x3840,240,push-up,frame_000000 frame_000239,mp4,val
+Final_dataset/val/push-up/push-up_42.mp4,Final_labels/val/push-up/push-up_42/action.txt,21.02,3840x2160,300,push-up,frame_000000 frame_000299,mp4,val
+Final_dataset/val/push-up/push-up_5.mp4,Final_labels/val/push-up/push-up_5/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,val
+Final_dataset/val/push-up/push-up_6.mp4,Final_labels/val/push-up/push-up_6/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,val
+Final_dataset/val/push-up/push-up_7.mp4,Final_labels/val/push-up/push-up_7/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,val
+Final_dataset/val/push-up/push-up_8.mp4,Final_labels/val/push-up/push-up_8/action.txt,0.61,1920x1080,150,push-up,frame_000000 frame_000149,mp4,val
+Final_dataset/val/push-up/push-up_9.mp4,Final_labels/val/push-up/push-up_9/action.txt,0.46,1920x1080,113,push-up,frame_000000 frame_000149,mp4,val
+Final_dataset/val/romanian deadlift/romanian deadlift_1.mp4,Final_labels/val/romanian deadlift/romanian deadlift_1/action.txt,30.79,720x1280,944,romanian deadlift,frame_000000 frame_000943,mp4,val
+Final_dataset/val/romanian deadlift/romanian deadlift_13.mp4,Final_labels/val/romanian deadlift/romanian deadlift_13/action.txt,7.47,1364x720,385,romanian deadlift,frame_000000 frame_000384,mp4,val
+Final_dataset/val/romanian deadlift/romanian deadlift_2.mp4,Final_labels/val/romanian deadlift/romanian deadlift_2/action.txt,3.58,1280x720,140,romanian deadlift,frame_000000 frame_000139,mp4,val
+Final_dataset/val/romanian deadlift/romanian deadlift_3.mp4,Final_labels/val/romanian deadlift/romanian deadlift_3/action.txt,7.84,1280x720,330,romanian deadlift,frame_000000 frame_000329,mp4,val
+Final_dataset/val/romanian deadlift/romanian deadlift_4.mp4,Final_labels/val/romanian deadlift/romanian deadlift_4/action.txt,21.17,720x1280,647,romanian deadlift,frame_000000 frame_000646,mp4,val
+Final_dataset/val/romanian deadlift/romanian deadlift_5.mp4,Final_labels/val/romanian deadlift/romanian deadlift_5/action.txt,6.2,1280x720,242,romanian deadlift,frame_000000 frame_000241,mp4,val
+Final_dataset/val/russian twist/russian twist_1.mp4,Final_labels/val/russian twist/russian twist_1/action.txt,1.46,854x480,438,russian twist,frame_000075 frame_000437,mp4,val
+Final_dataset/val/russian twist/russian twist_2.mp4,Final_labels/val/russian twist/russian twist_2/action.txt,1.53,854x480,393,russian twist,frame_000151 frame_000392,mp4,val
+Final_dataset/val/russian twist/russian twist_3.mp4,Final_labels/val/russian twist/russian twist_3/action.txt,0.34,640x360,164,russian twist,frame_000036 frame_000161,mp4,val
+Final_dataset/val/russian twist/russian twist_4.mp4,Final_labels/val/russian twist/russian twist_4/action.txt,2.76,1280x720,208,russian twist,frame_000000 frame_000207,mp4,val
+Final_dataset/val/russian twist/russian twist_5.mp4,Final_labels/val/russian twist/russian twist_5/action.txt,3.0,1280x720,554,russian twist,frame_000000 frame_000553,mp4,val
+Final_dataset/val/russian twist/russian twist_6.mp4,Final_labels/val/russian twist/russian twist_6/action.txt,3.71,1280x720,247,russian twist,frame_000000 frame_000246,mp4,val
+Final_dataset/val/shoulder press/shoulder press_1.mp4,Final_labels/val/shoulder press/shoulder press_1/action.txt,2.41,480x854,527,shoulder press,frame_000000 frame_000526,mp4,val
+Final_dataset/val/shoulder press/shoulder press_2.mp4,Final_labels/val/shoulder press/shoulder press_2/action.txt,3.03,640x360,183,shoulder press,frame_000000 frame_000182,mp4,val
+Final_dataset/val/shoulder press/shoulder press_25.mp4,Final_labels/val/shoulder press/shoulder press_25/action.txt,5.2,1280x720,335,shoulder press,frame_000000 frame_000334,mp4,val
+Final_dataset/val/shoulder press/shoulder press_26.mp4,Final_labels/val/shoulder press/shoulder press_26/action.txt,4.68,1280x720,602,shoulder press,frame_000000 frame_000601,mp4,val
+Final_dataset/val/shoulder press/shoulder press_3.mp4,Final_labels/val/shoulder press/shoulder press_3/action.txt,5.38,1280x720,288,shoulder press,frame_000000 frame_000287,mp4,val
+Final_dataset/val/shoulder press/shoulder press_30.mp4,Final_labels/val/shoulder press/shoulder press_30/action.txt,93.66,3840x2160,675,shoulder press,frame_000000 frame_000674,mp4,val
+Final_dataset/val/shoulder press/shoulder press_4.mp4,Final_labels/val/shoulder press/shoulder press_4/action.txt,6.97,1280x720,312,shoulder press,frame_000000 frame_000311,mp4,val
+Final_dataset/val/shoulder press/shoulder press_5.mp4,Final_labels/val/shoulder press/shoulder press_5/action.txt,7.37,1280x720,249,shoulder press,frame_000000 frame_000248,mp4,val
+Final_dataset/val/shoulder press/shoulder press_6.mp4,Final_labels/val/shoulder press/shoulder press_6/action.txt,20.25,720x1280,618,shoulder press,frame_000000 frame_000617,mp4,val
+Final_dataset/val/shoulder press/shoulder press_7.mp4,Final_labels/val/shoulder press/shoulder press_7/action.txt,7.14,1280x720,315,shoulder press,frame_000000 frame_000314,mp4,val
+Final_dataset/val/squat/squat_1.mp4,Final_labels/val/squat/squat_1/action.txt,3.13,854x480,1401,squat,frame_000801 frame_001400,mp4,val
+Final_dataset/val/squat/squat_2.mp4,Final_labels/val/squat/squat_2/action.txt,1.98,480x854,446,squat,frame_000000 frame_000186 frame_000300 frame_000445,mp4,val
+Final_dataset/val/squat/squat_20.mp4,Final_labels/val/squat/squat_20/action.txt,7.73,1280x720,416,squat,frame_000000 frame_000415,mp4,val
+Final_dataset/val/squat/squat_27.mp4,Final_labels/val/squat/squat_27/action.txt,4.02,1080x1920,187,squat,frame_000000 frame_000186,mp4,val
+Final_dataset/val/squat/squat_28.mp4,Final_labels/val/squat/squat_28/action.txt,35.3,3840x2160,361,squat,frame_000000 frame_000360,mp4,val
+Final_dataset/val/squat/squat_3.mp4,Final_labels/val/squat/squat_3/action.txt,0.59,854x480,352,squat,frame_000000 frame_000351,mp4,val
+Final_dataset/val/squat/squat_4.mp4,Final_labels/val/squat/squat_4/action.txt,4.17,1280x720,175,squat,frame_000002 frame_000174,mp4,val
+Final_dataset/val/squat/squat_5.mp4,Final_labels/val/squat/squat_5/action.txt,8.77,1280x720,432,squat,frame_000000 frame_000431,mp4,val
+Final_dataset/val/squat/squat_6.mp4,Final_labels/val/squat/squat_6/action.txt,7.54,1280x720,338,squat,frame_000000 frame_000337,mp4,val
+Final_dataset/val/squat/squat_7.mp4,Final_labels/val/squat/squat_7/action.txt,14.7,1280x720,647,squat,frame_000000 frame_000646,mp4,val
+Final_dataset/val/t bar row/t bar row_1.mp4,Final_labels/val/t bar row/t bar row_1/action.txt,1.94,640x360,1118,t bar row,frame_000555 frame_000906,mp4,val
+Final_dataset/val/t bar row/t bar row_2.mp4,Final_labels/val/t bar row/t bar row_2/action.txt,6.25,1280x720,228,t bar row,frame_000000 frame_000227,mp4,val
+Final_dataset/val/t bar row/t bar row_3.mp4,Final_labels/val/t bar row/t bar row_3/action.txt,4.06,1280x720,142,t bar row,frame_000000 frame_000141,mp4,val
+Final_dataset/val/t bar row/t bar row_4.mp4,Final_labels/val/t bar row/t bar row_4/action.txt,11.01,1280x720,480,t bar row,frame_000000 frame_000479,mp4,val
+Final_dataset/val/tricep Pushdown/tricep Pushdown_1.mp4,Final_labels/val/tricep Pushdown/tricep Pushdown_1/action.txt,20.12,720x1280,604,tricep Pushdown,frame_000000 frame_000603,mp4,val
+Final_dataset/val/tricep Pushdown/tricep Pushdown_10.mp4,Final_labels/val/tricep Pushdown/tricep Pushdown_10/action.txt,2.46,1080x608,201,tricep Pushdown,frame_000000 frame_000200,mp4,val
+Final_dataset/val/tricep Pushdown/tricep Pushdown_11.mp4,Final_labels/val/tricep Pushdown/tricep Pushdown_11/action.txt,0.37,1920x1080,90,tricep Pushdown,frame_000000 frame_000089,mp4,val
+Final_dataset/val/tricep Pushdown/tricep Pushdown_12.mp4,Final_labels/val/tricep Pushdown/tricep Pushdown_12/action.txt,0.12,1920x1080,30,tricep Pushdown,frame_000000 frame_000029,mp4,val
+Final_dataset/val/tricep Pushdown/tricep Pushdown_2.mp4,Final_labels/val/tricep Pushdown/tricep Pushdown_2/action.txt,0.37,1920x1080,90,tricep Pushdown,frame_000000 frame_000089,mp4,val
+Final_dataset/val/tricep Pushdown/tricep Pushdown_3.mp4,Final_labels/val/tricep Pushdown/tricep Pushdown_3/action.txt,0.38,1920x1080,91,tricep Pushdown,frame_000000 frame_000090,mp4,val
+Final_dataset/val/tricep Pushdown/tricep Pushdown_38.mp4,Final_labels/val/tricep Pushdown/tricep Pushdown_38/action.txt,5.2,1280x720,298,tricep Pushdown,frame_000000 frame_000297,mp4,val
+Final_dataset/val/tricep Pushdown/tricep Pushdown_4.mp4,Final_labels/val/tricep Pushdown/tricep Pushdown_4/action.txt,0.28,1920x1080,67,tricep Pushdown,frame_000000 frame_000066,mp4,val
+Final_dataset/val/tricep Pushdown/tricep Pushdown_41.mp4,Final_labels/val/tricep Pushdown/tricep Pushdown_41/action.txt,19.67,2160x3840,285,tricep Pushdown,frame_000000 frame_000284,mp4,val
+Final_dataset/val/tricep Pushdown/tricep Pushdown_5.mp4,Final_labels/val/tricep Pushdown/tricep Pushdown_5/action.txt,0.34,1920x1080,83,tricep Pushdown,frame_000000 frame_000082,mp4,val
+Final_dataset/val/tricep Pushdown/tricep Pushdown_6.mp4,Final_labels/val/tricep Pushdown/tricep Pushdown_6/action.txt,0.35,1920x1080,85,tricep Pushdown,frame_000000 frame_000084,mp4,val
+Final_dataset/val/tricep Pushdown/tricep Pushdown_7.mp4,Final_labels/val/tricep Pushdown/tricep Pushdown_7/action.txt,0.3,1920x1080,73,tricep Pushdown,frame_000000 frame_000072,mp4,val
+Final_dataset/val/tricep Pushdown/tricep Pushdown_8.mp4,Final_labels/val/tricep Pushdown/tricep Pushdown_8/action.txt,0.23,1920x1080,55,tricep Pushdown,frame_000000 frame_000054,mp4,val
+Final_dataset/val/tricep Pushdown/tricep Pushdown_9.mp4,Final_labels/val/tricep Pushdown/tricep Pushdown_9/action.txt,9.0,1280x720,426,tricep Pushdown,frame_000000 frame_000425,mp4,val
+Final_dataset/val/tricep dips/tricep dips_1.mp4,Final_labels/val/tricep dips/tricep dips_1/action.txt,0.96,640x360,556,tricep dips,frame_000000 frame_000555,mp4,val
+Final_dataset/val/tricep dips/tricep dips_2.mp4,Final_labels/val/tricep dips/tricep dips_2/action.txt,1.81,480x480,1065,tricep dips,frame_000000 frame_000016 frame_000122 frame_000817,mp4,val
+Final_dataset/val/tricep dips/tricep dips_26.mp4,Final_labels/val/tricep dips/tricep dips_26/action.txt,52.73,3840x2160,499,tricep dips,frame_000000 frame_000498,mp4,val
+Final_dataset/val/tricep dips/tricep dips_3.mp4,Final_labels/val/tricep dips/tricep dips_3/action.txt,16.9,720x1280,494,tricep dips,frame_000000 frame_000493,mp4,val
+Final_dataset/val/tricep dips/tricep dips_4.mp4,Final_labels/val/tricep dips/tricep dips_4/action.txt,10.12,1280x720,447,tricep dips,frame_000000 frame_000446,mp4,val
+Final_dataset/val/tricep dips/tricep dips_5.mp4,Final_labels/val/tricep dips/tricep dips_5/action.txt,3.06,1280x720,110,tricep dips,frame_000000 frame_000109,mp4,val
+Final_dataset/val/tricep dips/tricep dips_6.mp4,Final_labels/val/tricep dips/tricep dips_6/action.txt,6.68,1280x720,297,tricep dips,frame_000000 frame_000296,mp4,val
+Final_dataset/val/tricep dips/tricep dips_7.mp4,Final_labels/val/tricep dips/tricep dips_7/action.txt,13.07,720x1280,388,tricep dips,frame_000000 frame_000387,mp4,val
+Final_dataset/val/tricep dips/tricep dips_8.mp4,Final_labels/val/tricep dips/tricep dips_8/action.txt,7.12,1280x720,321,tricep dips,frame_000000 frame_000320,mp4,val

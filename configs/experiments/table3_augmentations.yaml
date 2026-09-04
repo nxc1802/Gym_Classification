@@ -1,0 +1,18 @@
+# Experiment Table 3: Transformer on Relative 12x4+1 Landmarks with Different Augmentations
+# Methods: Jitter, Rotate, Joint_Dropout, Time_Warp
+
+model: "Transformer"
+feature: "12rel_4"
+
+augmentations:
+  - "jitter"
+  - "rotate"
+  - "joint_dropout"
+  - "time_warp"
+
+hyperparameters:
+  batch_size: 16
+  epochs: 100
+  patience: 20
+  learning_rate: 0.0001
+  seq_len: 32

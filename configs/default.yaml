@@ -1,0 +1,33 @@
+# Default Configuration for Gym Exercise Classification
+
+# Dataset & Paths
+metadata_path: "Final_dataset_metadata.csv"
+landmark_dir: "data/landmarks"
+output_dir: "outputs"
+checkpoint_dir: "checkpoints"
+
+# Feature & Model Settings
+feature_method: "12rel_4"   # Choices: full_4, full_rel_4, 13_4, 12rel_4, angle3, angle2, direct_concat, branch_concat
+model_type: "Transformer"   # Choices: LSTM, BiLSTM, Transformer, STGCN, BranchConcat
+
+# Augmentation (primarily used for Transformer)
+augmentation: "none"        # Choices: none, jitter, rotate, joint_dropout, time_warp
+
+# Hyperparameters
+seed: 42
+device: "cuda"              # "cuda" or "cpu"
+batch_size: 16
+epochs: 100
+learning_rate: 0.0001
+weight_decay: 0.0001
+patience: 20
+seq_len: 32
+train_stride: 16
+val_test_stride: 32
+num_workers: 0
+
+# Model Specific Dimensions
+hidden_dim: 128
+num_layers: 4
+nhead: 8
+dropout: 0.1

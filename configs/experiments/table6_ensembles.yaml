@@ -1,0 +1,16 @@
+# Experiment Table 6: Ensemble Performance on Test Set Using Top Models
+# Base Models: Transformer (Branch-Concat), ST-GCN (Full-4), BiLSTM (Branch-Concat)
+# Ensemble Methods: Hard Voting, Soft Voting, Stacking
+
+methods:
+  - "hard"
+  - "soft"
+  - "stacking"
+
+base_models:
+  - name: "Transformer_branch_concat"
+    checkpoint: "checkpoints/best_Transformer_branch_concat.pt"
+  - name: "STGCN_full_4"
+    checkpoint: "checkpoints/best_STGCN_full_4.pt"
+  - name: "BiLSTM_branch_concat"
+    checkpoint: "checkpoints/best_BiLSTM_branch_concat.pt"
