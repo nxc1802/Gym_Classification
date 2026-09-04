@@ -447,11 +447,13 @@ def cmd_ensemble(args):
 
     all_preds_list = []
     all_probs_list = []
+    val_probs_list = []
+    y_val_final = None
     y_test_final = None
 
     for m, m_type, f_type, ckpt_name in model_entries:
         logger.info(f"Generating predictions for {m_type} ({f_type}) from {ckpt_name} ...")
-        _, _, test_loader = get_dataloaders(
+        _, val_loader, test_loader = get_dataloaders(
             metadata_path=args.metadata,
             feature_method=f_type,
             batch_size=getattr(args, "batch_size", 64),
@@ -460,6 +462,12 @@ def cmd_ensemble(args):
             in_memory=True
         )
         tr = Trainer(model=m, device=device)
+        if args.method == "stacking":
+            y_vt, _, y_vpr = tr.predict(val_loader)
+            val_probs_list.append(y_vpr)
+            if y_val_final is None:
+                y_val_final = y_vt
+
         y_t, y_p, y_pr = tr.predict(test_loader)
         all_preds_list.append(y_p)
         all_probs_list.append(y_pr)
@@ -467,14 +475,14 @@ def cmd_ensemble(args):
             y_test_final = y_t
 
     if args.method == "hard":
-        ens = HardVotingEnsemble(models_only)
+        ens = HardVotingEnsemble()
         final_preds = ens.predict(all_preds_list)
     elif args.method == "soft":
-        ens = SoftVotingEnsemble(models_only)
+        ens = SoftVotingEnsemble()
         final_preds = ens.predict(all_probs_list)
     elif args.method == "stacking":
-        ens = StackingEnsemble(models_only, num_classes=NUM_CLASSES)
-        ens.fit(all_probs_list, y_test_final)
+        ens = StackingEnsemble()
+        ens.fit(val_probs_list, y_val_final)
         final_preds = ens.predict(all_probs_list)
 
     metrics = compute_metrics(y_test_final, final_preds)
