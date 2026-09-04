@@ -6,9 +6,6 @@ Downloads gym exercise classification dataset from Kaggle via kagglehub.
 import os
 import shutil
 from pathlib import Path
-from typing import Optional
-import kagglehub
-
 DEFAULT_DATASET = "truongnhatquangk18dn/the-gym-exercise-classification-dataset"
 
 def download_kaggle_dataset(
@@ -20,6 +17,11 @@ def download_kaggle_dataset(
     If output_dir is specified, creates a directory with symlinks or copies if needed.
     Returns path to downloaded dataset.
     """
+    try:
+        import kagglehub
+    except ImportError:
+        raise ImportError("kagglehub is not installed. Please run: pip install kagglehub")
+
     print(f"Downloading Kaggle dataset: {dataset_name} ...")
     download_path = kagglehub.dataset_download(dataset_name)
     print(f"Dataset downloaded successfully to cache: {download_path}")
