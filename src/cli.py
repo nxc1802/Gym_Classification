@@ -502,7 +502,7 @@ def cmd_ensemble(args):
         logger.info(f"Recorded ensemble results to {report_file}")
 
     if getattr(args, "push_to_hf", False):
-        token = getattr(args, "hf_token", None)
+        token = getattr(args, "hf_token", None) or os.environ.get("HF_TOKEN")
         repo = getattr(args, "hf_repo", DEFAULT_MODEL_REPO)
         upload_file_to_hf(str(cm_path), repo_id=repo, path_in_repo=f"plots/{cm_path.name}", token=token)
         if os.path.exists(report_file):
@@ -687,6 +687,8 @@ def create_parser() -> argparse.ArgumentParser:
     p_ens.add_argument("--batch_size", type=int, default=128)
     p_ens.add_argument("--device", type=str, default="cuda")
     p_ens.add_argument("--push_to_hf", action="store_true", default=False, help="Push ensemble plots and report to Hugging Face")
+    p_ens.add_argument("--hf_repo", type=str, default=DEFAULT_MODEL_REPO, help="Hugging Face model repository ID")
+    p_ens.add_argument("--hf_token", type=str, default=None, help="Hugging Face authentication token")
     p_ens.add_argument("--report_file", type=str, default="outputs/EXPERIMENT_RESULTS.md", help="Single consolidated results file")
 
     # Reproduce
