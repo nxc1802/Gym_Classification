@@ -170,6 +170,13 @@ def cmd_data_report(args):
             zip_output=True
         )
         logger.info(f"Landmark packaging complete: {pkg_path}")
+        if getattr(args, "push_to_hf", False) and pkg_path:
+            logger.info(f"Uploading packaged landmarks {pkg_path} to HF dataset repo...")
+            push_landmarks_to_hf(
+                zip_path=pkg_path,
+                repo_id=getattr(args, "hf_dataset_repo", DEFAULT_DATASET_REPO),
+                token=getattr(args, "hf_token", None)
+            )
 
 def cmd_push_landmarks_hf(args):
     """
@@ -568,6 +575,9 @@ def create_parser() -> argparse.ArgumentParser:
     p_rep_data.add_argument("--landmark_dir", type=str, default="data/landmarks", help="Output directory for landmark CSVs")
     p_rep_data.add_argument("--smoke_test", action="store_true", help="Smoke test extraction: minimal samples for 1 class")
     p_rep_data.add_argument("--smoke_class", type=str, default="barbell biceps curl", help="Target class for smoke test")
+    p_rep_data.add_argument("--push_to_hf", action="store_true", default=False, help="Upload extracted landmarks ZIP to Hugging Face Hub")
+    p_rep_data.add_argument("--hf_dataset_repo", type=str, default=DEFAULT_DATASET_REPO, help="Hugging Face dataset repo ID")
+    p_rep_data.add_argument("--hf_token", type=str, default=None, help="Hugging Face authentication token")
 
     # Hugging Face Hub Landmarks Push / Pull
     p_push_hf = subparsers.add_parser("push-landmarks-hf", help="Upload landmarks archive to Hugging Face dataset repository")
