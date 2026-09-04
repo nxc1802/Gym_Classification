@@ -176,15 +176,16 @@ def cmd_data_report(args):
             push_landmarks_to_hf(
                 zip_path=pkg_path,
                 repo_id=getattr(args, "hf_dataset_repo", DEFAULT_DATASET_REPO),
-                token=getattr(args, "hf_token", None)
+                token=getattr(args, "hf_token", None) or os.environ.get("HF_TOKEN")
             )
 
 def cmd_push_landmarks_hf(args):
     """
     Uploads processed landmarks ZIP to Hugging Face dataset repository.
     """
+    token = args.token or os.environ.get("HF_TOKEN")
     logger.info(f"Pushing landmarks {args.zip_path} to HF dataset repo {args.repo_id} ...")
-    url = push_landmarks_to_hf(args.zip_path, repo_id=args.repo_id, token=args.token)
+    url = push_landmarks_to_hf(args.zip_path, repo_id=args.repo_id, token=token)
     if url:
         logger.info(f"Landmarks pushed successfully: {url}")
     else:
@@ -194,12 +195,13 @@ def cmd_pull_landmarks_hf(args):
     """
     Downloads and extracts processed landmarks ZIP from Hugging Face dataset repository.
     """
+    token = args.token or os.environ.get("HF_TOKEN")
     logger.info(f"Pulling landmarks from HF dataset repo {args.repo_id} to {args.dest_dir} ...")
     path = pull_landmarks_from_hf(
         dest_dir=args.dest_dir,
         repo_id=args.repo_id,
         filename=args.filename,
-        token=args.token
+        token=token
     )
     logger.info(f"Landmarks ready at: {path}")
 
