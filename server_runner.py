@@ -151,6 +151,70 @@ class ServerDaemon:
             self.log("[SUCCESS] Command completed successfully.")
         return res
 
+    def resolve_best_checkpoints(self) -> tuple[Optional[str], Optional[str], float, float]:
+        """
+        Dynamically finds the best Transformer checkpoint from Tables 1 & 2,
+        and the best ST-GCN checkpoint from Table 4 by inspecting EXPERIMENT_RESULTS.md.
+        """
+        best_t_ckpt, best_t_acc = None, -1.0
+        best_s_ckpt, best_s_acc = None, -1.0
+
+        if REPORT_FILE.exists():
+            content = REPORT_FILE.read_text(encoding="utf-8")
+            for line in content.splitlines():
+                line = line.strip()
+                if not line.startswith("|") or ":---" in line or "Exp ID" in line:
+                    continue
+                parts = [p.strip() for p in line.split("|")]
+                if len(parts) < 8:
+                    continue
+                exp_id = parts[1].replace("*", "").strip()
+
+                # Check Transformer runs in T1 and T2
+                if (exp_id.startswith("T1.") or exp_id.startswith("T2.")) and "Transformer" in line:
+                    for p in parts:
+                        if p.endswith("%"):
+                            try:
+                                acc = float(p.rstrip("%"))
+                                if acc > best_t_acc:
+                                    for cp in parts:
+                                        if cp.startswith("`checkpoints/") and cp.endswith(".pt`"):
+                                            candidate = cp.strip("`")
+                                            if (ROOT_DIR / candidate).exists():
+                                                best_t_acc = acc
+                                                best_t_ckpt = candidate
+                            except ValueError:
+                                pass
+
+                # Check ST-GCN runs in T4
+                elif exp_id.startswith("T4.") and ("ST-GCN" in line or "STGCN" in line):
+                    for p in parts:
+                        if p.endswith("%"):
+                            try:
+                                acc = float(p.rstrip("%"))
+                                if acc > best_s_acc:
+                                    for cp in parts:
+                                        if cp.startswith("`checkpoints/") and cp.endswith(".pt`"):
+                                            candidate = cp.strip("`")
+                                            if (ROOT_DIR / candidate).exists():
+                                                best_s_acc = acc
+                                                best_s_ckpt = candidate
+                            except ValueError:
+                                pass
+
+        # Fallback to filesystem timestamp if not found in report
+        ckpt_dir = ROOT_DIR / "checkpoints"
+        if not best_t_ckpt:
+            t_cands = sorted(ckpt_dir.glob("best_Transformer_*.pt"), key=lambda p: p.stat().st_mtime, reverse=True)
+            if t_cands:
+                best_t_ckpt = str(t_cands[0].relative_to(ROOT_DIR))
+        if not best_s_ckpt:
+            s_cands = sorted(ckpt_dir.glob("best_STGCN_*.pt"), key=lambda p: p.stat().st_mtime, reverse=True)
+            if s_cands:
+                best_s_ckpt = str(s_cands[0].relative_to(ROOT_DIR))
+
+        return best_t_ckpt, best_s_ckpt, best_t_acc, best_s_acc
+
     def start_pipeline(self, experiments: list):
         hb_thread = threading.Thread(target=self._heartbeat_loop, daemon=True)
         hb_thread.start()
@@ -158,10 +222,26 @@ class ServerDaemon:
         self.log(f"ServerDaemon started for {len(experiments)} experiments.")
         for idx, exp in enumerate(experiments, 1):
             name = exp["name"]
+            exp_id = exp.get("exp_id", "")
             self.current_experiment = f"[{idx}/{len(experiments)}] {name}"
             self.log(f"\n========================================================")
             self.log(f"Starting Experiment: {self.current_experiment}")
             self.log(f"========================================================")
+
+            # Dynamically resolve best checkpoints right before running Table 5 ensemble
+            if exp_id.startswith("T5."):
+                best_t, best_s, t_acc, s_acc = self.resolve_best_checkpoints()
+                if best_t and best_s:
+                    self.log(f"[ENSEMBLE RESOLUTION] Selected Best Transformer: {best_t} (Val Acc: {t_acc:.2f}%)")
+                    self.log(f"[ENSEMBLE RESOLUTION] Selected Best ST-GCN: {best_s} (Val Acc: {s_acc:.2f}%)")
+                    cmd = list(exp["cmd"])
+                    try:
+                        c_idx = cmd.index("--checkpoints")
+                        cmd[c_idx + 1] = best_t
+                        cmd[c_idx + 2] = best_s
+                        exp["cmd"] = cmd
+                    except (ValueError, IndexError):
+                        pass
 
             t0 = time.time()
             res = self.run_cmd(exp["cmd"])
@@ -169,7 +249,7 @@ class ServerDaemon:
 
             exp_record = {
                 "name": name,
-                "exp_id": exp.get("exp_id", ""),
+                "exp_id": exp_id,
                 "duration_seconds": duration,
                 "status": "success" if res.returncode == 0 else "failed"
             }
@@ -187,6 +267,33 @@ class ServerDaemon:
             STATUS_FILE.write_text(json.dumps(final_status, indent=2), encoding="utf-8")
         except Exception:
             pass
+
+        # Push master EXPERIMENT_RESULTS.md to Hugging Face
+        if self.hf_token and REPORT_FILE.exists():
+            try:
+                from src.utils.hf_hub import upload_file_to_hf
+                self.log("[HF Hub] Uploading master EXPERIMENT_RESULTS.md to Hugging Face...")
+                upload_file_to_hf(
+                    local_path=str(REPORT_FILE),
+                    path_in_repo="EXPERIMENT_RESULTS.md",
+                    repo_id="Cuong2004/gym-exercise-classification",
+                    token=self.hf_token,
+                    commit_message="Master Benchmark Results (Table 1-6 completed)"
+                )
+                self.log("[HF Hub] EXPERIMENT_RESULTS.md uploaded successfully!")
+            except Exception as e:
+                self.log(f"[HF Hub Warning] Could not upload EXPERIMENT_RESULTS.md: {e}")
+
+        # Git commit and push sync
+        try:
+            self.log("[Git] Synchronizing results to GitHub...")
+            subprocess.run(["git", "add", "outputs/EXPERIMENT_RESULTS.md", "outputs/ensemble"], cwd=str(ROOT_DIR), capture_output=True)
+            subprocess.run(["git", "commit", "-m", "Benchmark results: Table 1 to Table 6 execution complete"], cwd=str(ROOT_DIR), capture_output=True)
+            push_res = subprocess.run(["git", "push"], cwd=str(ROOT_DIR), capture_output=True, text=True)
+            self.log(f"[Git] Push result: {push_res.stdout.strip()} {push_res.stderr.strip()}")
+        except Exception as e:
+            self.log(f"[Git Warning] Git sync failed: {e}")
+
         self.log("All planned experiments in this run finished!")
 
 def main():
@@ -194,6 +301,9 @@ def main():
     parser.add_argument("--table", type=str, default="all", choices=["table1", "table2", "table4", "table5", "all"], help="Which table to run")
     parser.add_argument("--dry_run", action="store_true", help="Run 1 epoch per experiment for testing")
     parser.add_argument("--device", type=str, default="auto", choices=["cuda", "cpu", "mps", "auto"])
+    parser.add_argument("--push_to_hf", action="store_true", default=True, help="Push checkpoints and reports to HF Hub")
+    parser.add_argument("--no_hf", dest="push_to_hf", action="store_false", help="Disable HF Hub upload")
+    parser.add_argument("--hf_token", type=str, default=None, help="Hugging Face auth token")
     args = parser.parse_args()
 
     table_map = {
@@ -207,6 +317,8 @@ def main():
         experiments = TABLE1_EXPERIMENTS + TABLE2_EXPERIMENTS + TABLE4_EXPERIMENTS + TABLE5_EXPERIMENTS
     else:
         experiments = table_map[args.table]
+
+    hf_token = args.hf_token or os.environ.get("HF_TOKEN", "")
 
     for exp in experiments:
         new_cmd = []
@@ -223,23 +335,17 @@ def main():
                 skip_next = True
             else:
                 new_cmd.append(c)
-        # For ensemble commands, auto-resolve existing best checkpoints if present
-        if len(exp["cmd"]) > 1 and exp["cmd"][1] == "ensemble":
-            ckpt_dir = ROOT_DIR / "checkpoints"
-            trans_candidates = sorted(ckpt_dir.glob("best_Transformer_*.pt"), key=lambda p: p.stat().st_mtime, reverse=True)
-            stgcn_candidates = sorted(ckpt_dir.glob("best_STGCN_*.pt"), key=lambda p: p.stat().st_mtime, reverse=True)
-            if trans_candidates and stgcn_candidates:
-                best_t = str(trans_candidates[0].relative_to(ROOT_DIR))
-                best_s = str(stgcn_candidates[0].relative_to(ROOT_DIR))
-                try:
-                    c_idx = new_cmd.index("--checkpoints")
-                    new_cmd[c_idx + 1] = best_t
-                    new_cmd[c_idx + 2] = best_s
-                except (ValueError, IndexError):
-                    pass
+
+        # Inject HF arguments if requested
+        if args.push_to_hf and hf_token:
+            if "--push_to_hf" not in new_cmd:
+                new_cmd.append("--push_to_hf")
+            if "--hf_token" not in new_cmd:
+                new_cmd.extend(["--hf_token", hf_token])
+
         exp["cmd"] = new_cmd
 
-    daemon = ServerDaemon()
+    daemon = ServerDaemon(hf_token=hf_token)
     daemon.start_pipeline(experiments)
 
 if __name__ == "__main__":
