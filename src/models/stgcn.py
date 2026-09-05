@@ -1,7 +1,11 @@
 """
 Spatial-Temporal Graph Convolutional Network (ST-GCN) for Gym Exercise Skeleton Sequences.
-Constructs spatial adjacency from MediaPipe skeleton topology with symmetric normalization:
-A_norm = D^(-1/2) A D^(-1/2).
+Faithfully follows the canonical architecture by Yan et al. (AAAI 2018):
+- Input BatchNorm2d to standardize raw spatial coordinates across batches and time.
+- Spatial Graph Convolution: A_norm * M (learnable edge importance mask) + Conv2d + BatchNorm2d + ReLU.
+- Temporal Convolution (TCN): Conv2d along time dimension + BatchNorm2d + Dropout.
+- Residual shortcut: Conv2d + BatchNorm2d when channels/strides change.
+- Calibrated ~350K parameter budget.
 """
 
 from typing import List, Tuple, Optional
@@ -14,8 +18,8 @@ from src.constants import POSE_CONNECTIONS_33, EDGES_13
 
 class STGCNBlock(nn.Module):
     """
-    ST-GCN unit consisting of Spatial Graph Convolution + Multi-scale Temporal Convolution
-    with residual connection and BatchNorm.
+    Standard ST-GCN Block (Yan et al. 2018):
+    Spatial Graph Conv (with learned edge mask) -> BN -> ReLU -> Temporal Conv -> BN -> Dropout -> Residual Sum -> ReLU.
     """
     def __init__(
         self,
@@ -23,110 +27,139 @@ class STGCNBlock(nn.Module):
         out_channels: int,
         A_norm: torch.Tensor,
         stride: int = 1,
-        kernel_sizes: Tuple[int, ...] = (9, 5, 3),
+        temporal_kernel: int = 9,
         dropout: float = 0.1
     ):
         super().__init__()
         V = A_norm.size(0)
         self.register_buffer("A_norm", A_norm)
-        # Learnable edge weight matrix B
-        self.B = nn.Parameter(torch.zeros(V, V))
-        nn.init.uniform_(self.B, -1e-4, 1e-4)
+        # Learnable edge importance weighting (initialized to 1.0 to preserve graph structure)
+        self.edge_mask = nn.Parameter(torch.ones(V, V))
 
-        # 1x1 Conv for feature dimension transition
-        self.conv1x1 = nn.Conv2d(in_channels, out_channels, 1, bias=False)
+        # Spatial Graph Convolution
+        self.gcn_conv = nn.Conv2d(in_channels, out_channels, 1, bias=False)
+        self.gcn_bn = nn.BatchNorm2d(out_channels)
+        self.gcn_act = nn.ReLU(inplace=True)
 
-        # Multi-scale temporal convolution branches along time dimension T
-        self.temporal_branches = nn.ModuleList([
-            nn.Conv2d(
-                out_channels,
-                out_channels,
-                kernel_size=(k, 1),
-                stride=(stride, 1),
-                padding=(k // 2, 0),
-                bias=False
-            )
-            for k in kernel_sizes
-        ])
+        # Temporal Convolution (TCN)
+        padding = (temporal_kernel - 1) // 2
+        self.tcn_conv = nn.Conv2d(
+            out_channels,
+            out_channels,
+            kernel_size=(temporal_kernel, 1),
+            stride=(stride, 1),
+            padding=(padding, 0),
+            bias=False
+        )
+        self.tcn_bn = nn.BatchNorm2d(out_channels)
+        self.dropout = nn.Dropout(dropout)
 
-        self.bn = nn.BatchNorm2d(out_channels)
-        self.act = nn.ReLU(inplace=True)
-        self.dropout = nn.Dropout2d(dropout)
-
+        # Residual shortcut
         if in_channels != out_channels or stride != 1:
-            self.res_conv = nn.Conv2d(in_channels, out_channels, 1, stride=(stride, 1), bias=False)
-            self.res_bn = nn.BatchNorm2d(out_channels)
+            self.res = nn.Sequential(
+                nn.Conv2d(in_channels, out_channels, 1, stride=(stride, 1), bias=False),
+                nn.BatchNorm2d(out_channels)
+            )
         else:
-            self.res_conv = None
-            self.res_bn = None
+            self.res = nn.Identity()
+
+        self.act = nn.ReLU(inplace=True)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x shape: (B, C, T, V)
-        A_adj = self.A_norm + torch.softmax(self.B, dim=1)
-        # Spatial graph propagation: sum_j A_ij * x_j
-        x_graph = torch.einsum("ij,bctj->bcti", A_adj, x)
-        x_graph = self.conv1x1(x_graph)
+        res = self.res(x)
 
-        # Multi-scale temporal aggregation
-        x_temp = sum(branch(x_graph) for branch in self.temporal_branches) / len(self.temporal_branches)
-        x_temp = self.bn(x_temp)
+        # 1. Spatial GCN with edge importance weighting
+        A = self.A_norm * self.edge_mask
+        x_g = torch.einsum("vw,bctw->bctv", A, x)
+        x_g = self.gcn_act(self.gcn_bn(self.gcn_conv(x_g)))
 
-        # Residual connection
-        res = self.res_bn(self.res_conv(x)) if self.res_conv else x
-        return self.dropout(self.act(x_temp + res))
+        # 2. Temporal TCN
+        x_t = self.dropout(self.tcn_bn(self.tcn_conv(x_g)))
+
+        # 3. Residual connection + activation
+        return self.act(x_t + res)
 
 class STGCNModel(nn.Module):
     """
-    ST-GCN model for skeletal action recognition.
-    Accepts input sequence (B, T, Feat_Dim), automatically decomposes it into (B, C, T, V),
-    passes through 4 ST-GCN stages, and applies Global Average Pooling.
+    Calibrated ST-GCN Classifier for Gym Exercise Recognition (~350K parameters).
+    Accepts (B, T, D) and reshapes to canonical (B, C, T, V).
+    Applies data BatchNorm2d, passes through 3 ST-GCN blocks, and classifies via GAP + Linear.
     """
     def __init__(
         self,
         feat_dim: int,
         num_classes: int,
         num_joints: Optional[int] = None,
-        dropout: float = 0.3
+        dropout: float = 0.2
     ):
         super().__init__()
         if num_joints is None:
-            if feat_dim % 33 == 0 or (feat_dim - 1) % 32 == 0:
-                num_joints = 33
-            elif feat_dim % 13 == 0 or (feat_dim - 1) % 12 == 0:
+            if feat_dim in (24, 36, 48):
+                num_joints = 12
+            elif feat_dim in (26, 39, 52):
                 num_joints = 13
+            elif feat_dim in (64, 96, 128):
+                num_joints = 32
+            elif feat_dim in (66, 99, 132):
+                num_joints = 33
+            elif feat_dim % 13 == 0:
+                num_joints = 13
+            elif feat_dim % 12 == 0:
+                num_joints = 12
             else:
                 num_joints = 13
 
         self.num_joints = num_joints
-        # Calculate channels per joint C
-        if feat_dim % num_joints == 0:
-            self.c_per_joint = feat_dim // num_joints
-        elif (feat_dim - 1) % (num_joints - 1) == 0:
-            # relative coordinates case e.g. 129 -> 32*4 + 1
-            self.c_per_joint = (feat_dim - 1) // (num_joints - 1)
-        else:
-            self.c_per_joint = max(2, feat_dim // num_joints)
-
-        # Build symmetrically normalized adjacency matrix D^(-1/2) A D^(-1/2)
-        A_norm = self._build_adjacency_matrix(self.num_joints)
+        self.c_per_joint = max(2, feat_dim // num_joints)
         C = self.c_per_joint
 
-        self.block1 = STGCNBlock(C, 64, A_norm, stride=1)
-        self.block2 = STGCNBlock(64, 64, A_norm, stride=1)
-        self.block3 = STGCNBlock(64, 128, A_norm, stride=2)
-        self.block4 = STGCNBlock(128, 256, A_norm, stride=2)
+        # Build symmetrically normalized adjacency matrix D^(-1/2) (A + I) D^(-1/2)
+        A_norm = self._build_adjacency_matrix(self.num_joints)
+
+        # Data BatchNorm to normalize coordinate scales across all joints and time
+        self.data_bn = nn.BatchNorm2d(C)
+
+        # Calibrated 3-stage architecture: channels [48, 96, 150] yields ~350,000 parameters
+        channels = [48, 96, 150]
+        strides = [1, 1, 2]
+        self.blocks = nn.ModuleList()
+        in_c = C
+        for out_c, s in zip(channels, strides):
+            self.blocks.append(
+                STGCNBlock(
+                    in_channels=in_c,
+                    out_channels=out_c,
+                    A_norm=A_norm,
+                    stride=s,
+                    temporal_kernel=9,
+                    dropout=dropout
+                )
+            )
+            in_c = out_c
 
         self.gap = nn.AdaptiveAvgPool2d(1)
-        self.drop = nn.Dropout(dropout)
-        self.fc = nn.Linear(256, num_classes)
+        self.fc = nn.Linear(channels[-1], num_classes)
 
     @classmethod
     def _build_adjacency_matrix(cls, V: int) -> torch.Tensor:
         """
         Builds symmetric normalized adjacency matrix: A_norm = D^(-1/2) (A + I) D^(-1/2)
         """
-        edges = POSE_CONNECTIONS_33 if V >= 33 else EDGES_13
-        A = np.eye(V, dtype=np.float32)  # Include self-connections
+        if V >= 33:
+            edges = POSE_CONNECTIONS_33
+        elif V == 32:
+            edges = [(i - 1, j - 1) for i, j in POSE_CONNECTIONS_33 if i > 0 and j > 0 and i - 1 < 32 and j - 1 < 32]
+        elif V == 12:
+            edges = [
+                (0, 1), (0, 2), (2, 4), (1, 3), (3, 5),
+                (0, 6), (1, 7), (6, 7), (6, 8), (8, 10),
+                (7, 9), (9, 11)
+            ]
+        else:
+            edges = EDGES_13
+
+        A = np.eye(V, dtype=np.float32)  # Include self-connections (loops)
         for i, j in edges:
             if i < V and j < V:
                 A[i, j] = 1.0
@@ -147,18 +180,16 @@ class STGCNModel(nn.Module):
         if D >= expected_len:
             x_joints = x[:, :, :expected_len].reshape(B, T, V, C)
         else:
-            # Pad if dimension is slightly lower
             pad = torch.zeros(B, T, expected_len - D, device=x.device, dtype=x.dtype)
             x_padded = torch.cat([x, pad], dim=-1)
             x_joints = x_padded.reshape(B, T, V, C)
 
-        # Permute to (B, C, T, V)
+        # Permute to canonical ST-GCN format (B, C, T, V)
         x_in = x_joints.permute(0, 3, 1, 2).contiguous()
+        h = self.data_bn(x_in)
 
-        h = self.block1(x_in)
-        h = self.block2(h)
-        h = self.block3(h)
-        h = self.block4(h)
+        for block in self.blocks:
+            h = block(h)
 
-        pooled = self.gap(h).flatten(1)  # (B, 256)
-        return self.fc(self.drop(pooled))
+        pooled = self.gap(h).flatten(1)  # (B, 150)
+        return self.fc(pooled)

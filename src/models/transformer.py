@@ -29,10 +29,11 @@ class PositionalEncoding(nn.Module):
 
 class TransformerModel(nn.Module):
     """
-    Transformer Encoder Classifier.
+    Calibrated Transformer Encoder Classifier (~355K params).
+    - Input LayerNorm on feature dimension
     - Linear projection to d_model
     - Sinusoidal Positional Encoding
-    - N layers of TransformerEncoderLayer (8 attention heads)
+    - 3 layers of TransformerEncoderLayer (8 attention heads, ff_dim=192)
     - Global Average Pooling over time + Classification Head
     """
     def __init__(
@@ -41,11 +42,12 @@ class TransformerModel(nn.Module):
         num_classes: int,
         d_model: int = 128,
         nhead: int = 8,
-        num_layers: int = 4,
-        dim_feedforward: int = 256,
-        dropout: float = 0.1
+        num_layers: int = 3,
+        dim_feedforward: int = 192,
+        dropout: float = 0.2
     ):
         super().__init__()
+        self.in_norm = nn.LayerNorm(feat_dim)
         self.input_proj = nn.Linear(feat_dim, d_model)
         self.pos_encoder = PositionalEncoding(d_model)
 
@@ -68,7 +70,8 @@ class TransformerModel(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: (B, T, D)
-        h = self.input_proj(x)
+        x_norm = self.in_norm(x)
+        h = self.input_proj(x_norm)
         h = self.pos_encoder(h)
         encoded = self.transformer_encoder(h)  # (B, T, d_model)
         encoded = self.norm(encoded)

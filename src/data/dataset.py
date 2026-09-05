@@ -40,6 +40,37 @@ def parse_segment_range(label_content: str, total_frames: int) -> Tuple[int, int
     except Exception:
         return 0, total_frames
 
+def handle_zero_frames(df: pd.DataFrame, method: str = "zero") -> pd.DataFrame:
+    """
+    Handles missing or undetected frames in landmark sequences.
+    method:
+      - 'zero': keeps undetected landmarks as 0.0 (baseline)
+      - 'ffill': forward-fills valid coordinates, back-fills initial gaps
+      - 'linear': linear interpolation across time for missing/zero coordinate values
+    """
+    if method in ("zero", "none", None) or len(df) <= 1:
+        return df.fillna(0.0)
+
+    df_clean = df.copy()
+    coord_cols = [c for c in df_clean.columns if any(c.endswith(f"_{d}") for d in ["x", "y", "z"])]
+    if not coord_cols:
+        return df_clean.fillna(0.0)
+
+    # Frame is undetected/zero if all coordinates are 0 or NaN
+    zeros_mask = (df_clean[coord_cols].abs() < 1e-6) | df_clean[coord_cols].isna()
+    row_is_zero = zeros_mask.all(axis=1)
+
+    if not row_is_zero.any():
+        return df_clean.fillna(0.0)
+
+    df_clean.loc[row_is_zero, coord_cols] = np.nan
+    if method == "ffill":
+        df_clean[coord_cols] = df_clean[coord_cols].ffill().bfill().fillna(0.0)
+    elif method == "linear":
+        df_clean[coord_cols] = df_clean[coord_cols].interpolate(method="linear", limit_direction="both").fillna(0.0)
+
+    return df_clean.fillna(0.0)
+
 def sliding_windows(
     data: np.ndarray,
     seq_len: int = DEFAULT_SEQ_LEN,
@@ -150,6 +181,7 @@ def build_dataset_from_csvs(
     seq_len: int = DEFAULT_SEQ_LEN,
     stride: Optional[int] = None,
     augment_method: Optional[str] = None,
+    zero_frame_handling: str = "zero",
     landmark_dir: Optional[str] = None,
     smoke_test: bool = False,
     smoke_class: Optional[str] = "barbell biceps curl",
@@ -196,6 +228,7 @@ def build_dataset_from_csvs(
                     df = pd.read_csv(csv_path)
                     if len(df) == 0:
                         continue
+                    df = handle_zero_frames(df, method=zero_frame_handling)
                     feat = extract_features_by_method(df, feature_method)
                     if is_branch:
                         f1, f2 = feat
@@ -233,6 +266,7 @@ def build_dataset_from_csvs(
                 df = pd.read_csv(csv_path)
                 s, e = parse_segment_range(row["label_content"], len(df))
                 df_segment = df.iloc[s:e].reset_index(drop=True)
+                df_segment = handle_zero_frames(df_segment, method=zero_frame_handling)
                 feat = extract_features_by_method(df_segment, feature_method)
             else:
                 n_frames = int(row.get("num_frames", 75))
@@ -240,6 +274,7 @@ def build_dataset_from_csvs(
                 df = pd.DataFrame(np.random.randn(n_frames, len(dummy_cols)), columns=dummy_cols)
                 s, e = parse_segment_range(row["label_content"], n_frames)
                 df_segment = df.iloc[s:e].reset_index(drop=True)
+                df_segment = handle_zero_frames(df_segment, method=zero_frame_handling)
                 feat = extract_features_by_method(df_segment, feature_method)
 
             if is_branch:
@@ -256,10 +291,29 @@ def build_dataset_from_csvs(
                     all_samples.append(w)
                     all_labels.append(class_idx)
 
+    # Dataset Expansion: Preserve 100% of clean original samples and append augmented copies
+    if split == "train" and augment_method and augment_method != "none":
+        augmenter = LandmarkAugmenter()
+        aug_samples = []
+        aug_labels = []
+        for s, l in zip(all_samples, all_labels):
+            if is_branch:
+                t1 = augmenter.apply(torch.from_numpy(s[0]).float(), augment_method).numpy()
+                t2 = augmenter.apply(torch.from_numpy(s[1]).float(), augment_method).numpy()
+                aug_samples.append((t1, t2))
+            else:
+                t = augmenter.apply(torch.from_numpy(s).float(), augment_method).numpy()
+                aug_samples.append(t)
+            aug_labels.append(l)
+
+        # Retain original clean samples + augmented supplementary samples (sample count doubled)
+        all_samples = all_samples + aug_samples
+        all_labels = all_labels + aug_labels
+
     return GymDataset(
         samples=all_samples,
         labels=all_labels,
-        augment_method=augment_method if split == "train" else None,
+        augment_method=None,
         is_branch=is_branch,
         in_memory=in_memory
     )
@@ -270,7 +324,9 @@ def get_dataloaders(
     batch_size: int = 16,
     seq_len: int = DEFAULT_SEQ_LEN,
     stride: Optional[int] = None,
+    val_test_stride: Optional[int] = None,
     augment_method: Optional[str] = None,
+    zero_frame_handling: str = "zero",
     landmark_dir: Optional[str] = None,
     num_workers: int = 0,
     smoke_test: bool = False,
@@ -282,21 +338,22 @@ def get_dataloaders(
     Optimized for high-throughput GPU training with in-memory caching and pinned memory.
     """
     meta_df = pd.read_csv(metadata_path)
+    vt_stride = val_test_stride if val_test_stride is not None else DEFAULT_VAL_TEST_STRIDE
 
     train_ds = build_dataset_from_csvs(
         meta_df, "train", feature_method, seq_len, stride or DEFAULT_TRAIN_STRIDE,
-        augment_method=augment_method, landmark_dir=landmark_dir,
-        smoke_test=smoke_test, smoke_class=smoke_class, in_memory=in_memory
+        augment_method=augment_method, zero_frame_handling=zero_frame_handling,
+        landmark_dir=landmark_dir, smoke_test=smoke_test, smoke_class=smoke_class, in_memory=in_memory
     )
     val_ds = build_dataset_from_csvs(
-        meta_df, "val", feature_method, seq_len, DEFAULT_VAL_TEST_STRIDE,
-        augment_method=None, landmark_dir=landmark_dir,
-        smoke_test=smoke_test, smoke_class=smoke_class, in_memory=in_memory
+        meta_df, "val", feature_method, seq_len, vt_stride,
+        augment_method=None, zero_frame_handling=zero_frame_handling,
+        landmark_dir=landmark_dir, smoke_test=smoke_test, smoke_class=smoke_class, in_memory=in_memory
     )
     test_ds = build_dataset_from_csvs(
-        meta_df, "test", feature_method, seq_len, DEFAULT_VAL_TEST_STRIDE,
-        augment_method=None, landmark_dir=landmark_dir,
-        smoke_test=smoke_test, smoke_class=smoke_class, in_memory=in_memory
+        meta_df, "test", feature_method, seq_len, vt_stride,
+        augment_method=None, zero_frame_handling=zero_frame_handling,
+        landmark_dir=landmark_dir, smoke_test=smoke_test, smoke_class=smoke_class, in_memory=in_memory
     )
 
     pin_mem = torch.cuda.is_available()

@@ -49,6 +49,9 @@ data/landmarks/
 outputs/*.png
 outputs/*.jpg
 outputs/*.zip
+outputs/*.log
+outputs/*.json
+outputs/ensemble/
 outputs/test_report/
 .system_generated/
 scratch/

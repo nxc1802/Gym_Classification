@@ -103,6 +103,14 @@ class LandmarkAugmenter:
 
         return out if is_batched else out.squeeze(0)
 
+    def scale(self, x: torch.Tensor, scale_min: float = 0.9, scale_max: float = 1.1) -> torch.Tensor:
+        """
+        Applies random uniform scaling to simulate subject distance / body size variations
+        as referenced in Augmentation_CSV.ipynb and publication manuscript.
+        """
+        factor = torch.empty(1).uniform_(scale_min, scale_max).item()
+        return x * factor
+
     def apply(self, x: torch.Tensor, method: str) -> torch.Tensor:
         """
         Applies a single augmentation method by name.
@@ -112,10 +120,22 @@ class LandmarkAugmenter:
             return self.jitter(x)
         elif method == "rotate":
             return self.rotate(x)
+        elif method == "scale":
+            return self.scale(x)
         elif method == "joint_dropout":
             return self.joint_dropout(x)
         elif method == "time_warp":
             return self.time_warp(x)
+        elif method == "combined":
+            # Canonical combination from notebook & manuscript:
+            # 1. Scale (0.9 - 1.1)
+            # 2. Rotation (+-10 deg around center/torso)
+            # 3. Time Warping (+-20% temporal stretch/compression)
+            # 4. Joint Jitter (Gaussian noise sigma=0.01)
+            x = self.scale(x)
+            x = self.rotate(x)
+            x = self.time_warp(x)
+            return self.jitter(x)
         elif method == "none" or not method:
             return x
         else:

@@ -113,14 +113,27 @@ EDGES_13: List[Tuple[int, int]] = [
 ]
 
 # Feature Dimensions Mapping
-# - full_4: 33 * 4 (x, y, z, visibility) = 132
-# - full_rel_4: 32 * 4 (rel_x, rel_y, rel_z, visibility) + 1 (nose_vis) = 129
-# - 13_4: 13 * 4 (x, y, z, visibility) = 52
-# - 12rel_4: 12 * 4 (rel_x, rel_y, rel_z, visibility) = 48 (or 49 if nose_vis included)
-# - angle3: C(13, 3) = 286 triplet angles
-# - angle2: C(13, 2) = 78 pair absolute angles
-# - direct_concat: 48 (or 49) + 286 = 334 (or 335)
+# - raw_2d: 13 * 2 (x, y) = 26
+# - raw_3d: 13 * 3 (x, y, z) = 39
+# - rel_2d: 12 * 2 (rel_x, rel_y) = 24
+# - rel_3d: 12 * 3 (rel_x, rel_y, rel_z) = 36
+# - angle_2d: C(13, 3) = 286 planar triplet angles
+# - angle_3d: C(13, 3) = 286 3D spatial vector angles
+# - mix: 36 (rel_3d) + 286 (angle_3d) = 322
+# - Legacy:
+#   - full_4: 33 * 4 = 132
+#   - full_rel_4: 32 * 4 + 1 = 129
+#   - 13_4: 13 * 4 = 52
+#   - 12rel_4: 12 * 4 + 1 = 49
+#   - angle3: 286, angle2: 78, direct_concat: 335
 FEATURE_DIMS: Dict[str, int] = {
+    "raw_2d": 26,
+    "raw_3d": 39,
+    "rel_2d": 24,
+    "rel_3d": 36,
+    "angle_2d": 286,
+    "angle_3d": 286,
+    "mix": 322,
     "full_4": 132,
     "full_rel_4": 129,
     "13_4": 52,

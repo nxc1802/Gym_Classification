@@ -61,44 +61,142 @@ from src.training import Trainer, compute_metrics, plot_confusion_matrix, export
 
 logger = setup_logger("GymCLI")
 
+def resolve_device(device_str: str) -> torch.device:
+    """
+    Intelligently resolves device string ('cuda', 'mps', 'cpu', 'auto') to active torch.device.
+    """
+    if device_str in ("cuda", "auto") and not torch.cuda.is_available():
+        if torch.backends.mps.is_available():
+            logger.info("CUDA not available. Detected Apple Silicon MPS! Accelerating on MPS device.")
+            return torch.device("mps")
+        else:
+            return torch.device("cpu")
+    if device_str == "mps" and not torch.backends.mps.is_available():
+        return torch.device("cpu")
+    return torch.device("cuda" if device_str in ("cuda", "auto") and torch.cuda.is_available() else device_str)
+
 def build_model(
     model_type: str,
     feature_method: str,
     num_classes: int = NUM_CLASSES,
-    hidden_dim: int = 128,
-    num_layers: int = 4,
+    hidden_dim: Optional[int] = None,
+    num_layers: Optional[int] = None,
     nhead: int = 8,
-    dropout: float = 0.1
+    dropout: Optional[float] = None
 ) -> nn.Module:
     """
     Model Factory instantiating the requested architecture with compatible input dimensions.
+    Defaults are calibrated to a fair ~350K parameter budget.
     """
-    feat_dim = FEATURE_DIMS.get(feature_method, 49)
+    feat_dim = FEATURE_DIMS.get(feature_method, 36)
 
     if model_type == "LSTM":
         if feature_method == "branch_concat":
-            return BranchConcatModel(dim1=49, dim2=286, num_classes=num_classes, hidden_dim=hidden_dim, dropout=dropout)
-        return LSTMModel(feat_dim=feat_dim, num_classes=num_classes, hidden_dim=hidden_dim, num_layers=max(2, num_layers // 2), dropout=dropout)
+            return BranchConcatModel(dim1=49, dim2=286, num_classes=num_classes, hidden_dim=hidden_dim or 64, dropout=dropout or 0.3)
+        h_dim = hidden_dim if hidden_dim is not None else 160
+        n_layers = num_layers if num_layers is not None else 2
+        drop = dropout if dropout is not None else 0.3
+        return LSTMModel(feat_dim=feat_dim, num_classes=num_classes, hidden_dim=h_dim, num_layers=n_layers, dropout=drop)
 
     elif model_type == "BiLSTM":
         if feature_method == "branch_concat":
-            return BranchConcatModel(dim1=49, dim2=286, num_classes=num_classes, hidden_dim=hidden_dim, dropout=dropout)
-        return BiLSTMModel(feat_dim=feat_dim, num_classes=num_classes, hidden_dim=hidden_dim, num_layers=max(2, num_layers // 2), dropout=dropout)
+            return BranchConcatModel(dim1=49, dim2=286, num_classes=num_classes, hidden_dim=hidden_dim or 64, dropout=dropout or 0.3)
+        h_dim = hidden_dim if hidden_dim is not None else 96
+        n_layers = num_layers if num_layers is not None else 2
+        drop = dropout if dropout is not None else 0.3
+        return BiLSTMModel(feat_dim=feat_dim, num_classes=num_classes, hidden_dim=h_dim, num_layers=n_layers, dropout=drop)
 
     elif model_type == "Transformer":
         if feature_method == "branch_concat":
-            return BranchConcatTransformer(dim1=49, dim2=286, num_classes=num_classes, d_model=hidden_dim, nhead=nhead, num_layers=num_layers, dropout=dropout)
-        return TransformerModel(feat_dim=feat_dim, num_classes=num_classes, d_model=hidden_dim, nhead=nhead, num_layers=num_layers, dropout=dropout)
+            return BranchConcatTransformer(dim1=49, dim2=286, num_classes=num_classes, d_model=hidden_dim or 128, nhead=nhead, num_layers=num_layers or 3, dropout=dropout or 0.2)
+        h_dim = hidden_dim if hidden_dim is not None else 128
+        n_layers = num_layers if num_layers is not None else 3
+        drop = dropout if dropout is not None else 0.2
+        return TransformerModel(feat_dim=feat_dim, num_classes=num_classes, d_model=h_dim, nhead=nhead, num_layers=n_layers, dim_feedforward=192, dropout=drop)
 
     elif model_type == "STGCN":
-        num_joints = 33 if "full" in feature_method else 13
-        return STGCNModel(feat_dim=feat_dim, num_classes=num_classes, num_joints=num_joints, dropout=dropout)
+        drop = dropout if dropout is not None else 0.3
+        return STGCNModel(feat_dim=feat_dim, num_classes=num_classes, dropout=drop)
 
     elif model_type == "BranchConcat":
-        return BranchConcatModel(dim1=49, dim2=286, num_classes=num_classes, hidden_dim=hidden_dim, dropout=dropout)
+        return BranchConcatModel(dim1=49, dim2=286, num_classes=num_classes, hidden_dim=hidden_dim or 64, dropout=dropout or 0.3)
 
     else:
         raise ValueError(f"Unknown model_type: {model_type}")
+
+def update_experiment_markdown(
+    report_file: str,
+    exp_id: str,
+    record: Dict[str, Any]
+) -> bool:
+    """
+    Updates the specific row in EXPERIMENT_RESULTS.md matching **{exp_id}**.
+    """
+    rep_path = Path(report_file)
+    if not rep_path.exists():
+        return False
+
+    content = rep_path.read_text(encoding="utf-8")
+    lines = content.splitlines()
+    updated = False
+    new_lines = []
+
+    for line in lines:
+        if f"**{exp_id}**" in line and line.strip().startswith("|"):
+            parts = [p.strip() for p in line.split("|")]
+            # Table 1: Exp ID | Model | Feature | Dim | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
+            if exp_id.startswith("T1."):
+                if len(parts) >= 12:
+                    parts[5] = f"{record.get('train_loss', 0.0):.4f}"
+                    parts[6] = f"{record.get('val_loss', 0.0):.4f}"
+                    parts[7] = f"{record.get('val_acc', 0.0) * 100:.2f}%"
+                    parts[8] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
+                    parts[9] = f"{record.get('macro_f1', 0.0):.4f}"
+                    parts[10] = f"`checkpoints/{record.get('checkpoint', '')}`"
+                    parts[11] = "Done"
+                    line = "| " + " | ".join(parts[1:-1]) + " |"
+                    updated = True
+            # Table 2: Exp ID | Augmentation | Config | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
+            elif exp_id.startswith("T2."):
+                if len(parts) >= 11:
+                    parts[4] = f"{record.get('train_loss', 0.0):.4f}"
+                    parts[5] = f"{record.get('val_loss', 0.0):.4f}"
+                    parts[6] = f"{record.get('val_acc', 0.0) * 100:.2f}%"
+                    parts[7] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
+                    parts[8] = f"{record.get('macro_f1', 0.0):.4f}"
+                    parts[9] = f"`checkpoints/{record.get('checkpoint', '')}`"
+                    parts[10] = "Done"
+                    line = "| " + " | ".join(parts[1:-1]) + " |"
+                    updated = True
+            # Table 4: Exp ID | Model | Graph Stream | Tensor Shape | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
+            elif exp_id.startswith("T4."):
+                if len(parts) >= 12:
+                    parts[5] = f"{record.get('train_loss', 0.0):.4f}"
+                    parts[6] = f"{record.get('val_loss', 0.0):.4f}"
+                    parts[7] = f"{record.get('val_acc', 0.0) * 100:.2f}%"
+                    parts[8] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
+                    parts[9] = f"{record.get('macro_f1', 0.0):.4f}"
+                    parts[10] = f"`checkpoints/{record.get('checkpoint', '')}`"
+                    parts[11] = "Done"
+                    line = "| " + " | ".join(parts[1:-1]) + " |"
+                    updated = True
+            # Table 5: Exp ID | Ensemble Strategy | Component Models | Test Acc | Macro F1 | Weighted F1 | Checkpoint / Artifact | Status
+            elif exp_id.startswith("T5."):
+                if len(parts) >= 9:
+                    parts[4] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
+                    parts[5] = f"{record.get('macro_f1', 0.0):.4f}"
+                    parts[6] = f"{record.get('weighted_f1', record.get('macro_f1', 0.0)):.4f}"
+                    if "checkpoint" in record:
+                        parts[7] = f"`{record['checkpoint']}`"
+                    parts[8] = "Done"
+                    line = "| " + " | ".join(parts[1:-1]) + " |"
+                    updated = True
+        new_lines.append(line)
+
+    if updated:
+        rep_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+        logger.info(f"Successfully auto-updated Table row **{exp_id}** in {rep_path}")
+    return updated
 
 def append_experiment_result(
     report_file: str,
@@ -257,23 +355,35 @@ def cmd_train(args):
         args.patience = 2
 
     device_str = args.device
-    if device_str == "cuda" and not torch.cuda.is_available():
-        logger.warning("CUDA requested but not available. Falling back to CPU.")
-        device_str = "cpu"
+    if device_str in ("cuda", "auto") and not torch.cuda.is_available():
+        if torch.backends.mps.is_available():
+            logger.info("CUDA not available. Detected Apple Silicon MPS! Accelerating on MPS device.")
+            device_str = "mps"
+        else:
+            logger.warning("CUDA requested but not available. Falling back to CPU.")
+            device_str = "cpu"
     device = torch.device(device_str)
-    gpu_name = torch.cuda.get_device_name(0) if device_str == "cuda" else "CPU"
+    if device_str == "cuda":
+        gpu_name = torch.cuda.get_device_name(0)
+    elif device_str == "mps":
+        gpu_name = "Apple Silicon GPU (Metal Performance Shaders)"
+    else:
+        gpu_name = "CPU"
     logger.info(f"Using device: {device} ({gpu_name})")
 
     # Dataloaders
     in_mem = getattr(args, "in_memory", True)
-    logger.info(f"Loading data: Feature={args.feature}, Augment={args.augment}, BatchSize={args.batch_size}, InMemory={in_mem}")
+    zero_frame_handling = getattr(args, "zero_frame", "zero")
+    logger.info(f"Loading data: Feature={args.feature}, Augment={args.augment}, ZeroFrame={zero_frame_handling}, BatchSize={args.batch_size}, InMemory={in_mem}")
     train_loader, val_loader, test_loader = get_dataloaders(
         metadata_path=args.metadata,
         feature_method=args.feature,
         batch_size=args.batch_size,
         seq_len=args.seq_len,
         stride=args.train_stride,
+        val_test_stride=getattr(args, "val_test_stride", 32),
         augment_method=args.augment,
+        zero_frame_handling=zero_frame_handling,
         landmark_dir=args.landmark_dir,
         num_workers=args.num_workers,
         smoke_test=is_smoke,
@@ -296,11 +406,16 @@ def cmd_train(args):
     logger.info(f"Initialized {args.model} model. Trainable parameters: {num_params:,}")
 
     model_name = f"{args.model}_{args.feature}_aug_{args.augment}"
+    if getattr(args, "exp_id", None):
+        model_name = f"{args.model}_{args.exp_id}_{args.feature}"
+
     use_amp = getattr(args, "use_amp", True)
     amp_dtype = getattr(args, "amp_dtype", "bfloat16")
     push_to_hf = getattr(args, "push_to_hf", False)
     hf_repo = getattr(args, "hf_repo", DEFAULT_MODEL_REPO)
     hf_token = getattr(args, "hf_token", None)
+    use_cw = getattr(args, "use_class_weights", False)
+    label_smoothing = getattr(args, "label_smoothing", 0.0)
 
     trainer = Trainer(
         model=model,
@@ -310,6 +425,8 @@ def cmd_train(args):
         patience=args.patience,
         checkpoint_dir=args.checkpoint_dir,
         model_name=model_name,
+        use_class_weights=use_cw,
+        label_smoothing=label_smoothing,
         use_amp=use_amp,
         amp_dtype=amp_dtype,
         push_to_hf=push_to_hf,
@@ -317,7 +434,7 @@ def cmd_train(args):
         hf_token=hf_token
     )
 
-    logger.info(f"Starting training for {args.epochs} epochs (EarlyStopping patience={args.patience}, AMP={use_amp} [{amp_dtype}])...")
+    logger.info(f"Starting training for {args.epochs} epochs (EarlyStopping patience={args.patience}, AMP={use_amp} [{amp_dtype}], LabelSmoothing={label_smoothing})...")
     history = trainer.fit(train_loader, val_loader, epochs=args.epochs, verbose=True)
 
     # Evaluate on test set
@@ -335,24 +452,35 @@ def cmd_train(args):
 
     # Update consolidated Master Experiment Report
     report_file = getattr(args, "report_file", "outputs/EXPERIMENT_RESULTS.md")
-    append_experiment_result(
-        report_file=report_file,
-        record={
-            "model": args.model,
-            "feature": args.feature,
-            "augment": args.augment,
-            "epochs": args.epochs,
-            "batch_size": args.batch_size,
-            "train_loss": history["train_loss"][-1] if history["train_loss"] else 0.0,
-            "val_loss": history["val_loss"][-1] if history["val_loss"] else 0.0,
-            "accuracy": metrics["accuracy"],
-            "macro_f1": metrics["macro_f1"],
-            "checkpoint": f"best_{model_name}.pt"
-        },
-        push_to_hf=push_to_hf,
-        hf_repo=hf_repo,
-        hf_token=hf_token
-    )
+    val_loss = history["val_loss"][-1] if history.get("val_loss") else 0.0
+    val_acc = history["val_acc"][-1] if history.get("val_acc") else 0.0
+    train_loss = history["train_loss"][-1] if history.get("train_loss") else 0.0
+
+    record = {
+        "model": args.model,
+        "feature": args.feature,
+        "augment": args.augment,
+        "epochs": args.epochs,
+        "batch_size": args.batch_size,
+        "train_loss": train_loss,
+        "val_loss": val_loss,
+        "val_acc": val_acc,
+        "accuracy": metrics["accuracy"],
+        "macro_f1": metrics["macro_f1"],
+        "checkpoint": f"best_{model_name}.pt"
+    }
+
+    exp_id = getattr(args, "exp_id", None)
+    if exp_id:
+        update_experiment_markdown(report_file, exp_id, record)
+    else:
+        append_experiment_result(
+            report_file=report_file,
+            record=record,
+            push_to_hf=push_to_hf,
+            hf_repo=hf_repo,
+            hf_token=hf_token
+        )
 
     if push_to_hf:
         upload_file_to_hf(
@@ -417,28 +545,59 @@ def cmd_ensemble(args):
     Ensemble multiple trained models using hard voting, soft voting, or stacking.
     Dynamically loads appropriate dataloader for each model architecture and feature type.
     """
-    device = torch.device("cuda" if torch.cuda.is_available() and args.device == "cuda" else "cpu")
-    logger.info(f"Running Ensemble method: {args.method.upper()} on {len(args.checkpoints)} checkpoints.")
+    device = resolve_device(args.device)
+    logger.info(f"Running Ensemble method: {args.method.upper()} on {len(args.checkpoints)} checkpoints using device: {device}.")
 
     model_entries = []
     models_only = []
     for ckpt in args.checkpoints:
         p = Path(ckpt)
-        if "STGCN" in p.name:
+        if not p.exists():
+            raise FileNotFoundError(f"Checkpoint file not found: {p}")
+
+        state_dict = torch.load(p, map_location="cpu")
+
+        # Identify model architecture
+        if "STGCN" in p.name or any("gcn_conv" in k for k in state_dict.keys()):
             m_type = "STGCN"
-            f_type = "full_4" if "full_4" in p.name else "full_rel_4"
         elif "BiLSTM" in p.name:
             m_type = "BiLSTM"
-            f_type = "branch_concat" if "branch" in p.name else "12rel_4"
         elif "LSTM" in p.name:
             m_type = "LSTM"
-            f_type = "branch_concat" if "branch" in p.name else "12rel_4"
         else:
             m_type = "Transformer"
-            f_type = "branch_concat" if "branch" in p.name else "12rel_4"
 
+        # Identify feature method from filename
+        f_type = None
+        for feat in ["mix", "angle_3d", "angle_2d", "raw_3d", "raw_2d", "rel_3d", "rel_2d", "branch_concat", "direct_concat", "full_rel_4", "full_4", "12rel_4", "13_4"]:
+            if f"_{feat}." in p.name or f"_{feat}_" in p.name or p.name.endswith(f"_{feat}") or feat in p.name:
+                f_type = feat
+                break
+
+        # Fallback: deduce from tensor dimensions in state_dict
+        if f_type is None:
+            if "input_proj.weight" in state_dict:
+                in_dim = state_dict["input_proj.weight"].shape[1]
+                for k, v in FEATURE_DIMS.items():
+                    if v == in_dim:
+                        f_type = k
+                        break
+            elif "lstm.weight_ih_l0" in state_dict:
+                in_dim = state_dict["lstm.weight_ih_l0"].shape[1]
+                for k, v in FEATURE_DIMS.items():
+                    if v == in_dim:
+                        f_type = k
+                        break
+            elif "data_bn.weight" in state_dict:
+                c_dim = state_dict["data_bn.weight"].shape[0]
+                f_type = "raw_3d" if c_dim == 3 else "raw_2d"
+
+        if f_type is None:
+            f_type = "mix" if m_type == "Transformer" else "raw_3d"
+
+        logger.info(f"Loaded {p.name} -> Model: {m_type}, Feature: {f_type}")
         m = build_model(m_type, f_type, num_classes=NUM_CLASSES)
-        m.load_state_dict(torch.load(p, map_location=device))
+        m.load_state_dict(state_dict)
         m.to(device)
         m.eval()
         model_entries.append((m, m_type, f_type, p.name))
@@ -495,13 +654,54 @@ def cmd_ensemble(args):
     logger.info(f"Saved ensemble confusion matrix: {cm_path}")
 
     report_file = getattr(args, "report_file", "outputs/EXPERIMENT_RESULTS.md")
-    if report_file:
-        now_str = time.strftime("%Y-%m-%d %H:%M:%S")
-        is_hf = "Yes" if getattr(args, "push_to_hf", False) else "No"
-        row = f"| {now_str} | Ensemble_{args.method.upper()} | multi | none | - | - | - | - | {metrics['accuracy']*100:.2f}% | {metrics['macro_f1']:.4f} | `ensemble_{args.method}` | {is_hf} |\n"
-        with open(report_file, "a", encoding="utf-8") as rf:
-            rf.write(row)
-        logger.info(f"Recorded ensemble results to {report_file}")
+    exp_id = getattr(args, "exp_id", None)
+    if report_file and exp_id:
+        update_experiment_markdown(
+            report_file,
+            exp_id,
+            {
+                "accuracy": metrics["accuracy"],
+                "macro_f1": metrics["macro_f1"],
+                "weighted_f1": metrics.get("weighted_f1", metrics["macro_f1"]),
+                "checkpoint": f"outputs/ensemble/cm_ensemble_{args.method}.png"
+            }
+        )
+
+    # Auto-update Table 6 if method is stacking or requested
+    if args.method == "stacking" and report_file and Path(report_file).exists():
+        try:
+            from sklearn.metrics import classification_report as sk_clf_report
+            rep_dict = sk_clf_report(y_test_final, final_preds, target_names=ACTIONS, output_dict=True, zero_division=0)
+            rep_text = Path(report_file).read_text(encoding="utf-8")
+            new_lines = []
+            for line in rep_text.splitlines():
+                matched_act = None
+                for act in ACTIONS:
+                    if line.strip().startswith(f"| {act} "):
+                        matched_act = act
+                        break
+                if matched_act and matched_act in rep_dict:
+                    row_data = rep_dict[matched_act]
+                    p = row_data["precision"]
+                    r = row_data["recall"]
+                    f1 = row_data["f1-score"]
+                    supp = int(row_data["support"])
+                    line = f"| {matched_act} | {p:.4f} | {r:.4f} | {f1:.4f} | {supp} |"
+                elif line.strip().startswith("| **Accuracy**"):
+                    acc = rep_dict.get("accuracy", metrics["accuracy"])
+                    tot_supp = len(y_test_final)
+                    line = f"| **Accuracy** | | | **{acc*100:.2f}%** | **{tot_supp}** |"
+                elif line.strip().startswith("| **Macro avg**"):
+                    m_data = rep_dict.get("macro avg", {})
+                    line = f"| **Macro avg** | **{m_data.get('precision', 0):.4f}** | **{m_data.get('recall', 0):.4f}** | **{m_data.get('f1-score', 0):.4f}** | **{int(m_data.get('support', 0))}** |"
+                elif line.strip().startswith("| **Weighted avg**"):
+                    w_data = rep_dict.get("weighted avg", {})
+                    line = f"| **Weighted avg** | **{w_data.get('precision', 0):.4f}** | **{w_data.get('recall', 0):.4f}** | **{w_data.get('f1-score', 0):.4f}** | **{int(w_data.get('support', 0))}** |"
+                new_lines.append(line)
+            Path(report_file).write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+            logger.info(f"Updated Table 6 Classification Report in {report_file}")
+        except Exception as e:
+            logger.warning(f"Could not auto-update Table 6: {e}")
 
     if getattr(args, "push_to_hf", False):
         token = getattr(args, "hf_token", None) or os.environ.get("HF_TOKEN")
@@ -629,26 +829,35 @@ def create_parser() -> argparse.ArgumentParser:
     # Train
     p_train = subparsers.add_parser("train", help="Train a deep learning model")
     p_train.add_argument("--model", type=str, default="Transformer", choices=["LSTM", "BiLSTM", "Transformer", "STGCN", "BranchConcat"], help="Model architecture")
-    p_train.add_argument("--feature", type=str, default="12rel_4", choices=["full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"], help="Feature representation")
-    p_train.add_argument("--augment", type=str, default="none", choices=["none", "jitter", "rotate", "joint_dropout", "time_warp"], help="Augmentation method")
+    p_train.add_argument(
+        "--feature", type=str, default="mix",
+        choices=["raw_2d", "raw_3d", "rel_2d", "rel_3d", "angle_2d", "angle_3d", "mix", "full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"],
+        help="Feature representation method"
+    )
+    p_train.add_argument("--augment", type=str, default="none", choices=["none", "jitter", "rotate", "joint_dropout", "time_warp", "combined"], help="Augmentation method")
+    p_train.add_argument("--zero_frame", type=str, default="zero", choices=["zero", "ffill", "linear"], help="Missing/zero-frame handling strategy")
+    p_train.add_argument("--label_smoothing", type=float, default=0.0, help="Label smoothing regularization parameter (e.g. 0.1)")
+    p_train.add_argument("--exp_id", type=str, default=None, help="Experiment ID to automatically update outputs/EXPERIMENT_RESULTS.md (e.g. T1.1, T2.1, T2b.1, A3, PROPOSED)")
     p_train.add_argument("--smoke_test", action="store_true", help="Smoke test mode: minimal 2 epochs and minimal dataset for quick debugging")
     p_train.add_argument("--smoke_class", type=str, default="barbell biceps curl", help="Target class for smoke test debug")
     p_train.add_argument("--epochs", type=int, default=100, help="Maximum epochs")
-    p_train.add_argument("--batch_size", type=int, default=128, help="Batch size (e.g. 128-512 for 96GB GPU)")
+    p_train.add_argument("--batch_size", type=int, default=16, help="Batch size (e.g. 16 for clean gradient dynamics)")
     p_train.add_argument("--lr", type=float, default=1e-4, help="Learning rate")
     p_train.add_argument("--weight_decay", type=float, default=1e-4, help="Weight decay")
     p_train.add_argument("--patience", type=int, default=20, help="Early stopping patience")
     p_train.add_argument("--seq_len", type=int, default=32, help="Sequence length in frames")
     p_train.add_argument("--train_stride", type=int, default=16, help="Stride for training sliding window")
-    p_train.add_argument("--device", type=str, default="cuda", choices=["cuda", "cpu"], help="Computation device")
+    p_train.add_argument("--val_test_stride", type=int, default=32, help="Stride for validation and testing sliding window")
+    p_train.add_argument("--use_class_weights", action="store_true", default=False, help="Use class weighting in CrossEntropyLoss")
+    p_train.add_argument("--device", type=str, default="auto", choices=["cuda", "cpu", "mps", "auto"], help="Computation device")
     p_train.add_argument("--metadata", type=str, default="Final_dataset_metadata.csv", help="Metadata CSV path")
     p_train.add_argument("--landmark_dir", type=str, default="data/landmarks", help="Directory of landmark CSVs")
     p_train.add_argument("--output_dir", type=str, default="outputs", help="Output directory")
     p_train.add_argument("--checkpoint_dir", type=str, default="checkpoints", help="Directory to save model weights")
-    p_train.add_argument("--hidden_dim", type=int, default=128, help="Hidden dimension")
-    p_train.add_argument("--num_layers", type=int, default=4, help="Number of model layers")
+    p_train.add_argument("--hidden_dim", type=int, default=None, help="Hidden dimension (None uses calibrated ~350K budget)")
+    p_train.add_argument("--num_layers", type=int, default=None, help="Number of model layers (None uses calibrated ~350K budget)")
     p_train.add_argument("--nhead", type=int, default=8, help="Number of attention heads (for Transformer)")
-    p_train.add_argument("--dropout", type=float, default=0.1, help="Dropout probability")
+    p_train.add_argument("--dropout", type=float, default=None, help="Dropout probability (None uses calibrated ~350K budget)")
     p_train.add_argument("--seed", type=int, default=42, help="Random seed")
     p_train.add_argument("--num_workers", type=int, default=0, help="DataLoader worker processes")
 
@@ -666,7 +875,10 @@ def create_parser() -> argparse.ArgumentParser:
     p_eval = subparsers.add_parser("evaluate", help="Evaluate a model checkpoint")
     p_eval.add_argument("--checkpoint", type=str, required=True, help="Path to .pt checkpoint file")
     p_eval.add_argument("--model", type=str, default="Transformer", choices=["LSTM", "BiLSTM", "Transformer", "STGCN", "BranchConcat"])
-    p_eval.add_argument("--feature", type=str, default="12rel_4", choices=["full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"])
+    p_eval.add_argument(
+        "--feature", type=str, default="mix",
+        choices=["raw_2d", "raw_3d", "rel_2d", "rel_3d", "angle_2d", "angle_3d", "mix", "full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"]
+    )
     p_eval.add_argument("--split", type=str, default="test", choices=["train", "val", "test"])
     p_eval.add_argument("--metadata", type=str, default="Final_dataset_metadata.csv")
     p_eval.add_argument("--landmark_dir", type=str, default="data/landmarks")
@@ -683,6 +895,7 @@ def create_parser() -> argparse.ArgumentParser:
     p_ens = subparsers.add_parser("ensemble", help="Ensemble multiple models")
     p_ens.add_argument("--checkpoints", nargs="+", required=True, help="List of checkpoint .pt file paths")
     p_ens.add_argument("--method", type=str, default="stacking", choices=["hard", "soft", "stacking"], help="Ensemble method")
+    p_ens.add_argument("--exp_id", type=str, default=None, help="Experiment ID to automatically update report (e.g. T5.1, T5.2, T5.3)")
     p_ens.add_argument("--metadata", type=str, default="Final_dataset_metadata.csv")
     p_ens.add_argument("--landmark_dir", type=str, default="data/landmarks")
     p_ens.add_argument("--output_dir", type=str, default="outputs/ensemble")

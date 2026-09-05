@@ -9,7 +9,7 @@ import torch.nn.functional as F
 
 class LSTMModel(nn.Module):
     """
-    Standard LSTM Classifier for temporal feature sequences.
+    Calibrated LSTM Classifier for temporal feature sequences (~345K params).
     Input: (B, T, D)
     Output: (B, num_classes)
     """
@@ -17,11 +17,13 @@ class LSTMModel(nn.Module):
         self,
         feat_dim: int,
         num_classes: int,
-        hidden_dim: int = 128,
+        hidden_dim: int = 160,
         num_layers: int = 2,
-        dropout: float = 0.3
+        dropout: float = 0.3,
+        pooling: str = "mean"
     ):
         super().__init__()
+        self.pooling = pooling
         self.lstm = nn.LSTM(
             input_size=feat_dim,
             hidden_size=hidden_dim,
@@ -39,12 +41,15 @@ class LSTMModel(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         out, _ = self.lstm(x)  # (B, T, hidden_dim)
-        last_step = out[:, -1, :]  # (B, hidden_dim)
-        return self.fc(last_step)
+        if self.pooling == "mean":
+            pooled = out.mean(dim=1)  # Global Average Pooling over time
+        else:
+            pooled = out[:, -1, :]
+        return self.fc(pooled)
 
 class BiLSTMModel(nn.Module):
     """
-    Bidirectional LSTM Classifier for temporal feature sequences.
+    Calibrated Bidirectional LSTM Classifier (~340K params).
     Input: (B, T, D)
     Output: (B, num_classes)
     """
@@ -52,11 +57,13 @@ class BiLSTMModel(nn.Module):
         self,
         feat_dim: int,
         num_classes: int,
-        hidden_dim: int = 128,
+        hidden_dim: int = 96,
         num_layers: int = 2,
-        dropout: float = 0.3
+        dropout: float = 0.3,
+        pooling: str = "mean"
     ):
         super().__init__()
+        self.pooling = pooling
         self.bilstm = nn.LSTM(
             input_size=feat_dim,
             hidden_size=hidden_dim,
@@ -75,8 +82,11 @@ class BiLSTMModel(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         out, _ = self.bilstm(x)  # (B, T, hidden_dim * 2)
-        last_step = out[:, -1, :]
-        return self.fc(last_step)
+        if self.pooling == "mean":
+            pooled = out.mean(dim=1)  # Global Average Pooling over time
+        else:
+            pooled = out[:, -1, :]
+        return self.fc(pooled)
 
 class BranchConcatModel(nn.Module):
     """

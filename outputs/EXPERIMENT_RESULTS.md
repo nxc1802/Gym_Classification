@@ -1,23 +1,109 @@
 # Master Experiment Results: Deep Learning for Gym Exercise Classification
 
-This file aggregates all experimental evaluation results, tracking accuracy, Macro F1, and checkpoints.
+This document serves as the primary tracking log and benchmark sheet for the research paper. All experimental results are systematically categorized into structured tables corresponding directly to the paper's narrative and evaluation phases.
 
-| Timestamp | Model | Feature | Augment | Epochs | Batch | Train Loss | Val Loss | Test Acc (%) | Macro F1 | Best Checkpoint | HF Synced |
-| :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
-| 2026-09-04 13:45:57 | Transformer | 12rel_4 | none | 2 | 4 | 3.0234 | 2.9414 | 0.00% | 0.0000 | `best_Transformer_12rel_4_aug_none.pt` | Yes |
-| 2026-09-04 06:49:04 | Transformer | 12rel_4 | none | 2 | 4 | 3.0508 | 2.9492 | 0.00% | 0.0000 | `best_Transformer_12rel_4_aug_none.pt` | Yes |
-| 2026-09-04 06:56:47 | Transformer | 12rel_4 | none | 50 | 128 | 3.0263 | 3.1304 | 3.67% | 0.0098 | `best_Transformer_12rel_4_aug_none.pt` | Yes |
-| 2026-09-04 06:57:12 | BiLSTM | 12rel_4 | none | 50 | 128 | 3.0801 | 3.1018 | 3.38% | 0.0047 | `best_BiLSTM_12rel_4_aug_none.pt` | Yes |
-| 2026-09-04 06:57:34 | LSTM | 12rel_4 | none | 50 | 128 | 3.0853 | 3.0967 | 5.87% | 0.0084 | `best_LSTM_12rel_4_aug_none.pt` | Yes |
-| 2026-09-04 06:59:43 | Transformer | 12rel_4 | rotate | 50 | 128 | 2.8635 | 3.3664 | 3.79% | 0.0243 | `best_Transformer_12rel_4_aug_rotate.pt` | Yes |
-| 2026-09-04 07:00:40 | Transformer | branch_concat | none | 50 | 128 | 3.0719 | 3.0988 | 1.30% | 0.0042 | `best_Transformer_branch_concat_aug_none.pt` | Yes |
-| 2026-09-04 07:01:20 | STGCN | full_4 | none | 50 | 128 | 2.8057 | 3.2348 | 3.02% | 0.0269 | `best_STGCN_full_4_aug_none.pt` | Yes |
-| 2026-09-04 07:08:12 | Ensemble_STACKING | multi | none | - | - | - | - | 1.02% | 0.0009 | `ensemble_stacking` | Yes |
-| 2026-09-04 07:09:19 | Ensemble_STACKING | multi | none | - | - | - | - | 1.02% | 0.0009 | `ensemble_stacking` | Yes |
-| 2026-09-04 09:33:12 | Transformer | 12rel_4 | none | 100 | 16 | 0.8340 | 2.3472 | 33.97% | 0.3922 | `best_Transformer_12rel_4_aug_none.pt` | Yes |
-| 2026-09-04 09:35:01 | BiLSTM | 12rel_4 | none | 100 | 16 | 0.9352 | 2.1845 | 37.39% | 0.4491 | `best_BiLSTM_12rel_4_aug_none.pt` | Yes |
-| 2026-09-04 09:36:10 | LSTM | 12rel_4 | none | 100 | 16 | 0.9353 | 2.2530 | 37.55% | 0.4454 | `best_LSTM_12rel_4_aug_none.pt` | Yes |
-| 2026-09-04 09:38:41 | Transformer | 12rel_4 | rotate | 100 | 16 | 0.9100 | 2.2156 | 34.78% | 0.4164 | `best_Transformer_12rel_4_aug_rotate.pt` | Yes |
-| 2026-09-04 09:41:31 | Transformer | branch_concat | none | 100 | 16 | 0.5546 | 2.4651 | 38.51% | 0.4809 | `best_Transformer_branch_concat_aug_none.pt` | Yes |
-| 2026-09-04 09:44:08 | STGCN | full_4 | none | 100 | 16 | 1.6435 | 2.4650 | 28.47% | 0.3421 | `best_STGCN_full_4_aug_none.pt` | Yes |
-| 2026-09-04 09:44:40 | Ensemble_STACKING | multi | none | - | - | - | - | 35.15% | 0.4468 | `ensemble_stacking` | Yes |
+### Experimental Protocol & Standards
+- **Dataset Support:** 1,108 segments across 22 classes (639 Train, 210 Validation, 259 Held-out Test).
+- **Temporal Sliding Window:** Sequence length $T = 32$ frames. Train stride = 16 (50% overlap), Val/Test stride = 32 (non-overlapping).
+- **Controlled Parameter Budget:** All backbones are calibrated to $\approx 350\text{K} \pm 15\%$ parameters for strict fairness.
+- **Optimization:** Adam optimizer ($lr = 10^{-4}$), ReduceLROnPlateau scheduler, up to 100 epochs, early stopping patience = 20, AMP enabled, `use_class_weights = False`.
+
+---
+
+## Table 1: Temporal Models on Landmark Feature Sets (Controlled Budget $\approx 350\text{K}$)
+*Objective:* Benchmark 3 temporal models (LSTM, BiLSTM, Transformer) across 7 coordinate & angular representations (2D/3D raw, relative, angles, and unified mix).
+
+| Exp ID | Model Architecture | Feature Representation | Dimension | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
+| :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
+| **T1.1** | **LSTM** | raw_2d | 26 | - | - | - | - | - | `checkpoints/best_LSTM_raw_2d.pt` | Pending |
+| **T1.2** | **LSTM** | rel_2d | 24 | - | - | - | - | - | `checkpoints/best_LSTM_rel_2d.pt` | Pending |
+| **T1.3** | **LSTM** | angle_2d | 286 | - | - | - | - | - | `checkpoints/best_LSTM_angle_2d.pt` | Pending |
+| **T1.4** | **LSTM** | raw_3d | 39 | - | - | - | - | - | `checkpoints/best_LSTM_raw_3d.pt` | Pending |
+| **T1.5** | **LSTM** | rel_3d | 36 | - | - | - | - | - | `checkpoints/best_LSTM_rel_3d.pt` | Pending |
+| **T1.6** | **LSTM** | angle_3d | 286 | - | - | - | - | - | `checkpoints/best_LSTM_angle_3d.pt` | Pending |
+| **T1.7** | **LSTM** | mix | 322 | - | - | - | - | - | `checkpoints/best_LSTM_mix.pt` | Pending |
+| **T1.8** | **BiLSTM** | raw_2d | 26 | - | - | - | - | - | `checkpoints/best_BiLSTM_raw_2d.pt` | Pending |
+| **T1.9** | **BiLSTM** | rel_2d | 24 | - | - | - | - | - | `checkpoints/best_BiLSTM_rel_2d.pt` | Pending |
+| **T1.10** | **BiLSTM** | angle_2d | 286 | - | - | - | - | - | `checkpoints/best_BiLSTM_angle_2d.pt` | Pending |
+| **T1.11** | **BiLSTM** | raw_3d | 39 | - | - | - | - | - | `checkpoints/best_BiLSTM_raw_3d.pt` | Pending |
+| **T1.12** | **BiLSTM** | rel_3d | 36 | - | - | - | - | - | `checkpoints/best_BiLSTM_rel_3d.pt` | Pending |
+| **T1.13** | **BiLSTM** | angle_3d | 286 | - | - | - | - | - | `checkpoints/best_BiLSTM_angle_3d.pt` | Pending |
+| **T1.14** | **BiLSTM** | mix | 322 | - | - | - | - | - | `checkpoints/best_BiLSTM_mix.pt` | Pending |
+| **T1.15** | **Transformer** | raw_2d | 26 | - | - | - | - | - | `checkpoints/best_Transformer_raw_2d.pt` | Pending |
+| **T1.16** | **Transformer** | rel_2d | 24 | - | - | - | - | - | `checkpoints/best_Transformer_rel_2d.pt` | Pending |
+| **T1.17** | **Transformer** | angle_2d | 286 | - | - | - | - | - | `checkpoints/best_Transformer_angle_2d.pt` | Pending |
+| **T1.18** | **Transformer** | raw_3d | 39 | - | - | - | - | - | `checkpoints/best_Transformer_raw_3d.pt` | Pending |
+| **T1.19** | **Transformer** | rel_3d | 36 | - | - | - | - | - | `checkpoints/best_Transformer_rel_3d.pt` | Pending |
+| **T1.20** | **Transformer** | angle_3d | 286 | - | - | - | - | - | `checkpoints/best_Transformer_angle_3d.pt` | Pending |
+| **T1.21** | **Transformer** | mix | 322 | - | - | - | - | - | `checkpoints/best_Transformer_mix.pt` | Pending |
+
+---
+
+## Table 2: Data Augmentation on Best Transformer
+*Objective:* Assess whether dataset expansion (combining 100% clean original samples + augmented supplementary samples via Scale, Rotate, Time-Warp, and Jitter) outperforms the unaugmented baseline.
+
+| Exp ID | Augmentation Strategy | Configuration | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
+| :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
+| **T2.1** | **None (Baseline)** | `augment: none` (Clean original samples: $N$) | - | - | - | - | - | `checkpoints/best_Transformer_mix.pt` | Pending |
+| **T2.2** | **Augmented Expansion (2x Samples)** | `augment: combined` (Original $N$ + Augmented $N$ via Scale, Rotate $\pm 10^\circ$, Time-Warp, Jitter) | - | - | - | - | - | `checkpoints/best_Transformer_mix_aug.pt` | Pending |
+
+---
+
+## Table 3: Feature Fusion (Lược bỏ / Replaced by Unified Mix Representation)
+*Ghi chú:* Trong paper gốc, Bảng 3 khảo sát Branch-Concat vs Direct-Concat. Phương pháp `mix` (kết hợp chuẩn hóa z-score giữa tọa độ tương đối và góc tam giác 3D) đã được tích hợp trực tiếp vào Bảng 1 (T1.7, T1.14, T1.21), thay thế hoàn toàn cấu trúc đa nhánh cồng kềnh. Do đó Bảng 3 được lược bỏ theo đúng chỉ đạo.
+
+---
+
+## Table 4: ST-GCN on Raw vs. Relative Graph Streams (Controlled Budget $\approx 350\text{K}$)
+*Objective:* Evaluate ST-GCN under spatial-temporal graph topology $(B, C, T, V)$ comparing raw coordinates and relative translation frames.
+
+| Exp ID | Model Architecture | Graph Stream | Tensor Shape $(C, T, V)$ | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
+| :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
+| **T4.1** | **ST-GCN** | raw_3d | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_STGCN_raw_3d.pt` | Pending |
+| **T4.2** | **ST-GCN** | rel_3d | $(3, 32, 12)$ | - | - | - | - | - | `checkpoints/best_STGCN_rel_3d.pt` | Pending |
+| **T4.3** | **ST-GCN** | raw_2d | $(2, 32, 13)$ | - | - | - | - | - | `checkpoints/best_STGCN_raw_2d.pt` | Pending |
+| **T4.4** | **ST-GCN** | rel_2d | $(2, 32, 12)$ | - | - | - | - | - | `checkpoints/best_STGCN_rel_2d.pt` | Pending |
+
+---
+
+## Table 5: Heterogeneous Ensemble (Best Transformer + Best ST-GCN $\rightarrow$ SOTA)
+*Objective:* Fuse complementary dynamics from the best sequence Transformer (Bảng 1/2) and the best skeletal graph ST-GCN (Bảng 4) to achieve SOTA accuracy.
+
+| Exp ID | Ensemble Strategy | Component Models | Test Acc (%) | Macro F1 | Weighted F1 | Checkpoint / Artifact | Status |
+| :---: | :--- | :--- | :---: | :---: | :---: | :--- | :---: |
+| **T5.1** | **Hard Voting** | Best Transformer + Best ST-GCN | - | - | - | `outputs/ensemble/cm_ensemble_hard.png` | Pending |
+| **T5.2** | **Soft Voting** | Best Transformer + Best ST-GCN | - | - | - | `outputs/ensemble/cm_ensemble_soft.png` | Pending |
+| **T5.3** | **Stacking Ensemble** | Best Transformer + Best ST-GCN + Meta-Classifier | - | - | - | `outputs/ensemble/cm_ensemble_stacking.png` | Pending |
+
+---
+
+## Table 6: Detailed Classification Report of Best Ensemble Method (Stacking)
+*Objective:* Comprehensive per-class evaluation of the proposed SOTA ensemble across all 22 gym exercise categories.
+
+| Exercise Class | Precision | Recall | F1-Score | Support |
+| :--- | :---: | :---: | :---: | :---: |
+| barbell biceps curl | - | - | - | - |
+| bench press | - | - | - | - |
+| chest fly machine | - | - | - | - |
+| deadlift | - | - | - | - |
+| decline bench press | - | - | - | - |
+| hammer curl | - | - | - | - |
+| hip thrust | - | - | - | - |
+| incline bench press | - | - | - | - |
+| lat pulldown | - | - | - | - |
+| lateral raise | - | - | - | - |
+| leg extension | - | - | - | - |
+| leg raises | - | - | - | - |
+| plank | - | - | - | - |
+| pull Up | - | - | - | - |
+| push-up | - | - | - | - |
+| romanian deadlift | - | - | - | - |
+| russian twist | - | - | - | - |
+| shoulder press | - | - | - | - |
+| squat | - | - | - | - |
+| t bar row | - | - | - | - |
+| tricep Pushdown | - | - | - | - |
+| tricep dips | - | - | - | - |
+| **Accuracy** | | | - | - |
+| **Macro avg** | - | - | - | - |
+| **Weighted avg** | - | - | - | - |

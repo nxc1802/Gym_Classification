@@ -32,7 +32,8 @@ class Trainer:
         patience: int = 20,
         checkpoint_dir: str = "checkpoints",
         model_name: str = "model",
-        use_class_weights: bool = True,
+        use_class_weights: bool = False,
+        label_smoothing: float = 0.0,
         use_amp: bool = True,
         amp_dtype: str = "bfloat16",
         push_to_hf: bool = False,
@@ -51,6 +52,7 @@ class Trainer:
         self.best_checkpoint_path = self.checkpoint_dir / f"best_{model_name}.pt"
         self.last_checkpoint_path = self.checkpoint_dir / f"last_{model_name}.pt"
         self.use_class_weights = use_class_weights
+        self.label_smoothing = label_smoothing
 
         # AMP Configuration
         self.use_amp = use_amp and (device.type == "cuda")
@@ -92,11 +94,14 @@ class Trainer:
                 for c, w in zip(classes, weights):
                     if c < NUM_CLASSES:
                         weight_tensor[c] = float(w)
-                return nn.CrossEntropyLoss(weight=weight_tensor.to(self.device))
+                return nn.CrossEntropyLoss(
+                    weight=weight_tensor.to(self.device),
+                    label_smoothing=self.label_smoothing
+                )
             else:
-                return nn.CrossEntropyLoss()
+                return nn.CrossEntropyLoss(label_smoothing=self.label_smoothing)
         else:
-            return nn.CrossEntropyLoss()
+            return nn.CrossEntropyLoss(label_smoothing=self.label_smoothing)
 
     def train_epoch(self, train_loader: DataLoader, criterion: nn.Module) -> Tuple[float, float]:
         self.model.train()

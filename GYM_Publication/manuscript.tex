@@ -132,33 +132,33 @@ Manual segmentation was critical to remove irrelevant frames such as transitions
 \multirow{2}{*}{\textbf{Class}}   & \multicolumn{3}{c|}{\textbf{Videos}} & \multicolumn{3}{c}{\textbf{Segments}} \\
   & \textbf{Train} & \textbf{Val} & \textbf{Test} & \textbf{Train} & \textbf{Val} & \textbf{Test} \\
 \hline
-barbell biceps curl & 52 & 18 & 14 & 53 & 18 & 14 \\ 
-bench press & 51 & 18 & 15 & 51 & 18 & 15 \\ 
-lat pulldown & 28 & 9 & 8 & 29 & 9 & 8 \\ 
-push-up & 30 & 10 & 10 & 30 & 10 & 10 \\ 
-tricep Pushdown & 18 & 5 & 9 & 29 & 5 & 10 \\ 
-pull Up & 24 & 8 & 14 & 28 & 8 & 14 \\ 
-deadlift & 14 & 6 & 9 & 19 & 6 & 15 \\ 
-shoulder press & 27 & 10 & 9 & 27 & 10 & 9 \\ 
-squat & 42 & 15 & 14 & 42 & 15 & 15 \\ 
-lateral raise & 24 & 8 & 15 & 24 & 8 & 15 \\ 
-hammer curl & 22 & 9 & 13 & 27 & 9 & 13 \\ 
-incline bench press & 15 & 6 & 11 & 15 & 6 & 11 \\ 
-chest fly machine & 5 & 2 & 2 & 5 & 2 & 2 \\ 
-leg extension & 31 & 11 & 10 & 31 & 11 & 10 \\ 
-tricep dips & 40 & 14 & 12 & 43 & 14 & 14 \\ 
-leg raises & 12 & 6 & 6 & 13 & 6 & 8 \\ 
-decline bench press & 15 & 6 & 6 & 19 & 6 & 6 \\ 
-hip thrust & 27 & 10 & 13 & 28 & 10 & 14 \\ 
-t bar row & 24 & 10 & 15 & 27 & 11 & 17 \\ 
-russian twist & 15 & 4 & 10 & 17 & 4 & 10 \\ 
-romanian deadlift & 39 & 14 & 12 & 39 & 14 & 12 \\ 
-plank & 25 & 9 & 9 & 43 & 10 & 17 \\ 
+barbell biceps curl    & 52  & 18  & 15  & 52  & 18  & 15  \\
+bench press            & 51  & 18  & 15  & 51  & 18  & 15  \\
+chest fly machine      & 28  & 9   & 8   & 28  & 9   & 8   \\
+deadlift               & 30  & 10  & 10  & 30  & 10  & 10  \\
+decline bench press    & 18  & 5   & 9   & 18  & 5   & 9   \\
+hammer curl            & 24  & 8   & 14  & 24  & 8   & 14  \\
+hip thrust             & 14  & 6   & 9   & 14  & 6   & 9   \\
+incline bench press    & 27  & 10  & 9   & 27  & 10  & 9   \\
+lat pulldown           & 43  & 15  & 14  & 43  & 15  & 14  \\
+lateral raise          & 24  & 8   & 15  & 24  & 8   & 15  \\
+leg extension          & 22  & 9   & 13  & 22  & 9   & 13  \\
+leg raises             & 15  & 6   & 11  & 15  & 6   & 11  \\
+plank                  & 5   & 2   & 2   & 5   & 2   & 2   \\
+pull Up                & 31  & 11  & 10  & 31  & 11  & 10  \\
+push-up                & 40  & 14  & 12  & 40  & 14  & 12  \\
+romanian deadlift      & 12  & 6   & 6   & 12  & 6   & 6   \\
+russian twist          & 15  & 6   & 6   & 15  & 6   & 6   \\
+shoulder press         & 27  & 10  & 13  & 27  & 10  & 13  \\
+squat                  & 24  & 10  & 15  & 24  & 10  & 15  \\
+t bar row              & 15  & 4   & 10  & 15  & 4   & 10  \\
+tricep Pushdown        & 39  & 14  & 12  & 39  & 14  & 12  \\
+tricep dips            & 25  & 9   & 9   & 25  & 9   & 9   \\
 \hline
 \end{tabular}
 \end{table}
 
-The distribution of videos across the 22 gym exercise classes reveals significant imbalance. This pronounced imbalance-for instance, "plank" is represented by only 9 videos (0.9\%) while "barbell biceps curl" has 84 videos (8.2\%) and "bench press" has 84 videos (8.2\%) - can bias the classifier toward well-represented classes and severely degrade performance on underrepresented ones unless addressed by augmentation or sampling strategies. The detailed presentation of class imbalance is a crucial transparency point for the dataset. This sets a clear direction for future research using this dataset, emphasizing the need for specialized imbalance-handling techniques.
+The distribution of videos across the 22 gym exercise classes reveals significant imbalance. This pronounced imbalance-for instance, "plank" is represented by only 9 videos (0.9\%) while "barbell biceps curl" has 85 videos (8.3\%) and "bench press" has 84 videos (8.2\%) - can bias the classifier toward well-represented classes and severely degrade performance on underrepresented ones unless addressed by augmentation or sampling strategies. The detailed presentation of class imbalance is a crucial transparency point for the dataset. This sets a clear direction for future research using this dataset, emphasizing the need for specialized imbalance-handling techniques.
 
 \textbf{Data Augmentation} is applied directly on skeleton-based pose sequences to improve generalization and reduce overfitting. Each 32-frame sequence of 2D joint coordinates undergoes a set of lightweight, label-preserving transformations. Specifically, we implement: (1) \textit{Time Warping}, which non-linearly stretches or compresses parts of the sequence along the temporal axis to simulate variation in execution speed; (2) \textit{Joint Jitter}, where small Gaussian noise is added to each joint coordinate to mimic sensor noise or annotation imprecision; (3) \textit{Scaling}, applying random uniform scaling to simulate differences in subject size or camera zoom; (4) \textit{Rotation}, where entire skeletons are rotated by small angles around the torso to account for viewpoint variation; and (5) \textit{Joint Dropout}, randomly masking a small subset of joints to simulate occlusion or tracking failure. All augmentations are applied in a temporally consistent manner across frames to preserve motion coherence. These pose-specific augmentations are performed on-the-fly during training and have shown to significantly improve the model's robustness to intra-class variability and unseen subject motion.\cite{ko2024augmentation}
 
@@ -176,7 +176,7 @@ The distribution of videos across the 22 gym exercise classes reveals significan
     \label{fig:propFs}
 \end{figure}
 
-Each raw video is manually trimmed to isolate only the target exercise, producing clean segments. We then generate overlapping clips from each segment using a 32-frame sliding window with a 16-frame stride, padding any final clip by duplicating its last frame to reach 32 frames. This exact procedure is applied to both of our model inputs - the pose-landmark stream and the spatio-temporal graph stream—so that each branch processes input sequences of identical length.
+Each raw video is manually trimmed to isolate only the target exercise, producing clean segments. We then generate clips from each segment using a 32-frame sliding window with a 16-frame stride (50\% overlap) for the training set to encourage dense temporal feature representation, while using non-overlapping 32-frame clips (stride of 32 frames) for validation and testing to strictly prevent redundant boundary predictions, padding any final clip by duplicating its last frame to reach 32 frames. This exact procedure is applied to both of our model inputs - the pose-landmark stream and the spatio-temporal graph stream—so that each branch processes input sequences of identical length.
 
 
 \textbf{MediaPipe} detects 33 landmarks on the human body, each represented by three-dimensional coordinates (x, y, z) and a visibility score indicating the likelihood of the landmark being visible. These landmarks cover major body parts such as shoulders, elbows, wrists, hips, knees, and ankles. In addition to normalized coordinates, MediaPipe provides world landmarks in real-world space, enhancing applications requiring spatial accuracy.	\cite{chuankun2019}
@@ -207,7 +207,7 @@ Each raw video is manually trimmed to isolate only the target exercise, producin
 %     \label{fig:propFs}
 % \end{figure}
 
-For the pose‐based branch, each clean video segment was first decomposed into overlapping clips of 32 consecutive frames with a stride of 16 frames, yielding 19 442 samples (14 324 training, 2 574 validation, 2 544 testing). 
+For the pose‐based branch, each clean video segment was first decomposed into 32-frame clips (using a stride of 16 frames on training segments, and a non-overlapping stride of 32 frames on validation and testing segments), yielding 17\,100 clips (12\,419 training, 2\,228 validation, 2\,453 testing). 
 We then applied two complementary feature‐extraction pipelines. In the landmark stream, MediaPipe detects 33 two‐dimensional landmarks per frame, each represented as a 4-dimensional vector $(x, y, z, \text{visibility})$. To focus on the most informative joints, we discard non-essential points (e.g., fingers and toes), retaining 13 key landmarks. From the full 33-landmark set we compute 32 relative-landmark features—inter-joint offsets normalized about the nose—and from the reduced 13-landmark set a further 12 relative features. 
 We also compute geometric angles from every triplet of these 13 landmarks ($\binom{13}{3}$ angles total), yielding a compact yet expressive representation.
 
@@ -258,7 +258,7 @@ Because the feature maps are from consecutive frames, Long Short-Term Memory (LS
 
 \textbf{Evaluation} is based on multiple metrics, including Accuracy, Precision, Recall, and F1-score, to provide a comprehensive assessment of model effectiveness. A confusion matrix is constructed to analyze misclassifications and to identify common sources of errors among exercise classes.
 
-For both the pose‐based and graph‐based branches, we used identical training hyperparameters: up to 100 epochs, early stopping with a patience of 20 epochs on validation loss, a batch size of 16, overlapping windows of stride 16, and sequence lengths fixed at 32 frames. In the pose stream, each clip’s landmarks and angle are modeled by three temporal architectures - LSTM, Bi‐LSTM, and a Transformer encoder - while in the graph stream the same these landmarks are structured into a spatio-temporal graph and processed by an ST-GCN. All four models were trained and validated under these consistent conditions to enable a fair comparison of their capacity to capture both temporal dependencies and spatial relationships in gym exercise data.
+For both the pose‐based and graph‐based branches, we used identical training hyperparameters: up to 100 epochs, early stopping with a patience of 20 epochs on validation loss, a batch size of 16, sequence lengths fixed at 32 frames, with a stride of 16 frames for training and a stride of 32 frames for validation and testing. In the pose stream, each clip’s landmarks and angle are modeled by three temporal architectures - LSTM, Bi‐LSTM, and a Transformer encoder - while in the graph stream the same these landmarks are structured into a spatio-temporal graph and processed by an ST-GCN. All four models were trained and validated under these consistent conditions to enable a fair comparison of their capacity to capture both temporal dependencies and spatial relationships in gym exercise data.
 
 \section{Result and Discussion}
 
