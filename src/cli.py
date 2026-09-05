@@ -354,18 +354,10 @@ def cmd_train(args):
         args.batch_size = min(args.batch_size, 4)
         args.patience = 2
 
-    device_str = args.device
-    if device_str in ("cuda", "auto") and not torch.cuda.is_available():
-        if torch.backends.mps.is_available():
-            logger.info("CUDA not available. Detected Apple Silicon MPS! Accelerating on MPS device.")
-            device_str = "mps"
-        else:
-            logger.warning("CUDA requested but not available. Falling back to CPU.")
-            device_str = "cpu"
-    device = torch.device(device_str)
-    if device_str == "cuda":
+    device = resolve_device(args.device)
+    if device.type == "cuda":
         gpu_name = torch.cuda.get_device_name(0)
-    elif device_str == "mps":
+    elif device.type == "mps":
         gpu_name = "Apple Silicon GPU (Metal Performance Shaders)"
     else:
         gpu_name = "CPU"
@@ -497,7 +489,7 @@ def cmd_evaluate(args):
     """
     Evaluates an existing checkpoint on test or validation split.
     """
-    device = torch.device("cuda" if torch.cuda.is_available() and args.device == "cuda" else "cpu")
+    device = resolve_device(args.device)
     ckpt_path = Path(args.checkpoint)
     if not ckpt_path.exists():
         logger.error(f"Checkpoint not found: {ckpt_path}")
