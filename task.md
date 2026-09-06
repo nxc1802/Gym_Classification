@@ -1,13 +1,13 @@
 # Kế Hoạch & Danh Sách CLI Thực Nghiệm (Gym Classification)
 
 ## I. Danh Sách Nhiệm Vụ Cốt Lõi (Core Tasks)
-- [ ] 1. Setup & kết nối Marimo server, clone project.
-- [ ] 2. Chạy dataset preparation + MediaPipe một lần và lưu/push output lên HF.
-- [ ] 3. Chạy smoke test MediaPipe → smoke training để kiểm tra toàn bộ pipeline.
-- [ ] 4. Chạy training experiments, đảm bảo server không disconnect, theo dõi tiến độ mỗi 15 phút và chạy đồng thời nhiều model nếu có thể.
-- [ ] 5. Upload checkpoint (best/last), test results và report lên HF.
-- [ ] 6. Ghi toàn bộ experiment results vào outputs/EXPERIMENT_RESULTS.md
-- [ ] 7. Đồng bộ code lên GitHub sau khi test thành công.
+- [x] 1. Setup & kết nối Marimo server, clone project.
+- [x] 2. Chạy dataset preparation + MediaPipe một lần và lưu/push output lên HF.
+- [x] 3. Chạy smoke test MediaPipe → smoke training để kiểm tra toàn bộ pipeline.
+- [x] 4. Chạy training experiments, đảm bảo server không disconnect, theo dõi tiến độ mỗi 15 phút và chạy đồng thời nhiều model nếu có thể.
+- [x] 5. Upload checkpoint (best/last), test results và report lên HF.
+- [x] 6. Ghi toàn bộ experiment results vào outputs/EXPERIMENT_RESULTS.md
+- [x] 7. Đồng bộ code lên GitHub sau khi test thành công.
 
 ---
 
