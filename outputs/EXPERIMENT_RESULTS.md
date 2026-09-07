@@ -15,27 +15,27 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 | Exp ID | Model Architecture | Feature Representation | Dimension | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
-| **T1.1** | **LSTM** | raw_2d | 26 | 0.3328 | 0.7408 | 82.80% | 55.24% | 0.5273 | `checkpoints/best_LSTM_T1.1_raw_2d.pt` | Done |
-| **T1.2** | **LSTM** | rel_2d | 24 | 0.4362 | 0.7774 | 81.07% | 54.97% | 0.5235 | `checkpoints/best_LSTM_T1.2_rel_2d.pt` | Done |
-| **T1.3** | **LSTM** | angle_2d | 286 | 0.1405 | 0.5446 | 87.86% | 58.86% | 0.5587 | `checkpoints/best_LSTM_T1.3_angle_2d.pt` | Done |
-| **T1.4** | **LSTM** | raw_3d | 39 | 0.2000 | 0.7636 | 86.27% | 57.63% | 0.5432 | `checkpoints/best_LSTM_T1.4_raw_3d.pt` | Done |
-| **T1.5** | **LSTM** | rel_3d | 36 | 0.2381 | 0.6846 | 86.56% | 59.67% | 0.5774 | `checkpoints/best_LSTM_T1.5_rel_3d.pt` | Done |
-| **T1.6** | **LSTM** | angle_3d | 286 | 0.2205 | 0.5940 | 85.55% | 56.89% | 0.5327 | `checkpoints/best_LSTM_T1.6_angle_3d.pt` | Done |
-| **T1.7** | **LSTM** | mix | 322 | 0.0206 | 0.7323 | 92.77% | 52.49% | 0.4759 | `checkpoints/best_LSTM_T1.7_mix.pt` | Done |
-| **T1.8** | **BiLSTM** | raw_2d | 26 | 0.1960 | 0.6544 | 87.72% | 57.51% | 0.5584 | `checkpoints/best_BiLSTM_T1.8_raw_2d.pt` | Done |
-| **T1.9** | **BiLSTM** | rel_2d | 24 | 0.3695 | 0.6475 | 81.94% | 58.17% | 0.5542 | `checkpoints/best_BiLSTM_T1.9_rel_2d.pt` | Done |
-| **T1.10** | **BiLSTM** | angle_2d | 286 | 0.1315 | 0.5625 | 88.44% | 58.74% | 0.5583 | `checkpoints/best_BiLSTM_T1.10_angle_2d.pt` | Done |
-| **T1.11** | **BiLSTM** | raw_3d | 39 | 0.1908 | 0.6540 | 87.28% | 58.62% | 0.5604 | `checkpoints/best_BiLSTM_T1.11_raw_3d.pt` | Done |
-| **T1.12** | **BiLSTM** | rel_3d | 36 | 0.3674 | 0.7463 | 82.66% | 56.41% | 0.5404 | `checkpoints/best_BiLSTM_T1.12_rel_3d.pt` | Done |
-| **T1.13** | **BiLSTM** | angle_3d | 286 | 0.2591 | 0.7354 | 84.97% | 57.54% | 0.5435 | `checkpoints/best_BiLSTM_T1.13_angle_3d.pt` | Done |
-| **T1.14** | **BiLSTM** | mix | 322 | 0.0149 | 0.6321 | 91.91% | 54.10% | 0.5055 | `checkpoints/best_BiLSTM_T1.14_mix.pt` | Done |
-| **T1.15** | **Transformer** | raw_2d | 26 | 0.1486 | 0.5698 | 89.31% | 60.72% | 0.5801 | `checkpoints/best_Transformer_T1.15_raw_2d.pt` | Done |
-| **T1.16** | **Transformer** | rel_2d | 24 | 0.1813 | 0.6779 | 87.72% | 63.32% | 0.6069 | `checkpoints/best_Transformer_T1.16_rel_2d.pt` | Done |
-| **T1.17** | **Transformer** | angle_2d | 286 | 0.0543 | 0.5028 | 90.46% | 62.19% | 0.5927 | `checkpoints/best_Transformer_T1.17_angle_2d.pt` | Done |
-| **T1.18** | **Transformer** | raw_3d | 39 | 0.0665 | 0.5389 | 91.62% | 63.71% | 0.6167 | `checkpoints/best_Transformer_T1.18_raw_3d.pt` | Done |
-| **T1.19** | **Transformer** | rel_3d | 36 | 0.0899 | 0.6060 | 90.32% | 60.96% | 0.5838 | `checkpoints/best_Transformer_T1.19_rel_3d.pt` | Done |
-| **T1.20** | **Transformer** | angle_3d | 286 | 0.0421 | 0.6084 | 90.61% | 62.10% | 0.5952 | `checkpoints/best_Transformer_T1.20_angle_3d.pt` | Done |
-| **T1.21** | **Transformer** | mix | 322 | 0.0085 | 0.4870 | 90.90% | 60.81% | 0.5720 | `checkpoints/best_Transformer_T1.21_mix.pt` | Done |
+| **T1.1** | **LSTM** | raw_2d | 26 | 0.3074 | 2.2601 | 47.56% | 47.90% | 0.4712 | `checkpoints/best_LSTM_T1.1_raw_2d.pt` | Done |
+| **T1.2** | **LSTM** | rel_2d | 24 | 0.4024 | 2.3667 | 50.12% | 45.70% | 0.4622 | `checkpoints/best_LSTM_T1.2_rel_2d.pt` | Done |
+| **T1.3** | **LSTM** | angle_2d | 286 | 0.1309 | 3.0266 | 48.04% | 43.80% | 0.4342 | `checkpoints/best_LSTM_T1.3_angle_2d.pt` | Done |
+| **T1.4** | **LSTM** | raw_3d | 39 | 0.1985 | 2.6284 | 49.13% | 48.27% | 0.4754 | `checkpoints/best_LSTM_T1.4_raw_3d.pt` | Done |
+| **T1.5** | **LSTM** | rel_3d | 36 | 0.2856 | 2.5757 | 52.85% | 48.85% | 0.4814 | `checkpoints/best_LSTM_T1.5_rel_3d.pt` | Done |
+| **T1.6** | **LSTM** | angle_3d | 286 | 0.1232 | 3.4244 | 45.20% | 44.17% | 0.4485 | `checkpoints/best_LSTM_T1.6_angle_3d.pt` | Done |
+| **T1.7** | **LSTM** | mix | 322 | 0.0559 | 3.5758 | 49.33% | 54.91% | 0.5439 | `checkpoints/best_LSTM_T1.7_mix.pt` | Done |
+| **T1.8** | **BiLSTM** | raw_2d | 26 | 0.2915 | 2.0462 | 54.56% | 44.78% | 0.4474 | `checkpoints/best_BiLSTM_T1.8_raw_2d.pt` | Done |
+| **T1.9** | **BiLSTM** | rel_2d | 24 | 0.3273 | 2.3025 | 50.26% | 50.20% | 0.4902 | `checkpoints/best_BiLSTM_T1.9_rel_2d.pt` | Done |
+| **T1.10** | **BiLSTM** | angle_2d | 286 | 0.1235 | 2.9666 | 51.52% | 47.49% | 0.4535 | `checkpoints/best_BiLSTM_T1.10_angle_2d.pt` | Done |
+| **T1.11** | **BiLSTM** | raw_3d | 39 | 0.2631 | 2.7134 | 47.32% | 44.82% | 0.4326 | `checkpoints/best_BiLSTM_T1.11_raw_3d.pt` | Done |
+| **T1.12** | **BiLSTM** | rel_3d | 36 | 0.3466 | 2.4109 | 49.40% | 44.44% | 0.4028 | `checkpoints/best_BiLSTM_T1.12_rel_3d.pt` | Done |
+| **T1.13** | **BiLSTM** | angle_3d | 286 | 0.0984 | 3.2998 | 48.96% | 46.04% | 0.4730 | `checkpoints/best_BiLSTM_T1.13_angle_3d.pt` | Done |
+| **T1.14** | **BiLSTM** | mix | 322 | 0.0654 | 3.3699 | 50.70% | 52.95% | 0.5282 | `checkpoints/best_BiLSTM_T1.14_mix.pt` | Done |
+| **T1.15** | **Transformer** | raw_2d | 26 | 0.1623 | 2.5206 | 55.48% | 52.91% | 0.5451 | `checkpoints/best_Transformer_T1.15_raw_2d.pt` | Done |
+| **T1.16** | **Transformer** | rel_2d | 24 | 0.1928 | 2.3190 | 58.87% | 54.51% | 0.5360 | `checkpoints/best_Transformer_T1.16_rel_2d.pt` | Done |
+| **T1.17** | **Transformer** | angle_2d | 286 | 0.1049 | 2.6590 | 56.58% | 49.42% | 0.4788 | `checkpoints/best_Transformer_T1.17_angle_2d.pt` | Done |
+| **T1.18** | **Transformer** | raw_3d | 39 | 0.1174 | 2.3503 | 55.59% | 51.90% | 0.5404 | `checkpoints/best_Transformer_T1.18_raw_3d.pt` | Done |
+| **T1.19** | **Transformer** | rel_3d | 36 | 0.1802 | 2.3504 | 55.55% | 52.81% | 0.5213 | `checkpoints/best_Transformer_T1.19_rel_3d.pt` | Done |
+| **T1.20** | **Transformer** | angle_3d | 286 | 0.1003 | 3.2583 | 49.95% | 51.12% | 0.5245 | `checkpoints/best_Transformer_T1.20_angle_3d.pt` | Done |
+| **T1.21** | **Transformer** | mix | 322 | 0.0843 | 2.7207 | 51.86% | 53.49% | 0.5411 | `checkpoints/best_Transformer_T1.21_mix.pt` | Done |
 
 ---
 
@@ -44,8 +44,8 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 | Exp ID | Augmentation Strategy | Configuration | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
-| **T2.1** | **None (Baseline)** | `augment: none` (Clean original samples: $N$) | 0.0085 | 0.4870 | 90.90% | 60.81% | 0.5720 | `checkpoints/best_Transformer_T2.1_mix.pt` | Done |
-| **T2.2** | **Augmented Expansion (2x Samples)** | `augment: combined` (Original $N$ + Augmented $N$ via Scale, Rotate $\pm 10^\circ$, Time-Warp, Jitter) | 0.0050 | 0.6842 | 91.18% | 61.71% | 0.5710 | `checkpoints/best_Transformer_T2.2_mix.pt` | Done |
+| **T2.1** | **None (Baseline)** | `augment: none` (Clean original samples: $N$) | 0.0843 | 2.7207 | 51.86% | 53.49% | 0.5411 | `checkpoints/best_Transformer_T2.1_mix.pt` | Done |
+| **T2.2** | **Augmented Expansion (2x Samples)** | `augment: combined` (Original $N$ + Augmented $N$ via Scale, Rotate $\pm 10^\circ$, Time-Warp, Jitter) | 0.0054 | 4.2401 | 54.36% | 52.34% | 0.5480 | `checkpoints/best_Transformer_T2.2_mix.pt` | Done |
 
 ---
 
@@ -59,10 +59,10 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 | Exp ID | Model Architecture | Graph Stream | Tensor Shape $(C, T, V)$ | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
-| **T4.1** | **ST-GCN** | raw_3d | $(3, 32, 13)$ | 0.2932 | 1.0418 | 75.87% | 51.05% | 0.4829 | `checkpoints/best_STGCN_T4.1_raw_3d.pt` | Done |
-| **T4.2** | **ST-GCN** | rel_3d | $(3, 32, 12)$ | 0.4585 | 0.9909 | 74.13% | 51.80% | 0.4939 | `checkpoints/best_STGCN_T4.2_rel_3d.pt` | Done |
-| **T4.3** | **ST-GCN** | raw_2d | $(2, 32, 13)$ | 0.5006 | 1.7527 | 59.25% | 36.74% | 0.3373 | `checkpoints/best_STGCN_T4.3_raw_2d.pt` | Done |
-| **T4.4** | **ST-GCN** | rel_2d | $(2, 32, 12)$ | 0.5125 | 1.4366 | 68.64% | 43.35% | 0.4161 | `checkpoints/best_STGCN_T4.4_rel_2d.pt` | Done |
+| **T4.1** | **ST-GCN** | raw_3d | $(3, 32, 13)$ | 0.6066 | 2.5094 | 37.99% | 35.87% | 0.3471 | `checkpoints/best_STGCN_T4.1_raw_3d.pt` | Done |
+| **T4.2** | **ST-GCN** | rel_3d | $(3, 32, 12)$ | 0.5516 | 2.2020 | 41.99% | 41.94% | 0.4128 | `checkpoints/best_STGCN_T4.2_rel_3d.pt` | Done |
+| **T4.3** | **ST-GCN** | raw_2d | $(2, 32, 13)$ | 0.7527 | 2.9184 | 34.40% | 39.63% | 0.3346 | `checkpoints/best_STGCN_T4.3_raw_2d.pt` | Done |
+| **T4.4** | **ST-GCN** | rel_2d | $(2, 32, 12)$ | 0.7432 | 2.5220 | 35.19% | 35.03% | 0.3397 | `checkpoints/best_STGCN_T4.4_rel_2d.pt` | Done |
 
 ---
 
@@ -71,9 +71,9 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 | Exp ID | Ensemble Strategy | Component Models | Test Acc (%) | Macro F1 | Weighted F1 | Checkpoint / Artifact | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :--- | :---: |
-| **T5.1** | **Hard Voting** | Best Transformer + Best ST-GCN | 58.83% | 0.5723 | 0.5746 | `outputs/ensemble/cm_ensemble_hard.png` | Done |
-| **T5.2** | **Soft Voting** | Best Transformer + Best ST-GCN | 62.40% | 0.6020 | 0.6047 | `outputs/ensemble/cm_ensemble_soft.png` | Done |
-| **T5.3** | **Stacking Ensemble** | Best Transformer + Best ST-GCN + Meta-Classifier | 53.62% | 0.4760 | 0.4820 | `outputs/ensemble/cm_ensemble_stacking.png` | Done |
+| **T5.1** | **Hard Voting** | Best Transformer + Best ST-GCN | 49.73% | 0.5103 | 0.5031 | `outputs/ensemble/cm_ensemble_hard.png` | Done |
+| **T5.2** | **Soft Voting** | Best Transformer + Best ST-GCN | 54.30% | 0.5343 | 0.5422 | `outputs/ensemble/cm_ensemble_soft.png` | Done |
+| **T5.3** | **Stacking Ensemble** | Best Transformer + Best ST-GCN + Meta-Classifier | 53.05% | 0.5224 | 0.5420 | `outputs/ensemble/cm_ensemble_stacking.png` | Done |
 
 ---
 
@@ -82,28 +82,28 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 | Exercise Class | Precision | Recall | F1-Score | Support |
 | :--- | :---: | :---: | :---: | :---: |
-| barbell biceps curl | 0.3986 | 0.7626 | 0.5235 | 219 |
-| bench press | 0.2700 | 0.8504 | 0.4099 | 127 |
-| chest fly machine | 0.5590 | 0.6632 | 0.6066 | 193 |
-| deadlift | 0.4182 | 0.9055 | 0.5721 | 127 |
-| decline bench press | 0.0000 | 0.0000 | 0.0000 | 259 |
-| hammer curl | 0.0000 | 0.0000 | 0.0000 | 187 |
-| hip thrust | 0.5854 | 0.8108 | 0.6799 | 148 |
-| incline bench press | 0.8921 | 0.7607 | 0.8212 | 163 |
-| lat pulldown | 0.4517 | 0.8603 | 0.5924 | 136 |
-| lateral raise | 0.8551 | 0.6782 | 0.7564 | 174 |
-| leg extension | 0.8418 | 0.7340 | 0.7842 | 203 |
-| leg raises | 0.5455 | 0.1983 | 0.2909 | 121 |
-| plank | 1.0000 | 0.5522 | 0.7115 | 67 |
-| pull Up | 0.0000 | 0.0000 | 0.0000 | 80 |
-| push-up | 0.8544 | 1.0000 | 0.9215 | 135 |
-| romanian deadlift | 0.4380 | 0.5048 | 0.4690 | 105 |
-| russian twist | 0.9070 | 0.9689 | 0.9369 | 161 |
-| shoulder press | 0.7949 | 0.3647 | 0.5000 | 170 |
-| squat | 0.2865 | 0.5464 | 0.3759 | 194 |
-| t bar row | 0.0000 | 0.0000 | 0.0000 | 128 |
-| tricep Pushdown | 0.0000 | 0.0000 | 0.0000 | 85 |
-| tricep dips | 0.6050 | 0.4557 | 0.5199 | 158 |
-| **Accuracy** | | | **53.62%** | **3340** |
-| **Macro avg** | **0.4865** | **0.5280** | **0.4760** | **3340** |
-| **Weighted avg** | **0.4857** | **0.5362** | **0.4820** | **3340** |
+| barbell biceps curl | 0.4853 | 0.3837 | 0.4286 | 172 |
+| bench press | 0.4865 | 0.4286 | 0.4557 | 84 |
+| chest fly machine | 0.6733 | 0.4304 | 0.5251 | 158 |
+| deadlift | 0.2973 | 0.1719 | 0.2178 | 64 |
+| decline bench press | 0.3402 | 0.3242 | 0.3320 | 256 |
+| hammer curl | 0.2042 | 0.4928 | 0.2887 | 138 |
+| hip thrust | 0.8193 | 0.5312 | 0.6445 | 512 |
+| incline bench press | 0.8286 | 0.4394 | 0.5743 | 132 |
+| lat pulldown | 0.5824 | 0.6163 | 0.5989 | 86 |
+| lateral raise | 0.5903 | 0.6343 | 0.6115 | 134 |
+| leg extension | 0.8098 | 0.8371 | 0.8232 | 178 |
+| leg raises | 0.6667 | 0.5783 | 0.6194 | 83 |
+| plank | 1.0000 | 0.0536 | 0.1017 | 56 |
+| pull Up | 0.7162 | 0.7067 | 0.7114 | 75 |
+| push-up | 0.7091 | 0.9750 | 0.8211 | 80 |
+| romanian deadlift | 0.5517 | 0.3516 | 0.4295 | 91 |
+| russian twist | 0.6435 | 0.9136 | 0.7551 | 81 |
+| shoulder press | 0.3623 | 0.7353 | 0.4854 | 136 |
+| squat | 0.9167 | 0.3837 | 0.5410 | 172 |
+| t bar row | 0.1837 | 0.6338 | 0.2848 | 71 |
+| tricep Pushdown | 0.4479 | 0.5658 | 0.5000 | 76 |
+| tricep dips | 0.8824 | 0.6410 | 0.7426 | 117 |
+| **Accuracy** | | | **53.05%** | **2952** |
+| **Macro avg** | **0.5999** | **0.5376** | **0.5224** | **2952** |
+| **Weighted avg** | **0.6262** | **0.5305** | **0.5420** | **2952** |
