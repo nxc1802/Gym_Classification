@@ -142,14 +142,29 @@ class ServerDaemon:
             time.sleep(self.heartbeat_interval)
 
     def run_cmd(self, cmd_args: list) -> subprocess.CompletedProcess:
-        full_cmd = [sys.executable] + cmd_args
+        full_cmd = [sys.executable, "-u"] + cmd_args
         self.log(f"[RUNNING] {' '.join(full_cmd)}")
-        res = subprocess.run(full_cmd, cwd=str(ROOT_DIR), capture_output=True, text=True)
-        if res.returncode != 0:
-            self.log(f"[ERROR] Process failed with exit code {res.returncode}:\n{res.stderr[-2000:]}")
+        proc = subprocess.Popen(
+            full_cmd,
+            cwd=str(ROOT_DIR),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1
+        )
+        output_lines = []
+        if proc.stdout:
+            for line in proc.stdout:
+                line_clean = line.rstrip()
+                if line_clean:
+                    self.log(line_clean)
+                output_lines.append(line)
+        proc.wait()
+        if proc.returncode != 0:
+            self.log(f"[ERROR] Process failed with exit code {proc.returncode}")
         else:
             self.log("[SUCCESS] Command completed successfully.")
-        return res
+        return subprocess.CompletedProcess(full_cmd, proc.returncode, "".join(output_lines), "")
 
     def resolve_best_checkpoints(self) -> tuple[Optional[str], Optional[str], float, float]:
         """
