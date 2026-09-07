@@ -110,9 +110,10 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 ---
 
-## Proposed SOTA: Upgraded Skeletal Transformer (SL=16, Overlap=8, Mix Representation)
-*Objective:* Comprehensive empirical evaluation of the proposed SOTA architecture incorporating all Roadmap upgrades: Learnable Positional Embeddings, Pre-LN, GeLU, AdamW, Cosine Annealing with Warmup, Label Smoothing 0.1, SL=16 with Overlap=8, on the verified anti-leakage MediaPipe landmark dataset.
+## Proposed SOTA: Upgraded Skeletal Transformer (Mix Representation)
+*Objective:* Comprehensive empirical evaluation of the proposed SOTA architecture incorporating all Roadmap upgrades: Learnable Positional Embeddings, Pre-LN, GeLU, AdamW, Cosine Annealing with Warmup, Label Smoothing 0.1, exploring temporal sequence lengths ($SL=16$ vs. $SL=20$) with 50% overlap, on the verified anti-leakage MediaPipe landmark dataset.
 
 | Exp ID | Architecture | Feature | Seq Len | Stride | Augment | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :---: | :---: | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
 | **SOTA_TRANSFORMER_MIX** | **Transformer (Pre-LN + GeLU + Learnable PE)** | mix | 16 | 8 | combined (1->4) | 0.6206 | 2.4735 | 53.54% | 53.05% | 0.5442 | `checkpoints/best_Transformer_SOTA_TRANSFORMER_MIX_mix.pt` | Done |
+| **SOTA_TRANSFORMER_MIX_SL20** | **Transformer (Pre-LN + GeLU + Learnable PE)** | mix | 20 | 10 | combined (1->4) | 0.9282 | 2.1251 | 52.52% | 56.55% | 0.5643 | `checkpoints/best_Transformer_SOTA_TRANSFORMER_MIX_SL20_mix.pt` | Done |
