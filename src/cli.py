@@ -191,6 +191,18 @@ def update_experiment_markdown(
                     parts[8] = "Done"
                     line = "| " + " | ".join(parts[1:-1]) + " |"
                     updated = True
+            # SOTA Table: Exp ID | Architecture | Feature | Seq Len | Stride | Augment | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
+            elif exp_id.startswith("SOTA"):
+                if len(parts) >= 14:
+                    parts[7] = f"{record.get('train_loss', 0.0):.4f}"
+                    parts[8] = f"{record.get('val_loss', 0.0):.4f}"
+                    parts[9] = f"{record.get('val_acc', 0.0) * 100:.2f}%"
+                    parts[10] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
+                    parts[11] = f"{record.get('macro_f1', 0.0):.4f}"
+                    parts[12] = f"`checkpoints/{record.get('checkpoint', '')}`"
+                    parts[13] = "Done"
+                    line = "| " + " | ".join(parts[1:-1]) + " |"
+                    updated = True
         new_lines.append(line)
 
     if updated:
@@ -423,10 +435,15 @@ def cmd_train(args):
         amp_dtype=amp_dtype,
         push_to_hf=push_to_hf,
         hf_repo=hf_repo,
-        hf_token=hf_token
+        hf_token=hf_token,
+        optimizer_type=getattr(args, "optimizer", "adamw"),
+        scheduler_type=getattr(args, "scheduler", "cosine_warmup"),
+        warmup_epochs=getattr(args, "warmup_epochs", 5),
+        max_epochs=args.epochs,
+        early_stopping_metric=getattr(args, "early_stopping_metric", "val_acc")
     )
 
-    logger.info(f"Starting training for {args.epochs} epochs (EarlyStopping patience={args.patience}, AMP={use_amp} [{amp_dtype}], LabelSmoothing={label_smoothing})...")
+    logger.info(f"Starting training for {args.epochs} epochs (EarlyStopping patience={args.patience}, Optimizer={getattr(args, 'optimizer', 'adamw')}, Scheduler={getattr(args, 'scheduler', 'cosine_warmup')}, AMP={use_amp} [{amp_dtype}], LabelSmoothing={label_smoothing})...")
     history = trainer.fit(train_loader, val_loader, epochs=args.epochs, verbose=True)
 
     # Evaluate on test set
@@ -434,6 +451,8 @@ def cmd_train(args):
     y_true, y_pred, y_prob = trainer.predict(test_loader)
     metrics = compute_metrics(y_true, y_pred)
     logger.info(f"Test Accuracy: {metrics['accuracy'] * 100:.2f}% | Macro F1: {metrics['macro_f1']:.4f}")
+    from sklearn.metrics import classification_report as sk_classification_report
+    logger.info("Detailed Classification Report:\n" + sk_classification_report(y_true, y_pred, target_names=ACTIONS, digits=4, zero_division=0))
 
     # Plot confusion matrix
     out_dir = Path(args.output_dir)
@@ -444,9 +463,16 @@ def cmd_train(args):
 
     # Update consolidated Master Experiment Report
     report_file = getattr(args, "report_file", "outputs/EXPERIMENT_RESULTS.md")
-    val_loss = history["val_loss"][-1] if history.get("val_loss") else 0.0
-    val_acc = history["val_acc"][-1] if history.get("val_acc") else 0.0
-    train_loss = history["train_loss"][-1] if history.get("train_loss") else 0.0
+    es_metric = getattr(args, "early_stopping_metric", "val_acc")
+    if history.get(es_metric):
+        best_idx = int(np.argmax(history[es_metric]) if es_metric == "val_acc" else np.argmin(history[es_metric]))
+        val_loss = history["val_loss"][best_idx]
+        val_acc = history["val_acc"][best_idx]
+        train_loss = history["train_loss"][best_idx]
+    else:
+        val_loss = history["val_loss"][-1] if history.get("val_loss") else 0.0
+        val_acc = history["val_acc"][-1] if history.get("val_acc") else 0.0
+        train_loss = history["train_loss"][-1] if history.get("train_loss") else 0.0
 
     record = {
         "model": args.model,
@@ -852,6 +878,10 @@ def create_parser() -> argparse.ArgumentParser:
     p_train.add_argument("--dropout", type=float, default=None, help="Dropout probability (None uses calibrated ~350K budget)")
     p_train.add_argument("--seed", type=int, default=42, help="Random seed")
     p_train.add_argument("--num_workers", type=int, default=0, help="DataLoader worker processes")
+    p_train.add_argument("--early_stopping_metric", type=str, default="val_acc", choices=["val_acc", "val_loss"], help="Metric to monitor for early stopping and best checkpoint")
+    p_train.add_argument("--optimizer", type=str, default="adamw", choices=["adamw", "adam"], help="Optimizer architecture")
+    p_train.add_argument("--scheduler", type=str, default="cosine_warmup", choices=["cosine_warmup", "plateau"], help="Learning rate scheduler")
+    p_train.add_argument("--warmup_epochs", type=int, default=5, help="Number of linear warmup epochs")
 
     # High-Performance Acceleration & HF Options
     p_train.add_argument("--use_amp", action="store_true", default=True, help="Enable Automatic Mixed Precision (AMP)")

@@ -59,13 +59,13 @@ class TestFairBudgetAndFeatures(unittest.TestCase):
         raw_3d = extract_features_by_method(self.df, "raw_3d")
         self.assertEqual(raw_3d.shape, (self.n_frames, 39))
 
-        # rel_2d: 12 * 2 = 24
+        # rel_2d: 13 * 2 = 26
         rel_2d = extract_features_by_method(self.df, "rel_2d")
-        self.assertEqual(rel_2d.shape, (self.n_frames, 24))
+        self.assertEqual(rel_2d.shape, (self.n_frames, 26))
 
-        # rel_3d: 12 * 3 = 36
+        # rel_3d: 13 * 3 = 39
         rel_3d = extract_features_by_method(self.df, "rel_3d")
-        self.assertEqual(rel_3d.shape, (self.n_frames, 36))
+        self.assertEqual(rel_3d.shape, (self.n_frames, 39))
 
         # angle_2d: 286
         ang_2d = extract_features_by_method(self.df, "angle_2d")
@@ -75,9 +75,9 @@ class TestFairBudgetAndFeatures(unittest.TestCase):
         ang_3d = extract_features_by_method(self.df, "angle_3d")
         self.assertEqual(ang_3d.shape, (self.n_frames, 286))
 
-        # mix: 36 + 286 = 322
+        # mix: 39 + 286 = 325
         mix = extract_features_by_method(self.df, "mix")
-        self.assertEqual(mix.shape, (self.n_frames, 322))
+        self.assertEqual(mix.shape, (self.n_frames, 325))
         self.assertFalse(np.isnan(mix).any())
 
     def test_02_zero_frame_handling(self):
@@ -126,7 +126,7 @@ class TestFairBudgetAndFeatures(unittest.TestCase):
         self.assertTrue(min_p <= p_stgcn <= max_p, f"STGCN params {p_stgcn} outside range [{min_p}, {max_p}]")
 
     def test_04_forward_pass_all_models(self):
-        x = torch.randn(2, 32, 36)  # (B=2, T=32, D=36)
+        x = torch.randn(2, 32, 39)  # (B=2, T=32, D=39)
         
         lstm = build_model("LSTM", "rel_3d")
         out_lstm = lstm(x)

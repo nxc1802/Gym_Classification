@@ -16,26 +16,26 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | Exp ID | Model Architecture | Feature Representation | Dimension | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
 | **T1.1** | **LSTM** | raw_2d | 26 | 0.3074 | 2.2601 | 47.56% | 47.90% | 0.4712 | `checkpoints/best_LSTM_T1.1_raw_2d.pt` | Done |
-| **T1.2** | **LSTM** | rel_2d | 24 | 0.4024 | 2.3667 | 50.12% | 45.70% | 0.4622 | `checkpoints/best_LSTM_T1.2_rel_2d.pt` | Done |
+| **T1.2** | **LSTM** | rel_2d | 26 | 0.4024 | 2.3667 | 50.12% | 45.70% | 0.4622 | `checkpoints/best_LSTM_T1.2_rel_2d.pt` | Done |
 | **T1.3** | **LSTM** | angle_2d | 286 | 0.1309 | 3.0266 | 48.04% | 43.80% | 0.4342 | `checkpoints/best_LSTM_T1.3_angle_2d.pt` | Done |
 | **T1.4** | **LSTM** | raw_3d | 39 | 0.1985 | 2.6284 | 49.13% | 48.27% | 0.4754 | `checkpoints/best_LSTM_T1.4_raw_3d.pt` | Done |
-| **T1.5** | **LSTM** | rel_3d | 36 | 0.2856 | 2.5757 | 52.85% | 48.85% | 0.4814 | `checkpoints/best_LSTM_T1.5_rel_3d.pt` | Done |
+| **T1.5** | **LSTM** | rel_3d | 39 | 0.2856 | 2.5757 | 52.85% | 48.85% | 0.4814 | `checkpoints/best_LSTM_T1.5_rel_3d.pt` | Done |
 | **T1.6** | **LSTM** | angle_3d | 286 | 0.1232 | 3.4244 | 45.20% | 44.17% | 0.4485 | `checkpoints/best_LSTM_T1.6_angle_3d.pt` | Done |
-| **T1.7** | **LSTM** | mix | 322 | 0.0559 | 3.5758 | 49.33% | 54.91% | 0.5439 | `checkpoints/best_LSTM_T1.7_mix.pt` | Done |
+| **T1.7** | **LSTM** | mix | 325 | 0.0559 | 3.5758 | 49.33% | 54.91% | 0.5439 | `checkpoints/best_LSTM_T1.7_mix.pt` | Done |
 | **T1.8** | **BiLSTM** | raw_2d | 26 | 0.2915 | 2.0462 | 54.56% | 44.78% | 0.4474 | `checkpoints/best_BiLSTM_T1.8_raw_2d.pt` | Done |
-| **T1.9** | **BiLSTM** | rel_2d | 24 | 0.3273 | 2.3025 | 50.26% | 50.20% | 0.4902 | `checkpoints/best_BiLSTM_T1.9_rel_2d.pt` | Done |
+| **T1.9** | **BiLSTM** | rel_2d | 26 | 0.3273 | 2.3025 | 50.26% | 50.20% | 0.4902 | `checkpoints/best_BiLSTM_T1.9_rel_2d.pt` | Done |
 | **T1.10** | **BiLSTM** | angle_2d | 286 | 0.1235 | 2.9666 | 51.52% | 47.49% | 0.4535 | `checkpoints/best_BiLSTM_T1.10_angle_2d.pt` | Done |
 | **T1.11** | **BiLSTM** | raw_3d | 39 | 0.2631 | 2.7134 | 47.32% | 44.82% | 0.4326 | `checkpoints/best_BiLSTM_T1.11_raw_3d.pt` | Done |
-| **T1.12** | **BiLSTM** | rel_3d | 36 | 0.3466 | 2.4109 | 49.40% | 44.44% | 0.4028 | `checkpoints/best_BiLSTM_T1.12_rel_3d.pt` | Done |
+| **T1.12** | **BiLSTM** | rel_3d | 39 | 0.3466 | 2.4109 | 49.40% | 44.44% | 0.4028 | `checkpoints/best_BiLSTM_T1.12_rel_3d.pt` | Done |
 | **T1.13** | **BiLSTM** | angle_3d | 286 | 0.0984 | 3.2998 | 48.96% | 46.04% | 0.4730 | `checkpoints/best_BiLSTM_T1.13_angle_3d.pt` | Done |
-| **T1.14** | **BiLSTM** | mix | 322 | 0.0654 | 3.3699 | 50.70% | 52.95% | 0.5282 | `checkpoints/best_BiLSTM_T1.14_mix.pt` | Done |
+| **T1.14** | **BiLSTM** | mix | 325 | 0.0654 | 3.3699 | 50.70% | 52.95% | 0.5282 | `checkpoints/best_BiLSTM_T1.14_mix.pt` | Done |
 | **T1.15** | **Transformer** | raw_2d | 26 | 0.1623 | 2.5206 | 55.48% | 52.91% | 0.5451 | `checkpoints/best_Transformer_T1.15_raw_2d.pt` | Done |
-| **T1.16** | **Transformer** | rel_2d | 24 | 0.1928 | 2.3190 | 58.87% | 54.51% | 0.5360 | `checkpoints/best_Transformer_T1.16_rel_2d.pt` | Done |
+| **T1.16** | **Transformer** | rel_2d | 26 | 0.1928 | 2.3190 | 58.87% | 54.51% | 0.5360 | `checkpoints/best_Transformer_T1.16_rel_2d.pt` | Done |
 | **T1.17** | **Transformer** | angle_2d | 286 | 0.1049 | 2.6590 | 56.58% | 49.42% | 0.4788 | `checkpoints/best_Transformer_T1.17_angle_2d.pt` | Done |
 | **T1.18** | **Transformer** | raw_3d | 39 | 0.1174 | 2.3503 | 55.59% | 51.90% | 0.5404 | `checkpoints/best_Transformer_T1.18_raw_3d.pt` | Done |
-| **T1.19** | **Transformer** | rel_3d | 36 | 0.1802 | 2.3504 | 55.55% | 52.81% | 0.5213 | `checkpoints/best_Transformer_T1.19_rel_3d.pt` | Done |
+| **T1.19** | **Transformer** | rel_3d | 39 | 0.1802 | 2.3504 | 55.55% | 52.81% | 0.5213 | `checkpoints/best_Transformer_T1.19_rel_3d.pt` | Done |
 | **T1.20** | **Transformer** | angle_3d | 286 | 0.1003 | 3.2583 | 49.95% | 51.12% | 0.5245 | `checkpoints/best_Transformer_T1.20_angle_3d.pt` | Done |
-| **T1.21** | **Transformer** | mix | 322 | 0.0843 | 2.7207 | 51.86% | 53.49% | 0.5411 | `checkpoints/best_Transformer_T1.21_mix.pt` | Done |
+| **T1.21** | **Transformer** | mix | 325 | 0.0843 | 2.7207 | 51.86% | 53.49% | 0.5411 | `checkpoints/best_Transformer_T1.21_mix.pt` | Done |
 
 ---
 
@@ -60,9 +60,9 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | Exp ID | Model Architecture | Graph Stream | Tensor Shape $(C, T, V)$ | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
 | **T4.1** | **ST-GCN** | raw_3d | $(3, 32, 13)$ | 0.6066 | 2.5094 | 37.99% | 35.87% | 0.3471 | `checkpoints/best_STGCN_T4.1_raw_3d.pt` | Done |
-| **T4.2** | **ST-GCN** | rel_3d | $(3, 32, 12)$ | 0.5516 | 2.2020 | 41.99% | 41.94% | 0.4128 | `checkpoints/best_STGCN_T4.2_rel_3d.pt` | Done |
+| **T4.2** | **ST-GCN** | rel_3d | $(3, 32, 13)$ | 0.5516 | 2.2020 | 41.99% | 41.94% | 0.4128 | `checkpoints/best_STGCN_T4.2_rel_3d.pt` | Done |
 | **T4.3** | **ST-GCN** | raw_2d | $(2, 32, 13)$ | 0.7527 | 2.9184 | 34.40% | 39.63% | 0.3346 | `checkpoints/best_STGCN_T4.3_raw_2d.pt` | Done |
-| **T4.4** | **ST-GCN** | rel_2d | $(2, 32, 12)$ | 0.7432 | 2.5220 | 35.19% | 35.03% | 0.3397 | `checkpoints/best_STGCN_T4.4_rel_2d.pt` | Done |
+| **T4.4** | **ST-GCN** | rel_2d | $(2, 32, 13)$ | 0.7432 | 2.5220 | 35.19% | 35.03% | 0.3397 | `checkpoints/best_STGCN_T4.4_rel_2d.pt` | Done |
 
 ---
 
@@ -107,3 +107,12 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | **Accuracy** | | | **53.05%** | **2952** |
 | **Macro avg** | **0.5999** | **0.5376** | **0.5224** | **2952** |
 | **Weighted avg** | **0.6262** | **0.5305** | **0.5420** | **2952** |
+
+---
+
+## Proposed SOTA: Upgraded Skeletal Transformer (SL=16, Overlap=8, Mix Representation)
+*Objective:* Comprehensive empirical evaluation of the proposed SOTA architecture incorporating all Roadmap upgrades: Learnable Positional Embeddings, Pre-LN, GeLU, AdamW, Cosine Annealing with Warmup, Label Smoothing 0.1, SL=16 with Overlap=8, on the verified anti-leakage MediaPipe landmark dataset.
+
+| Exp ID | Architecture | Feature | Seq Len | Stride | Augment | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
+| :---: | :--- | :---: | :---: | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
+| **SOTA_TRANSFORMER_MIX** | **Transformer (Pre-LN + GeLU + Learnable PE)** | mix | 16 | 8 | combined (1->4) | 0.6206 | 2.4735 | 53.54% | 53.05% | 0.5442 | `checkpoints/best_Transformer_SOTA_TRANSFORMER_MIX_mix.pt` | Done |

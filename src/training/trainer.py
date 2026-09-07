@@ -7,6 +7,7 @@ Supports:
   - Direct upload of checkpoints to Hugging Face Hub
 """
 
+import math
 import time
 from pathlib import Path
 from typing import Dict, Any, Optional, Tuple, List
@@ -22,6 +23,7 @@ from src.utils.hf_hub import upload_checkpoints_to_hf, DEFAULT_MODEL_REPO
 class Trainer:
     """
     High-Throughput Trainer for gym exercise classification models.
+    Supports AdamW, Cosine Annealing with Warmup, Label Smoothing, and Mixed Precision.
     """
     def __init__(
         self,
@@ -38,7 +40,12 @@ class Trainer:
         amp_dtype: str = "bfloat16",
         push_to_hf: bool = False,
         hf_repo: str = DEFAULT_MODEL_REPO,
-        hf_token: Optional[str] = None
+        hf_token: Optional[str] = None,
+        optimizer_type: str = "adamw",
+        scheduler_type: str = "cosine_warmup",
+        warmup_epochs: int = 5,
+        max_epochs: int = 60,
+        early_stopping_metric: str = "val_acc"
     ):
         self.model = model.to(device)
         self.device = device
@@ -53,6 +60,8 @@ class Trainer:
         self.last_checkpoint_path = self.checkpoint_dir / f"last_{model_name}.pt"
         self.use_class_weights = use_class_weights
         self.label_smoothing = label_smoothing
+        self.scheduler_type = scheduler_type
+        self.early_stopping_metric = early_stopping_metric
 
         # AMP Configuration
         self.use_amp = use_amp and (device.type == "cuda")
@@ -72,14 +81,34 @@ class Trainer:
         self.hf_repo = hf_repo
         self.hf_token = hf_token
 
-        self.optimizer = torch.optim.Adam(
-            self.model.parameters(),
-            lr=self.lr,
-            weight_decay=self.weight_decay
-        )
-        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            self.optimizer, mode="min", factor=0.5, patience=3
-        )
+        # Optimizer selection: AdamW (Roadmap Sec 4) vs Adam
+        if optimizer_type.lower() == "adamw":
+            self.optimizer = torch.optim.AdamW(
+                self.model.parameters(),
+                lr=self.lr,
+                weight_decay=self.weight_decay
+            )
+        else:
+            self.optimizer = torch.optim.Adam(
+                self.model.parameters(),
+                lr=self.lr,
+                weight_decay=self.weight_decay
+            )
+
+        # Scheduler selection: Cosine Annealing with Warmup (Roadmap Sec 2.3) vs ReduceLROnPlateau
+        if scheduler_type == "cosine_warmup":
+            def lr_lambda(epoch: int) -> float:
+                if epoch < warmup_epochs:
+                    return max(1e-2, float(epoch + 1) / float(max(1, warmup_epochs)))
+                else:
+                    progress = float(epoch - warmup_epochs) / float(max(1, max_epochs - warmup_epochs))
+                    return max(1e-2, 0.5 * (1.0 + math.cos(math.pi * progress)))
+
+            self.scheduler = torch.optim.lr_scheduler.LambdaLR(self.optimizer, lr_lambda=lr_lambda)
+        else:
+            self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+                self.optimizer, mode="min", factor=0.5, patience=3
+            )
 
     def _get_criterion(self, train_loader: DataLoader) -> nn.Module:
         if self.use_class_weights:
@@ -196,18 +225,21 @@ class Trainer:
             "lr": []
         }
 
-        best_val_loss = float("inf")
+        best_metric = -float("inf") if self.early_stopping_metric == "val_acc" else float("inf")
         patience_counter = 0
 
         amp_info = f" [AMP: {self.amp_dtype}]" if self.use_amp else " [FP32]"
         if verbose:
-            print(f"Starting training on {self.device}{amp_info} for {epochs} epochs ...")
+            print(f"Starting training on {self.device}{amp_info} for {epochs} epochs (Monitoring: {self.early_stopping_metric}) ...")
 
         for epoch in range(1, epochs + 1):
             t0 = time.perf_counter()
             tr_loss, tr_acc = self.train_epoch(train_loader, criterion)
             v_loss, v_acc = self.validate(val_loader, criterion)
-            self.scheduler.step(v_loss)
+            if isinstance(self.scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                self.scheduler.step(v_loss)
+            else:
+                self.scheduler.step()
 
             current_lr = self.optimizer.param_groups[0]["lr"]
             history["train_loss"].append(tr_loss)
@@ -229,17 +261,19 @@ class Trainer:
             # Save last checkpoint every epoch
             torch.save(self.model.state_dict(), self.last_checkpoint_path)
 
-            if v_loss < best_val_loss:
-                best_val_loss = v_loss
+            is_better = (v_acc > best_metric) if self.early_stopping_metric == "val_acc" else (v_loss < best_metric)
+            if is_better:
+                best_metric = v_acc if self.early_stopping_metric == "val_acc" else v_loss
                 patience_counter = 0
                 torch.save(self.model.state_dict(), self.best_checkpoint_path)
                 if verbose:
-                    print(f"  --> Best checkpoint saved: {self.best_checkpoint_path.name}")
+                    val_str = f"val_acc: {v_acc * 100:.2f}%" if self.early_stopping_metric == "val_acc" else f"val_loss: {v_loss:.4f}"
+                    print(f"  --> Best checkpoint saved ({val_str}): {self.best_checkpoint_path.name}")
             else:
                 patience_counter += 1
                 if patience_counter >= self.patience:
                     if verbose:
-                        print(f"Early stopping triggered at epoch {epoch}.")
+                        print(f"Early stopping triggered at epoch {epoch} (No improvement in {self.early_stopping_metric} for {self.patience} epochs).")
                     break
 
         # Reload best weights

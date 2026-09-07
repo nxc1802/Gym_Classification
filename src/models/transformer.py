@@ -27,14 +27,27 @@ class PositionalEncoding(nn.Module):
         T = x.size(1)
         return x + self.pe[:, :T, :]
 
+class LearnablePositionalEncoding(nn.Module):
+    """
+    Learnable temporal positional embedding (Roadmap Sec 2.1).
+    Enables the model to adaptively capture exercise repetition phases.
+    """
+    def __init__(self, d_model: int, max_len: int = 128):
+        super().__init__()
+        self.pe = nn.Parameter(torch.randn(1, max_len, d_model) * 0.02)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        T = x.size(1)
+        return x + self.pe[:, :T, :]
+
 class TransformerModel(nn.Module):
     """
-    Calibrated Transformer Encoder Classifier (~355K params).
-    - Input LayerNorm on feature dimension
-    - Linear projection to d_model
-    - Sinusoidal Positional Encoding
-    - 3 layers of TransformerEncoderLayer (8 attention heads, ff_dim=192)
-    - Global Average Pooling over time + Classification Head
+    Modern SOTA Skeletal Transformer Classifier (~350K params).
+    Roadmap Upgrades:
+      - Learnable Positional Embeddings
+      - Pre-LayerNorm (norm_first=True) for smooth gradient propagation
+      - GeLU activations
+      - Robust Projection + GAP + Two-stage LayerNorm Head
     """
     def __init__(
         self,
@@ -43,13 +56,19 @@ class TransformerModel(nn.Module):
         d_model: int = 128,
         nhead: int = 8,
         num_layers: int = 3,
-        dim_feedforward: int = 192,
-        dropout: float = 0.2
+        dim_feedforward: int = 160,
+        dropout: float = 0.2,
+        pos_type: str = "learnable"
     ):
         super().__init__()
         self.in_norm = nn.LayerNorm(feat_dim)
         self.input_proj = nn.Linear(feat_dim, d_model)
-        self.pos_encoder = PositionalEncoding(d_model)
+        self.input_drop = nn.Dropout(dropout)
+
+        if pos_type == "learnable":
+            self.pos_encoder = LearnablePositionalEncoding(d_model)
+        else:
+            self.pos_encoder = PositionalEncoding(d_model)
 
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=d_model,
@@ -57,21 +76,24 @@ class TransformerModel(nn.Module):
             dim_feedforward=dim_feedforward,
             dropout=dropout,
             batch_first=True,
-            activation="relu"
+            activation="gelu",
+            norm_first=True
         )
-        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers, enable_nested_tensor=False)
         self.norm = nn.LayerNorm(d_model)
         self.fc = nn.Sequential(
-            nn.Linear(d_model, 64),
-            nn.ReLU(),
+            nn.Linear(d_model, d_model),
+            nn.GELU(),
+            nn.LayerNorm(d_model),
             nn.Dropout(dropout),
-            nn.Linear(64, num_classes)
+            nn.Linear(d_model, num_classes)
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: (B, T, D)
         x_norm = self.in_norm(x)
         h = self.input_proj(x_norm)
+        h = self.input_drop(h)
         h = self.pos_encoder(h)
         encoded = self.transformer_encoder(h)  # (B, T, d_model)
         encoded = self.norm(encoded)
