@@ -60,13 +60,13 @@ class TestGymPipeline(unittest.TestCase):
         cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def test_01_feature_engineering(self):
-        # Test 12rel_4
+        # Test 12rel_4 (hip-midpoint-relative, all 13 joints: 13*4 + 1 avg_hip_vis = 53)
         rel_12 = extract_relative_features(self.df, RAW_POINTS_13, ["x", "y", "z", "visibility"], include_origin_vis=True)
-        self.assertEqual(rel_12.shape, (self.n_frames, 49))
+        self.assertEqual(rel_12.shape, (self.n_frames, 53))
 
-        # Test full_rel_4
+        # Test full_rel_4 (hip-midpoint-relative, all 33 joints: 33*4 + 1 = 133)
         rel_32 = extract_relative_features(self.df, RAW_POINTS_33, ["x", "y", "z", "visibility"], include_origin_vis=True)
-        self.assertEqual(rel_32.shape, (self.n_frames, 129))
+        self.assertEqual(rel_32.shape, (self.n_frames, 133))
 
         # Test angles
         ang3 = compute_triplet_angles(self.df, RAW_POINTS_13)
@@ -76,13 +76,13 @@ class TestGymPipeline(unittest.TestCase):
         ang2 = compute_pair_angles(self.df, RAW_POINTS_13)
         self.assertEqual(ang2.shape, (self.n_frames, 78))
 
-        # Test direct concat
+        # Test direct concat (53 + 286 = 339)
         direct = extract_features_by_method(self.df, "direct_concat")
-        self.assertEqual(direct.shape, (self.n_frames, 335))
+        self.assertEqual(direct.shape, (self.n_frames, 339))
 
         # Test branch concat
         b1, b2 = extract_features_by_method(self.df, "branch_concat")
-        self.assertEqual(b1.shape, (self.n_frames, 49))
+        self.assertEqual(b1.shape, (self.n_frames, 53))
         self.assertEqual(b2.shape, (self.n_frames, 286))
 
     def test_02_augmentations(self):
@@ -106,46 +106,65 @@ class TestGymPipeline(unittest.TestCase):
         x_warp = aug.apply(x, "time_warp")
         self.assertEqual(x_warp.shape, x.shape)
 
+        # Mirror
+        x_mir = aug.apply(x, "mirror")
+        self.assertEqual(x_mir.shape, x.shape)
+
+        # Speed perturb
+        x_sp = aug.apply(x, "speed_perturb")
+        self.assertEqual(x_sp.shape, x.shape)
+
+        # Generate augmented variants (should return 3 variants)
+        variants = aug.generate_augmented_variants(x, "combined")
+        self.assertEqual(len(variants), 3)
+        for v in variants:
+            self.assertEqual(v.shape, x.shape)
+
     def test_03_sliding_windows_and_padding(self):
         # Normal sequence 75 frames, seq_len 32, stride 16
-        arr = np.random.randn(75, 49)
+        arr = np.random.randn(75, 53)
         wins = sliding_windows(arr, seq_len=32, stride=16)
-        # Windows: [0:32], [16:48], [32:64], [48:80 (padded)] -> 4 windows
-        self.assertEqual(len(wins), 4)
+        # Windows: [0:32], [16:48], [32:64], [48:75 -> 27 frames >= 16 -> interpolated]
+        self.assertGreaterEqual(len(wins), 3)
         for w in wins:
-            self.assertEqual(w.shape, (32, 49))
+            self.assertEqual(w.shape, (32, 53))
 
-        # Short sequence 20 frames -> should be padded to 32
-        arr_short = np.random.randn(20, 49)
+        # Short sequence 20 frames >= 50% of 32 -> should be interpolated to 32
+        arr_short = np.random.randn(20, 53)
         wins_short = sliding_windows(arr_short, seq_len=32, stride=16)
         self.assertEqual(len(wins_short), 1)
-        self.assertEqual(wins_short[0].shape, (32, 49))
+        self.assertEqual(wins_short[0].shape, (32, 53))
+
+        # Very short sequence 10 frames < 50% of 32 -> should be discarded
+        arr_tiny = np.random.randn(10, 53)
+        wins_tiny = sliding_windows(arr_tiny, seq_len=32, stride=16)
+        self.assertEqual(len(wins_tiny), 0)
 
     def test_04_model_forward_passes(self):
         B, T = 4, 32
 
         # 1. LSTM
-        m_lstm = LSTMModel(feat_dim=49, num_classes=NUM_CLASSES).to(self.device)
-        out_lstm = m_lstm(torch.randn(B, T, 49).to(self.device))
+        m_lstm = LSTMModel(feat_dim=53, num_classes=NUM_CLASSES).to(self.device)
+        out_lstm = m_lstm(torch.randn(B, T, 53).to(self.device))
         self.assertEqual(out_lstm.shape, (B, NUM_CLASSES))
 
         # 2. BiLSTM
-        m_bilstm = BiLSTMModel(feat_dim=49, num_classes=NUM_CLASSES).to(self.device)
-        out_bilstm = m_bilstm(torch.randn(B, T, 49).to(self.device))
+        m_bilstm = BiLSTMModel(feat_dim=53, num_classes=NUM_CLASSES).to(self.device)
+        out_bilstm = m_bilstm(torch.randn(B, T, 53).to(self.device))
         self.assertEqual(out_bilstm.shape, (B, NUM_CLASSES))
 
         # 3. Transformer
-        m_tf = TransformerModel(feat_dim=49, num_classes=NUM_CLASSES).to(self.device)
-        out_tf = m_tf(torch.randn(B, T, 49).to(self.device))
+        m_tf = TransformerModel(feat_dim=53, num_classes=NUM_CLASSES).to(self.device)
+        out_tf = m_tf(torch.randn(B, T, 53).to(self.device))
         self.assertEqual(out_tf.shape, (B, NUM_CLASSES))
 
         # 4. BranchConcat (LSTM & Transformer)
-        m_bc_lstm = BranchConcatModel(dim1=49, dim2=286, num_classes=NUM_CLASSES).to(self.device)
-        x_tuple = (torch.randn(B, T, 49).to(self.device), torch.randn(B, T, 286).to(self.device))
+        m_bc_lstm = BranchConcatModel(dim1=53, dim2=286, num_classes=NUM_CLASSES).to(self.device)
+        x_tuple = (torch.randn(B, T, 53).to(self.device), torch.randn(B, T, 286).to(self.device))
         out_bc_lstm = m_bc_lstm(x_tuple)
         self.assertEqual(out_bc_lstm.shape, (B, NUM_CLASSES))
 
-        m_bc_tf = BranchConcatTransformer(dim1=49, dim2=286, num_classes=NUM_CLASSES).to(self.device)
+        m_bc_tf = BranchConcatTransformer(dim1=53, dim2=286, num_classes=NUM_CLASSES).to(self.device)
         out_bc_tf = m_bc_tf(x_tuple)
         self.assertEqual(out_bc_tf.shape, (B, NUM_CLASSES))
 

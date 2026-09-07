@@ -88,11 +88,11 @@ def build_model(
     Model Factory instantiating the requested architecture with compatible input dimensions.
     Defaults are calibrated to a fair ~350K parameter budget.
     """
-    feat_dim = FEATURE_DIMS.get(feature_method, 36)
+    feat_dim = FEATURE_DIMS.get(feature_method, 39)
 
     if model_type == "LSTM":
         if feature_method == "branch_concat":
-            return BranchConcatModel(dim1=49, dim2=286, num_classes=num_classes, hidden_dim=hidden_dim or 64, dropout=dropout or 0.3)
+            return BranchConcatModel(dim1=53, dim2=286, num_classes=num_classes, hidden_dim=hidden_dim or 64, dropout=dropout or 0.3)
         h_dim = hidden_dim if hidden_dim is not None else 160
         n_layers = num_layers if num_layers is not None else 2
         drop = dropout if dropout is not None else 0.3
@@ -100,7 +100,7 @@ def build_model(
 
     elif model_type == "BiLSTM":
         if feature_method == "branch_concat":
-            return BranchConcatModel(dim1=49, dim2=286, num_classes=num_classes, hidden_dim=hidden_dim or 64, dropout=dropout or 0.3)
+            return BranchConcatModel(dim1=53, dim2=286, num_classes=num_classes, hidden_dim=hidden_dim or 64, dropout=dropout or 0.3)
         h_dim = hidden_dim if hidden_dim is not None else 96
         n_layers = num_layers if num_layers is not None else 2
         drop = dropout if dropout is not None else 0.3
@@ -108,7 +108,7 @@ def build_model(
 
     elif model_type == "Transformer":
         if feature_method == "branch_concat":
-            return BranchConcatTransformer(dim1=49, dim2=286, num_classes=num_classes, d_model=hidden_dim or 128, nhead=nhead, num_layers=num_layers or 3, dropout=dropout or 0.2)
+            return BranchConcatTransformer(dim1=53, dim2=286, num_classes=num_classes, d_model=hidden_dim or 128, nhead=nhead, num_layers=num_layers or 3, dropout=dropout or 0.2)
         h_dim = hidden_dim if hidden_dim is not None else 128
         n_layers = num_layers if num_layers is not None else 3
         drop = dropout if dropout is not None else 0.2
@@ -119,7 +119,7 @@ def build_model(
         return STGCNModel(feat_dim=feat_dim, num_classes=num_classes, dropout=drop)
 
     elif model_type == "BranchConcat":
-        return BranchConcatModel(dim1=49, dim2=286, num_classes=num_classes, hidden_dim=hidden_dim or 64, dropout=dropout or 0.3)
+        return BranchConcatModel(dim1=53, dim2=286, num_classes=num_classes, hidden_dim=hidden_dim or 64, dropout=dropout or 0.3)
 
     else:
         raise ValueError(f"Unknown model_type: {model_type}")
@@ -365,7 +365,7 @@ def cmd_train(args):
 
     # Dataloaders
     in_mem = getattr(args, "in_memory", True)
-    zero_frame_handling = getattr(args, "zero_frame", "zero")
+    zero_frame_handling = getattr(args, "zero_frame", "interpolate")
     logger.info(f"Loading data: Feature={args.feature}, Augment={args.augment}, ZeroFrame={zero_frame_handling}, BatchSize={args.batch_size}, InMemory={in_mem}")
     train_loader, val_loader, test_loader = get_dataloaders(
         metadata_path=args.metadata,
@@ -826,8 +826,8 @@ def create_parser() -> argparse.ArgumentParser:
         choices=["raw_2d", "raw_3d", "rel_2d", "rel_3d", "angle_2d", "angle_3d", "mix", "full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"],
         help="Feature representation method"
     )
-    p_train.add_argument("--augment", type=str, default="none", choices=["none", "jitter", "rotate", "joint_dropout", "time_warp", "combined"], help="Augmentation method")
-    p_train.add_argument("--zero_frame", type=str, default="zero", choices=["zero", "ffill", "linear"], help="Missing/zero-frame handling strategy")
+    p_train.add_argument("--augment", type=str, default="none", choices=["none", "jitter", "rotate", "joint_dropout", "time_warp", "mirror", "speed_perturb", "combined"], help="Augmentation method")
+    p_train.add_argument("--zero_frame", type=str, default="interpolate", choices=["zero", "ffill", "linear", "interpolate"], help="Missing/zero-frame handling strategy")
     p_train.add_argument("--label_smoothing", type=float, default=0.0, help="Label smoothing regularization parameter (e.g. 0.1)")
     p_train.add_argument("--exp_id", type=str, default=None, help="Experiment ID to automatically update outputs/EXPERIMENT_RESULTS.md (e.g. T1.1, T2.1, T2b.1, A3, PROPOSED)")
     p_train.add_argument("--smoke_test", action="store_true", help="Smoke test mode: minimal 2 epochs and minimal dataset for quick debugging")

@@ -1,6 +1,6 @@
 """
 Feature Engineering for Gym Pose Landmarks.
-Computes raw coordinates (2D/3D), nose-relative coordinates (2D/3D), joint angles (2D/3D), and mix representations.
+Computes raw coordinates (2D/3D), hip-midpoint-relative coordinates (2D/3D), joint angles (2D/3D), and mix representations.
 """
 
 from itertools import combinations
@@ -8,7 +8,7 @@ from typing import List, Tuple, Dict, Union, Optional
 import numpy as np
 import pandas as pd
 
-from src.constants import RAW_POINTS_33, RAW_POINTS_13, REL_POINTS_12
+from src.constants import RAW_POINTS_33, RAW_POINTS_13, REL_POINTS_12, HIP_MIDPOINT_JOINTS
 
 def extract_raw_features(
     df: pd.DataFrame,
@@ -41,23 +41,27 @@ def extract_relative_features(
     include_origin_vis: bool = True
 ) -> np.ndarray:
     """
-    Re-centers coordinates relative to NOSE.
-    Coordinates (x, y, z) become (pt - nose).
+    Re-centers coordinates relative to the hip midpoint (average of LEFT_HIP and RIGHT_HIP).
+    Coordinates (x, y, z) become (pt - hip_midpoint).
     Visibility is retained unchanged.
-    Optionally appends NOSE_visibility as an additional feature.
+    All input points (including NOSE) are output as hip-midpoint-relative.
+    Optionally appends average hip visibility as an additional feature.
     """
-    # Origin coordinates (NOSE)
     coord_dims = [d for d in dims if d != "visibility"]
+    hip_l, hip_r = HIP_MIDPOINT_JOINTS
+
+    # Compute hip midpoint for each coordinate dimension
     origin_coords = {}
     for d in coord_dims:
-        col = f"NOSE_{d}"
-        origin_coords[d] = df[col].fillna(0.0).values if col in df.columns else np.zeros(len(df), dtype=np.float32)
+        col_l = f"{hip_l}_{d}"
+        col_r = f"{hip_r}_{d}"
+        l_vals = df[col_l].fillna(0.0).values if col_l in df.columns else np.zeros(len(df), dtype=np.float32)
+        r_vals = df[col_r].fillna(0.0).values if col_r in df.columns else np.zeros(len(df), dtype=np.float32)
+        origin_coords[d] = (l_vals + r_vals) / 2.0
 
     features = []
-    # For each non-origin point
+    # All points are relative to hip midpoint (no point excluded)
     for pt in points:
-        if pt == "NOSE":
-            continue
         for d in dims:
             col = f"{pt}_{d}"
             arr = df[col].fillna(0.0).values if col in df.columns else np.zeros(len(df), dtype=np.float32)
@@ -65,8 +69,13 @@ def extract_relative_features(
                 arr = arr - origin_coords[d]
             features.append(arr)
 
-    if include_origin_vis and "NOSE_visibility" in df.columns:
-        features.append(df["NOSE_visibility"].fillna(0.0).values)
+    # Optionally append average hip visibility
+    if include_origin_vis:
+        vis_l_col = f"{hip_l}_visibility"
+        vis_r_col = f"{hip_r}_visibility"
+        vis_l = df[vis_l_col].fillna(0.0).values if vis_l_col in df.columns else np.ones(len(df), dtype=np.float32)
+        vis_r = df[vis_r_col].fillna(0.0).values if vis_r_col in df.columns else np.ones(len(df), dtype=np.float32)
+        features.append((vis_l + vis_r) / 2.0)
 
     return np.stack(features, axis=1).astype(np.float32)
 
@@ -169,23 +178,15 @@ def compute_pair_angles(df: pd.DataFrame, points: List[str] = RAW_POINTS_13) -> 
 def extract_mix_features(df: pd.DataFrame) -> np.ndarray:
     """
     Extracts the unified Proposed Mix representation:
-    Combines best relative coordinates (rel_3d: 12*3 = 36 dims)
-    and best joint angles (angle_3d: 286 dims) = 322 dimensions.
-    Applies per-sequence z-score standardization to balance kinematic and angular features.
+    Combines hip-midpoint-relative coordinates (rel_3d: 13*3 = 39 dims)
+    and joint angles (angle_3d: 286 dims) = 325 dimensions.
+    NOTE: Raw concatenation without per-sequence z-score.
+    Normalization should be applied at dataset level using train-set statistics.
     """
-    rel = extract_relative_features(df, RAW_POINTS_13, dims=["x", "y", "z"], include_origin_vis=False)  # (N, 36)
+    rel = extract_relative_features(df, RAW_POINTS_13, dims=["x", "y", "z"], include_origin_vis=False)  # (N, 39)
     ang = compute_triplet_angles_3d(df, RAW_POINTS_13)  # (N, 286)
 
-    # Robust per-sequence standardization
-    rel_mean = np.mean(rel, axis=0, keepdims=True)
-    rel_std = np.std(rel, axis=0, keepdims=True) + 1e-7
-    rel_norm = (rel - rel_mean) / rel_std
-
-    ang_mean = np.mean(ang, axis=0, keepdims=True)
-    ang_std = np.std(ang, axis=0, keepdims=True) + 1e-7
-    ang_norm = (ang - ang_mean) / ang_std
-
-    return np.concatenate([rel_norm, ang_norm], axis=1).astype(np.float32)
+    return np.concatenate([rel, ang], axis=1).astype(np.float32)
 
 def extract_features_by_method(df: pd.DataFrame, method: str) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
     """
@@ -193,48 +194,48 @@ def extract_features_by_method(df: pd.DataFrame, method: str) -> Union[np.ndarra
     Supported:
       - raw_2d: 13 joints * 2 = 26 dims
       - raw_3d: 13 joints * 3 = 39 dims
-      - rel_2d: 12 joints * 2 = 24 dims
-      - rel_3d: 12 joints * 3 = 36 dims
+      - rel_2d: 13 joints * 2 = 26 dims (hip-midpoint-relative)
+      - rel_3d: 13 joints * 3 = 39 dims (hip-midpoint-relative)
       - angle_2d: 286 planar triplet angles
       - angle_3d: 286 3D spatial triplet angles
-      - mix: 36 (rel_3d) + 286 (angle_3d) = 322 dims
+      - mix: 39 (rel_3d) + 286 (angle_3d) = 325 dims
       - Legacy: full_4 (132), full_rel_4 (129), 13_4 (52), 12rel_4 (49),
-                angle3 (286), angle2 (78), direct_concat (335), branch_concat ((49, 286))
+               angle3 (286), angle2 (78), direct_concat (335), branch_concat ((49, 286))
     """
     if method == "raw_2d":
         return extract_raw_features(df, RAW_POINTS_13, ["x", "y"])  # 26
     elif method == "raw_3d":
         return extract_raw_features(df, RAW_POINTS_13, ["x", "y", "z"])  # 39
     elif method == "rel_2d":
-        return extract_relative_features(df, RAW_POINTS_13, ["x", "y"], include_origin_vis=False)  # 24
+        return extract_relative_features(df, RAW_POINTS_13, ["x", "y"], include_origin_vis=False)  # 26
     elif method == "rel_3d":
-        return extract_relative_features(df, RAW_POINTS_13, ["x", "y", "z"], include_origin_vis=False)  # 36
+        return extract_relative_features(df, RAW_POINTS_13, ["x", "y", "z"], include_origin_vis=False)  # 39
     elif method == "angle_2d":
         return compute_triplet_angles_2d(df, RAW_POINTS_13)  # 286
     elif method == "angle_3d":
         return compute_triplet_angles_3d(df, RAW_POINTS_13)  # 286
     elif method == "mix":
-        return extract_mix_features(df)  # 322
+        return extract_mix_features(df)  # 325
 
     # Legacy support
     elif method == "full_4":
         return extract_raw_features(df, RAW_POINTS_33, ["x", "y", "z", "visibility"])  # 132
     elif method == "full_rel_4":
-        return extract_relative_features(df, RAW_POINTS_33, ["x", "y", "z", "visibility"], include_origin_vis=True)  # 129
+        return extract_relative_features(df, RAW_POINTS_33, ["x", "y", "z", "visibility"], include_origin_vis=True)  # 133
     elif method == "13_4":
         return extract_raw_features(df, RAW_POINTS_13, ["x", "y", "z", "visibility"])  # 52
     elif method == "12rel_4":
-        return extract_relative_features(df, RAW_POINTS_13, ["x", "y", "z", "visibility"], include_origin_vis=True)  # 49
+        return extract_relative_features(df, RAW_POINTS_13, ["x", "y", "z", "visibility"], include_origin_vis=True)  # 53
     elif method == "angle3":
         return compute_triplet_angles_2d(df, RAW_POINTS_13)  # 286
     elif method == "angle2":
         return compute_pair_angles(df, RAW_POINTS_13)  # 78
     elif method == "direct_concat":
-        rel = extract_relative_features(df, RAW_POINTS_13, ["x", "y", "z", "visibility"], include_origin_vis=True)  # 49
+        rel = extract_relative_features(df, RAW_POINTS_13, ["x", "y", "z", "visibility"], include_origin_vis=True)  # 53
         ang = compute_triplet_angles_2d(df, RAW_POINTS_13)  # 286
-        return np.concatenate([rel, ang], axis=1).astype(np.float32)  # 335
+        return np.concatenate([rel, ang], axis=1).astype(np.float32)  # 339
     elif method == "branch_concat":
-        rel = extract_relative_features(df, RAW_POINTS_13, ["x", "y", "z", "visibility"], include_origin_vis=True)  # 49
+        rel = extract_relative_features(df, RAW_POINTS_13, ["x", "y", "z", "visibility"], include_origin_vis=True)  # 53
         ang = compute_triplet_angles_2d(df, RAW_POINTS_13)  # 286
         return (rel, ang)
     else:

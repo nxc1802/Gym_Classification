@@ -89,8 +89,11 @@ RAW_POINTS_13: List[str] = [
     "RIGHT_ANKLE"
 ]
 
-# 12 Relative Body Joints (Excluding NOSE which serves as coordinate origin)
+# 12 Relative Body Joints (Legacy: Excluding NOSE which served as coordinate origin)
 REL_POINTS_12: List[str] = [j for j in RAW_POINTS_13 if j != "NOSE"]
+
+# Hip joints used to compute the hip-midpoint origin for relative features
+HIP_MIDPOINT_JOINTS: Tuple[str, str] = ("LEFT_HIP", "RIGHT_HIP")
 
 # Skeleton Graph Connections for 33 Joints (MediaPipe POSE_CONNECTIONS)
 POSE_CONNECTIONS_33: List[Tuple[int, int]] = [
@@ -115,33 +118,33 @@ EDGES_13: List[Tuple[int, int]] = [
 # Feature Dimensions Mapping
 # - raw_2d: 13 * 2 (x, y) = 26
 # - raw_3d: 13 * 3 (x, y, z) = 39
-# - rel_2d: 12 * 2 (rel_x, rel_y) = 24
-# - rel_3d: 12 * 3 (rel_x, rel_y, rel_z) = 36
+# - rel_2d: 13 * 2 (hip-midpoint-relative x, y) = 26
+# - rel_3d: 13 * 3 (hip-midpoint-relative x, y, z) = 39
 # - angle_2d: C(13, 3) = 286 planar triplet angles
 # - angle_3d: C(13, 3) = 286 3D spatial vector angles
-# - mix: 36 (rel_3d) + 286 (angle_3d) = 322
+# - mix: 39 (rel_3d) + 286 (angle_3d) = 325
 # - Legacy:
 #   - full_4: 33 * 4 = 132
-#   - full_rel_4: 32 * 4 + 1 = 129
+#   - full_rel_4: 33 * 4 + 1 = 133 (hip-midpoint-relative, all 33 joints)
 #   - 13_4: 13 * 4 = 52
-#   - 12rel_4: 12 * 4 + 1 = 49
-#   - angle3: 286, angle2: 78, direct_concat: 335
+#   - 12rel_4: 13 * 4 + 1 = 53 (hip-midpoint-relative, all 13 joints)
+#   - angle3: 286, angle2: 78, direct_concat: 339
 FEATURE_DIMS: Dict[str, int] = {
     "raw_2d": 26,
     "raw_3d": 39,
-    "rel_2d": 24,
-    "rel_3d": 36,
+    "rel_2d": 26,
+    "rel_3d": 39,
     "angle_2d": 286,
     "angle_3d": 286,
-    "mix": 322,
+    "mix": 325,
     "full_4": 132,
-    "full_rel_4": 129,
+    "full_rel_4": 133,
     "13_4": 52,
-    "12rel_4": 49,
+    "12rel_4": 53,
     "angle3": 286,
     "angle2": 78,
-    "direct_concat": 335,
-    "branch_concat": -1  # Dual branch tuple (49, 286)
+    "direct_concat": 339,
+    "branch_concat": -1  # Dual branch tuple (53, 286)
 }
 
 # Standard Sliding Window defaults

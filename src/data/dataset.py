@@ -10,6 +10,7 @@ from typing import List, Tuple, Dict, Optional, Union
 import numpy as np
 import pandas as pd
 import torch
+import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 
 from src.constants import (
@@ -40,13 +41,16 @@ def parse_segment_range(label_content: str, total_frames: int) -> Tuple[int, int
     except Exception:
         return 0, total_frames
 
-def handle_zero_frames(df: pd.DataFrame, method: str = "zero") -> pd.DataFrame:
+def handle_zero_frames(df: pd.DataFrame, method: str = "interpolate") -> pd.DataFrame:
     """
-    Handles missing or undetected frames in landmark sequences.
+    Handles missing or undetected frames (zero frames from MediaPipe failures) in landmark sequences.
     method:
       - 'zero': keeps undetected landmarks as 0.0 (baseline)
       - 'ffill': forward-fills valid coordinates, back-fills initial gaps
-      - 'linear': linear interpolation across time for missing/zero coordinate values
+      - 'linear': pandas linear interpolation across time for missing/zero coordinate values
+      - 'interpolate': intelligent interpolation using torch.nn.functional.interpolate.
+            For gaps < 50% of segment: fills via linear interpolation between neighbors.
+            For segments >= 50% zero: stretches valid frames via 1D interpolation to fill.
     """
     if method in ("zero", "none", None) or len(df) <= 1:
         return df.fillna(0.0)
@@ -63,11 +67,37 @@ def handle_zero_frames(df: pd.DataFrame, method: str = "zero") -> pd.DataFrame:
     if not row_is_zero.any():
         return df_clean.fillna(0.0)
 
-    df_clean.loc[row_is_zero, coord_cols] = np.nan
     if method == "ffill":
+        df_clean.loc[row_is_zero, coord_cols] = np.nan
         df_clean[coord_cols] = df_clean[coord_cols].ffill().bfill().fillna(0.0)
     elif method == "linear":
+        df_clean.loc[row_is_zero, coord_cols] = np.nan
         df_clean[coord_cols] = df_clean[coord_cols].interpolate(method="linear", limit_direction="both").fillna(0.0)
+    elif method == "interpolate":
+        n_total = len(df_clean)
+        n_zero = row_is_zero.sum()
+        zero_ratio = n_zero / n_total
+
+        valid_mask = ~row_is_zero
+        if not valid_mask.any():
+            # All frames are zero — nothing to interpolate from
+            return df_clean.fillna(0.0)
+
+        valid_data = df_clean.loc[valid_mask, coord_cols].values.astype(np.float32)  # (N_valid, C)
+        n_valid = valid_data.shape[0]
+
+        if zero_ratio >= 0.5:
+            # High zero ratio: stretch valid frames to fill entire segment via torch interpolate
+            t_valid = torch.from_numpy(valid_data).unsqueeze(0).permute(0, 2, 1)  # (1, C, N_valid)
+            t_stretched = F.interpolate(t_valid, size=n_total, mode="linear", align_corners=False)
+            filled = t_stretched.squeeze(0).permute(1, 0).numpy()  # (N_total, C)
+            df_clean[coord_cols] = filled
+        else:
+            # Low zero ratio: use linear interpolation between valid neighbors
+            df_clean.loc[row_is_zero, coord_cols] = np.nan
+            df_clean[coord_cols] = df_clean[coord_cols].interpolate(
+                method="linear", limit_direction="both"
+            ).fillna(0.0)
 
     return df_clean.fillna(0.0)
 
@@ -78,17 +108,28 @@ def sliding_windows(
 ) -> List[np.ndarray]:
     """
     Slices a continuous frame array (T, D) into overlapping windows of size `seq_len`.
-    If the sequence is shorter than `seq_len` or the last window is partial,
-    pads the final window by repeating the last frame.
+    Last-sample handling:
+      - If total frames < seq_len and >= 50% of seq_len: interpolate-stretch to seq_len.
+      - If total frames < seq_len and < 50%: discard (return empty).
+      - For trailing partial windows:
+        - >= 50% of seq_len: stretch via torch.nn.functional.interpolate.
+        - < 50% of seq_len: discard the partial window.
     """
     T = data.shape[0]
     if T == 0:
         return []
 
+    half_seq = seq_len // 2  # 50% threshold
+
     if T < seq_len:
-        pad_count = seq_len - T
-        pad_tail = np.repeat(data[-1:], pad_count, axis=0)
-        return [np.concatenate([data, pad_tail], axis=0)]
+        if T >= half_seq:
+            # Stretch via interpolation
+            t_data = torch.from_numpy(data).float().unsqueeze(0).permute(0, 2, 1)  # (1, D, T)
+            t_stretched = F.interpolate(t_data, size=seq_len, mode="linear", align_corners=False)
+            return [t_stretched.squeeze(0).permute(1, 0).numpy()]  # (seq_len, D)
+        else:
+            # Too short — discard
+            return []
 
     windows = []
     for start in range(0, T, stride):
@@ -97,9 +138,13 @@ def sliding_windows(
             windows.append(data[start:end])
         else:
             partial = data[start:]
-            pad_count = seq_len - len(partial)
-            pad_tail = np.repeat(data[-1:], pad_count, axis=0)
-            windows.append(np.concatenate([partial, pad_tail], axis=0))
+            partial_len = len(partial)
+            if partial_len >= half_seq:
+                # Stretch partial to full seq_len via interpolation
+                t_partial = torch.from_numpy(partial).float().unsqueeze(0).permute(0, 2, 1)  # (1, D, partial_len)
+                t_stretched = F.interpolate(t_partial, size=seq_len, mode="linear", align_corners=False)
+                windows.append(t_stretched.squeeze(0).permute(1, 0).numpy())
+            # else: discard — too few frames
             break
 
     return windows
@@ -181,7 +226,7 @@ def build_dataset_from_csvs(
     seq_len: int = DEFAULT_SEQ_LEN,
     stride: Optional[int] = None,
     augment_method: Optional[str] = None,
-    zero_frame_handling: str = "zero",
+    zero_frame_handling: str = "interpolate",
     landmark_dir: Optional[str] = None,
     smoke_test: bool = False,
     smoke_class: Optional[str] = "barbell biceps curl",
@@ -254,10 +299,12 @@ def build_dataset_from_csvs(
 
             csv_path = None
             if landmark_dir:
-                cand1 = Path(landmark_dir) / f"{Path(row['filepath']).stem}.csv"
-                cand2 = Path(landmark_dir) / split / action_name / f"{Path(row['filepath']).stem}.csv"
-                cand3 = Path(landmark_dir) / action_name / f"{Path(row['filepath']).stem}.csv"
-                for c in [cand1, cand2, cand3]:
+                # Priority 1: split-specific directory structure
+                cand1 = Path(landmark_dir) / split / action_name / f"{Path(row['filepath']).stem}.csv"
+                # Priority 2: flat landmark directory (legacy, no split separation)
+                cand2 = Path(landmark_dir) / f"{Path(row['filepath']).stem}.csv"
+                # NOTE: Removed cand3 (landmark_dir/action/) to prevent cross-split data leakage
+                for c in [cand1, cand2]:
                     if c.exists():
                         csv_path = c
                         break
@@ -291,22 +338,27 @@ def build_dataset_from_csvs(
                     all_samples.append(w)
                     all_labels.append(class_idx)
 
-    # Dataset Expansion: Preserve 100% of clean original samples and append augmented copies
+    # Dataset Expansion: Preserve 100% of clean original samples and append 3 augmented variants (1→4 total)
     if split == "train" and augment_method and augment_method != "none":
         augmenter = LandmarkAugmenter()
         aug_samples = []
         aug_labels = []
         for s, l in zip(all_samples, all_labels):
             if is_branch:
-                t1 = augmenter.apply(torch.from_numpy(s[0]).float(), augment_method).numpy()
-                t2 = augmenter.apply(torch.from_numpy(s[1]).float(), augment_method).numpy()
-                aug_samples.append((t1, t2))
+                # For branch: augment first branch, keep second unchanged
+                t1 = torch.from_numpy(s[0]).float()
+                variants = augmenter.generate_augmented_variants(t1, augment_method)
+                for v in variants:
+                    aug_samples.append((v.numpy(), s[1].copy()))
+                    aug_labels.append(l)
             else:
-                t = augmenter.apply(torch.from_numpy(s).float(), augment_method).numpy()
-                aug_samples.append(t)
-            aug_labels.append(l)
+                t = torch.from_numpy(s).float()
+                variants = augmenter.generate_augmented_variants(t, augment_method)
+                for v in variants:
+                    aug_samples.append(v.numpy())
+                    aug_labels.append(l)
 
-        # Retain original clean samples + augmented supplementary samples (sample count doubled)
+        # Retain original clean samples + 3 augmented variants per sample (4× total)
         all_samples = all_samples + aug_samples
         all_labels = all_labels + aug_labels
 
@@ -318,6 +370,54 @@ def build_dataset_from_csvs(
         in_memory=in_memory
     )
 
+def _compute_train_stats(train_ds: 'GymDataset') -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Computes global mean and std across all training samples for z-score normalization.
+    Returns (mean, std) tensors of shape (1, D) where D = feature dimension.
+    """
+    if train_ds.in_memory and train_ds.tensor_samples is not None:
+        # Efficient: work directly with the stacked tensor (N, T, D)
+        all_data = train_ds.tensor_samples  # (N, T, D)
+        # Compute stats across samples and time steps
+        flat = all_data.reshape(-1, all_data.shape[-1])  # (N*T, D)
+    else:
+        # Collect from samples list
+        arrays = []
+        for s in train_ds.samples:
+            if isinstance(s, tuple):
+                arrays.append(s[0])  # Only first branch for stats
+            elif isinstance(s, np.ndarray):
+                arrays.append(s)
+            else:
+                arrays.append(s.numpy() if isinstance(s, torch.Tensor) else s)
+        stacked = np.concatenate([a.reshape(-1, a.shape[-1]) for a in arrays], axis=0)
+        flat = torch.from_numpy(stacked).float()
+
+    mean = flat.mean(dim=0, keepdim=True)  # (1, D)
+    std = flat.std(dim=0, keepdim=True) + 1e-7  # (1, D)
+    return mean, std
+
+def _apply_normalization(ds: 'GymDataset', mean: torch.Tensor, std: torch.Tensor) -> None:
+    """
+    Applies z-score normalization in-place to a GymDataset using provided mean/std.
+    """
+    if ds.in_memory and ds.tensor_samples is not None:
+        # In-memory tensor: normalize directly
+        # mean/std shape (1, D), tensor_samples shape (N, T, D)
+        ds.tensor_samples = (ds.tensor_samples - mean.unsqueeze(0)) / std.unsqueeze(0)
+    elif ds.samples is not None:
+        for i, s in enumerate(ds.samples):
+            if isinstance(s, tuple):
+                continue  # Skip branch samples for now
+            if isinstance(s, np.ndarray):
+                m = mean.squeeze(0).numpy()
+                s_np = std.squeeze(0).numpy()
+                ds.samples[i] = ((s - m) / s_np).astype(np.float32)
+
+    # Store stats as attributes for inference
+    ds.train_mean = mean
+    ds.train_std = std
+
 def get_dataloaders(
     metadata_path: str,
     feature_method: str,
@@ -326,7 +426,7 @@ def get_dataloaders(
     stride: Optional[int] = None,
     val_test_stride: Optional[int] = None,
     augment_method: Optional[str] = None,
-    zero_frame_handling: str = "zero",
+    zero_frame_handling: str = "interpolate",
     landmark_dir: Optional[str] = None,
     num_workers: int = 0,
     smoke_test: bool = False,
@@ -335,6 +435,7 @@ def get_dataloaders(
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
     """
     Constructs train, validation, and test DataLoaders.
+    Applies global z-score normalization using train-set statistics to prevent data leakage.
     Optimized for high-throughput GPU training with in-memory caching and pinned memory.
     """
     meta_df = pd.read_csv(metadata_path)
@@ -355,6 +456,14 @@ def get_dataloaders(
         augment_method=None, zero_frame_handling=zero_frame_handling,
         landmark_dir=landmark_dir, smoke_test=smoke_test, smoke_class=smoke_class, in_memory=in_memory
     )
+
+    # Global z-score normalization using TRAIN-SET statistics only (prevents data leakage)
+    is_branch = (feature_method == "branch_concat")
+    if not is_branch and len(train_ds) > 0:
+        train_mean, train_std = _compute_train_stats(train_ds)
+        _apply_normalization(train_ds, train_mean, train_std)
+        _apply_normalization(val_ds, train_mean, train_std)
+        _apply_normalization(test_ds, train_mean, train_std)
 
     pin_mem = torch.cuda.is_available()
     persistent = (num_workers > 0)
