@@ -179,22 +179,30 @@ def run_mediapipe_extraction_pipeline(
         split = row["split"]
         act = row["class"]
 
+        # Strict candidate resolution enforcing split boundaries (no cross-split leakage)
         candidates = [
             raw_dir / rel_path,
-            raw_dir / Path(rel_path).name,
             raw_dir / split / act / Path(rel_path).name,
-            raw_dir / act / Path(rel_path).name
+            raw_dir / "Final_dataset" / split / act / Path(rel_path).name,
         ]
+        if len(Path(rel_path).parts) > 1:
+            candidates.append(raw_dir / Path(*Path(rel_path).parts[1:]))
+
         vid_file = None
         for c in candidates:
-            if c.exists():
+            if c and c.exists() and c.is_file():
                 vid_file = c
                 break
 
+        # If not found directly, strictly search ONLY within this split's subfolder
         if vid_file is None:
-            matches = list(raw_dir.glob(f"**/{Path(rel_path).name}"))
-            if matches:
-                vid_file = matches[0]
+            split_dirs = [raw_dir / split, raw_dir / "Final_dataset" / split]
+            for sd in split_dirs:
+                if sd.exists():
+                    matches = list(sd.glob(f"**/{Path(rel_path).name}"))
+                    if matches:
+                        vid_file = matches[0]
+                        break
 
         if vid_file and vid_file.exists():
             out_file = out_dir / split / act / f"{vid_file.stem}.csv"
