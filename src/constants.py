@@ -129,11 +129,30 @@ EDGES_13: List[Tuple[int, int]] = [
 #   - 13_4: 13 * 4 = 52
 #   - 12rel_4: 13 * 4 + 1 = 53 (hip-midpoint-relative, all 13 joints)
 #   - angle3: 286, angle2: 78, direct_concat: 339
+# Kinematic Parent Mapping for 13 Joints: joint_idx -> parent_joint_idx (None for root)
+KINEMATIC_TREE_13: Dict[int, Optional[int]] = {
+    0: None,  # NOSE (Root reference)
+    1: 0,     # LEFT_SHOULDER -> NOSE
+    2: 0,     # RIGHT_SHOULDER -> NOSE
+    3: 1,     # LEFT_ELBOW -> LEFT_SHOULDER
+    4: 2,     # RIGHT_ELBOW -> RIGHT_SHOULDER
+    5: 3,     # LEFT_WRIST -> LEFT_ELBOW
+    6: 4,     # RIGHT_WRIST -> RIGHT_ELBOW
+    7: 1,     # LEFT_HIP -> LEFT_SHOULDER
+    8: 2,     # RIGHT_HIP -> RIGHT_SHOULDER
+    9: 7,     # LEFT_KNEE -> LEFT_HIP
+    10: 8,    # RIGHT_KNEE -> RIGHT_HIP
+    11: 9,    # LEFT_ANKLE -> LEFT_KNEE
+    12: 10    # RIGHT_ANKLE -> RIGHT_KNEE
+}
+
 FEATURE_DIMS: Dict[str, int] = {
     "raw_2d": 26,
     "raw_3d": 39,
     "rel_2d": 26,
     "rel_3d": 39,
+    "bone_2d": 26,
+    "bone_3d": 39,
     "angle_2d": 286,
     "angle_3d": 286,
     "mix": 325,

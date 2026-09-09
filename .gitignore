@@ -37,7 +37,7 @@ models_cache/
 # Datasets & Heavy Artifacts
 data/raw/
 data/landmarks/
-data/kaggle_landmarks
+data/kaggle_landmarks/
 *.zip
 *.tar.gz
 *.mp4

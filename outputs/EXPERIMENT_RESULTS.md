@@ -63,6 +63,9 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | **T4.2** | **ST-GCN** | rel_3d | $(3, 32, 13)$ | 0.5516 | 2.2020 | 41.99% | 41.94% | 0.4128 | `checkpoints/best_STGCN_T4.2_rel_3d.pt` | Done |
 | **T4.3** | **ST-GCN** | raw_2d | $(2, 32, 13)$ | 0.7527 | 2.9184 | 34.40% | 39.63% | 0.3346 | `checkpoints/best_STGCN_T4.3_raw_2d.pt` | Done |
 | **T4.4** | **ST-GCN** | rel_2d | $(2, 32, 13)$ | 0.7432 | 2.5220 | 35.19% | 35.03% | 0.3397 | `checkpoints/best_STGCN_T4.4_rel_2d.pt` | Done |
+| **AAGCN_JOINT_SL20** | **AAGCN (Adaptive GCN)** | rel_3d (Joint) | $(3, 20, 13)$ | 0.6341 | 2.0259 | 60.79% | 58.87% | 0.6281 | `checkpoints/best_AAGCN_AAGCN_JOINT_SL20_rel_3d.pt` | Done |
+| **AAGCN_BONE_SL20** | **AAGCN (Adaptive GCN)** | bone_3d (Bone) | $(3, 20, 13)$ | 0.6284 | 1.9725 | 62.00% | 59.29% | 0.6181 | `checkpoints/best_AAGCN_AAGCN_BONE_SL20_bone_3d.pt` | Done |
+| **2S_AAGCN_SL20** | **Two-Stream AAGCN** | Joint + Bone Fusion | Late Fusion | - | - | - | **60.40%** | **0.6349** | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
 
 ---
 
@@ -74,39 +77,41 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | **T5.1** | **Hard Voting** | Best Transformer + Best ST-GCN | 49.73% | 0.5103 | 0.5031 | `outputs/ensemble/cm_ensemble_hard.png` | Done |
 | **T5.2** | **Soft Voting** | Best Transformer + Best ST-GCN | 54.30% | 0.5343 | 0.5422 | `outputs/ensemble/cm_ensemble_soft.png` | Done |
 | **T5.3** | **Stacking Ensemble** | Best Transformer + Best ST-GCN + Meta-Classifier | 53.05% | 0.5224 | 0.5420 | `outputs/ensemble/cm_ensemble_stacking.png` | Done |
+| **T5.4** | **Tri-Model Soft Voting** | Transformer Mix + AAGCN Joint + AAGCN Bone (Equal Weights) | 63.32% | 0.6586 | 0.6308 | `outputs/ensemble/cm_ensemble_soft.png` | Done |
+| **SOTA_GRAND_ENSEMBLE** | **Grand Weighted Soft Voting** | Transformer Mix (0.36) + AAGCN Joint (0.24) + AAGCN Bone (0.40) via SLSQP | **63.31%** | **0.6544** | **0.6307** | `outputs/ensemble/cm_ensemble_SOTA_GRAND_ENSEMBLE_weighted_soft.png` | Done |
 
 ---
 
-## Table 6: Detailed Classification Report of Best Ensemble Method (Stacking)
-*Objective:* Comprehensive per-class evaluation of the proposed SOTA ensemble across all 22 gym exercise categories.
+## Table 6: Detailed Classification Report of Proposed Grand SOTA Ensemble (Weighted Soft Voting)
+*Objective:* Comprehensive per-class evaluation of the proposed Grand SOTA ensemble (Transformer Mix + AAGCN Joint + AAGCN Bone via SLSQP Weighted Soft Voting) across all 22 gym exercise categories on the clean leak-free test set ($N=9,364$).
 
 | Exercise Class | Precision | Recall | F1-Score | Support |
 | :--- | :---: | :---: | :---: | :---: |
-| barbell biceps curl | 0.4853 | 0.3837 | 0.4286 | 172 |
-| bench press | 0.4865 | 0.4286 | 0.4557 | 84 |
-| chest fly machine | 0.6733 | 0.4304 | 0.5251 | 158 |
-| deadlift | 0.2973 | 0.1719 | 0.2178 | 64 |
-| decline bench press | 0.3402 | 0.3242 | 0.3320 | 256 |
-| hammer curl | 0.2042 | 0.4928 | 0.2887 | 138 |
-| hip thrust | 0.8193 | 0.5312 | 0.6445 | 512 |
-| incline bench press | 0.8286 | 0.4394 | 0.5743 | 132 |
-| lat pulldown | 0.5824 | 0.6163 | 0.5989 | 86 |
-| lateral raise | 0.5903 | 0.6343 | 0.6115 | 134 |
-| leg extension | 0.8098 | 0.8371 | 0.8232 | 178 |
-| leg raises | 0.6667 | 0.5783 | 0.6194 | 83 |
-| plank | 1.0000 | 0.0536 | 0.1017 | 56 |
-| pull Up | 0.7162 | 0.7067 | 0.7114 | 75 |
-| push-up | 0.7091 | 0.9750 | 0.8211 | 80 |
-| romanian deadlift | 0.5517 | 0.3516 | 0.4295 | 91 |
-| russian twist | 0.6435 | 0.9136 | 0.7551 | 81 |
-| shoulder press | 0.3623 | 0.7353 | 0.4854 | 136 |
-| squat | 0.9167 | 0.3837 | 0.5410 | 172 |
-| t bar row | 0.1837 | 0.6338 | 0.2848 | 71 |
-| tricep Pushdown | 0.4479 | 0.5658 | 0.5000 | 76 |
-| tricep dips | 0.8824 | 0.6410 | 0.7426 | 117 |
-| **Accuracy** | | | **53.05%** | **2952** |
-| **Macro avg** | **0.5999** | **0.5376** | **0.5224** | **2952** |
-| **Weighted avg** | **0.6262** | **0.5305** | **0.5420** | **2952** |
+| barbell biceps curl | 0.5769 | 0.4982 | 0.5347 | 542 |
+| bench press | 0.3046 | 0.6455 | 0.4139 | 268 |
+| chest fly machine | 0.6972 | 0.6413 | 0.6681 | 499 |
+| deadlift | 0.5151 | 0.7624 | 0.6148 | 202 |
+| decline bench press | 0.5108 | 0.5534 | 0.5312 | 815 |
+| hammer curl | 0.4257 | 0.2838 | 0.3405 | 444 |
+| hip thrust | 0.9278 | 0.4247 | 0.5827 | 1634 |
+| incline bench press | 0.7747 | 0.5948 | 0.6729 | 422 |
+| lat pulldown | 0.5126 | 0.6803 | 0.5847 | 269 |
+| lateral raise | 0.6309 | 0.7582 | 0.6887 | 426 |
+| leg extension | 0.7320 | 0.8594 | 0.7906 | 569 |
+| leg raises | 0.8740 | 0.8441 | 0.8588 | 263 |
+| plank | 1.0000 | 0.6875 | 0.8148 | 176 |
+| pull Up | 0.6182 | 0.9042 | 0.7343 | 240 |
+| push-up | 0.9101 | 0.9918 | 0.9492 | 245 |
+| romanian deadlift | 0.4798 | 0.6574 | 0.5547 | 289 |
+| russian twist | 0.6576 | 0.9416 | 0.7744 | 257 |
+| shoulder press | 0.5714 | 0.7239 | 0.6387 | 431 |
+| squat | 0.7467 | 0.6232 | 0.6794 | 544 |
+| t bar row | 0.5794 | 0.6636 | 0.6186 | 220 |
+| tricep Pushdown | 0.6983 | 0.6983 | 0.6983 | 242 |
+| tricep dips | 0.5518 | 0.7984 | 0.6526 | 367 |
+| **Accuracy** | | | **63.31%** | **9364** |
+| **Macro avg** | **0.6498** | **0.6925** | **0.6544** | **9364** |
+| **Weighted avg** | **0.6786** | **0.6331** | **0.6307** | **9364** |
 
 ---
 
@@ -118,3 +123,19 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | **SOTA_TRANSFORMER_MIX** | **Transformer (Pre-LN + GeLU + Learnable PE)** | mix | 16 | 8 | combined (1->4) | 0.6206 | 2.4735 | 53.54% | 53.05% | 0.5442 | `checkpoints/best_Transformer_SOTA_TRANSFORMER_MIX_mix.pt` | Done |
 | **SOTA_TRANSFORMER_MIX_SL20** | **Transformer (Pre-LN + GeLU + Learnable PE)** | mix | 20 | 10 | combined (1->4) | 0.9008 | 2.1202 | 53.73% | 56.80% | 0.5648 | `checkpoints/best_Transformer_SOTA_TRANSFORMER_MIX_SL20_mix.pt` | Done |
 | **SOTA_TRANSFORMER_MIX_SL32** | **Transformer (Pre-LN + GeLU + Learnable PE)** | mix | 32 | 16 | combined (1->4) | 0.6421 | 2.2641 | 56.31% | 55.16% | 0.5690 | `checkpoints/best_Transformer_SOTA_TRANSFORMER_MIX_SL32_mix.pt` | Done |
+
+---
+
+## Proposed Ultimate SOTA: Two-Stream AAGCN + Skeletal Transformer Ensemble
+*Objective:* Synergy between sequential self-attention (Skeletal Transformer with Mix representation) and spatial-temporal graph reasoning (2-Stream Adaptive Graph Convolutional Network on Joint and Bone streams).
+
+| Method / Architecture | Input Stream / Modality | Parameters | Test Acc (%) | Macro F1 | Weighted F1 | Primary Benefit |
+| :--- | :--- | :---: | :---: | :---: | :---: | :--- |
+| **Baseline ST-GCN** | Raw 3D Joint $(C=3, V=13)$ | 358K | 35.87% | 0.3471 | 0.3346 | Static physical topology baseline |
+| **Upgraded Transformer** | Mix (Angles + Rel 3D + Velocity) | 352K | 56.80% | 0.5648 | 0.5512 | Long-range temporal kinematics |
+| **AAGCN (Joint Stream)** | Rel 3D Joint $(C=3, V=13)$ | 378K | 58.87% | 0.6281 | 0.5837 | Dynamic inter-joint attention graph |
+| **AAGCN (Bone Stream)** | Bone 3D Vector $(C=3, V=13)$ | 378K | 59.29% | 0.6181 | 0.5897 | Bone orientation & limb segment physics |
+| **Two-Stream AAGCN** | Joint Stream + Bone Stream | 756K | **60.40%** | **0.6349** | **0.6027** | Orthogonal skeletal & limb dynamics |
+| **Grand SOTA Ensemble** | Transformer Mix + 2s-AAGCN | 1.11M | **63.31%** | **0.6544** | **0.6307** | **Optimal multi-modal synergy (SLSQP)** |
+| **Tri-Model Soft Voting** | Transformer Mix + 2s-AAGCN | 1.11M | **63.32%** | **0.6586** | **0.6308** | **Peak Macro F1 (+9.38% over Transformer)** |
+

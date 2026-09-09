@@ -8,7 +8,7 @@ from typing import List, Tuple, Dict, Union, Optional
 import numpy as np
 import pandas as pd
 
-from src.constants import RAW_POINTS_33, RAW_POINTS_13, REL_POINTS_12, HIP_MIDPOINT_JOINTS
+from src.constants import RAW_POINTS_33, RAW_POINTS_13, REL_POINTS_12, HIP_MIDPOINT_JOINTS, KINEMATIC_TREE_13
 
 def extract_raw_features(
     df: pd.DataFrame,
@@ -78,6 +78,41 @@ def extract_relative_features(
         features.append((vis_l + vis_r) / 2.0)
 
     return np.stack(features, axis=1).astype(np.float32)
+
+def extract_bone_features(
+    df: pd.DataFrame,
+    points: List[str] = RAW_POINTS_13,
+    dims: List[str] = ("x", "y", "z")
+) -> np.ndarray:
+    """
+    Extracts skeletal bone vector representations e_u = X_u - X_parent(u).
+    For the root joint (NOSE), the bone vector is set to zero ([0, 0, 0]).
+    Bone vectors are strictly translation-invariant and explicitly capture limb segment lengths and orientations.
+    Shape: (N_frames, len(points) * len(dims))
+    """
+    n_frames = len(df)
+    coords = {}
+    for pt in points:
+        pt_coords = []
+        for d in dims:
+            col = f"{pt}_{d}"
+            vals = df[col].fillna(0.0).values if col in df.columns else np.zeros(n_frames, dtype=np.float32)
+            pt_coords.append(vals)
+        coords[pt] = np.stack(pt_coords, axis=1)  # (N_frames, len(dims))
+
+    bone_features = []
+    for idx, pt in enumerate(points):
+        parent_idx = KINEMATIC_TREE_13.get(idx)
+        if parent_idx is not None and parent_idx < len(points):
+            parent_pt = points[parent_idx]
+            bone_vec = coords[pt] - coords[parent_pt]  # (N_frames, len(dims))
+        else:
+            bone_vec = np.zeros((n_frames, len(dims)), dtype=np.float32)
+
+        for d_i in range(len(dims)):
+            bone_features.append(bone_vec[:, d_i])
+
+    return np.stack(bone_features, axis=1).astype(np.float32)
 
 def compute_triplet_angles_2d(df: pd.DataFrame, points: List[str] = RAW_POINTS_13) -> np.ndarray:
     """
@@ -210,6 +245,10 @@ def extract_features_by_method(df: pd.DataFrame, method: str) -> Union[np.ndarra
         return extract_relative_features(df, RAW_POINTS_13, ["x", "y"], include_origin_vis=False)  # 26
     elif method == "rel_3d":
         return extract_relative_features(df, RAW_POINTS_13, ["x", "y", "z"], include_origin_vis=False)  # 39
+    elif method == "bone_2d":
+        return extract_bone_features(df, RAW_POINTS_13, ["x", "y"])  # 26
+    elif method == "bone_3d":
+        return extract_bone_features(df, RAW_POINTS_13, ["x", "y", "z"])  # 39
     elif method == "angle_2d":
         return compute_triplet_angles_2d(df, RAW_POINTS_13)  # 286
     elif method == "angle_3d":

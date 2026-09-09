@@ -53,9 +53,11 @@ from src.models import (
     TransformerModel,
     BranchConcatTransformer,
     STGCNModel,
+    AAGCNModel,
     HardVotingEnsemble,
     SoftVotingEnsemble,
-    StackingEnsemble
+    StackingEnsemble,
+    WeightedSoftVotingEnsemble
 )
 from src.training import Trainer, compute_metrics, plot_confusion_matrix, export_latex_table7
 
@@ -117,6 +119,10 @@ def build_model(
     elif model_type == "STGCN":
         drop = dropout if dropout is not None else 0.3
         return STGCNModel(feat_dim=feat_dim, num_classes=num_classes, dropout=drop)
+
+    elif model_type == "AAGCN":
+        drop = dropout if dropout is not None else 0.2
+        return AAGCNModel(feat_dim=feat_dim, num_classes=num_classes, dropout=drop)
 
     elif model_type == "BranchConcat":
         return BranchConcatModel(dim1=53, dim2=286, num_classes=num_classes, hidden_dim=hidden_dim or 64, dropout=dropout or 0.3)
@@ -576,7 +582,9 @@ def cmd_ensemble(args):
         state_dict = torch.load(p, map_location="cpu")
 
         # Identify model architecture
-        if "STGCN" in p.name or any("gcn_conv" in k for k in state_dict.keys()):
+        if "AAGCN" in p.name or any("conv_theta" in k for k in state_dict.keys()):
+            m_type = "AAGCN"
+        elif "STGCN" in p.name or any("gcn_conv" in k for k in state_dict.keys()):
             m_type = "STGCN"
         elif "BiLSTM" in p.name:
             m_type = "BiLSTM"
@@ -587,7 +595,7 @@ def cmd_ensemble(args):
 
         # Identify feature method from filename
         f_type = None
-        for feat in ["mix", "angle_3d", "angle_2d", "raw_3d", "raw_2d", "rel_3d", "rel_2d", "branch_concat", "direct_concat", "full_rel_4", "full_4", "12rel_4", "13_4"]:
+        for feat in ["mix", "angle_3d", "angle_2d", "bone_3d", "bone_2d", "raw_3d", "raw_2d", "rel_3d", "rel_2d", "branch_concat", "direct_concat", "full_rel_4", "full_4", "12rel_4", "13_4"]:
             if f"_{feat}." in p.name or f"_{feat}_" in p.name or p.name.endswith(f"_{feat}") or feat in p.name:
                 f_type = feat
                 break
@@ -630,18 +638,24 @@ def cmd_ensemble(args):
     y_val_final = None
     y_test_final = None
 
+    ens_seq_len = getattr(args, "seq_len", 20)
+    ens_stride = getattr(args, "stride", getattr(args, "val_test_stride", 10))
+
     for m, m_type, f_type, ckpt_name in model_entries:
-        logger.info(f"Generating predictions for {m_type} ({f_type}) from {ckpt_name} ...")
+        logger.info(f"Generating predictions for {m_type} ({f_type}) from {ckpt_name} (seq_len={ens_seq_len}, stride={ens_stride}) ...")
         _, val_loader, test_loader = get_dataloaders(
             metadata_path=args.metadata,
             feature_method=f_type,
             batch_size=getattr(args, "batch_size", 64),
+            seq_len=ens_seq_len,
+            stride=ens_stride,
+            val_test_stride=ens_stride,
             landmark_dir=args.landmark_dir,
             num_workers=0,
             in_memory=True
         )
         tr = Trainer(model=m, device=device)
-        if args.method == "stacking":
+        if args.method in ("stacking", "weighted_soft"):
             y_vt, _, y_vpr = tr.predict(val_loader)
             val_probs_list.append(y_vpr)
             if y_val_final is None:
@@ -659,6 +673,11 @@ def cmd_ensemble(args):
     elif args.method == "soft":
         ens = SoftVotingEnsemble()
         final_preds = ens.predict(all_probs_list)
+    elif args.method == "weighted_soft":
+        ens = WeightedSoftVotingEnsemble()
+        ens.fit(val_probs_list, y_val_final)
+        logger.info(f"Optimized Soft Voting Weights (SLSQP): {[round(w, 4) for w in ens.weights]}")
+        final_preds = ens.predict(all_probs_list)
     elif args.method == "stacking":
         ens = StackingEnsemble()
         ens.fit(val_probs_list, y_val_final)
@@ -667,8 +686,11 @@ def cmd_ensemble(args):
     metrics = compute_metrics(y_test_final, final_preds)
     logger.info(f"Ensemble ({args.method.upper()}) Test Accuracy: {metrics['accuracy'] * 100:.2f}% | Macro F1: {metrics['macro_f1']:.4f}")
 
-    cm_path = out_dir / f"cm_ensemble_{args.method}.png"
+    exp_id = getattr(args, "exp_id", None)
+    cm_path = out_dir / (f"cm_ensemble_{exp_id}_{args.method}.png" if exp_id else f"cm_ensemble_{args.method}.png")
     plot_confusion_matrix(y_test_final, final_preds, str(cm_path), title=f"Ensemble ({args.method.upper()})")
+    # Also save standard filename for generic references
+    plot_confusion_matrix(y_test_final, final_preds, str(out_dir / f"cm_ensemble_{args.method}.png"), title=f"Ensemble ({args.method.upper()})")
     logger.info(f"Saved ensemble confusion matrix: {cm_path}")
 
     report_file = getattr(args, "report_file", "outputs/EXPERIMENT_RESULTS.md")
@@ -685,8 +707,8 @@ def cmd_ensemble(args):
             }
         )
 
-    # Auto-update Table 6 if method is stacking or requested
-    if args.method == "stacking" and report_file and Path(report_file).exists():
+    # Auto-update Table 6 if method is ensemble and requested
+    if args.method in ("stacking", "weighted_soft", "soft") and report_file and Path(report_file).exists():
         try:
             from sklearn.metrics import classification_report as sk_clf_report
             rep_dict = sk_clf_report(y_test_final, final_preds, target_names=ACTIONS, output_dict=True, zero_division=0)
@@ -846,10 +868,10 @@ def create_parser() -> argparse.ArgumentParser:
 
     # Train
     p_train = subparsers.add_parser("train", help="Train a deep learning model")
-    p_train.add_argument("--model", type=str, default="Transformer", choices=["LSTM", "BiLSTM", "Transformer", "STGCN", "BranchConcat"], help="Model architecture")
+    p_train.add_argument("--model", type=str, default="Transformer", choices=["LSTM", "BiLSTM", "Transformer", "STGCN", "AAGCN", "BranchConcat"], help="Model architecture")
     p_train.add_argument(
         "--feature", type=str, default="mix",
-        choices=["raw_2d", "raw_3d", "rel_2d", "rel_3d", "angle_2d", "angle_3d", "mix", "full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"],
+        choices=["raw_2d", "raw_3d", "rel_2d", "rel_3d", "bone_2d", "bone_3d", "angle_2d", "angle_3d", "mix", "full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"],
         help="Feature representation method"
     )
     p_train.add_argument("--augment", type=str, default="none", choices=["none", "jitter", "rotate", "joint_dropout", "time_warp", "mirror", "speed_perturb", "combined"], help="Augmentation method")
@@ -896,10 +918,10 @@ def create_parser() -> argparse.ArgumentParser:
     # Evaluate
     p_eval = subparsers.add_parser("evaluate", help="Evaluate a model checkpoint")
     p_eval.add_argument("--checkpoint", type=str, required=True, help="Path to .pt checkpoint file")
-    p_eval.add_argument("--model", type=str, default="Transformer", choices=["LSTM", "BiLSTM", "Transformer", "STGCN", "BranchConcat"])
+    p_eval.add_argument("--model", type=str, default="Transformer", choices=["LSTM", "BiLSTM", "Transformer", "STGCN", "AAGCN", "BranchConcat"])
     p_eval.add_argument(
         "--feature", type=str, default="mix",
-        choices=["raw_2d", "raw_3d", "rel_2d", "rel_3d", "angle_2d", "angle_3d", "mix", "full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"]
+        choices=["raw_2d", "raw_3d", "rel_2d", "rel_3d", "bone_2d", "bone_3d", "angle_2d", "angle_3d", "mix", "full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"]
     )
     p_eval.add_argument("--split", type=str, default="test", choices=["train", "val", "test"])
     p_eval.add_argument("--metadata", type=str, default="Final_dataset_metadata.csv")
@@ -916,12 +938,14 @@ def create_parser() -> argparse.ArgumentParser:
     # Ensemble
     p_ens = subparsers.add_parser("ensemble", help="Ensemble multiple models")
     p_ens.add_argument("--checkpoints", nargs="+", required=True, help="List of checkpoint .pt file paths")
-    p_ens.add_argument("--method", type=str, default="stacking", choices=["hard", "soft", "stacking"], help="Ensemble method")
-    p_ens.add_argument("--exp_id", type=str, default=None, help="Experiment ID to automatically update report (e.g. T5.1, T5.2, T5.3)")
+    p_ens.add_argument("--method", type=str, default="weighted_soft", choices=["hard", "soft", "weighted_soft", "stacking"], help="Ensemble method")
+    p_ens.add_argument("--exp_id", type=str, default=None, help="Experiment ID to automatically update report (e.g. T5.1, T5.2, T5.3, SOTA_ENSEMBLE)")
+    p_ens.add_argument("--seq_len", type=int, default=20, help="Sequence length for ensemble dataloader")
+    p_ens.add_argument("--stride", type=int, default=10, help="Stride for ensemble dataloader")
     p_ens.add_argument("--metadata", type=str, default="Final_dataset_metadata.csv")
     p_ens.add_argument("--landmark_dir", type=str, default="data/landmarks")
     p_ens.add_argument("--output_dir", type=str, default="outputs/ensemble")
-    p_ens.add_argument("--batch_size", type=int, default=128)
+    p_ens.add_argument("--batch_size", type=int, default=64)
     p_ens.add_argument("--device", type=str, default="cuda")
     p_ens.add_argument("--push_to_hf", action="store_true", default=False, help="Push ensemble plots and report to Hugging Face")
     p_ens.add_argument("--hf_repo", type=str, default=DEFAULT_MODEL_REPO, help="Hugging Face model repository ID")

@@ -1,7 +1,8 @@
 from .lstm import LSTMModel, BiLSTMModel, BranchConcatModel
 from .transformer import TransformerModel, BranchConcatTransformer, PositionalEncoding
 from .stgcn import STGCNModel, STGCNBlock
-from .ensemble import HardVotingEnsemble, SoftVotingEnsemble, StackingEnsemble
+from .aagcn import AAGCNModel, AAGCNBlock
+from .ensemble import HardVotingEnsemble, SoftVotingEnsemble, StackingEnsemble, WeightedSoftVotingEnsemble
 
 __all__ = [
     "LSTMModel",
@@ -12,7 +13,10 @@ __all__ = [
     "PositionalEncoding",
     "STGCNModel",
     "STGCNBlock",
+    "AAGCNModel",
+    "AAGCNBlock",
     "HardVotingEnsemble",
     "SoftVotingEnsemble",
-    "StackingEnsemble"
+    "StackingEnsemble",
+    "WeightedSoftVotingEnsemble"
 ]
