@@ -16,6 +16,7 @@ import argparse
 import os
 import sys
 import time
+import shutil
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 import pandas as pd
@@ -229,6 +230,71 @@ def update_experiment_markdown(
         logger.info(f"Successfully auto-updated Table row **{exp_id}** in {rep_path}")
     return updated
 
+def ensure_smoke_report_file(smoke_report_path: str, template_path: str = "outputs/EXPERIMENT_RESULTS.md") -> None:
+    """
+    Guarantees that the smoke test results markdown file exists with full table structures.
+    Initializes from EXPERIMENT_RESULTS.md template if available to retain full table structures.
+    """
+    p = Path(smoke_report_path)
+    if not p.exists() or "## Table 1" not in p.read_text(encoding="utf-8", errors="ignore"):
+        p.parent.mkdir(parents=True, exist_ok=True)
+        t = Path(template_path)
+        if t.exists():
+            shutil.copy(t, p)
+            logger.info(f"Initialized isolated smoke test report from {t} -> {p}")
+        else:
+            p.write_text("# Smoke Test Experiment Results\n\n", encoding="utf-8")
+
+def update_table7_markdown(
+    report_file: str,
+    model_name_key: str,
+    win_acc: float,
+    win_f1: float,
+    vid_acc: float,
+    vid_f1: float
+) -> bool:
+    """
+    Updates the specific row in Table 7 of report_file matching model_name_key.
+    model_name_key matches the bold architecture name in Table 7:
+      - "Baseline LSTM (Mix)"
+      - "Baseline BiLSTM (Mix)"
+      - "Baseline ST-GCN (Rel 3D)"
+      - "Best Transformer (Mix)"
+      - "Best Transformer + SkelGym-Aug"
+      - "Two-Stream AAGCN"
+      - "Four-Stream AAGCN"
+      - "Tri-Model Grand Ensemble"
+      - "Grand 5-Stream SOTA Ensemble"
+    """
+    rep_path = Path(report_file)
+    if not rep_path.exists():
+        return False
+
+    content = rep_path.read_text(encoding="utf-8")
+    lines = content.splitlines()
+    updated = False
+    new_lines = []
+    gain = (vid_acc - win_acc) * 100
+
+    for line in lines:
+        if f"**{model_name_key}**" in line and line.strip().startswith("|"):
+            parts = [p.strip() for p in line.split("|")]
+            if len(parts) >= 8:
+                parts[3] = f"{win_acc * 100:.2f}%"
+                parts[4] = f"{win_f1:.4f}"
+                parts[5] = f"{vid_acc * 100:.2f}%"
+                parts[6] = f"{vid_f1:.4f}"
+                gain_sign = "+" if gain >= 0 else ""
+                parts[7] = f"{gain_sign}{gain:.2f}%"
+                line = "| " + " | ".join(parts[1:-1]) + " |"
+                updated = True
+        new_lines.append(line)
+
+    if updated:
+        rep_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+        logger.info(f"Successfully auto-updated Table 7 row **{model_name_key}** in {rep_path}")
+    return updated
+
 def append_experiment_result(
     report_file: str,
     record: Dict[str, Any],
@@ -384,6 +450,14 @@ def cmd_train(args):
         args.epochs = min(args.epochs, 2)
         args.batch_size = min(args.batch_size, 4)
         args.patience = 2
+        if getattr(args, "output_dir", "outputs") == "outputs":
+            args.output_dir = "outputs/smoke_test"
+        if getattr(args, "checkpoint_dir", "checkpoints") == "checkpoints":
+            args.checkpoint_dir = "checkpoints/smoke_test"
+        if getattr(args, "report_file", "outputs/EXPERIMENT_RESULTS.md") == "outputs/EXPERIMENT_RESULTS.md":
+            args.report_file = "outputs/smoke_test/SMOKE_RESULTS.md"
+        args.push_to_hf = False
+        ensure_smoke_report_file(args.report_file)
 
     device = resolve_device(args.device)
     if device.type == "cuda":
@@ -475,6 +549,31 @@ def cmd_train(args):
     from sklearn.metrics import classification_report as sk_classification_report
     logger.info("Detailed Classification Report:\n" + sk_classification_report(y_true, y_pred, labels=list(range(NUM_CLASSES)), target_names=ACTIONS, digits=4, zero_division=0))
 
+    # Optional Video-level evaluation
+    if getattr(args, "video_level", False) and hasattr(test_loader.dataset, "video_ids") and test_loader.dataset.video_ids:
+        y_vid_t, y_vid_p, y_vid_pr, vid_metrics = aggregate_video_level_predictions(
+            y_prob, y_true, test_loader.dataset.video_ids
+        )
+        logger.info(f"🔥 VIDEO-LEVEL Test Accuracy: {vid_metrics['accuracy'] * 100:.2f}% | Macro F1: {vid_metrics['macro_f1']:.4f}")
+        metrics["video_level"] = vid_metrics
+        t7_map = {
+            "T1.7": "Baseline LSTM (Mix)",
+            "T1.14": "Baseline BiLSTM (Mix)",
+            "T4.2": "Baseline ST-GCN (Rel 3D)",
+            "T1.21": "Best Transformer (Mix)",
+            "T2.2": "Best Transformer + SkelGym-Aug"
+        }
+        exp_id = getattr(args, "exp_id", None)
+        if exp_id in t7_map:
+            update_table7_markdown(
+                report_file=getattr(args, "report_file", "outputs/EXPERIMENT_RESULTS.md"),
+                model_name_key=t7_map[exp_id],
+                win_acc=metrics["accuracy"],
+                win_f1=metrics["macro_f1"],
+                vid_acc=vid_metrics["accuracy"],
+                vid_f1=vid_metrics["macro_f1"]
+            )
+
     # Plot confusion matrix
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -511,7 +610,15 @@ def cmd_train(args):
 
     exp_id = getattr(args, "exp_id", None)
     if exp_id:
-        update_experiment_markdown(report_file, exp_id, record)
+        updated = update_experiment_markdown(report_file, exp_id, record)
+        if not updated:
+            append_experiment_result(
+                report_file=report_file,
+                record=record,
+                push_to_hf=push_to_hf,
+                hf_repo=hf_repo,
+                hf_token=hf_token
+            )
     else:
         append_experiment_result(
             report_file=report_file,
@@ -536,6 +643,15 @@ def cmd_evaluate(args):
     """
     Evaluates an existing checkpoint on test or validation split.
     """
+    is_smoke = getattr(args, "smoke_test", False)
+    if is_smoke:
+        logger.info("[SMOKE TEST MODE ACTIVATED FOR EVALUATE] Minimal samples & isolated outputs!")
+        if getattr(args, "report_file", "outputs/EXPERIMENT_RESULTS.md") == "outputs/EXPERIMENT_RESULTS.md":
+            args.report_file = "outputs/smoke_test/SMOKE_RESULTS.md"
+        ensure_smoke_report_file(args.report_file)
+        if getattr(args, "save_cm", None) is None:
+            args.save_cm = "outputs/smoke_test/cm_evaluate.png"
+
     device = resolve_device(args.device)
     ckpt_path = Path(args.checkpoint)
     if not ckpt_path.exists():
@@ -560,7 +676,8 @@ def cmd_evaluate(args):
         batch_size=args.batch_size,
         seq_len=args.seq_len,
         landmark_dir=args.landmark_dir,
-        num_workers=0
+        num_workers=0,
+        smoke_test=is_smoke
     )
     loader = test_loader if args.split == "test" else val_loader
 
@@ -576,7 +693,8 @@ def cmd_evaluate(args):
             seq_len=args.seq_len,
             landmark_dir=args.landmark_dir,
             num_workers=0,
-            is_horizontal_flip=True
+            is_horizontal_flip=True,
+            smoke_test=is_smoke
         )
         loader_flip = test_loader_flip if args.split == "test" else val_loader_flip
         _, _, y_prob_flip = trainer.predict(loader_flip)
@@ -593,6 +711,24 @@ def cmd_evaluate(args):
         logger.info(f"🔥 VIDEO-LEVEL {args.split.upper()} (TTA={getattr(args, 'tta', False)}) - Accuracy: {vid_metrics['accuracy']*100:.2f}% | Macro F1: {vid_metrics['macro_f1']:.4f}")
         metrics["video_level"] = vid_metrics
 
+        # Auto-update Table 7
+        rep_file = getattr(args, "report_file", "outputs/EXPERIMENT_RESULTS.md")
+        ckpt_str = str(args.checkpoint)
+        key = None
+        if args.model == "LSTM" and args.feature == "mix":
+            key = "Baseline LSTM (Mix)"
+        elif args.model == "BiLSTM" and args.feature == "mix":
+            key = "Baseline BiLSTM (Mix)"
+        elif args.model == "STGCN" and args.feature in ("rel_3d", "raw_3d"):
+            key = "Baseline ST-GCN (Rel 3D)"
+        elif args.model == "Transformer" and args.feature == "mix":
+            if "T2.2" in ckpt_str or "skel_gym_aug" in ckpt_str:
+                key = "Best Transformer + SkelGym-Aug"
+            else:
+                key = "Best Transformer (Mix)"
+        if key and rep_file and Path(rep_file).exists():
+            update_table7_markdown(rep_file, key, metrics["accuracy"], metrics["macro_f1"], vid_metrics["accuracy"], vid_metrics["macro_f1"])
+
     if args.save_cm:
         plot_confusion_matrix(y_true, y_pred, args.save_cm, title=f"Confusion Matrix: {args.model}")
         logger.info(f"Confusion matrix saved to {args.save_cm}")
@@ -608,6 +744,16 @@ def cmd_ensemble(args):
     Ensemble multiple trained models using hard voting, soft voting, or stacking.
     Dynamically loads appropriate dataloader for each model architecture and feature type.
     """
+    is_smoke = getattr(args, "smoke_test", False)
+    if is_smoke:
+        logger.info("[SMOKE TEST MODE ACTIVATED FOR ENSEMBLE] Isolated outputs!")
+        if getattr(args, "output_dir", "outputs/ensemble") in ("outputs/ensemble", "outputs"):
+            args.output_dir = "outputs/smoke_test/ensemble"
+        if getattr(args, "report_file", "outputs/EXPERIMENT_RESULTS.md") == "outputs/EXPERIMENT_RESULTS.md":
+            args.report_file = "outputs/smoke_test/SMOKE_RESULTS.md"
+        args.push_to_hf = False
+        ensure_smoke_report_file(args.report_file)
+
     device = resolve_device(args.device)
     logger.info(f"Running Ensemble method: {args.method.upper()} on {len(args.checkpoints)} checkpoints using device: {device}.")
 
@@ -691,7 +837,8 @@ def cmd_ensemble(args):
             val_test_stride=ens_stride,
             landmark_dir=args.landmark_dir,
             num_workers=0,
-            in_memory=True
+            in_memory=True,
+            smoke_test=is_smoke
         )
         tr = Trainer(model=m, device=device)
 
@@ -707,7 +854,8 @@ def cmd_ensemble(args):
                 landmark_dir=args.landmark_dir,
                 num_workers=0,
                 in_memory=True,
-                is_horizontal_flip=True
+                is_horizontal_flip=True,
+                smoke_test=is_smoke
             )
         else:
             val_loader_flip = None
@@ -838,6 +986,29 @@ def cmd_ensemble(args):
             logger.info(f"Updated Table 6 Classification Report in {report_file}")
         except Exception as e:
             logger.warning(f"Could not auto-update Table 6: {e}")
+
+    # Auto-update Table 7 (Video-Level Summary Benchmark)
+    if getattr(args, "video_level", False) and 'vid_metrics' in locals() and report_file and Path(report_file).exists():
+        exp_id = getattr(args, "exp_id", "") or ""
+        t7_key = None
+        if exp_id == "T4.9" or (len(args.checkpoints) == 2 and all("AAGCN" in c for c in args.checkpoints)):
+            t7_key = "Two-Stream AAGCN"
+        elif exp_id == "T4.10" or (len(args.checkpoints) == 4 and all("AAGCN" in c for c in args.checkpoints)):
+            t7_key = "Four-Stream AAGCN"
+        elif exp_id == "T5.4" or (len(args.checkpoints) == 3 and any("Transformer" in c for c in args.checkpoints)):
+            t7_key = "Tri-Model Grand Ensemble"
+        elif exp_id == "T5.5" or (len(args.checkpoints) == 5):
+            t7_key = "Grand 5-Stream SOTA Ensemble"
+
+        if t7_key:
+            update_table7_markdown(
+                report_file=report_file,
+                model_name_key=t7_key,
+                win_acc=metrics["accuracy"],
+                win_f1=metrics["macro_f1"],
+                vid_acc=vid_metrics["accuracy"],
+                vid_f1=vid_metrics["macro_f1"]
+            )
 
     if getattr(args, "push_to_hf", False):
         token = getattr(args, "hf_token", None) or os.environ.get("HF_TOKEN")
@@ -1012,6 +1183,7 @@ def create_parser() -> argparse.ArgumentParser:
     p_train.add_argument("--hf_repo", type=str, default=DEFAULT_MODEL_REPO, help="Hugging Face Model repository ID")
     p_train.add_argument("--hf_token", type=str, default=None, help="Hugging Face authentication token")
     p_train.add_argument("--report_file", type=str, default="outputs/EXPERIMENT_RESULTS.md", help="Single consolidated results file")
+    p_train.add_argument("--video_level", action="store_true", default=False, help="Also evaluate and log Video-Level aggregation on Test set")
 
     # Evaluate
     p_eval = subparsers.add_parser("evaluate", help="Evaluate a model checkpoint")
@@ -1031,6 +1203,8 @@ def create_parser() -> argparse.ArgumentParser:
     p_eval.add_argument("--video_level", action="store_true", default=False, help="Evaluate Video-Level Aggregation")
     p_eval.add_argument("--save_cm", type=str, default=None, help="File path to save confusion matrix image")
     p_eval.add_argument("--save_table7", type=str, default=None, help="File path to save Table 7 LaTeX code")
+    p_eval.add_argument("--report_file", type=str, default="outputs/EXPERIMENT_RESULTS.md", help="Single consolidated results file")
+    p_eval.add_argument("--smoke_test", action="store_true", default=False, help="Smoke test evaluation: minimal samples and isolated outputs")
     p_eval.add_argument("--hidden_dim", type=int, default=None)
     p_eval.add_argument("--num_layers", type=int, default=None)
     p_eval.add_argument("--nhead", type=int, default=8)
@@ -1053,6 +1227,7 @@ def create_parser() -> argparse.ArgumentParser:
     p_ens.add_argument("--hf_repo", type=str, default=DEFAULT_MODEL_REPO, help="Hugging Face model repository ID")
     p_ens.add_argument("--hf_token", type=str, default=None, help="Hugging Face authentication token")
     p_ens.add_argument("--report_file", type=str, default="outputs/EXPERIMENT_RESULTS.md", help="Single consolidated results file")
+    p_ens.add_argument("--smoke_test", action="store_true", default=False, help="Smoke test mode for ensemble: minimal samples and isolated outputs")
 
     # Reproduce
     p_rep = subparsers.add_parser("reproduce", help="Automated reproduction for paper tables")

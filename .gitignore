@@ -54,6 +54,7 @@ outputs/*.log
 outputs/*.json
 outputs/ensemble/
 outputs/test_report/
+outputs/smoke_test/
 .system_generated/
 scratch/
 

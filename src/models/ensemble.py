@@ -62,6 +62,11 @@ class StackingEnsemble:
         Trains the meta-learner on validation probabilities.
         Concatenates probabilities along feature dimension: (N, M * num_classes)
         """
+        if len(np.unique(val_labels)) < 2:
+            # Fallback for smoke test / single class debugging: mark fitted without training LogisticRegression
+            self.is_fitted = True
+            return self
+
         X_meta = np.concatenate(val_probabilities, axis=1)
         self.meta_classifier.fit(X_meta, val_labels)
         self.is_fitted = True
@@ -70,12 +75,16 @@ class StackingEnsemble:
     def predict(self, test_probabilities: List[np.ndarray]) -> np.ndarray:
         if not self.is_fitted:
             raise RuntimeError("StackingEnsemble must be fitted before predict!")
+        if not hasattr(self.meta_classifier, "classes_"):
+            return np.argmax(np.mean(test_probabilities, axis=0), axis=1)
         X_meta = np.concatenate(test_probabilities, axis=1)
         return self.meta_classifier.predict(X_meta)
 
     def predict_proba(self, test_probabilities: List[np.ndarray]) -> np.ndarray:
         if not self.is_fitted:
             raise RuntimeError("StackingEnsemble must be fitted before predict_proba!")
+        if not hasattr(self.meta_classifier, "classes_"):
+            return np.mean(test_probabilities, axis=0)
         X_meta = np.concatenate(test_probabilities, axis=1)
         return self.meta_classifier.predict_proba(X_meta)
 

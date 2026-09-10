@@ -54,6 +54,7 @@ TABLE1_EXPERIMENTS = [
 TABLE2_EXPERIMENTS = [
     {"name": "T2.1_Transformer_mix_no_aug", "exp_id": "T2.1", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "mix", "--augment", "none", "--exp_id", "T2.1", "--epochs", "100", "--batch_size", "16", "--device", "auto", "--use_amp", "--in_memory"]},
     {"name": "T2.2_Transformer_mix_combined_aug", "exp_id": "T2.2", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "mix", "--augment", "combined", "--exp_id", "T2.2", "--epochs", "100", "--batch_size", "16", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T2.3_Transformer_mix_skel_gym_aug", "exp_id": "T2.3", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "mix", "--augment", "skel_gym_aug", "--exp_id", "T2.3", "--epochs", "100", "--batch_size", "16", "--device", "auto", "--use_amp", "--in_memory"]},
 ]
 
 TABLE4_EXPERIMENTS = [
