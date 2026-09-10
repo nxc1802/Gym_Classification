@@ -823,8 +823,8 @@ def cmd_ensemble(args):
     y_val_final = None
     y_test_final = None
 
-    ens_seq_len = getattr(args, "seq_len", 20)
-    ens_stride = getattr(args, "stride", getattr(args, "val_test_stride", 10))
+    ens_seq_len = getattr(args, "seq_len", 32)
+    ens_stride = getattr(args, "stride", getattr(args, "val_test_stride", 32))
 
     for m, m_type, f_type, ckpt_name in model_entries:
         logger.info(f"Generating predictions for {m_type} ({f_type}) from {ckpt_name} (seq_len={ens_seq_len}, stride={ens_stride}) ...")
@@ -1153,7 +1153,7 @@ def create_parser() -> argparse.ArgumentParser:
     p_train.add_argument("--batch_size", type=int, default=16, help="Batch size (e.g. 16 for clean gradient dynamics)")
     p_train.add_argument("--lr", type=float, default=1e-4, help="Learning rate")
     p_train.add_argument("--weight_decay", type=float, default=1e-4, help="Weight decay")
-    p_train.add_argument("--patience", type=int, default=20, help="Early stopping patience")
+    p_train.add_argument("--patience", type=int, default=10, help="Early stopping patience")
     p_train.add_argument("--seq_len", type=int, default=32, help="Sequence length in frames")
     p_train.add_argument("--train_stride", type=int, default=16, help="Stride for training sliding window")
     p_train.add_argument("--val_test_stride", type=int, default=32, help="Stride for validation and testing sliding window")
@@ -1214,8 +1214,8 @@ def create_parser() -> argparse.ArgumentParser:
     p_ens.add_argument("--checkpoints", nargs="+", required=True, help="List of checkpoint .pt file paths")
     p_ens.add_argument("--method", type=str, default="weighted_soft", choices=["hard", "soft", "weighted_soft", "stacking"], help="Ensemble method")
     p_ens.add_argument("--exp_id", type=str, default=None, help="Experiment ID to automatically update report (e.g. T5.1, T5.2, T5.3, SOTA_ENSEMBLE)")
-    p_ens.add_argument("--seq_len", type=int, default=20, help="Sequence length for ensemble dataloader")
-    p_ens.add_argument("--stride", type=int, default=10, help="Stride for ensemble dataloader")
+    p_ens.add_argument("--seq_len", type=int, default=32, help="Sequence length for ensemble dataloader")
+    p_ens.add_argument("--stride", type=int, default=32, help="Stride for ensemble dataloader")
     p_ens.add_argument("--tta", action="store_true", default=False, help="Enable Test-Time Augmentation (Horizontal Mirroring)")
     p_ens.add_argument("--video_level", action="store_true", default=False, help="Evaluate Video-Level Aggregation")
     p_ens.add_argument("--metadata", type=str, default="Final_dataset_metadata.csv")
@@ -1241,7 +1241,7 @@ def create_parser() -> argparse.ArgumentParser:
     p_rep.add_argument("--batch_size", type=int, default=128)
     p_rep.add_argument("--lr", type=float, default=1e-4)
     p_rep.add_argument("--weight_decay", type=float, default=1e-4)
-    p_rep.add_argument("--patience", type=int, default=20)
+    p_rep.add_argument("--patience", type=int, default=10)
     p_rep.add_argument("--seq_len", type=int, default=32)
     p_rep.add_argument("--train_stride", type=int, default=16)
     p_rep.add_argument("--hidden_dim", type=int, default=128)

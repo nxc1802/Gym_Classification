@@ -4,12 +4,12 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 ### Experimental Protocol & Standards (MediaPipe Pose Heavy SOTA Dataset)
 - **Dataset Source of Truth:** 1,024 clean, un-shuffled video recordings across 22 classes from Kaggle (`nguyenxuancuongk18dn/gym-exercise-classification-dataset`).
-  - **Train Set:** 580 videos (266,717 frames $\rightarrow$ 15,820 windows at $T=32$, stride 16; 25,852 windows at $T=20$, stride 10).
-  - **Validation Set:** 208 videos (72,105 frames $\rightarrow$ 2,147 windows at $T=32$, stride 32; 3,513 windows at $T=20$, stride 20).
-  - **Held-out Test Set:** 236 videos (110,577 frames $\rightarrow$ 3,337 windows at $T=32$, stride 32; 5,416 windows at $T=20$, stride 20).
+  - **Train Set:** 580 videos (266,717 frames $\rightarrow$ 15,820 windows at $T=32$, stride 16).
+  - **Validation Set:** 208 videos (72,105 frames $\rightarrow$ 2,147 windows at $T=32$, stride 32).
+  - **Held-out Test Set:** 236 videos (110,577 frames $\rightarrow$ 3,337 windows at $T=32$, stride 32).
 - **Landmark Model:** MediaPipe Pose `model_complexity = 2` (Heavy) with 33 full-body landmarks (13 calibrated keypoints used for spatial body kinematics).
 - **Controlled Parameter Budget:** All individual backbones calibrated to $\approx 350\text{K} \pm 15\%$ parameters for strict fairness.
-- **Optimization:** Adam / AdamW optimizer, Cosine Annealing with Warmup or ReduceLROnPlateau, up to 100 epochs, early stopping patience = 20, Automatic Mixed Precision (AMP) enabled.
+- **Optimization:** Adam / AdamW optimizer, Cosine Annealing with Warmup or ReduceLROnPlateau, fixed 100 epochs, early stopping patience = 10, Automatic Mixed Precision (AMP) enabled.
 
 ---
 
@@ -61,12 +61,12 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | **T4.2** | **ST-GCN** | rel_3d | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_STGCN_T4.2_rel_3d.pt` | Pending |
 | **T4.3** | **ST-GCN** | raw_2d | $(2, 32, 13)$ | - | - | - | - | - | `checkpoints/best_STGCN_T4.3_raw_2d.pt` | Pending |
 | **T4.4** | **ST-GCN** | rel_2d | $(2, 32, 13)$ | - | - | - | - | - | `checkpoints/best_STGCN_T4.4_rel_2d.pt` | Pending |
-| **T4.5** | **AAGCN (Adaptive GCN)** | rel_3d (Joint Stream) | $(3, 20, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T4.5_rel_3d.pt` | Pending |
-| **T4.6** | **AAGCN (Adaptive GCN)** | bone_3d (Bone Stream) | $(3, 20, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T4.6_bone_3d.pt` | Pending |
-| **T4.7** | **AAGCN (Adaptive GCN)** | joint_motion_3d ($\Delta X$) | $(3, 20, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T4.7_joint_motion_3d.pt` | Pending |
-| **T4.8** | **AAGCN (Adaptive GCN)** | bone_motion_3d ($\Delta B$) | $(3, 20, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T4.8_bone_motion_3d.pt` | Pending |
-| **T4.9** | **Two-Stream AAGCN** | Joint + Bone Stream Fusion | Late Fusion | - | - | - | - | - | `outputs/ensemble/cm_2s_aagcn.png` | Pending |
-| **T4.10** | **Four-Stream AAGCN** | Joint + Bone + J-Motion + B-Motion | Late Fusion | - | - | - | - | - | `outputs/ensemble/cm_4s_aagcn.png` | Pending |
+| **T4.5** | **AAGCN (Adaptive GCN)** | rel_3d (Joint Stream) | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T4.5_rel_3d.pt` | Pending |
+| **T4.6** | **AAGCN (Adaptive GCN)** | bone_3d (Bone Stream) | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T4.6_bone_3d.pt` | Pending |
+| **T4.7** | **AAGCN (Adaptive GCN)** | joint_motion_3d ($\Delta X$) | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T4.7_joint_motion_3d.pt` | Pending |
+| **T4.8** | **AAGCN (Adaptive GCN)** | bone_motion_3d ($\Delta B$) | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T4.8_bone_motion_3d.pt` | Pending |
+| **T4.9** | **Two-Stream AAGCN** | Joint + Bone Stream Fusion | Late Fusion ($T=32$) | - | - | - | - | - | `outputs/ensemble/cm_2s_aagcn.png` | Pending |
+| **T4.10** | **Four-Stream AAGCN** | Joint + Bone + J-Motion + B-Motion | Late Fusion ($T=32$) | - | - | - | - | - | `outputs/ensemble/cm_4s_aagcn.png` | Pending |
 
 ---
 
@@ -84,7 +84,7 @@ This document serves as the primary tracking log and benchmark sheet for the res
 ---
 
 ## Table 6A: Detailed Classification Report (Window-Level Benchmark)
-*Objective:* Comprehensive per-class evaluation of the proposed Grand SOTA ensemble across all 22 gym exercise categories on the held-out test windows ($N=3,337$ at $T=32$, or $N=5,416$ at $T=20$).
+*Objective:* Comprehensive per-class evaluation of the proposed Grand SOTA ensemble across all 22 gym exercise categories on the held-out test windows ($N=3,337$ windows at $T=32$, stride 32).
 
 | Exercise Class | Precision | Recall | F1-Score | Support |
 | :--- | :---: | :---: | :---: | :---: |
