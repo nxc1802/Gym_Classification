@@ -75,7 +75,7 @@ def collect_video_tasks(raw_base_dir: str, output_landmark_dir: str):
                     split_idx = idx_p
                     break
             if split_idx != -1 and len(parts) > split_idx + 2:
-                split = parts[split_idx]
+                split = parts[split_idx].lower()
                 act = parts[split_idx + 1]
                 filename = parts[-1]
             else:
@@ -110,14 +110,24 @@ def _worker_extract(task_tuple):
 def run_extraction_pipeline(
     raw_dir: str = None,
     output_dir: str = str(ROOT_DIR / "data" / "landmarks"),
-    num_workers: int = 16
+    num_workers: int = 16,
+    clean_old: bool = False,
+    push_to_hf: bool = False,
+    hf_token: str = None
 ):
     """Executes the full pipeline with model_complexity = 2."""
     print("=" * 70)
     print(" MediaPipe Pose Landmark Extraction: model_complexity = 2 (Heavy)")
     print(f" Target Output: {output_dir}")
     print(f" Parallel Workers: {num_workers}")
+    print(f" Push to Hugging Face: {push_to_hf}")
     print("=" * 70)
+
+    out_p = Path(output_dir)
+    if clean_old and out_p.exists():
+        import shutil
+        print(f"\n[Warning] Cleaning old landmarks at {out_p} ...")
+        shutil.rmtree(out_p)
 
     # 1. Resolve raw dataset
     if not raw_dir or not os.path.exists(raw_dir):
@@ -130,33 +140,54 @@ def run_extraction_pipeline(
     print(f"      Already extracted (skip): {skipped}")
     print(f"      Tasks to process        : {len(tasks)}")
 
-    if not tasks:
-        print("\nAll videos have already been extracted! Output directory is up-to-date.")
-        _summarize_splits(output_dir)
-        return
+    if tasks:
+        # 3. Parallel extraction
+        print(f"\n[3/4] Launching parallel extraction with model_complexity=2 ({num_workers} workers) ...")
+        success_cnt = 0
+        fail_cnt = 0
 
-    # 3. Parallel extraction
-    print(f"\n[3/4] Launching parallel extraction with model_complexity=2 ({num_workers} workers) ...")
-    success_cnt = 0
-    fail_cnt = 0
+        with ProcessPoolExecutor(max_workers=num_workers) as executor:
+            futures = {executor.submit(_worker_extract, t): t for t in tasks}
+            total_tasks = len(tasks)
+            for idx, fut in enumerate(as_completed(futures), 1):
+                ok, name, err = fut.result()
+                if ok:
+                    success_cnt += 1
+                else:
+                    fail_cnt += 1
+                    print(f"  [FAIL] {name}: {err}")
 
-    with ProcessPoolExecutor(max_workers=num_workers) as executor:
-        futures = {executor.submit(_worker_extract, t): t for t in tasks}
-        total_tasks = len(tasks)
-        for idx, fut in enumerate(as_completed(futures), 1):
-            ok, name, err = fut.result()
-            if ok:
-                success_cnt += 1
-            else:
-                fail_cnt += 1
-                print(f"  [FAIL] {name}: {err}")
-
-            if idx % 25 == 0 or idx == total_tasks:
-                print(f"  Progress: [{idx}/{total_tasks}] (Success: {success_cnt}, Failed: {fail_cnt})")
+                if idx % 25 == 0 or idx == total_tasks:
+                    print(f"  Progress: [{idx}/{total_tasks}] (Success: {success_cnt}, Failed: {fail_cnt})")
 
     # 4. Final summary
     print("\n[4/4] Extraction completed!")
     _summarize_splits(output_dir)
+
+    # 5. Packaging & Hugging Face Upload
+    if push_to_hf:
+        import shutil
+        from src.utils.hf_hub import upload_file_to_hf, DEFAULT_DATASET_REPO
+
+        zip_base = str(ROOT_DIR / "landmarks_dataset")
+        print(f"\n[Packaging] Compressing {output_dir} into {zip_base}.zip ...")
+        zip_file = shutil.make_archive(zip_base, "zip", output_dir)
+        print(f"            Archive created: {zip_file} ({os.path.getsize(zip_file) / (1024**2):.1f} MB)")
+
+        token = hf_token or os.environ.get("HF_TOKEN")
+        if token:
+            print(f"[HF Hub] Uploading to {DEFAULT_DATASET_REPO} ...")
+            upload_file_to_hf(
+                local_path=zip_file,
+                path_in_repo="landmarks_dataset.zip",
+                repo_id=DEFAULT_DATASET_REPO,
+                repo_type="dataset",
+                token=token,
+                commit_message="MediaPipe Pose (model_complexity=2 Heavy) directly from Kaggle Source of Truth"
+            )
+            print("[HF Hub] Upload completed successfully!")
+        else:
+            print("[HF Hub Warning] No HF_TOKEN provided, skipped upload.")
 
 def _summarize_splits(output_dir: str):
     base = Path(output_dir)
@@ -175,12 +206,18 @@ def main():
     parser.add_argument("--raw_dir", type=str, default=None, help="Path to raw videos (downloads from Kaggle if not provided)")
     parser.add_argument("--output_dir", type=str, default=str(ROOT_DIR / "data" / "landmarks"), help="Output directory for landmark CSVs")
     parser.add_argument("--workers", type=int, default=16, help="Number of worker processes")
+    parser.add_argument("--clean_old", action="store_true", help="Remove existing output directory before extraction")
+    parser.add_argument("--push_to_hf", action="store_true", help="Compress and upload to Hugging Face dataset repo")
+    parser.add_argument("--hf_token", type=str, default=None, help="Hugging Face API token")
     args = parser.parse_args()
 
     run_extraction_pipeline(
         raw_dir=args.raw_dir,
         output_dir=args.output_dir,
-        num_workers=args.workers
+        num_workers=args.workers,
+        clean_old=args.clean_old,
+        push_to_hf=args.push_to_hf,
+        hf_token=args.hf_token
     )
 
 if __name__ == "__main__":
