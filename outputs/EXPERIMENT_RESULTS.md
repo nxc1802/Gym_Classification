@@ -96,8 +96,8 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | **T5.1** | **Hard Voting** | Best Transformer (T1/T2) + Best Graph (T3/T4) | 54.26% | 0.5884 | 0.5643 | `outputs/ensemble/cm_ensemble_hard.png` | Done |
 | **T5.2** | **Soft Voting** | Best Transformer (T1/T2) + Best Graph (T3/T4) | 61.46% | 0.6347 | 0.6247 | `outputs/ensemble/cm_ensemble_soft.png` | Done |
 | **T5.3** | **Stacking Ensemble** | Best Transformer (T1/T2) + Best Graph (T3/T4) + Meta-Learner | 62.21% | 0.6367 | 0.6302 | `outputs/ensemble/cm_ensemble_stacking.png` | Done |
-| **T5.4** | **Tri-Model Grand Ensemble** | Best Transformer + AAGCN Joint Aug + AAGCN Bone Aug | 60.25% | 0.6341 | 0.6094 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
-| **T5.5** | **Grand Multi-Stream SOTA Ensemble** | Best Transformer + Four-Stream AAGCN Aug | 60.22% | 0.6353 | 0.6097 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
+| **T5.4** | **Tri-Model Grand Ensemble (Weighted Soft Voting)** | Best Transformer + AAGCN Joint Aug + AAGCN Bone Aug | 60.25% | 0.6341 | 0.6094 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
+| **T5.5** | **Grand Multi-Stream SOTA Ensemble (Weighted Soft Voting)** | Best Transformer + Four-Stream AAGCN Aug | 60.22% | 0.6353 | 0.6097 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
 
 ---
 
