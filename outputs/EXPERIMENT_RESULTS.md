@@ -47,13 +47,15 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 | Exp ID | Augmentation Strategy | Configuration | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
-| **T2.1** | **None (Baseline)** | `augment: none` (Clean original samples) | 0.0793 | 1.8965 | 66.39% | 47.09% | 0.4879 | `checkpoints/best_Transformer_T2.1_mix.pt` | Done |
-| **T2.2** | **SkelGym-Aug (Dynamic On-the-Fly)** | `augment: skel_gym_aug` (Bilateral Flip $p=0.5$, 3D Yaw $\pm 15^\circ$, Scale, Time-Warp, Jitter) | 0.0985 | 1.6043 | 68.60% | 51.92% | 0.5305 | `checkpoints/best_Transformer_T2.2_mix.pt` | Done |
+| **T2.1** | **None (Baseline Mix)** | `augment: none` (Clean original samples) | 0.0793 | 1.8965 | 66.39% | 47.09% | 0.4879 | `checkpoints/best_Transformer_T2.1_mix.pt` | Done |
+| **T2.2** | **SkelGym-Aug (Dynamic Mix)** | `augment: skel_gym_aug` (Bilateral Flip $p=0.5$, 3D Yaw $\pm 15^\circ$, Scale, Time-Warp, Jitter) | 0.0985 | 1.6043 | 68.60% | 51.92% | 0.5305 | `checkpoints/best_Transformer_T2.2_mix.pt` | Done |
+| **T2.3** | **None (Baseline raw_3d)** | `augment: none` (Clean original samples) | 0.1300 | 1.1634 | 72.76% | 57.21% | 0.5864 | `checkpoints/best_Transformer_T1.18_raw_3d.pt` | Done |
+| **T2.4** | **SkelGym-Aug (Dynamic raw_3d)** | `augment: skel_gym_aug` (Bilateral Flip $p=0.5$, 3D Yaw $\pm 15^\circ$, Scale, Time-Warp, Jitter) | - | - | - | - | - | - | Pending |
 
 ---
 
 ## Table 3: Spatial-Temporal Graph Models & Multi-Stream AAGCN Kinematics
-*Objective:* Evaluate Graph Neural Networks under spatial-temporal skeletal graph topology $(B, C, T, V)$, systematically benchmarking baseline ST-GCN against dynamic Adaptive Graph Convolutional Networks (AAGCN) and their multi-stream fusion ablations.
+*Objective:* Evaluate Graph Neural Networks under spatial-temporal skeletal graph topology $(B, C, T, V)$, systematically benchmarking baseline ST-GCN against dynamic Adaptive Graph Convolutionn Networks (AAGCN) and their multi-stream fusion ablations.
 
 | Exp ID | Model Architecture | Graph Stream | Tensor Shape $(C, T, V)$ | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
@@ -79,6 +81,10 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | **T4.2** | **ST-GCN** | rel_3d (Joint) | `augment: skel_gym_aug` (Dynamic) | 0.5803 | 1.5091 | 60.19% | 52.24% | 0.5159 | `checkpoints/best_STGCN_T4.2_rel_3d.pt` | Done |
 | **T4.3** | **AAGCN** | rel_3d (Joint) | `augment: none` (Baseline) | 0.0778 | 2.0461 | 68.73% | 54.00% | 0.5362 | `checkpoints/best_AAGCN_T4.3_rel_3d.pt` | Done |
 | **T4.4** | **AAGCN** | rel_3d (Joint) | `augment: skel_gym_aug` (Dynamic) | 0.3145 | 1.2315 | 68.87% | 57.18% | 0.5710 | `checkpoints/best_AAGCN_T4.4_rel_3d.pt` | Done |
+| **T4.5** | **Two-Stream AAGCN** | Joint + Bone Stream Fusion | `augment: none` (Baseline) | - | - | - | 54.38% | 0.5496 | `outputs/ensemble/cm_ensemble_T3.9_weighted_soft.png` | Done |
+| **T4.6** | **Two-Stream AAGCN** | Joint + Bone Stream Fusion | `augment: skel_gym_aug` (Dynamic) | - | - | - | - | - | - | Pending |
+| **T4.7** | **Four-Stream AAGCN** | Joint + Bone + J-Motion + B-Motion | `augment: none` (Baseline) | - | - | - | 56.03% | 0.5668 | `outputs/ensemble/cm_ensemble_T3.10_weighted_soft.png` | Done |
+| **T4.8** | **Four-Stream AAGCN** | Joint + Bone + J-Motion + B-Motion | `augment: skel_gym_aug` (Dynamic) | - | - | - | - | - | - | Pending |
 
 ---
 
@@ -87,11 +93,11 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 | Exp ID | Ensemble Strategy | Component Models | Test Acc (%) | Macro F1 | Weighted F1 | Checkpoint / Artifact | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :--- | :---: |
-| **T5.1** | **Hard Voting** | Best Transformer + Best ST-GCN | 42.12% | 0.4572 | 0.4414 | `outputs/ensemble/cm_ensemble_hard.png` | Done |
-| **T5.2** | **Soft Voting** | Best Transformer + Best ST-GCN | 49.47% | 0.5165 | 0.5055 | `outputs/ensemble/cm_ensemble_soft.png` | Done |
-| **T5.3** | **Stacking Ensemble** | Best Transformer + Best ST-GCN + Meta-Learner | 50.16% | 0.5171 | 0.4978 | `outputs/ensemble/cm_ensemble_stacking.png` | Done |
-| **T5.4** | **Tri-Model Grand Ensemble** | Transformer Mix + AAGCN Joint + AAGCN Bone | 54.78% | 0.5584 | 0.5612 | `outputs/ensemble/cm_ensemble_T5.4_weighted_soft.png` | Done |
-| **T5.5** | **Grand 5-Stream SOTA Ensemble** | Transformer Mix + 4-Stream AAGCN | 56.11% | 0.5715 | 0.5771 | `outputs/ensemble/cm_ensemble_T5.5_weighted_soft.png` | Done |
+| **T5.1** | **Hard Voting** | Best Transformer (T1/T2) + Best Graph (T3/T4) | - | - | - | - | Pending |
+| **T5.2** | **Soft Voting** | Best Transformer (T1/T2) + Best Graph (T3/T4) | - | - | - | - | Pending |
+| **T5.3** | **Stacking Ensemble** | Best Transformer (T1/T2) + Best Graph (T3/T4) + Meta-Learner | - | - | - | - | Pending |
+| **T5.4** | **Tri-Model Grand Ensemble** | Best Transformer + AAGCN Joint Aug + AAGCN Bone Aug | - | - | - | - | Pending |
+| **T5.5** | **Grand Multi-Stream SOTA Ensemble** | Best Transformer + Four-Stream AAGCN Aug | - | - | - | - | Pending |
 
 ---
 
