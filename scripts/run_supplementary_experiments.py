@@ -101,6 +101,10 @@ SINGLE_MODELS = [
 def run_job(job):
     name = job["name"]
     cmd = job["cmd"]
+    ckpt = job.get("ckpt")
+    if ckpt and Path(ckpt).exists():
+        logger.info(f"⏭️ Checkpoint {ckpt} already exists. Skipping training for {name}.")
+        return True, name, 0.0, ""
     logger.info(f"🚀 Starting {name} ...")
     start_t = time.time()
     res = subprocess.run(cmd, capture_output=True, text=True)

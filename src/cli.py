@@ -298,6 +298,7 @@ def update_table7_markdown(
         updated = False
         new_lines = []
         in_table7 = False
+        gain = (vid_acc - win_acc) * 100
         for line in lines:
             if "## Table 7" in line:
                 in_table7 = True
