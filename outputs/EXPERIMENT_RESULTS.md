@@ -52,29 +52,41 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 ---
 
-## Table 4: Spatial-Temporal Graph Models & Multi-Stream AAGCN Ablation
+## Table 3: Spatial-Temporal Graph Models & Multi-Stream AAGCN Kinematics
 *Objective:* Evaluate Graph Neural Networks under spatial-temporal skeletal graph topology $(B, C, T, V)$, systematically benchmarking baseline ST-GCN against dynamic Adaptive Graph Convolutional Networks (AAGCN) and their multi-stream fusion ablations.
 
 | Exp ID | Model Architecture | Graph Stream | Tensor Shape $(C, T, V)$ | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
-| **T4.1** | **ST-GCN** | raw_3d | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_STGCN_T4.1_raw_3d.pt` | Pending |
-| **T4.2** | **ST-GCN** | rel_3d | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_STGCN_T4.2_rel_3d.pt` | Pending |
-| **T4.3** | **ST-GCN** | raw_2d | $(2, 32, 13)$ | - | - | - | - | - | `checkpoints/best_STGCN_T4.3_raw_2d.pt` | Pending |
-| **T4.4** | **ST-GCN** | rel_2d | $(2, 32, 13)$ | - | - | - | - | - | `checkpoints/best_STGCN_T4.4_rel_2d.pt` | Pending |
-| **T4.5** | **AAGCN (Adaptive GCN)** | rel_3d (Joint Stream) | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T4.5_rel_3d.pt` | Pending |
-| **T4.6** | **AAGCN (Adaptive GCN)** | bone_3d (Bone Stream) | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T4.6_bone_3d.pt` | Pending |
-| **T4.7** | **AAGCN (Adaptive GCN)** | joint_motion_3d ($\Delta X$) | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T4.7_joint_motion_3d.pt` | Pending |
-| **T4.8** | **AAGCN (Adaptive GCN)** | bone_motion_3d ($\Delta B$) | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T4.8_bone_motion_3d.pt` | Pending |
-| **T4.9** | **Two-Stream AAGCN** | Joint + Bone Stream Fusion | Late Fusion ($T=32$) | - | - | - | - | - | `outputs/ensemble/cm_2s_aagcn.png` | Pending |
-| **T4.10** | **Four-Stream AAGCN** | Joint + Bone + J-Motion + B-Motion | Late Fusion ($T=32$) | - | - | - | - | - | `outputs/ensemble/cm_4s_aagcn.png` | Pending |
+| **T3.1** | **ST-GCN** | raw_3d | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_STGCN_T3.1_raw_3d.pt` | Pending |
+| **T3.2** | **ST-GCN** | rel_3d | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_STGCN_T3.2_rel_3d.pt` | Pending |
+| **T3.3** | **ST-GCN** | raw_2d | $(2, 32, 13)$ | - | - | - | - | - | `checkpoints/best_STGCN_T3.3_raw_2d.pt` | Pending |
+| **T3.4** | **ST-GCN** | rel_2d | $(2, 32, 13)$ | - | - | - | - | - | `checkpoints/best_STGCN_T3.4_rel_2d.pt` | Pending |
+| **T3.5** | **AAGCN (Adaptive GCN)** | rel_3d (Joint Stream) | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T3.5_rel_3d.pt` | Pending |
+| **T3.6** | **AAGCN (Adaptive GCN)** | bone_3d (Bone Stream) | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T3.6_bone_3d.pt` | Pending |
+| **T3.7** | **AAGCN (Adaptive GCN)** | joint_motion_3d ($\Delta X$) | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T3.7_joint_motion_3d.pt` | Pending |
+| **T3.8** | **AAGCN (Adaptive GCN)** | bone_motion_3d ($\Delta B$) | $(3, 32, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T3.8_bone_motion_3d.pt` | Pending |
+| **T3.9** | **Two-Stream AAGCN** | Joint + Bone Stream Fusion | Late Fusion ($T=32$) | - | - | - | - | - | `outputs/ensemble/cm_2s_aagcn.png` | Pending |
+| **T3.10** | **Four-Stream AAGCN** | Joint + Bone + J-Motion + B-Motion | Late Fusion ($T=32$) | - | - | - | - | - | `outputs/ensemble/cm_4s_aagcn.png` | Pending |
 
 ---
 
-## Table 5: Heterogeneous Cross-Paradigm Ensemble (Transformer + AAGCN)
-*Objective:* Fuse complementary dynamics from the best sequence Transformer (Bảng 1/2) and spatial-temporal graph models (Bảng 4) to establish SOTA accuracy.
+## Table 4: Data Augmentation Ablation on Graph Architectures
+*Objective:* Empirical ablation assessing the effectiveness of dynamic skeletal data augmentation (SkelGym-Aug: bilateral symmetry mirroring, 3D yaw rotation $\pm 15^\circ$, time-warping, jitter) on spatial-temporal graph models (ST-GCN and AAGCN).
+
+| Exp ID | Model Architecture | Graph Stream | Augmentation Strategy | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
+| :---: | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
+| **T4.1** | **ST-GCN** | rel_3d (Joint) | `augment: none` (Baseline) | - | - | - | - | - | `checkpoints/best_STGCN_T4.1_rel_3d.pt` | Pending |
+| **T4.2** | **ST-GCN** | rel_3d (Joint) | `augment: skel_gym_aug` (Dynamic) | - | - | - | - | - | `checkpoints/best_STGCN_T4.2_rel_3d.pt` | Pending |
+| **T4.3** | **AAGCN** | rel_3d (Joint) | `augment: none` (Baseline) | - | - | - | - | - | `checkpoints/best_AAGCN_T4.3_rel_3d.pt` | Pending |
+| **T4.4** | **AAGCN** | rel_3d (Joint) | `augment: skel_gym_aug` (Dynamic) | - | - | - | - | - | `checkpoints/best_AAGCN_T4.4_rel_3d.pt` | Pending |
+
+---
+
+## Table 5: Heterogeneous Cross-Paradigm Ensemble (Transformer + Graph Models)
+*Objective:* Fuse complementary dynamics from the best sequence Transformer (Table 1/2) and spatial-temporal graph models (Table 3/4) to establish SOTA accuracy.
 
 | Exp ID | Ensemble Strategy | Component Models | Test Acc (%) | Macro F1 | Weighted F1 | Checkpoint / Artifact | Status |
-| :---: | :--- | :--- | :---: | :---: | :---: | :--- | :---: |
+| :---: | :--- | :--- | :---: | :---: | :--- | :---: |
 | **T5.1** | **Hard Voting** | Best Transformer + Best ST-GCN | - | - | - | `outputs/ensemble/cm_ensemble_hard.png` | Pending |
 | **T5.2** | **Soft Voting** | Best Transformer + Best ST-GCN | - | - | - | `outputs/ensemble/cm_ensemble_soft.png` | Pending |
 | **T5.3** | **Stacking Ensemble** | Best Transformer + Best ST-GCN + Meta-Learner | - | - | - | `outputs/ensemble/cm_ensemble_stacking.png` | Pending |

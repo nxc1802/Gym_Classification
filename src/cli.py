@@ -176,24 +176,24 @@ def update_experiment_markdown(
                     parts[10] = "Done"
                     line = "| " + " | ".join(parts[1:-1]) + " |"
                     updated = True
-            # Table 3: Exp ID | Model Architecture | Feature Fusion / Loss Strategy | Configuration | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
+            # Table 3: Exp ID | Model Architecture | Graph Stream | Tensor Shape | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
             elif exp_id.startswith("T3."):
                 if len(parts) >= 12:
-                    parts[5] = f"{record.get('train_loss', 0.0):.4f}"
-                    parts[6] = f"{record.get('val_loss', 0.0):.4f}"
-                    parts[7] = f"{record.get('val_acc', 0.0) * 100:.2f}%"
+                    parts[5] = f"{record['train_loss']:.4f}" if record.get("train_loss") is not None else "-"
+                    parts[6] = f"{record['val_loss']:.4f}" if record.get("val_loss") is not None else "-"
+                    parts[7] = f"{record['val_acc'] * 100:.2f}%" if record.get("val_acc") is not None else "-"
                     parts[8] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
                     parts[9] = f"{record.get('macro_f1', 0.0):.4f}"
-                    parts[10] = f"`checkpoints/{record.get('checkpoint', '')}`"
+                    parts[10] = f"`checkpoints/{record.get('checkpoint', '')}`" if not str(record.get('checkpoint', '')).startswith("outputs") else f"`{record.get('checkpoint', '')}`"
                     parts[11] = "Done"
                     line = "| " + " | ".join(parts[1:-1]) + " |"
                     updated = True
-            # Table 4: Exp ID | Model | Graph Stream | Tensor Shape | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
+            # Table 4: Exp ID | Model Architecture | Graph Stream | Augmentation Strategy | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
             elif exp_id.startswith("T4."):
                 if len(parts) >= 12:
-                    parts[5] = f"{record['train_loss']:.4f}" if "train_loss" in record and record["train_loss"] is not None else "-"
-                    parts[6] = f"{record['val_loss']:.4f}" if "val_loss" in record and record["val_loss"] is not None else "-"
-                    parts[7] = f"{record['val_acc'] * 100:.2f}%" if "val_acc" in record and record["val_acc"] is not None else "-"
+                    parts[5] = f"{record['train_loss']:.4f}" if record.get("train_loss") is not None else "-"
+                    parts[6] = f"{record['val_loss']:.4f}" if record.get("val_loss") is not None else "-"
+                    parts[7] = f"{record['val_acc'] * 100:.2f}%" if record.get("val_acc") is not None else "-"
                     parts[8] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
                     parts[9] = f"{record.get('macro_f1', 0.0):.4f}"
                     parts[10] = f"`checkpoints/{record.get('checkpoint', '')}`" if not str(record.get('checkpoint', '')).startswith("outputs") else f"`{record.get('checkpoint', '')}`"
@@ -559,7 +559,8 @@ def cmd_train(args):
         t7_map = {
             "T1.7": "Baseline LSTM (Mix)",
             "T1.14": "Baseline BiLSTM (Mix)",
-            "T4.2": "Baseline ST-GCN (Rel 3D)",
+            "T3.2": "Baseline ST-GCN (Rel 3D)",
+            "T4.1": "Baseline ST-GCN (Rel 3D)",
             "T1.21": "Best Transformer (Mix)",
             "T2.2": "Best Transformer + SkelGym-Aug"
         }
@@ -991,9 +992,9 @@ def cmd_ensemble(args):
     if getattr(args, "video_level", False) and 'vid_metrics' in locals() and report_file and Path(report_file).exists():
         exp_id = getattr(args, "exp_id", "") or ""
         t7_key = None
-        if exp_id == "T4.9" or (len(args.checkpoints) == 2 and all("AAGCN" in c for c in args.checkpoints)):
+        if exp_id in ("T3.9", "T4.9") or (len(args.checkpoints) == 2 and all("AAGCN" in c for c in args.checkpoints)):
             t7_key = "Two-Stream AAGCN"
-        elif exp_id == "T4.10" or (len(args.checkpoints) == 4 and all("AAGCN" in c for c in args.checkpoints)):
+        elif exp_id in ("T3.10", "T4.10") or (len(args.checkpoints) == 4 and all("AAGCN" in c for c in args.checkpoints)):
             t7_key = "Four-Stream AAGCN"
         elif exp_id == "T5.4" or (len(args.checkpoints) == 3 and any("Transformer" in c for c in args.checkpoints)):
             t7_key = "Tri-Model Grand Ensemble"

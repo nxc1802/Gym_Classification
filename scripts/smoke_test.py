@@ -68,7 +68,7 @@ def main():
         sys.executable, "run.py", "train",
         "--model", "AAGCN",
         "--feature", "rel_3d",
-        "--exp_id", "T4.5",
+        "--exp_id", "T3.5",
         "--smoke_test",
         "--epochs", "2",
         "--device", "auto",
@@ -91,7 +91,7 @@ def main():
 
     # Step 4: Smoke Test Ensemble with Video-Level Aggregation
     print("\n--- Step 4: Ensemble Transformer + AAGCN with Video-Level Aggregation ---")
-    ckpt_aagcn = smoke_ckpt_dir / "best_AAGCN_T4.5_rel_3d.pt"
+    ckpt_aagcn = smoke_ckpt_dir / "best_AAGCN_T3.5_rel_3d.pt"
     run_cmd([
         sys.executable, "run.py", "ensemble",
         "--method", "weighted_soft",
