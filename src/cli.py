@@ -163,7 +163,7 @@ def update_experiment_markdown(
                     parts[11] = "Done"
                     line = "| " + " | ".join(parts[1:-1]) + " |"
                     updated = True
-            # Table 2: Exp ID | Augmentation | Config | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
+            # Table 2: Exp ID | Augmentation Strategy | Configuration | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
             elif exp_id.startswith("T2."):
                 if len(parts) >= 11:
                     parts[4] = f"{record.get('train_loss', 0.0):.4f}"
@@ -173,6 +173,18 @@ def update_experiment_markdown(
                     parts[8] = f"{record.get('macro_f1', 0.0):.4f}"
                     parts[9] = f"`checkpoints/{record.get('checkpoint', '')}`"
                     parts[10] = "Done"
+                    line = "| " + " | ".join(parts[1:-1]) + " |"
+                    updated = True
+            # Table 3: Exp ID | Model Architecture | Feature Fusion / Loss Strategy | Configuration | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
+            elif exp_id.startswith("T3."):
+                if len(parts) >= 12:
+                    parts[5] = f"{record.get('train_loss', 0.0):.4f}"
+                    parts[6] = f"{record.get('val_loss', 0.0):.4f}"
+                    parts[7] = f"{record.get('val_acc', 0.0) * 100:.2f}%"
+                    parts[8] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
+                    parts[9] = f"{record.get('macro_f1', 0.0):.4f}"
+                    parts[10] = f"`checkpoints/{record.get('checkpoint', '')}`"
+                    parts[11] = "Done"
                     line = "| " + " | ".join(parts[1:-1]) + " |"
                     updated = True
             # Table 4: Exp ID | Model | Graph Stream | Tensor Shape | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
@@ -461,7 +473,7 @@ def cmd_train(args):
     metrics = compute_metrics(y_true, y_pred)
     logger.info(f"Test Accuracy: {metrics['accuracy'] * 100:.2f}% | Macro F1: {metrics['macro_f1']:.4f}")
     from sklearn.metrics import classification_report as sk_classification_report
-    logger.info("Detailed Classification Report:\n" + sk_classification_report(y_true, y_pred, target_names=ACTIONS, digits=4, zero_division=0))
+    logger.info("Detailed Classification Report:\n" + sk_classification_report(y_true, y_pred, labels=list(range(NUM_CLASSES)), target_names=ACTIONS, digits=4, zero_division=0))
 
     # Plot confusion matrix
     out_dir = Path(args.output_dir)
@@ -940,7 +952,7 @@ def create_parser() -> argparse.ArgumentParser:
         choices=["raw_2d", "raw_3d", "rel_2d", "rel_3d", "bone_2d", "bone_3d", "joint_motion_2d", "joint_motion_3d", "bone_motion_2d", "bone_motion_3d", "angle_2d", "angle_3d", "mix", "full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"],
         help="Feature representation method"
     )
-    p_train.add_argument("--augment", type=str, default="none", choices=["none", "jitter", "rotate", "joint_dropout", "time_warp", "mirror", "speed_perturb", "combined"], help="Augmentation method")
+    p_train.add_argument("--augment", type=str, default="none", choices=["none", "jitter", "rotate", "joint_dropout", "time_warp", "mirror", "speed_perturb", "combined", "skel_gym_aug"], help="Augmentation method")
     p_train.add_argument("--zero_frame", type=str, default="interpolate", choices=["zero", "ffill", "linear", "interpolate"], help="Missing/zero-frame handling strategy")
     p_train.add_argument("--loss", type=str, default="ce", choices=["ce", "focal", "cb_focal"], help="Loss function: ce (CrossEntropy), focal (FocalLoss), cb_focal (Class-Balanced FocalLoss)")
     p_train.add_argument("--focal_gamma", type=float, default=2.0, help="Focal loss focusing parameter gamma (e.g. 2.0)")
