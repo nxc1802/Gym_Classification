@@ -15,8 +15,8 @@
 - [x] 1. Setup & kết nối Marimo server, clone repository, trích xuất landmarks MediaPipe Pose Heavy (complexity=2).
 - [x] 2. Push landmarks dataset lên Hugging Face và đồng bộ về local `data/landmarks/`.
 - [x] 3. Chạy Smoke Test (cách ly tại `outputs/smoke_test/` và `checkpoints/smoke_test/`, kiểm tra $SL=32$, train, eval, ensemble).
-- [ ] 4. Thực thi tuần tự các Bảng thực nghiệm với $SL=32$, epochs=100, patience=10 (Bảng 1 $\rightarrow$ Bảng 2 $\rightarrow$ Bảng 3 $\rightarrow$ Bảng 4 $\rightarrow$ Bảng 5 $\rightarrow$ Bảng 6A, 6B & Bảng 7).
-- [ ] 5. Tự động đồng bộ checkpoint, kết quả và confusion matrix vào `outputs/EXPERIMENT_RESULTS.md` và Hugging Face Hub.
+- [x] 4. Thực thi tuần tự các Bảng thực nghiệm với $SL=32$, epochs=100, patience=10 (Bảng 1 $\rightarrow$ Bảng 2 $\rightarrow$ Bảng 3 $\rightarrow$ Bảng 4 $\rightarrow$ Bảng 5 $\rightarrow$ Bảng 6A, 6B & Bảng 7).
+- [x] 5. Tự động đồng bộ checkpoint, kết quả và confusion matrix vào `outputs/EXPERIMENT_RESULTS.md` và Hugging Face Hub.
 - [ ] 6. Nghiệm thu SOTA, cập nhật LaTeX table cho paper và đồng bộ code lên GitHub.
 
 ---
