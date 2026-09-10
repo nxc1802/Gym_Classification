@@ -749,11 +749,11 @@ def cmd_evaluate(args):
             key = "Baseline BiLSTM (Mix)"
         elif args.model == "STGCN" and args.feature in ("rel_3d", "raw_3d"):
             key = "Baseline ST-GCN (Rel 3D)"
-        elif args.model == "Transformer" and args.feature == "mix":
-            if "T2.2" in ckpt_str or "skel_gym_aug" in ckpt_str:
+        elif args.model == "Transformer" and args.feature in ("mix", "raw_3d"):
+            if "T2.2" in ckpt_str or "T2.4" in ckpt_str or "skel_gym_aug" in ckpt_str:
                 key = "Best Transformer + SkelGym-Aug"
             else:
-                key = "Best Transformer (Mix)"
+                key = "Best Transformer"
         if key and rep_file and Path(rep_file).exists():
             update_table7_markdown(rep_file, key, metrics["accuracy"], metrics["macro_f1"], vid_metrics["accuracy"], vid_metrics["macro_f1"])
 
@@ -1020,9 +1020,9 @@ def cmd_ensemble(args):
     if getattr(args, "video_level", False) and 'vid_metrics' in locals() and report_file and Path(report_file).exists():
         exp_id = getattr(args, "exp_id", "") or ""
         t7_key = None
-        if exp_id in ("T3.9", "T4.9") or (len(args.checkpoints) == 2 and all("AAGCN" in c for c in args.checkpoints)):
+        if exp_id in ("T3.9", "T4.6", "T4.9") or (len(args.checkpoints) == 2 and all("AAGCN" in c for c in args.checkpoints)):
             t7_key = "Two-Stream AAGCN"
-        elif exp_id in ("T3.10", "T4.10") or (len(args.checkpoints) == 4 and all("AAGCN" in c for c in args.checkpoints)):
+        elif exp_id in ("T3.10", "T4.8", "T4.10") or (len(args.checkpoints) == 4 and all("AAGCN" in c for c in args.checkpoints)):
             t7_key = "Four-Stream AAGCN"
         elif exp_id == "T5.4" or (len(args.checkpoints) == 3 and any("Transformer" in c for c in args.checkpoints)):
             t7_key = "Tri-Model Grand Ensemble"
