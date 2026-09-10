@@ -3,7 +3,7 @@ Ensemble methods for gym exercise classification.
 Includes Hard Voting, Soft Voting, and Stacking Meta-Classifier.
 """
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 import numpy as np
 import torch
 import torch.nn as nn
