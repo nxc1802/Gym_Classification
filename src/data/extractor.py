@@ -13,28 +13,36 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 
 from src.constants import RAW_POINTS_33
 
-MODEL_TASK_URL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/latest/pose_landmarker_full.task"
-MODEL_LOCAL_PATH = Path(__file__).resolve().parent.parent.parent / "models_cache" / "pose_landmarker_full.task"
+MODEL_TASK_URLS = {
+    0: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task",
+    1: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/latest/pose_landmarker_full.task",
+    2: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/latest/pose_landmarker_heavy.task",
+}
 
-def _ensure_task_model() -> str:
+def _ensure_task_model(model_complexity: int = 2) -> str:
     """
     Ensures that the pose_landmarker model bundle exists locally.
     """
-    if not MODEL_LOCAL_PATH.exists():
-        MODEL_LOCAL_PATH.parent.mkdir(parents=True, exist_ok=True)
-        print(f"Downloading MediaPipe pose landmarker model to {MODEL_LOCAL_PATH} ...")
-        urllib.request.urlretrieve(MODEL_TASK_URL, str(MODEL_LOCAL_PATH))
+    url = MODEL_TASK_URLS.get(model_complexity, MODEL_TASK_URLS[2])
+    fname = Path(url).name
+    model_path = Path(__file__).resolve().parent.parent.parent / "models_cache" / fname
+    if not model_path.exists():
+        model_path.parent.mkdir(parents=True, exist_ok=True)
+        print(f"Downloading MediaPipe pose landmarker model to {model_path} ...")
+        urllib.request.urlretrieve(url, str(model_path))
         print("Model downloaded successfully.")
-    return str(MODEL_LOCAL_PATH)
+    return str(model_path)
 
 def extract_landmarks_from_video(
     video_path: str,
     output_csv_path: Optional[str] = None,
+    model_complexity: int = 2,
     min_detection_confidence: float = 0.5,
     min_tracking_confidence: float = 0.5
 ) -> pd.DataFrame:
     """
     Extracts 33 pose landmarks for each frame of a video using MediaPipe Pose.
+    model_complexity: 0 (lite), 1 (full), 2 (heavy - best accuracy for research).
     Returns a DataFrame with columns: ['Frame', '{LANDMARK}_x', '{LANDMARK}_y', '{LANDMARK}_z', '{LANDMARK}_visibility']
     Total columns = 1 + 33*4 = 133 columns.
     """
@@ -60,7 +68,7 @@ def extract_landmarks_from_video(
 
     if use_tasks_api and not hasattr(mp, "solutions"):
         # Modern Tasks API
-        model_path = _ensure_task_model()
+        model_path = _ensure_task_model(model_complexity=model_complexity)
         base_options = python.BaseOptions(model_asset_path=model_path)
         options = vision.PoseLandmarkerOptions(
             base_options=base_options,
@@ -101,7 +109,7 @@ def extract_landmarks_from_video(
         mp_pose = mp.solutions.pose
         pose = mp_pose.Pose(
             static_image_mode=False,
-            model_complexity=1,
+            model_complexity=model_complexity,
             min_detection_confidence=min_detection_confidence,
             min_tracking_confidence=min_tracking_confidence
         )
@@ -145,6 +153,7 @@ def extract_landmarks_from_video(
 def batch_extract_landmarks(
     video_paths: List[str],
     output_dir: str,
+    model_complexity: int = 2,
     num_workers: int = 4
 ) -> None:
     """
@@ -158,7 +167,7 @@ def batch_extract_landmarks(
         for vp in video_paths:
             vpath = Path(vp)
             out_file = out_dir_path / f"{vpath.stem}.csv"
-            f = executor.submit(extract_landmarks_from_video, str(vpath), str(out_file))
+            f = executor.submit(extract_landmarks_from_video, str(vpath), str(out_file), model_complexity)
             futures[f] = vpath.name
 
         for future in as_completed(futures):
