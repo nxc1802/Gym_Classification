@@ -132,6 +132,27 @@ def build_model(
     else:
         raise ValueError(f"Unknown model_type: {model_type}")
 
+import contextlib
+
+@contextlib.contextmanager
+def file_lock(lock_path: str = "outputs/.results.lock"):
+    Path(lock_path).parent.mkdir(parents=True, exist_ok=True)
+    f = open(lock_path, "a")
+    try:
+        import fcntl
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+    except Exception:
+        pass
+    try:
+        yield
+    finally:
+        try:
+            import fcntl
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+        except Exception:
+            pass
+        f.close()
+
 def update_experiment_markdown(
     report_file: str,
     exp_id: str,
@@ -144,90 +165,91 @@ def update_experiment_markdown(
     if not rep_path.exists():
         return False
 
-    content = rep_path.read_text(encoding="utf-8")
-    lines = content.splitlines()
-    updated = False
-    new_lines = []
+    with file_lock():
+        content = rep_path.read_text(encoding="utf-8")
+        lines = content.splitlines()
+        updated = False
+        new_lines = []
 
-    for line in lines:
-        if f"**{exp_id}**" in line and line.strip().startswith("|"):
-            parts = [p.strip() for p in line.split("|")]
-            # Table 1: Exp ID | Model | Feature | Dim | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
-            if exp_id.startswith("T1."):
-                if len(parts) >= 12:
-                    parts[5] = f"{record.get('train_loss', 0.0):.4f}"
-                    parts[6] = f"{record.get('val_loss', 0.0):.4f}"
-                    parts[7] = f"{record.get('val_acc', 0.0) * 100:.2f}%"
-                    parts[8] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
-                    parts[9] = f"{record.get('macro_f1', 0.0):.4f}"
-                    parts[10] = f"`checkpoints/{record.get('checkpoint', '')}`"
-                    parts[11] = "Done"
-                    line = "| " + " | ".join(parts[1:-1]) + " |"
-                    updated = True
-            # Table 2: Exp ID | Augmentation Strategy | Configuration | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
-            elif exp_id.startswith("T2."):
-                if len(parts) >= 11:
-                    parts[4] = f"{record.get('train_loss', 0.0):.4f}"
-                    parts[5] = f"{record.get('val_loss', 0.0):.4f}"
-                    parts[6] = f"{record.get('val_acc', 0.0) * 100:.2f}%"
-                    parts[7] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
-                    parts[8] = f"{record.get('macro_f1', 0.0):.4f}"
-                    parts[9] = f"`checkpoints/{record.get('checkpoint', '')}`"
-                    parts[10] = "Done"
-                    line = "| " + " | ".join(parts[1:-1]) + " |"
-                    updated = True
-            # Table 3: Exp ID | Model Architecture | Graph Stream | Tensor Shape | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
-            elif exp_id.startswith("T3."):
-                if len(parts) >= 12:
-                    parts[5] = f"{record['train_loss']:.4f}" if record.get("train_loss") is not None else "-"
-                    parts[6] = f"{record['val_loss']:.4f}" if record.get("val_loss") is not None else "-"
-                    parts[7] = f"{record['val_acc'] * 100:.2f}%" if record.get("val_acc") is not None else "-"
-                    parts[8] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
-                    parts[9] = f"{record.get('macro_f1', 0.0):.4f}"
-                    parts[10] = f"`checkpoints/{record.get('checkpoint', '')}`" if not str(record.get('checkpoint', '')).startswith("outputs") else f"`{record.get('checkpoint', '')}`"
-                    parts[11] = "Done"
-                    line = "| " + " | ".join(parts[1:-1]) + " |"
-                    updated = True
-            # Table 4: Exp ID | Model Architecture | Graph Stream | Augmentation Strategy | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
-            elif exp_id.startswith("T4."):
-                if len(parts) >= 12:
-                    parts[5] = f"{record['train_loss']:.4f}" if record.get("train_loss") is not None else "-"
-                    parts[6] = f"{record['val_loss']:.4f}" if record.get("val_loss") is not None else "-"
-                    parts[7] = f"{record['val_acc'] * 100:.2f}%" if record.get("val_acc") is not None else "-"
-                    parts[8] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
-                    parts[9] = f"{record.get('macro_f1', 0.0):.4f}"
-                    parts[10] = f"`checkpoints/{record.get('checkpoint', '')}`" if not str(record.get('checkpoint', '')).startswith("outputs") else f"`{record.get('checkpoint', '')}`"
-                    parts[11] = "Done"
-                    line = "| " + " | ".join(parts[1:-1]) + " |"
-                    updated = True
-            # Table 5: Exp ID | Ensemble Strategy | Component Models | Test Acc | Macro F1 | Weighted F1 | Checkpoint / Artifact | Status
-            elif exp_id.startswith("T5."):
-                if len(parts) >= 9:
-                    parts[4] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
-                    parts[5] = f"{record.get('macro_f1', 0.0):.4f}"
-                    parts[6] = f"{record.get('weighted_f1', record.get('macro_f1', 0.0)):.4f}"
-                    if "checkpoint" in record:
-                        parts[7] = f"`{record['checkpoint']}`"
-                    parts[8] = "Done"
-                    line = "| " + " | ".join(parts[1:-1]) + " |"
-                    updated = True
-            # SOTA Table: Exp ID | Architecture | Feature | Seq Len | Stride | Augment | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
-            elif exp_id.startswith("SOTA"):
-                if len(parts) >= 14:
-                    parts[7] = f"{record.get('train_loss', 0.0):.4f}"
-                    parts[8] = f"{record.get('val_loss', 0.0):.4f}"
-                    parts[9] = f"{record.get('val_acc', 0.0) * 100:.2f}%"
-                    parts[10] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
-                    parts[11] = f"{record.get('macro_f1', 0.0):.4f}"
-                    parts[12] = f"`checkpoints/{record.get('checkpoint', '')}`"
-                    parts[13] = "Done"
-                    line = "| " + " | ".join(parts[1:-1]) + " |"
-                    updated = True
-        new_lines.append(line)
+        for line in lines:
+            if f"**{exp_id}**" in line and line.strip().startswith("|"):
+                parts = [p.strip() for p in line.split("|")]
+                # Table 1: Exp ID | Model | Feature | Dim | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
+                if exp_id.startswith("T1."):
+                    if len(parts) >= 12:
+                        parts[5] = f"{record.get('train_loss', 0.0):.4f}"
+                        parts[6] = f"{record.get('val_loss', 0.0):.4f}"
+                        parts[7] = f"{record.get('val_acc', 0.0) * 100:.2f}%"
+                        parts[8] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
+                        parts[9] = f"{record.get('macro_f1', 0.0):.4f}"
+                        parts[10] = f"`checkpoints/{record.get('checkpoint', '')}`"
+                        parts[11] = "Done"
+                        line = "| " + " | ".join(parts[1:-1]) + " |"
+                        updated = True
+                # Table 2: Exp ID | Augmentation Strategy | Configuration | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
+                elif exp_id.startswith("T2."):
+                    if len(parts) >= 11:
+                        parts[4] = f"{record.get('train_loss', 0.0):.4f}"
+                        parts[5] = f"{record.get('val_loss', 0.0):.4f}"
+                        parts[6] = f"{record.get('val_acc', 0.0) * 100:.2f}%"
+                        parts[7] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
+                        parts[8] = f"{record.get('macro_f1', 0.0):.4f}"
+                        parts[9] = f"`checkpoints/{record.get('checkpoint', '')}`"
+                        parts[10] = "Done"
+                        line = "| " + " | ".join(parts[1:-1]) + " |"
+                        updated = True
+                # Table 3: Exp ID | Model Architecture | Graph Stream | Tensor Shape | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
+                elif exp_id.startswith("T3."):
+                    if len(parts) >= 12:
+                        parts[5] = f"{record['train_loss']:.4f}" if record.get("train_loss") is not None else "-"
+                        parts[6] = f"{record['val_loss']:.4f}" if record.get("val_loss") is not None else "-"
+                        parts[7] = f"{record['val_acc'] * 100:.2f}%" if record.get("val_acc") is not None else "-"
+                        parts[8] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
+                        parts[9] = f"{record.get('macro_f1', 0.0):.4f}"
+                        parts[10] = f"`checkpoints/{record.get('checkpoint', '')}`" if not str(record.get('checkpoint', '')).startswith("outputs") else f"`{record.get('checkpoint', '')}`"
+                        parts[11] = "Done"
+                        line = "| " + " | ".join(parts[1:-1]) + " |"
+                        updated = True
+                # Table 4: Exp ID | Model Architecture | Graph Stream | Augmentation Strategy | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
+                elif exp_id.startswith("T4."):
+                    if len(parts) >= 12:
+                        parts[5] = f"{record['train_loss']:.4f}" if record.get("train_loss") is not None else "-"
+                        parts[6] = f"{record['val_loss']:.4f}" if record.get("val_loss") is not None else "-"
+                        parts[7] = f"{record['val_acc'] * 100:.2f}%" if record.get("val_acc") is not None else "-"
+                        parts[8] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
+                        parts[9] = f"{record.get('macro_f1', 0.0):.4f}"
+                        parts[10] = f"`checkpoints/{record.get('checkpoint', '')}`" if not str(record.get('checkpoint', '')).startswith("outputs") else f"`{record.get('checkpoint', '')}`"
+                        parts[11] = "Done"
+                        line = "| " + " | ".join(parts[1:-1]) + " |"
+                        updated = True
+                # Table 5: Exp ID | Ensemble Strategy | Component Models | Test Acc | Macro F1 | Weighted F1 | Checkpoint / Artifact | Status
+                elif exp_id.startswith("T5."):
+                    if len(parts) >= 9:
+                        parts[4] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
+                        parts[5] = f"{record.get('macro_f1', 0.0):.4f}"
+                        parts[6] = f"{record.get('weighted_f1', record.get('macro_f1', 0.0)):.4f}"
+                        if "checkpoint" in record:
+                            parts[7] = f"`{record['checkpoint']}`"
+                        parts[8] = "Done"
+                        line = "| " + " | ".join(parts[1:-1]) + " |"
+                        updated = True
+                # SOTA Table: Exp ID | Architecture | Feature | Seq Len | Stride | Augment | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
+                elif exp_id.startswith("SOTA"):
+                    if len(parts) >= 14:
+                        parts[7] = f"{record.get('train_loss', 0.0):.4f}"
+                        parts[8] = f"{record.get('val_loss', 0.0):.4f}"
+                        parts[9] = f"{record.get('val_acc', 0.0) * 100:.2f}%"
+                        parts[10] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
+                        parts[11] = f"{record.get('macro_f1', 0.0):.4f}"
+                        parts[12] = f"`checkpoints/{record.get('checkpoint', '')}`"
+                        parts[13] = "Done"
+                        line = "| " + " | ".join(parts[1:-1]) + " |"
+                        updated = True
+            new_lines.append(line)
 
-    if updated:
-        rep_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
-        logger.info(f"Successfully auto-updated Table row **{exp_id}** in {rep_path}")
+        if updated:
+            rep_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+            logger.info(f"Successfully auto-updated Table row **{exp_id}** in {rep_path}")
     return updated
 
 def ensure_smoke_report_file(smoke_report_path: str, template_path: str = "outputs/EXPERIMENT_RESULTS.md") -> None:
@@ -270,29 +292,30 @@ def update_table7_markdown(
     if not rep_path.exists():
         return False
 
-    content = rep_path.read_text(encoding="utf-8")
-    lines = content.splitlines()
-    updated = False
-    new_lines = []
-    gain = (vid_acc - win_acc) * 100
+    with file_lock():
+        content = rep_path.read_text(encoding="utf-8")
+        lines = content.splitlines()
+        updated = False
+        new_lines = []
+        gain = (vid_acc - win_acc) * 100
 
-    for line in lines:
-        if f"**{model_name_key}**" in line and line.strip().startswith("|"):
-            parts = [p.strip() for p in line.split("|")]
-            if len(parts) >= 8:
-                parts[3] = f"{win_acc * 100:.2f}%"
-                parts[4] = f"{win_f1:.4f}"
-                parts[5] = f"{vid_acc * 100:.2f}%"
-                parts[6] = f"{vid_f1:.4f}"
-                gain_sign = "+" if gain >= 0 else ""
-                parts[7] = f"{gain_sign}{gain:.2f}%"
-                line = "| " + " | ".join(parts[1:-1]) + " |"
-                updated = True
-        new_lines.append(line)
+        for line in lines:
+            if f"**{model_name_key}**" in line and line.strip().startswith("|"):
+                parts = [p.strip() for p in line.split("|")]
+                if len(parts) >= 8:
+                    parts[3] = f"{win_acc * 100:.2f}%"
+                    parts[4] = f"{win_f1:.4f}"
+                    parts[5] = f"{vid_acc * 100:.2f}%"
+                    parts[6] = f"{vid_f1:.4f}"
+                    gain_sign = "+" if gain >= 0 else ""
+                    parts[7] = f"{gain_sign}{gain:.2f}%"
+                    line = "| " + " | ".join(parts[1:-1]) + " |"
+                    updated = True
+            new_lines.append(line)
 
-    if updated:
-        rep_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
-        logger.info(f"Successfully auto-updated Table 7 row **{model_name_key}** in {rep_path}")
+        if updated:
+            rep_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+            logger.info(f"Successfully auto-updated Table 7 row **{model_name_key}** in {rep_path}")
     return updated
 
 def append_experiment_result(
@@ -943,48 +966,49 @@ def cmd_ensemble(args):
             if getattr(args, "video_level", False) and 'y_vid_t' in locals() and 'y_vid_p' in locals():
                 rep_dict_vid = sk_clf_report(y_vid_t, y_vid_p, target_names=ACTIONS, output_dict=True, zero_division=0)
 
-            rep_text = Path(report_file).read_text(encoding="utf-8")
-            new_lines = []
-            curr_section = None
+            with file_lock():
+                rep_text = Path(report_file).read_text(encoding="utf-8")
+                new_lines = []
+                curr_section = None
 
-            for line in rep_text.splitlines():
-                if "Table 6A" in line or "Table 6:" in line:
-                    curr_section = "6A"
-                elif "Table 6B" in line:
-                    curr_section = "6B"
-                elif line.startswith("## Table 7") or line.startswith("## Table 8") or line.startswith("---"):
-                    curr_section = None
+                for line in rep_text.splitlines():
+                    if "Table 6A" in line or "Table 6:" in line:
+                        curr_section = "6A"
+                    elif "Table 6B" in line:
+                        curr_section = "6B"
+                    elif line.startswith("## Table 7") or line.startswith("## Table 8") or line.startswith("---"):
+                        curr_section = None
 
-                active_dict = rep_dict_win if curr_section == "6A" else (rep_dict_vid if curr_section == "6B" else None)
+                    active_dict = rep_dict_win if curr_section == "6A" else (rep_dict_vid if curr_section == "6B" else None)
 
-                if active_dict is not None:
-                    matched_act = None
-                    for act in ACTIONS:
-                        if line.strip().startswith(f"| {act} "):
-                            matched_act = act
-                            break
-                    if matched_act and matched_act in active_dict:
-                        row_data = active_dict[matched_act]
-                        p = row_data["precision"]
-                        r = row_data["recall"]
-                        f1 = row_data["f1-score"]
-                        supp = int(row_data["support"])
-                        line = f"| {matched_act} | {p:.4f} | {r:.4f} | {f1:.4f} | {supp} |"
-                    elif line.strip().startswith("| **Accuracy**"):
-                        acc = active_dict.get("accuracy", 0.0)
-                        tot_supp = int(active_dict.get("macro avg", {}).get("support", 0))
-                        line = f"| **Accuracy** | | | **{acc*100:.2f}%** | **{tot_supp}** |"
-                    elif line.strip().startswith("| **Macro avg**"):
-                        m_data = active_dict.get("macro avg", {})
-                        line = f"| **Macro avg** | **{m_data.get('precision', 0):.4f}** | **{m_data.get('recall', 0):.4f}** | **{m_data.get('f1-score', 0):.4f}** | **{int(m_data.get('support', 0))}** |"
-                    elif line.strip().startswith("| **Weighted avg**"):
-                        w_data = active_dict.get("weighted avg", {})
-                        line = f"| **Weighted avg** | **{w_data.get('precision', 0):.4f}** | **{w_data.get('recall', 0):.4f}** | **{w_data.get('f1-score', 0):.4f}** | **{int(w_data.get('support', 0))}** |"
+                    if active_dict is not None:
+                        matched_act = None
+                        for act in ACTIONS:
+                            if line.strip().startswith(f"| {act} "):
+                                matched_act = act
+                                break
+                        if matched_act and matched_act in active_dict:
+                            row_data = active_dict[matched_act]
+                            p = row_data["precision"]
+                            r = row_data["recall"]
+                            f1 = row_data["f1-score"]
+                            supp = int(row_data["support"])
+                            line = f"| {matched_act} | {p:.4f} | {r:.4f} | {f1:.4f} | {supp} |"
+                        elif line.strip().startswith("| **Accuracy**"):
+                            acc = active_dict.get("accuracy", 0.0)
+                            tot_supp = int(active_dict.get("macro avg", {}).get("support", 0))
+                            line = f"| **Accuracy** | | | **{acc*100:.2f}%** | **{tot_supp}** |"
+                        elif line.strip().startswith("| **Macro avg**"):
+                            m_data = active_dict.get("macro avg", {})
+                            line = f"| **Macro avg** | **{m_data.get('precision', 0):.4f}** | **{m_data.get('recall', 0):.4f}** | **{m_data.get('f1-score', 0):.4f}** | **{int(m_data.get('support', 0))}** |"
+                        elif line.strip().startswith("| **Weighted avg**"):
+                            w_data = active_dict.get("weighted avg", {})
+                            line = f"| **Weighted avg** | **{w_data.get('precision', 0):.4f}** | **{w_data.get('recall', 0):.4f}** | **{w_data.get('f1-score', 0):.4f}** | **{int(w_data.get('support', 0))}** |"
 
-                new_lines.append(line)
+                    new_lines.append(line)
 
-            Path(report_file).write_text("\n".join(new_lines) + "\n", encoding="utf-8")
-            logger.info(f"Updated Table 6 Classification Report in {report_file}")
+                Path(report_file).write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+                logger.info(f"Updated Table 6 Classification Report in {report_file}")
         except Exception as e:
             logger.warning(f"Could not auto-update Table 6: {e}")
 

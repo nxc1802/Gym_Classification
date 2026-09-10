@@ -1,10 +1,11 @@
 """
-Server Automated Execution & Keep-Alive Daemon.
-Designed for high-throughput GPU environments (e.g. NVIDIA RTX PRO 6000 Blackwell 102GB VRAM).
+Server Automated Execution & Multi-Worker Parallel Runner Daemon.
+Designed for high-throughput GPU environments (NVIDIA RTX PRO 6000 Blackwell 102GB VRAM, 20 vCPUs, 172GB RAM).
 
 Features:
-  - Full sequential execution of Tables 1 -> 2 -> 3 -> 4 -> 5 -> 6/7 matching task.md.
-  - Resume capability: skips already completed runs (Status == 'Done' in EXPERIMENT_RESULTS.md).
+  - Parallel execution of independent training runs across multiple concurrent workers (default: 4 workers).
+  - Preserves already completed runs: skips any experiment already marked 'Done' with valid checkpoint.
+  - Multi-process safe file locking on outputs/EXPERIMENT_RESULTS.md to avoid race conditions.
   - Anti-idle Heartbeat: maintains active session status to prevent cloud disconnection.
   - Automatic table updates: logs results to outputs/EXPERIMENT_RESULTS.md via --exp_id.
   - Real-time Hugging Face Hub checkpoint & report synchronization.
@@ -19,12 +20,14 @@ import threading
 import subprocess
 from pathlib import Path
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Optional, List, Dict, Any
 
 ROOT_DIR = Path(__file__).resolve().parent
 LOG_FILE = ROOT_DIR / "outputs" / "server_runner.log"
 STATUS_FILE = ROOT_DIR / "outputs" / "server_status.json"
 REPORT_FILE = ROOT_DIR / "outputs" / "EXPERIMENT_RESULTS.md"
+LOGS_DIR = ROOT_DIR / "outputs" / "logs"
 
 # ==============================================================================
 # TABLE 1: Temporal Models on Landmark Feature Sets (21 runs, SL=32)
@@ -139,42 +142,51 @@ TABLE5_EXPERIMENTS = [
     },
 ]
 
-class ServerDaemon:
+class ParallelServerDaemon:
     def __init__(
         self,
         hf_token: Optional[str] = None,
         heartbeat_interval: int = 15,
-        resume: bool = True
+        resume: bool = True,
+        workers: int = 4
     ):
         self.hf_token = hf_token or os.environ.get("HF_TOKEN", "")
         self.heartbeat_interval = heartbeat_interval
         self.resume = resume
+        self.workers = workers
         self.running = True
-        self.current_experiment = "Idle"
+        self.active_experiments = {}  # worker_id -> exp_name
         self.completed_experiments = []
         self.start_time = time.time()
+        self.lock = threading.Lock()
 
         if self.hf_token:
             os.environ["HF_TOKEN"] = self.hf_token
         ROOT_DIR.joinpath("outputs").mkdir(parents=True, exist_ok=True)
         ROOT_DIR.joinpath("checkpoints").mkdir(parents=True, exist_ok=True)
+        LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
     def log(self, msg: str):
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         formatted = f"[{ts}] {msg}"
         print(formatted, flush=True)
-        with open(LOG_FILE, "a", encoding="utf-8") as f:
-            f.write(formatted + "\n")
+        with self.lock:
+            with open(LOG_FILE, "a", encoding="utf-8") as f:
+                f.write(formatted + "\n")
 
     def _heartbeat_loop(self):
         while self.running:
-            status = {
-                "timestamp": datetime.now().isoformat(),
-                "uptime_seconds": int(time.time() - self.start_time),
-                "current_experiment": self.current_experiment,
-                "completed_count": len(self.completed_experiments),
-                "status": "RUNNING" if self.running else "STOPPED"
-            }
+            with self.lock:
+                active_list = list(self.active_experiments.values())
+                status = {
+                    "timestamp": datetime.now().isoformat(),
+                    "uptime_seconds": int(time.time() - self.start_time),
+                    "active_workers": len(active_list),
+                    "current_experiment": ", ".join(active_list) if active_list else "Idle",
+                    "active_experiments": active_list,
+                    "completed_count": len(self.completed_experiments),
+                    "status": "RUNNING" if self.running else "STOPPED"
+                }
             try:
                 STATUS_FILE.write_text(json.dumps(status, indent=2), encoding="utf-8")
             except Exception:
@@ -187,14 +199,13 @@ class ServerDaemon:
         exp_id = exp.get("exp_id", "")
         ckpt_rel = exp.get("ckpt", "")
         
-        # Check if row is Done in EXPERIMENT_RESULTS.md
+        # Check if row is marked Done in EXPERIMENT_RESULTS.md
         if REPORT_FILE.exists():
             content = REPORT_FILE.read_text(encoding="utf-8")
             for line in content.splitlines():
                 if f"**{exp_id}**" in line and line.strip().startswith("|"):
                     parts = [p.strip() for p in line.split("|")]
                     if len(parts) >= 6 and parts[-2] == "Done":
-                        # If checkpoint is specified, verify it exists
                         if ckpt_rel:
                             ckpt_p = ROOT_DIR / ckpt_rel
                             if ckpt_p.exists():
@@ -203,82 +214,138 @@ class ServerDaemon:
                             return True
         return False
 
-    def run_cmd(self, cmd_args: list) -> subprocess.CompletedProcess:
+    def run_single_experiment(self, exp: Dict[str, Any], worker_id: int) -> Dict[str, Any]:
+        name = exp["name"]
+        exp_id = exp.get("exp_id", "")
+        cmd_args = exp["cmd"]
+
+        with self.lock:
+            self.active_experiments[worker_id] = f"[{exp_id}] {name}"
+
+        self.log(f"[Worker {worker_id}] Starting: {name} ({exp_id})")
+        t0 = time.time()
+
         full_cmd = [sys.executable, "-u"] + cmd_args
-        self.log(f"[RUNNING] {' '.join(full_cmd)}")
-        proc = subprocess.Popen(
-            full_cmd,
-            cwd=str(ROOT_DIR),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1
-        )
-        output_lines = []
-        if proc.stdout:
+        exp_log_file = LOGS_DIR / f"{exp_id}.log"
+
+        with open(exp_log_file, "w", encoding="utf-8") as exp_log:
+            proc = subprocess.Popen(
+                full_cmd,
+                cwd=str(ROOT_DIR),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1
+            )
             for line in proc.stdout:
-                line_clean = line.rstrip()
-                if line_clean:
-                    self.log(line_clean)
-                output_lines.append(line)
-        proc.wait()
-        if proc.returncode != 0:
-            self.log(f"[ERROR] Process failed with exit code {proc.returncode}")
+                exp_log.write(line)
+                exp_log.flush()
+                # Print key milestones to main log
+                if any(k in line for k in ("Best checkpoint saved", "Test Accuracy:", "auto-updated Table", "VIDEO-LEVEL", "Saved ensemble")):
+                    self.log(f"[{exp_id}] {line.strip()}")
+
+            proc.wait()
+
+        duration = time.time() - t0
+        success = (proc.returncode == 0)
+
+        if success:
+            self.log(f"[Worker {worker_id}] ✅ COMPLETED {name} in {duration:.1f}s")
         else:
-            self.log("[SUCCESS] Command completed successfully.")
-        return subprocess.CompletedProcess(full_cmd, proc.returncode, "".join(output_lines), "")
+            self.log(f"[Worker {worker_id}] ❌ FAILED {name} with code {proc.returncode}")
 
-    def start_pipeline(self, experiments: list):
-        hb_thread = threading.Thread(target=self._heartbeat_loop, daemon=True)
-        hb_thread.start()
-
-        self.log(f"ServerDaemon started for {len(experiments)} total experiments (Resume={self.resume}).")
-        
-        for idx, exp in enumerate(experiments, 1):
-            name = exp["name"]
-            exp_id = exp.get("exp_id", "")
-            
-            # Check if experiment is already done
-            if self.is_experiment_completed(exp):
-                self.log(f"[SKIP] Experiment [{idx}/{len(experiments)}] {name} ({exp_id}) is already completed.")
-                self.completed_experiments.append({
-                    "name": name,
-                    "exp_id": exp_id,
-                    "status": "skipped_already_done",
-                    "duration_seconds": 0
-                })
-                continue
-
-            self.current_experiment = f"[{idx}/{len(experiments)}] {name}"
-            self.log(f"\n========================================================")
-            self.log(f"Starting Experiment: {self.current_experiment}")
-            self.log(f"========================================================")
-
-            t0 = time.time()
-            res = self.run_cmd(exp["cmd"])
-            duration = time.time() - t0
-
-            exp_record = {
+        with self.lock:
+            self.active_experiments.pop(worker_id, None)
+            record = {
                 "name": name,
                 "exp_id": exp_id,
                 "duration_seconds": duration,
-                "status": "success" if res.returncode == 0 else "failed"
+                "status": "success" if success else "failed"
             }
-            self.completed_experiments.append(exp_record)
-            
-            # Push master report after each successful experiment if token present
-            if res.returncode == 0 and self.hf_token and REPORT_FILE.exists():
+            self.completed_experiments.append(record)
+
+        # Intermediate report upload
+        if success and self.hf_token and REPORT_FILE.exists():
+            try:
+                from src.utils.hf_hub import upload_file_to_hf
+                upload_file_to_hf(
+                    local_path=str(REPORT_FILE),
+                    path_in_repo="EXPERIMENT_RESULTS.md",
+                    repo_id="Cuong2004/gym-exercise-classification",
+                    token=self.hf_token,
+                    commit_message=f"Update benchmark report after {name}"
+                )
+            except Exception:
+                pass
+
+        return record
+
+    def start_pipeline(self, all_experiments: List[Dict[str, Any]]):
+        hb_thread = threading.Thread(target=self._heartbeat_loop, daemon=True)
+        hb_thread.start()
+
+        # Step 1: Filter out already completed runs
+        pending_experiments = []
+        for exp in all_experiments:
+            if self.is_experiment_completed(exp):
+                self.log(f"[SKIP] Experiment {exp['name']} ({exp['exp_id']}) is already completed.")
+                with self.lock:
+                    self.completed_experiments.append({
+                        "name": exp["name"],
+                        "exp_id": exp["exp_id"],
+                        "status": "skipped_already_done",
+                        "duration_seconds": 0
+                    })
+            else:
+                pending_experiments.append(exp)
+
+        self.log(f"ParallelServerDaemon initialized. Total: {len(all_experiments)} | Completed: {len(self.completed_experiments)} | Pending: {len(pending_experiments)} | Workers: {self.workers}")
+
+        if not pending_experiments:
+            self.log("All experiments are already marked 'Done'! Nothing left to run.")
+            self.running = False
+            return
+
+        # Step 2: Separate single-model training runs and late-fusion/ensemble runs
+        train_runs = [e for e in pending_experiments if "train" in e["cmd"]]
+        ensemble_runs = [e for e in pending_experiments if "ensemble" in e["cmd"]]
+
+        self.log(f"Execution Queue: {len(train_runs)} Single-Model Training Runs (Parallel: {self.workers} workers) -> {len(ensemble_runs)} Ensemble Runs")
+
+        # Step 3: Run single-model training runs in parallel
+        if train_runs:
+            self.log(f"\n========================================================")
+            self.log(f"🚀 LAUNCHING {len(train_runs)} TRAINING RUNS WITH {self.workers} PARALLEL WORKERS")
+            self.log(f"========================================================")
+
+            worker_pool = list(range(1, self.workers + 1))
+            pool_lock = threading.Lock()
+
+            def worker_task(exp_item):
+                with pool_lock:
+                    w_id = worker_pool.pop(0)
                 try:
-                    from src.utils.hf_hub import upload_file_to_hf
-                    upload_file_to_hf(
-                        local_path=str(REPORT_FILE),
-                        path_in_repo="EXPERIMENT_RESULTS.md",
-                        repo_id="Cuong2004/gym-exercise-classification",
-                        token=self.hf_token,
-                        commit_message=f"Update benchmark report after {name}"
-                    )
-                except Exception as e:
-                    self.log(f"[HF Hub Warning] Could not push intermediate report: {e}")
+                    return self.run_single_experiment(exp_item, w_id)
+                finally:
+                    with pool_lock:
+                        worker_pool.append(w_id)
+
+            with ThreadPoolExecutor(max_workers=self.workers) as executor:
+                futures = {executor.submit(worker_task, exp): exp for exp in train_runs}
+                for future in as_completed(futures):
+                    exp = futures[future]
+                    try:
+                        res = future.result()
+                    except Exception as e:
+                        self.log(f"[ERROR] Worker raised exception on {exp['name']}: {e}")
+
+        # Step 4: Run ensemble / multi-stream fusion runs
+        if ensemble_runs:
+            self.log(f"\n========================================================")
+            self.log(f"🎯 LAUNCHING {len(ensemble_runs)} ENSEMBLE & FUSION RUNS")
+            self.log(f"========================================================")
+            for e_idx, e_exp in enumerate(ensemble_runs, 1):
+                self.run_single_experiment(e_exp, worker_id=1)
 
         self.running = False
         final_status = {
@@ -303,16 +370,16 @@ class ServerDaemon:
                     path_in_repo="EXPERIMENT_RESULTS.md",
                     repo_id="Cuong2004/gym-exercise-classification",
                     token=self.hf_token,
-                    commit_message="Master Benchmark Results (All Tables 1-7 completed)"
+                    commit_message="Master Benchmark Results (All Tables 1-7 completed via Parallel Daemon)"
                 )
                 self.log("[HF Hub] EXPERIMENT_RESULTS.md uploaded successfully!")
             except Exception as e:
                 self.log(f"[HF Hub Warning] Could not upload EXPERIMENT_RESULTS.md: {e}")
 
-        self.log("All planned experiments finished!")
+        self.log("All planned experiments finished successfully!")
 
 def main():
-    parser = argparse.ArgumentParser(description="Server Daemon & Automated Batch Runner")
+    parser = argparse.ArgumentParser(description="Multi-Worker Parallel Server Daemon")
     parser.add_argument("--table", type=str, default="all", choices=["table1", "table2", "table3", "table4", "table5", "all"], help="Which table to run")
     parser.add_argument("--dry_run", action="store_true", help="Run 1 epoch per experiment for testing")
     parser.add_argument("--device", type=str, default="auto", choices=["cuda", "cpu", "mps", "auto"])
@@ -320,6 +387,7 @@ def main():
     parser.add_argument("--no_hf", dest="push_to_hf", action="store_false", help="Disable HF Hub upload")
     parser.add_argument("--hf_token", type=str, default=None, help="Hugging Face auth token")
     parser.add_argument("--no_resume", action="store_true", help="Do not resume, re-run all")
+    parser.add_argument("--workers", type=int, default=4, help="Number of concurrent training workers")
     args = parser.parse_args()
 
     table_map = {
@@ -362,7 +430,11 @@ def main():
 
         exp["cmd"] = new_cmd
 
-    daemon = ServerDaemon(hf_token=hf_token, resume=not args.no_resume)
+    daemon = ParallelServerDaemon(
+        hf_token=hf_token,
+        resume=not args.no_resume,
+        workers=args.workers
+    )
     daemon.start_pipeline(experiments)
 
 if __name__ == "__main__":

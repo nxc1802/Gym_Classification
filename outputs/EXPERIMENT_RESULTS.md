@@ -18,11 +18,11 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 | Exp ID | Model Architecture | Feature Representation | Dimension | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
-| **T1.1** | **LSTM** | raw_2d | 26 | - | - | - | - | - | `checkpoints/best_LSTM_T1.1_raw_2d.pt` | Pending |
-| **T1.2** | **LSTM** | rel_2d | 26 | - | - | - | - | - | `checkpoints/best_LSTM_T1.2_rel_2d.pt` | Pending |
-| **T1.3** | **LSTM** | angle_2d | 286 | - | - | - | - | - | `checkpoints/best_LSTM_T1.3_angle_2d.pt` | Pending |
-| **T1.4** | **LSTM** | raw_3d | 39 | - | - | - | - | - | `checkpoints/best_LSTM_T1.4_raw_3d.pt` | Pending |
-| **T1.5** | **LSTM** | rel_3d | 39 | - | - | - | - | - | `checkpoints/best_LSTM_T1.5_rel_3d.pt` | Pending |
+| **T1.1** | **LSTM** | raw_2d | 26 | 0.2236 | 2.1459 | 60.63% | 40.79% | 0.4232 | `checkpoints/best_LSTM_T1.1_raw_2d.pt` | Done |
+| **T1.2** | **LSTM** | rel_2d | 26 | 0.2302 | 1.8470 | 65.68% | 49.20% | 0.4969 | `checkpoints/best_LSTM_T1.2_rel_2d.pt` | Done |
+| **T1.3** | **LSTM** | angle_2d | 286 | 0.1130 | 2.6723 | 62.53% | 40.59% | 0.4215 | `checkpoints/best_LSTM_T1.3_angle_2d.pt` | Done |
+| **T1.4** | **LSTM** | raw_3d | 39 | 0.1184 | 2.7792 | 61.03% | 46.08% | 0.4631 | `checkpoints/best_LSTM_T1.4_raw_3d.pt` | Done |
+| **T1.5** | **LSTM** | rel_3d | 39 | 0.1391 | 2.3413 | 65.23% | 51.84% | 0.5070 | `checkpoints/best_LSTM_T1.5_rel_3d.pt` | Done |
 | **T1.6** | **LSTM** | angle_3d | 429 | - | - | - | - | - | `checkpoints/best_LSTM_T1.6_angle_3d.pt` | Pending |
 | **T1.7** | **LSTM** | mix | 754 | - | - | - | - | - | `checkpoints/best_LSTM_T1.7_mix.pt` | Pending |
 | **T1.8** | **BiLSTM** | raw_2d | 26 | - | - | - | - | - | `checkpoints/best_BiLSTM_T1.8_raw_2d.pt` | Pending |

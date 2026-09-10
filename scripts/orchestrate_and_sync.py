@@ -51,7 +51,7 @@ def exec_remote_python(code_str: str, timeout: int = 40) -> tuple[int, str, str]
         proc.kill()
         return -1, "", "Execution timed out"
 
-def start_remote_runner(table: str = "all", dry_run: bool = False) -> bool:
+def start_remote_runner(table: str = "all", dry_run: bool = False, workers: int = 4) -> bool:
     hf_tok = get_hf_token()
     dry_flag = "--dry_run" if dry_run else ""
     launch_code = f"""
@@ -68,7 +68,7 @@ if running_pids:
     print(f"ALREADY_RUNNING:{{len(running_pids)}}")
 else:
     hf_arg = "--push_to_hf --hf_token {hf_tok}" if "{hf_tok}" else "--no_hf"
-    cmd = f"nohup python3 server_runner.py --table {table} {dry_flag} {{hf_arg}} > outputs/server_runner.log 2>&1 &"
+    cmd = f"nohup python3 server_runner.py --table {table} --workers {workers} {dry_flag} {{hf_arg}} > outputs/server_runner.log 2>&1 &"
     subprocess.Popen(cmd, shell=True, cwd="Gym_Classification")
     print("LAUNCHED_SUCCESSFULLY")
 """
@@ -198,20 +198,20 @@ def count_completed_in_report() -> tuple[int, int]:
                 done_count += 1
     return done_count, total_count
 
-def run_orchestration(poll_interval: int = 25, table: str = "all", dry_run: bool = False):
+def run_orchestration(poll_interval: int = 20, table: str = "all", dry_run: bool = False, workers: int = 4):
     print("=" * 60)
-    print("🚀 MARIMO GPU EXPERIMENT ORCHESTRATOR & SYNC DAEMON")
+    print("🚀 MARIMO GPU MULTI-WORKER ORCHESTRATOR & SYNC DAEMON")
     print("=" * 60)
     print(f"Marimo Server: {MARIMO_URL}")
-    print(f"Poll Interval: {poll_interval}s | Target Table: {table} | DryRun: {dry_run}")
+    print(f"Poll Interval: {poll_interval}s | Target Table: {table} | Workers: {workers} | DryRun: {dry_run}")
 
     # Step 1: Launch runner on remote
-    print("\n[Step 1] Launching / verifying server_runner.py on remote Marimo server...")
-    if not start_remote_runner(table=table, dry_run=dry_run):
+    print(f"\n[Step 1] Launching / verifying server_runner.py with {workers} parallel workers on remote Marimo server...")
+    if not start_remote_runner(table=table, dry_run=dry_run, workers=workers):
         print("[Error] Failed to launch server_runner on remote!")
         return
 
-    send_marimo_toast("🚀 Experiment benchmark pipeline initiated! Keep-alive daemon active.", kind="success")
+    send_marimo_toast(f"🚀 Multi-worker ({workers} concurrent GPUs) benchmark pipeline initiated! Keep-alive daemon active.", kind="success")
 
     last_sync_time = time.time()
     last_toast_time = time.time()
@@ -228,20 +228,20 @@ def run_orchestration(poll_interval: int = 25, table: str = "all", dry_run: bool
             recent_logs = status_data.get("recent_logs", [])
 
             now_str = time.strftime("%H:%M:%S")
-            print(f"[{now_str}] Status: {'RUNNING' if is_running else 'IDLE'} | Exp: {cur_exp} | Done: {completed_cnt} | GPU: {gpu_info}", flush=True)
+            print(f"[{now_str}] Status: {'RUNNING' if is_running else 'IDLE'} | Active: {cur_exp} | Done: {completed_cnt} | GPU: {gpu_info}", flush=True)
 
             if recent_logs:
-                for l in recent_logs[-2:]:
+                for l in recent_logs[-3:]:
                     print(f"   > {l}", flush=True)
 
             # Send Marimo Keep-Alive Toast every ~60 seconds to stimulate the notebook UI
             if time.time() - last_toast_time >= 60:
-                toast_msg = f"⚡ Running: {cur_exp} | GPU: {gpu_info}"
+                toast_msg = f"⚡ Multi-Worker Progress | Active: {cur_exp[:60]}... | Done: {completed_cnt}/42 | GPU: {gpu_info}"
                 send_marimo_toast(toast_msg, kind="info")
                 last_toast_time = time.time()
 
             # Sync EXPERIMENT_RESULTS.md every ~ poll_interval
-            if time.time() - last_sync_time >= 30:
+            if time.time() - last_sync_time >= 25:
                 sync_report_from_remote()
                 done_c, tot_c = count_completed_in_report()
                 print(f"   [Sync] Master report synchronized: {done_c} / {tot_c} experiments marked Done.", flush=True)
@@ -260,7 +260,7 @@ def run_orchestration(poll_interval: int = 25, table: str = "all", dry_run: bool
                     break
                 else:
                     print(f"[Warning] Runner stopped with {done_c}/{tot_c} completed. Re-triggering resume...")
-                    start_remote_runner(table=table, dry_run=dry_run)
+                    start_remote_runner(table=table, dry_run=dry_run, workers=workers)
 
         except Exception as e:
             print(f"[{time.strftime('%H:%M:%S')}] Poll error: {e}", flush=True)
@@ -280,8 +280,9 @@ def run_orchestration(poll_interval: int = 25, table: str = "all", dry_run: bool
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Marimo GPU Orchestrator")
     parser.add_argument("--table", type=str, default="all")
-    parser.add_argument("--poll_interval", type=int, default=25)
+    parser.add_argument("--poll_interval", type=int, default=20)
     parser.add_argument("--dry_run", action="store_true")
+    parser.add_argument("--workers", type=int, default=4, help="Number of concurrent workers")
     args = parser.parse_args()
 
-    run_orchestration(poll_interval=args.poll_interval, table=args.table, dry_run=args.dry_run)
+    run_orchestration(poll_interval=args.poll_interval, table=args.table, dry_run=args.dry_run, workers=args.workers)
