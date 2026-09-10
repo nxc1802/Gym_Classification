@@ -223,19 +223,59 @@ def extract_mix_features(df: pd.DataFrame) -> np.ndarray:
 
     return np.concatenate([rel, ang], axis=1).astype(np.float32)
 
+def extract_joint_motion_features(
+    df: pd.DataFrame,
+    points: List[str] = RAW_POINTS_13,
+    dims: List[str] = ["x", "y", "z"]
+) -> np.ndarray:
+    """
+    Computes Joint Motion (Temporal Velocity) stream:
+    M_joint(t) = X_rel(t+1) - X_rel(t)
+    Final frame is padded with the last computed motion vector.
+    Shape: (N_frames, len(points) * len(dims)) -> (N_frames, 39) for 13 3D joints.
+    """
+    rel_pos = extract_relative_features(df, points=points, dims=dims, include_origin_vis=False)
+    n_frames = rel_pos.shape[0]
+    if n_frames <= 1:
+        return np.zeros_like(rel_pos, dtype=np.float32)
+
+    motion = np.zeros_like(rel_pos, dtype=np.float32)
+    motion[:-1] = rel_pos[1:] - rel_pos[:-1]
+    motion[-1] = motion[-2]
+    return motion
+
+def extract_bone_motion_features(
+    df: pd.DataFrame,
+    points: List[str] = RAW_POINTS_13,
+    dims: List[str] = ["x", "y", "z"]
+) -> np.ndarray:
+    """
+    Computes Bone Motion (Angular/Deformation Velocity) stream:
+    M_bone(t) = B(t+1) - B(t)
+    Final frame is padded with the last computed motion vector.
+    Shape: (N_frames, len(points) * len(dims)) -> (N_frames, 39) for 13 3D bones.
+    """
+    bone_vec = extract_bone_features(df, points=points, dims=dims)
+    n_frames = bone_vec.shape[0]
+    if n_frames <= 1:
+        return np.zeros_like(bone_vec, dtype=np.float32)
+
+    motion = np.zeros_like(bone_vec, dtype=np.float32)
+    motion[:-1] = bone_vec[1:] - bone_vec[:-1]
+    motion[-1] = motion[-2]
+    return motion
+
 def extract_features_by_method(df: pd.DataFrame, method: str) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
     """
     Dispatches feature extraction based on method name.
-    Supported:
-      - raw_2d: 13 joints * 2 = 26 dims
-      - raw_3d: 13 joints * 3 = 39 dims
-      - rel_2d: 13 joints * 2 = 26 dims (hip-midpoint-relative)
-      - rel_3d: 13 joints * 3 = 39 dims (hip-midpoint-relative)
-      - angle_2d: 286 planar triplet angles
-      - angle_3d: 286 3D spatial triplet angles
-      - mix: 39 (rel_3d) + 286 (angle_3d) = 325 dims
-      - Legacy: full_4 (132), full_rel_4 (129), 13_4 (52), 12rel_4 (49),
-               angle3 (286), angle2 (78), direct_concat (335), branch_concat ((49, 286))
+    Unified feature extraction dispatch matching the exact paper specification:
+      - raw_2d (26), raw_3d (39)
+      - rel_2d (26), rel_3d (39)
+      - bone_2d (26), bone_3d (39)
+      - joint_motion_2d (26), joint_motion_3d (39)
+      - bone_motion_2d (26), bone_motion_3d (39)
+      - angle_2d (286), angle_3d (286)
+      - mix (325): Unified angle_3d + rel_3d + velocity
     """
     if method == "raw_2d":
         return extract_raw_features(df, RAW_POINTS_13, ["x", "y"])  # 26
@@ -249,6 +289,14 @@ def extract_features_by_method(df: pd.DataFrame, method: str) -> Union[np.ndarra
         return extract_bone_features(df, RAW_POINTS_13, ["x", "y"])  # 26
     elif method == "bone_3d":
         return extract_bone_features(df, RAW_POINTS_13, ["x", "y", "z"])  # 39
+    elif method == "joint_motion_2d":
+        return extract_joint_motion_features(df, RAW_POINTS_13, ["x", "y"])  # 26
+    elif method == "joint_motion_3d":
+        return extract_joint_motion_features(df, RAW_POINTS_13, ["x", "y", "z"])  # 39
+    elif method == "bone_motion_2d":
+        return extract_bone_motion_features(df, RAW_POINTS_13, ["x", "y"])  # 26
+    elif method == "bone_motion_3d":
+        return extract_bone_motion_features(df, RAW_POINTS_13, ["x", "y", "z"])  # 39
     elif method == "angle_2d":
         return compute_triplet_angles_2d(df, RAW_POINTS_13)  # 286
     elif method == "angle_3d":

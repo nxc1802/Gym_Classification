@@ -146,6 +146,15 @@ KINEMATIC_TREE_13: Dict[int, Optional[int]] = {
     12: 10    # RIGHT_ANKLE -> RIGHT_KNEE
 }
 
+SYMMETRIC_JOINT_PAIRS_13: List[Tuple[int, int]] = [
+    (1, 2),   # LEFT_SHOULDER <-> RIGHT_SHOULDER
+    (3, 4),   # LEFT_ELBOW <-> RIGHT_ELBOW
+    (5, 6),   # LEFT_WRIST <-> RIGHT_WRIST
+    (7, 8),   # LEFT_HIP <-> RIGHT_HIP
+    (9, 10),  # LEFT_KNEE <-> RIGHT_KNEE
+    (11, 12), # LEFT_ANKLE <-> RIGHT_ANKLE
+]
+
 FEATURE_DIMS: Dict[str, int] = {
     "raw_2d": 26,
     "raw_3d": 39,
@@ -153,6 +162,10 @@ FEATURE_DIMS: Dict[str, int] = {
     "rel_3d": 39,
     "bone_2d": 26,
     "bone_3d": 39,
+    "joint_motion_2d": 26,
+    "joint_motion_3d": 39,
+    "bone_motion_2d": 26,
+    "bone_motion_3d": 39,
     "angle_2d": 286,
     "angle_3d": 286,
     "mix": 325,

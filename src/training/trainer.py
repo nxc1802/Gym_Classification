@@ -14,16 +14,65 @@ from typing import Dict, Any, Optional, Tuple, List
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from sklearn.utils.class_weight import compute_class_weight
 
 from src.training.metrics import compute_metrics
 from src.utils.hf_hub import upload_checkpoints_to_hf, DEFAULT_MODEL_REPO
 
+class FocalLoss(nn.Module):
+    """
+    Multi-class Focal Loss (Lin et al., ICCV 2017) with support for class weighting and label smoothing.
+    FL(p_t) = - alpha_t (1 - p_t)^gamma * log(p_t)
+    Down-weights well-classified easy examples and forces network to focus on hard classes.
+    """
+    def __init__(
+        self,
+        gamma: float = 2.0,
+        weight: Optional[torch.Tensor] = None,
+        label_smoothing: float = 0.0,
+        reduction: str = "mean"
+    ):
+        super().__init__()
+        self.gamma = gamma
+        self.weight = weight
+        self.label_smoothing = label_smoothing
+        self.reduction = reduction
+
+    def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        num_classes = inputs.size(1)
+        log_p = F.log_softmax(inputs, dim=1)
+        p = torch.exp(log_p)
+
+        if self.label_smoothing > 0.0:
+            target_one_hot = torch.zeros_like(inputs).scatter_(1, targets.unsqueeze(1), 1.0)
+            target_smooth = target_one_hot * (1.0 - self.label_smoothing) + self.label_smoothing / num_classes
+            focal_weight = torch.pow(1.0 - p, self.gamma)
+            loss = - target_smooth * focal_weight * log_p
+            if self.weight is not None:
+                loss = loss * self.weight.unsqueeze(0)
+            loss = loss.sum(dim=1)
+        else:
+            p_t = p.gather(1, targets.unsqueeze(1)).squeeze(1)
+            log_p_t = log_p.gather(1, targets.unsqueeze(1)).squeeze(1)
+            focal_weight = torch.pow(1.0 - p_t, self.gamma)
+            loss = - focal_weight * log_p_t
+            if self.weight is not None:
+                alpha_t = self.weight.gather(0, targets)
+                loss = loss * alpha_t
+
+        if self.reduction == "mean":
+            return loss.mean()
+        elif self.reduction == "sum":
+            return loss.sum()
+        else:
+            return loss
+
 class Trainer:
     """
     High-Throughput Trainer for gym exercise classification models.
-    Supports AdamW, Cosine Annealing with Warmup, Label Smoothing, and Mixed Precision.
+    Supports AdamW, Cosine Annealing with Warmup, Label Smoothing, Focal Loss, and Mixed Precision.
     """
     def __init__(
         self,
@@ -36,6 +85,8 @@ class Trainer:
         model_name: str = "model",
         use_class_weights: bool = False,
         label_smoothing: float = 0.0,
+        loss_type: str = "ce",
+        focal_gamma: float = 2.0,
         use_amp: bool = True,
         amp_dtype: str = "bfloat16",
         push_to_hf: bool = False,
@@ -60,6 +111,8 @@ class Trainer:
         self.last_checkpoint_path = self.checkpoint_dir / f"last_{model_name}.pt"
         self.use_class_weights = use_class_weights
         self.label_smoothing = label_smoothing
+        self.loss_type = loss_type.lower()
+        self.focal_gamma = focal_gamma
         self.scheduler_type = scheduler_type
         self.early_stopping_metric = early_stopping_metric
 
@@ -111,7 +164,8 @@ class Trainer:
             )
 
     def _get_criterion(self, train_loader: DataLoader) -> nn.Module:
-        if self.use_class_weights:
+        weight_tensor = None
+        if self.use_class_weights or self.loss_type == "cb_focal":
             from src.constants import NUM_CLASSES
             all_labels = []
             for _, y in train_loader:
@@ -123,14 +177,22 @@ class Trainer:
                 for c, w in zip(classes, weights):
                     if c < NUM_CLASSES:
                         weight_tensor[c] = float(w)
+                weight_tensor = weight_tensor.to(self.device)
+
+        if self.loss_type in ("focal", "cb_focal"):
+            return FocalLoss(
+                gamma=self.focal_gamma,
+                weight=weight_tensor,
+                label_smoothing=self.label_smoothing
+            )
+        else:
+            if weight_tensor is not None:
                 return nn.CrossEntropyLoss(
-                    weight=weight_tensor.to(self.device),
+                    weight=weight_tensor,
                     label_smoothing=self.label_smoothing
                 )
             else:
                 return nn.CrossEntropyLoss(label_smoothing=self.label_smoothing)
-        else:
-            return nn.CrossEntropyLoss(label_smoothing=self.label_smoothing)
 
     def train_epoch(self, train_loader: DataLoader, criterion: nn.Module) -> Tuple[float, float]:
         self.model.train()

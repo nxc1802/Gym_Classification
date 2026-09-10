@@ -127,3 +127,48 @@ class WeightedSoftVotingEnsemble:
         avg_probs = self.predict_proba(model_probabilities)
         return np.argmax(avg_probs, axis=1)
 
+def aggregate_video_level_predictions(
+    y_probs: np.ndarray,
+    y_trues: np.ndarray,
+    video_ids: List[str]
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Dict[str, Any]]:
+    """
+    Aggregates window-level prediction probabilities into video-level decisions.
+    Uses Soft Probability Average Pooling: P_video = (1/K) * sum_{k=1}^K P_window_k
+    Returns:
+      - y_video_true: true class per video (N_videos,)
+      - y_video_pred: predicted class per video (N_videos,)
+      - y_video_prob: predicted probability distribution per video (N_videos, num_classes)
+      - metrics: video-level accuracy, macro F1, weighted F1
+    """
+    from src.training.metrics import compute_metrics
+    unique_vids = []
+    vid_to_indices = {}
+    for idx, v in enumerate(video_ids):
+        if v not in vid_to_indices:
+            unique_vids.append(v)
+            vid_to_indices[v] = []
+        vid_to_indices[v].append(idx)
+
+    y_video_true = []
+    y_video_pred = []
+    y_video_prob = []
+
+    for v in unique_vids:
+        indices = vid_to_indices[v]
+        v_probs = np.mean(y_probs[indices], axis=0)
+        v_pred = int(np.argmax(v_probs))
+        v_true = int(y_trues[indices[0]])
+
+        y_video_true.append(v_true)
+        y_video_pred.append(v_pred)
+        y_video_prob.append(v_probs)
+
+    y_video_true = np.array(y_video_true, dtype=np.int64)
+    y_video_pred = np.array(y_video_pred, dtype=np.int64)
+    y_video_prob = np.array(y_video_prob, dtype=np.float32)
+
+    metrics = compute_metrics(y_video_true, y_video_pred)
+    return y_video_true, y_video_pred, y_video_prob, metrics
+
+

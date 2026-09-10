@@ -160,13 +160,15 @@ class GymDataset(Dataset):
         labels: List[int],
         augment_method: Optional[str] = None,
         is_branch: bool = False,
-        in_memory: bool = True
+        in_memory: bool = True,
+        video_ids: Optional[List[str]] = None
     ):
         self.labels = labels
         self.augment_method = augment_method
         self.is_branch = is_branch
         self.augmenter = LandmarkAugmenter() if augment_method and augment_method != "none" else None
         self.in_memory = in_memory
+        self.video_ids = video_ids
 
         if in_memory and len(samples) > 0:
             self.tensor_labels = torch.tensor(labels, dtype=torch.long)
@@ -219,6 +221,37 @@ class GymDataset(Dataset):
                     t = self.augmenter.apply(t, self.augment_method)
                 return t, label
 
+def mirror_dataframe_horizontally(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Applies bilateral horizontal mirror symmetry:
+    1. Inverts x coordinates (x -> -x).
+    2. Swaps corresponding left and right landmark columns.
+    """
+    df_flipped = df.copy()
+    pairs = [
+        ("LEFT_SHOULDER", "RIGHT_SHOULDER"),
+        ("LEFT_ELBOW", "RIGHT_ELBOW"),
+        ("LEFT_WRIST", "RIGHT_WRIST"),
+        ("LEFT_HIP", "RIGHT_HIP"),
+        ("LEFT_KNEE", "RIGHT_KNEE"),
+        ("LEFT_ANKLE", "RIGHT_ANKLE"),
+    ]
+    if "NOSE_x" in df_flipped.columns:
+        df_flipped["NOSE_x"] = -df_flipped["NOSE_x"]
+
+    for l_pt, r_pt in pairs:
+        for dim in ["x", "y", "z", "visibility"]:
+            l_col = f"{l_pt}_{dim}"
+            r_col = f"{r_pt}_{dim}"
+            if l_col in df.columns and r_col in df.columns:
+                if dim == "x":
+                    df_flipped[l_col] = -df[r_col]
+                    df_flipped[r_col] = -df[l_col]
+                else:
+                    df_flipped[l_col] = df[r_col]
+                    df_flipped[r_col] = df[l_col]
+    return df_flipped
+
 def build_dataset_from_csvs(
     metadata_df: pd.DataFrame,
     split: str,
@@ -230,11 +263,13 @@ def build_dataset_from_csvs(
     landmark_dir: Optional[str] = None,
     smoke_test: bool = False,
     smoke_class: Optional[str] = "barbell biceps curl",
-    in_memory: bool = True
+    in_memory: bool = True,
+    is_horizontal_flip: bool = False
 ) -> GymDataset:
     """
     Loads landmark CSVs based on metadata split and constructs a GymDataset.
     Supports smoke_test mode to select minimal samples for debugging.
+    Supports is_horizontal_flip for Test-Time Augmentation (TTA).
     """
     split_df = metadata_df[metadata_df["split"] == split].reset_index(drop=True)
     if smoke_test:
@@ -249,6 +284,7 @@ def build_dataset_from_csvs(
     is_branch = (feature_method == "branch_concat")
     all_samples = []
     all_labels = []
+    all_video_ids = []
 
     has_folder_structure = False
     if landmark_dir:
@@ -270,10 +306,13 @@ def build_dataset_from_csvs(
 
             for csv_path in csv_files:
                 try:
+                    vid_name = csv_path.stem
                     df = pd.read_csv(csv_path)
                     if len(df) == 0:
                         continue
                     df = handle_zero_frames(df, method=zero_frame_handling)
+                    if is_horizontal_flip:
+                        df = mirror_dataframe_horizontally(df)
                     feat = extract_features_by_method(df, feature_method)
                     if is_branch:
                         f1, f2 = feat
@@ -283,11 +322,13 @@ def build_dataset_from_csvs(
                         for i in range(n_wins):
                             all_samples.append((w1[i], w2[i]))
                             all_labels.append(class_idx)
+                            all_video_ids.append(vid_name)
                     else:
                         wins = sliding_windows(feat, seq_len, stride)
                         for w in wins:
                             all_samples.append(w)
                             all_labels.append(class_idx)
+                            all_video_ids.append(vid_name)
                 except Exception:
                     continue
     else:
@@ -297,6 +338,7 @@ def build_dataset_from_csvs(
                 continue
             class_idx = ACTION_TO_IDX[action_name]
 
+            vid_name = Path(row.get("filepath", f"video_{class_idx}")).stem
             csv_path = None
             if landmark_dir:
                 # Priority 1: split-specific directory structure
@@ -314,6 +356,8 @@ def build_dataset_from_csvs(
                 s, e = parse_segment_range(row["label_content"], len(df))
                 df_segment = df.iloc[s:e].reset_index(drop=True)
                 df_segment = handle_zero_frames(df_segment, method=zero_frame_handling)
+                if is_horizontal_flip:
+                    df_segment = mirror_dataframe_horizontally(df_segment)
                 feat = extract_features_by_method(df_segment, feature_method)
             else:
                 n_frames = int(row.get("num_frames", 75))
@@ -322,6 +366,8 @@ def build_dataset_from_csvs(
                 s, e = parse_segment_range(row["label_content"], n_frames)
                 df_segment = df.iloc[s:e].reset_index(drop=True)
                 df_segment = handle_zero_frames(df_segment, method=zero_frame_handling)
+                if is_horizontal_flip:
+                    df_segment = mirror_dataframe_horizontally(df_segment)
                 feat = extract_features_by_method(df_segment, feature_method)
 
             if is_branch:
@@ -332,42 +378,49 @@ def build_dataset_from_csvs(
                 for i in range(n_wins):
                     all_samples.append((w1[i], w2[i]))
                     all_labels.append(class_idx)
+                    all_video_ids.append(vid_name)
             else:
                 wins = sliding_windows(feat, seq_len, stride)
                 for w in wins:
                     all_samples.append(w)
                     all_labels.append(class_idx)
+                    all_video_ids.append(vid_name)
 
     # Dataset Expansion: Preserve 100% of clean original samples and append 3 augmented variants (1→4 total)
     if split == "train" and augment_method and augment_method != "none":
         augmenter = LandmarkAugmenter()
         aug_samples = []
         aug_labels = []
-        for s, l in zip(all_samples, all_labels):
+        aug_video_ids = []
+        for s, l, v_id in zip(all_samples, all_labels, all_video_ids):
             if is_branch:
                 # For branch: augment first branch, keep second unchanged
                 t1 = torch.from_numpy(s[0]).float()
                 variants = augmenter.generate_augmented_variants(t1, augment_method)
-                for v in variants:
+                for idx_var, v in enumerate(variants):
                     aug_samples.append((v.numpy(), s[1].copy()))
                     aug_labels.append(l)
+                    aug_video_ids.append(f"{v_id}_aug_{idx_var}")
             else:
                 t = torch.from_numpy(s).float()
                 variants = augmenter.generate_augmented_variants(t, augment_method)
-                for v in variants:
+                for idx_var, v in enumerate(variants):
                     aug_samples.append(v.numpy())
                     aug_labels.append(l)
+                    aug_video_ids.append(f"{v_id}_aug_{idx_var}")
 
         # Retain original clean samples + 3 augmented variants per sample (4× total)
         all_samples = all_samples + aug_samples
         all_labels = all_labels + aug_labels
+        all_video_ids = all_video_ids + aug_video_ids
 
     return GymDataset(
         samples=all_samples,
         labels=all_labels,
         augment_method=None,
         is_branch=is_branch,
-        in_memory=in_memory
+        in_memory=in_memory,
+        video_ids=all_video_ids
     )
 
 def _compute_train_stats(train_ds: 'GymDataset') -> Tuple[torch.Tensor, torch.Tensor]:
@@ -431,7 +484,8 @@ def get_dataloaders(
     num_workers: int = 0,
     smoke_test: bool = False,
     smoke_class: Optional[str] = "barbell biceps curl",
-    in_memory: bool = True
+    in_memory: bool = True,
+    is_horizontal_flip: bool = False
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
     """
     Constructs train, validation, and test DataLoaders.
@@ -454,7 +508,8 @@ def get_dataloaders(
     test_ds = build_dataset_from_csvs(
         meta_df, "test", feature_method, seq_len, vt_stride,
         augment_method=None, zero_frame_handling=zero_frame_handling,
-        landmark_dir=landmark_dir, smoke_test=smoke_test, smoke_class=smoke_class, in_memory=in_memory
+        landmark_dir=landmark_dir, smoke_test=smoke_test, smoke_class=smoke_class, in_memory=in_memory,
+        is_horizontal_flip=is_horizontal_flip
     )
 
     # Global z-score normalization using TRAIN-SET statistics only (prevents data leakage)

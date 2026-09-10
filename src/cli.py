@@ -57,7 +57,8 @@ from src.models import (
     HardVotingEnsemble,
     SoftVotingEnsemble,
     StackingEnsemble,
-    WeightedSoftVotingEnsemble
+    WeightedSoftVotingEnsemble,
+    aggregate_video_level_predictions
 )
 from src.training import Trainer, compute_metrics, plot_confusion_matrix, export_latex_table7
 
@@ -437,6 +438,8 @@ def cmd_train(args):
         model_name=model_name,
         use_class_weights=use_cw,
         label_smoothing=label_smoothing,
+        loss_type=getattr(args, "loss", "ce"),
+        focal_gamma=getattr(args, "focal_gamma", 2.0),
         use_amp=use_amp,
         amp_dtype=amp_dtype,
         push_to_hf=push_to_hf,
@@ -449,7 +452,7 @@ def cmd_train(args):
         early_stopping_metric=getattr(args, "early_stopping_metric", "val_acc")
     )
 
-    logger.info(f"Starting training for {args.epochs} epochs (EarlyStopping patience={args.patience}, Optimizer={getattr(args, 'optimizer', 'adamw')}, Scheduler={getattr(args, 'scheduler', 'cosine_warmup')}, AMP={use_amp} [{amp_dtype}], LabelSmoothing={label_smoothing})...")
+    logger.info(f"Starting training for {args.epochs} epochs (Loss={getattr(args, 'loss', 'ce')}, Gamma={getattr(args, 'focal_gamma', 2.0)}, EarlyStopping patience={args.patience}, Optimizer={getattr(args, 'optimizer', 'adamw')}, Scheduler={getattr(args, 'scheduler', 'cosine_warmup')}, AMP={use_amp} [{amp_dtype}], LabelSmoothing={label_smoothing})...")
     history = trainer.fit(train_loader, val_loader, epochs=args.epochs, verbose=True)
 
     # Evaluate on test set
@@ -551,8 +554,32 @@ def cmd_evaluate(args):
 
     trainer = Trainer(model=model, device=device)
     y_true, y_pred, y_prob = trainer.predict(loader)
+
+    if getattr(args, "tta", False):
+        logger.info("Evaluating with Test-Time Augmentation (TTA - Bilateral Horizontal Mirroring)...")
+        _, val_loader_flip, test_loader_flip = get_dataloaders(
+            metadata_path=args.metadata,
+            feature_method=args.feature,
+            batch_size=args.batch_size,
+            seq_len=args.seq_len,
+            landmark_dir=args.landmark_dir,
+            num_workers=0,
+            is_horizontal_flip=True
+        )
+        loader_flip = test_loader_flip if args.split == "test" else val_loader_flip
+        _, _, y_prob_flip = trainer.predict(loader_flip)
+        y_prob = 0.5 * (y_prob + y_prob_flip)
+        y_pred = np.argmax(y_prob, axis=1)
+
     metrics = compute_metrics(y_true, y_pred)
-    logger.info(f"Evaluation on {args.split.upper()} - Acc: {metrics['accuracy']*100:.2f}% | Macro F1: {metrics['macro_f1']:.4f}")
+    logger.info(f"Evaluation on {args.split.upper()} (TTA={getattr(args, 'tta', False)}) - Window-Level Acc: {metrics['accuracy']*100:.2f}% | Macro F1: {metrics['macro_f1']:.4f}")
+
+    if getattr(args, "video_level", False) and hasattr(loader.dataset, "video_ids") and loader.dataset.video_ids:
+        y_vid_t, y_vid_p, y_vid_pr, vid_metrics = aggregate_video_level_predictions(
+            y_prob, y_true, loader.dataset.video_ids
+        )
+        logger.info(f"🔥 VIDEO-LEVEL {args.split.upper()} (TTA={getattr(args, 'tta', False)}) - Accuracy: {vid_metrics['accuracy']*100:.2f}% | Macro F1: {vid_metrics['macro_f1']:.4f}")
+        metrics["video_level"] = vid_metrics
 
     if args.save_cm:
         plot_confusion_matrix(y_true, y_pred, args.save_cm, title=f"Confusion Matrix: {args.model}")
@@ -595,7 +622,7 @@ def cmd_ensemble(args):
 
         # Identify feature method from filename
         f_type = None
-        for feat in ["mix", "angle_3d", "angle_2d", "bone_3d", "bone_2d", "raw_3d", "raw_2d", "rel_3d", "rel_2d", "branch_concat", "direct_concat", "full_rel_4", "full_4", "12rel_4", "13_4"]:
+        for feat in ["mix", "angle_3d", "angle_2d", "joint_motion_3d", "joint_motion_2d", "bone_motion_3d", "bone_motion_2d", "bone_3d", "bone_2d", "raw_3d", "raw_2d", "rel_3d", "rel_2d", "branch_concat", "direct_concat", "full_rel_4", "full_4", "12rel_4", "13_4"]:
             if f"_{feat}." in p.name or f"_{feat}_" in p.name or p.name.endswith(f"_{feat}") or feat in p.name:
                 f_type = feat
                 break
@@ -655,13 +682,40 @@ def cmd_ensemble(args):
             in_memory=True
         )
         tr = Trainer(model=m, device=device)
+
+        if getattr(args, "tta", False):
+            logger.info(f"Applying TTA mirroring for {m_type} ({f_type})...")
+            _, val_loader_flip, test_loader_flip = get_dataloaders(
+                metadata_path=args.metadata,
+                feature_method=f_type,
+                batch_size=getattr(args, "batch_size", 64),
+                seq_len=ens_seq_len,
+                stride=ens_stride,
+                val_test_stride=ens_stride,
+                landmark_dir=args.landmark_dir,
+                num_workers=0,
+                in_memory=True,
+                is_horizontal_flip=True
+            )
+        else:
+            val_loader_flip = None
+            test_loader_flip = None
+
         if args.method in ("stacking", "weighted_soft"):
             y_vt, _, y_vpr = tr.predict(val_loader)
+            if val_loader_flip is not None:
+                _, _, y_vpr_flip = tr.predict(val_loader_flip)
+                y_vpr = 0.5 * (y_vpr + y_vpr_flip)
             val_probs_list.append(y_vpr)
             if y_val_final is None:
                 y_val_final = y_vt
 
         y_t, y_p, y_pr = tr.predict(test_loader)
+        if test_loader_flip is not None:
+            _, _, y_pr_flip = tr.predict(test_loader_flip)
+            y_pr = 0.5 * (y_pr + y_pr_flip)
+            y_p = np.argmax(y_pr, axis=1)
+
         all_preds_list.append(y_p)
         all_probs_list.append(y_pr)
         if y_test_final is None:
@@ -684,7 +738,19 @@ def cmd_ensemble(args):
         final_preds = ens.predict(all_probs_list)
 
     metrics = compute_metrics(y_test_final, final_preds)
-    logger.info(f"Ensemble ({args.method.upper()}) Test Accuracy: {metrics['accuracy'] * 100:.2f}% | Macro F1: {metrics['macro_f1']:.4f}")
+    logger.info(f"Ensemble ({args.method.upper()}) Window-Level Test Accuracy: {metrics['accuracy'] * 100:.2f}% | Macro F1: {metrics['macro_f1']:.4f}")
+
+    if getattr(args, "video_level", False) and hasattr(test_loader.dataset, "video_ids") and test_loader.dataset.video_ids:
+        if hasattr(ens, "predict_proba"):
+            final_test_probs = ens.predict_proba(all_probs_list)
+        else:
+            final_test_probs = np.mean(all_probs_list, axis=0)
+        y_vid_t, y_vid_p, _, vid_metrics = aggregate_video_level_predictions(
+            final_test_probs, y_test_final, test_loader.dataset.video_ids
+        )
+        logger.info(f"============================================================")
+        logger.info(f"🔥 VIDEO-LEVEL Ensemble ({args.method.upper()}) Test Accuracy: {vid_metrics['accuracy'] * 100:.2f}% | Macro F1: {vid_metrics['macro_f1']:.4f}")
+        logger.info(f"============================================================")
 
     exp_id = getattr(args, "exp_id", None)
     cm_path = out_dir / (f"cm_ensemble_{exp_id}_{args.method}.png" if exp_id else f"cm_ensemble_{args.method}.png")
@@ -871,11 +937,13 @@ def create_parser() -> argparse.ArgumentParser:
     p_train.add_argument("--model", type=str, default="Transformer", choices=["LSTM", "BiLSTM", "Transformer", "STGCN", "AAGCN", "BranchConcat"], help="Model architecture")
     p_train.add_argument(
         "--feature", type=str, default="mix",
-        choices=["raw_2d", "raw_3d", "rel_2d", "rel_3d", "bone_2d", "bone_3d", "angle_2d", "angle_3d", "mix", "full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"],
+        choices=["raw_2d", "raw_3d", "rel_2d", "rel_3d", "bone_2d", "bone_3d", "joint_motion_2d", "joint_motion_3d", "bone_motion_2d", "bone_motion_3d", "angle_2d", "angle_3d", "mix", "full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"],
         help="Feature representation method"
     )
     p_train.add_argument("--augment", type=str, default="none", choices=["none", "jitter", "rotate", "joint_dropout", "time_warp", "mirror", "speed_perturb", "combined"], help="Augmentation method")
     p_train.add_argument("--zero_frame", type=str, default="interpolate", choices=["zero", "ffill", "linear", "interpolate"], help="Missing/zero-frame handling strategy")
+    p_train.add_argument("--loss", type=str, default="ce", choices=["ce", "focal", "cb_focal"], help="Loss function: ce (CrossEntropy), focal (FocalLoss), cb_focal (Class-Balanced FocalLoss)")
+    p_train.add_argument("--focal_gamma", type=float, default=2.0, help="Focal loss focusing parameter gamma (e.g. 2.0)")
     p_train.add_argument("--label_smoothing", type=float, default=0.0, help="Label smoothing regularization parameter (e.g. 0.1)")
     p_train.add_argument("--exp_id", type=str, default=None, help="Experiment ID to automatically update outputs/EXPERIMENT_RESULTS.md (e.g. T1.1, T2.1, T2b.1, A3, PROPOSED)")
     p_train.add_argument("--smoke_test", action="store_true", help="Smoke test mode: minimal 2 epochs and minimal dataset for quick debugging")
@@ -921,7 +989,7 @@ def create_parser() -> argparse.ArgumentParser:
     p_eval.add_argument("--model", type=str, default="Transformer", choices=["LSTM", "BiLSTM", "Transformer", "STGCN", "AAGCN", "BranchConcat"])
     p_eval.add_argument(
         "--feature", type=str, default="mix",
-        choices=["raw_2d", "raw_3d", "rel_2d", "rel_3d", "bone_2d", "bone_3d", "angle_2d", "angle_3d", "mix", "full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"]
+        choices=["raw_2d", "raw_3d", "rel_2d", "rel_3d", "bone_2d", "bone_3d", "joint_motion_2d", "joint_motion_3d", "bone_motion_2d", "bone_motion_3d", "angle_2d", "angle_3d", "mix", "full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"]
     )
     p_eval.add_argument("--split", type=str, default="test", choices=["train", "val", "test"])
     p_eval.add_argument("--metadata", type=str, default="Final_dataset_metadata.csv")
@@ -929,10 +997,12 @@ def create_parser() -> argparse.ArgumentParser:
     p_eval.add_argument("--batch_size", type=int, default=128)
     p_eval.add_argument("--seq_len", type=int, default=32)
     p_eval.add_argument("--device", type=str, default="cuda")
+    p_eval.add_argument("--tta", action="store_true", default=False, help="Enable Test-Time Augmentation (Horizontal Mirroring)")
+    p_eval.add_argument("--video_level", action="store_true", default=False, help="Evaluate Video-Level Aggregation")
     p_eval.add_argument("--save_cm", type=str, default=None, help="File path to save confusion matrix image")
     p_eval.add_argument("--save_table7", type=str, default=None, help="File path to save Table 7 LaTeX code")
-    p_eval.add_argument("--hidden_dim", type=int, default=128)
-    p_eval.add_argument("--num_layers", type=int, default=4)
+    p_eval.add_argument("--hidden_dim", type=int, default=None)
+    p_eval.add_argument("--num_layers", type=int, default=None)
     p_eval.add_argument("--nhead", type=int, default=8)
 
     # Ensemble
@@ -942,6 +1012,8 @@ def create_parser() -> argparse.ArgumentParser:
     p_ens.add_argument("--exp_id", type=str, default=None, help="Experiment ID to automatically update report (e.g. T5.1, T5.2, T5.3, SOTA_ENSEMBLE)")
     p_ens.add_argument("--seq_len", type=int, default=20, help="Sequence length for ensemble dataloader")
     p_ens.add_argument("--stride", type=int, default=10, help="Stride for ensemble dataloader")
+    p_ens.add_argument("--tta", action="store_true", default=False, help="Enable Test-Time Augmentation (Horizontal Mirroring)")
+    p_ens.add_argument("--video_level", action="store_true", default=False, help="Evaluate Video-Level Aggregation")
     p_ens.add_argument("--metadata", type=str, default="Final_dataset_metadata.csv")
     p_ens.add_argument("--landmark_dir", type=str, default="data/landmarks")
     p_ens.add_argument("--output_dir", type=str, default="outputs/ensemble")
