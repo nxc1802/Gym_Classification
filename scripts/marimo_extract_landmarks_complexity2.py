@@ -158,7 +158,7 @@ def run_extraction_pipeline(
                     print(f"  [FAIL] {name}: {err}")
 
                 if idx % 25 == 0 or idx == total_tasks:
-                    print(f"  Progress: [{idx}/{total_tasks}] (Success: {success_cnt}, Failed: {fail_cnt})")
+                    print(f"  Progress: [{idx}/{total_tasks}] (Success: {success_cnt}, Failed: {fail_cnt})", flush=True)
 
     # 4. Final summary
     print("\n[4/4] Extraction completed!")
