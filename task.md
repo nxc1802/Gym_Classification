@@ -11,7 +11,7 @@
 - [x] 1. Setup & kết nối Marimo server, trích xuất landmarks MediaPipe Pose Heavy (complexity=2).
 - [x] 2. Push landmarks dataset lên Hugging Face và đồng bộ về local `data/landmarks/`.
 - [ ] 3. Chạy Smoke Test (1-2 epochs) kiểm tra toàn bộ pipeline training và auto-logging.
-- [ ] 4. Thực thi tuần tự các Bảng thực nghiệm (Bảng 1 $\rightarrow$ Bảng 2 $\rightarrow$ Bảng 3 $\rightarrow$ Bảng 4 $\rightarrow$ Bảng 5 $\rightarrow$ Bảng 6 & 7).
+- [ ] 4. Thực thi tuần tự các Bảng thực nghiệm (Bảng 1 $\rightarrow$ Bảng 2 $\rightarrow$ Bảng 4 $\rightarrow$ Bảng 5 $\rightarrow$ Bảng 6A, 6B & Bảng 7).
 - [ ] 5. Tự động đồng bộ checkpoint, kết quả và confusion matrix vào `outputs/EXPERIMENT_RESULTS.md` và Hugging Face Hub.
 - [ ] 6. Nghiệm thu SOTA, cập nhật LaTeX table cho paper và đồng bộ code lên GitHub.
 
@@ -20,16 +20,24 @@
 ## II. Hướng Dẫn Quy Trình Cho Researcher & Developer
 
 1. **Thứ tự thực nghiệm chuẩn:**
-   $$\text{Bảng 1 (Temporal Baselines)} \longrightarrow \text{Bảng 2 (Augmentation)} \longrightarrow \text{Bảng 3 (Feature Fusion / SOTA Loss)} \longrightarrow \text{Bảng 4 (GNN / AAGCN Streams)} \longrightarrow \text{Bảng 5, 6, 7 (Ensemble / Video-Level / TTA)}$$
+   $$\text{Bảng 1 (Temporal Baselines)} \longrightarrow \text{Bảng 2 (SkelGym-Aug)} \longrightarrow \text{Bảng 4 (GNN & AAGCN Multi-Stream)} \longrightarrow \text{Bảng 5 (Cross-Paradigm Ensemble)} \longrightarrow \text{Bảng 6A, 6B \& 7 (Video-Level Evaluation)}$$
+   *(Lưu ý: Bảng 3 Feature Fusion cũ đã được loại bỏ hoàn toàn do phương pháp `mix` ở Bảng 1 đã đại diện toàn diện).*
+
 2. **Cơ chế Auto-Logging:**
-   - Mỗi lệnh `run.py train` hoặc `run.py ensemble` đều có tham số `--exp_id <ID>` (ví dụ: `--exp_id T1.1`).
-   - Khi hoàn thành, script sẽ **tự động cập nhật trực tiếp** chỉ số Train Loss, Val Loss, Val Acc, Test Acc, Macro F1 và đường dẫn Checkpoint vào đúng dòng trong [`outputs/EXPERIMENT_RESULTS.md`](outputs/EXPERIMENT_RESULTS.md).
+   - Mỗi lệnh `run.py train` hoặc `run.py ensemble` đều có tham số `--exp_id <ID>` (ví dụ: `--exp_id T1.1`, `--exp_id T4.9`).
+   - Khi hoàn thành, script sẽ **tự động cập nhật trực tiếp** các chỉ số Train Loss, Val Loss, Val Acc, Test Acc, Macro F1 và đường dẫn Checkpoint vào đúng dòng trong [`outputs/EXPERIMENT_RESULTS.md`](outputs/EXPERIMENT_RESULTS.md).
+
 3. **Tối ưu tốc độ:**
    - Luôn kèm cờ `--use_amp --in_memory --device auto` để kích hoạt Automatic Mixed Precision (bfloat16/fp16) và nạp toàn bộ dataset vào RAM để đạt thông lượng tối đa.
    - Trên server GPU (RTX PRO 6000 / CUDA), mỗi run chỉ mất khoảng 2-4 phút.
-4. **Chọn Best Checkpoints cho Ensemble (Bảng 5, 6, 7):**
-   - Sau khi chạy xong Bảng 1, 2, 3: Chọn checkpoint Transformer có Val Acc cao nhất $\rightarrow$ `<BEST_TRANSFORMER_CKPT>`.
-   - Sau khi chạy xong Bảng 4: Chọn các checkpoint AAGCN (Joint, Bone, J-Motion, B-Motion) $\rightarrow$ `<AAGCN_JOINT>`, `<AAGCN_BONE>`, `<AAGCN_JM>`, `<AAGCN_BM>`.
+
+4. **Chọn Checkpoints cho Multi-Stream & Ensemble (Bảng 4, 5, 6, 7):**
+   - **Bảng 4 Multi-Stream**: Kết hợp các checkpoint AAGCN đơn luồng:
+     - Joint: `checkpoints/best_AAGCN_T4.5_rel_3d.pt`
+     - Bone: `checkpoints/best_AAGCN_T4.6_bone_3d.pt`
+     - Joint Motion: `checkpoints/best_AAGCN_T4.7_joint_motion_3d.pt`
+     - Bone Motion: `checkpoints/best_AAGCN_T4.8_bone_motion_3d.pt`
+   - **Bảng 5 Cross-Paradigm Ensemble**: Kết hợp Best Transformer (`checkpoints/best_Transformer_T1.21_mix.pt` hoặc `checkpoints/best_Transformer_T2.2_mix.pt`) với các mô hình đồ thị từ Bảng 4.
 
 ---
 
@@ -80,31 +88,18 @@ python3 run.py train --model Transformer --feature mix --exp_id T1.21 --device a
 
 ---
 
-### Bảng 2: Data Augmentation Strategies on Best Transformer (3 runs)
-*Khảo sát các chiến lược tăng cường dữ liệu trên mô hình Transformer tốt nhất (mặc định: `mix`).*
+### Bảng 2: Data Augmentation Strategies on Best Transformer (2 runs)
+*Khảo sát tăng cường dữ liệu: Baseline sạch (None) vs. SkelGym-Aug động trên Transformer Mix.*
 
 ```bash
 python3 run.py train --model Transformer --feature mix --augment none --exp_id T2.1 --device auto --use_amp --in_memory
-python3 run.py train --model Transformer --feature mix --augment combined --exp_id T2.2 --device auto --use_amp --in_memory
-python3 run.py train --model Transformer --feature mix --augment skel_gym_aug --exp_id T2.3 --device auto --use_amp --in_memory
+python3 run.py train --model Transformer --feature mix --augment skel_gym_aug --exp_id T2.2 --device auto --use_amp --in_memory
 ```
 
 ---
 
-### Bảng 3: Feature Fusion & SOTA Architecture Ablations (4 runs)
-*Đánh giá phương thức hợp nhất đa đặc trưng và kỹ thuật tối ưu hàm Loss (Label Smoothing, Focal Loss).*
-
-```bash
-python3 run.py train --model Transformer --feature direct_concat --exp_id T3.1 --device auto --use_amp --in_memory
-python3 run.py train --model BranchConcat --feature branch_concat --exp_id T3.2 --device auto --use_amp --in_memory
-python3 run.py train --model Transformer --feature mix --label_smoothing 0.1 --exp_id T3.3 --device auto --use_amp --in_memory
-python3 run.py train --model Transformer --feature mix --loss focal --focal_gamma 2.0 --exp_id T3.4 --device auto --use_amp --in_memory
-```
-
----
-
-### Bảng 4: Spatial-Temporal Graph Models (ST-GCN & AAGCN Multi-Stream) (8 runs)
-*Khảo sát mạng đồ thị không-thời gian: ST-GCN trên toạ độ tĩnh và AAGCN trên 4 luồng động học.*
+### Bảng 4: Spatial-Temporal Graph Models & Multi-Stream AAGCN Ablation (10 runs)
+*Khảo sát mạng đồ thị không-thời gian: ST-GCN baselines và AAGCN 4 luồng động học cùng các phép hợp nhất ablation.*
 
 #### 1. ST-GCN Baselines (4 runs, $T=32$)
 ```bash
@@ -114,7 +109,7 @@ python3 run.py train --model STGCN --feature raw_2d --exp_id T4.3 --device auto 
 python3 run.py train --model STGCN --feature rel_2d --exp_id T4.4 --device auto --use_amp --in_memory
 ```
 
-#### 2. Adaptive GCN (AAGCN 4-Stream, $T=20$)
+#### 2. Adaptive GCN (AAGCN) Single-Stream Kinematics (4 runs, $T=20$)
 ```bash
 python3 run.py train --model AAGCN --feature rel_3d --seq_len 20 --train_stride 10 --val_test_stride 20 --exp_id T4.5 --device auto --use_amp --in_memory
 python3 run.py train --model AAGCN --feature bone_3d --seq_len 20 --train_stride 10 --val_test_stride 20 --exp_id T4.6 --device auto --use_amp --in_memory
@@ -122,10 +117,19 @@ python3 run.py train --model AAGCN --feature joint_motion_3d --seq_len 20 --trai
 python3 run.py train --model AAGCN --feature bone_motion_3d --seq_len 20 --train_stride 10 --val_test_stride 20 --exp_id T4.8 --device auto --use_amp --in_memory
 ```
 
+#### 3. AAGCN Multi-Stream Late Fusion Ablations (2 runs, $T=20$)
+```bash
+# Two-Stream AAGCN (Joint + Bone)
+python3 run.py ensemble --method weighted_soft --exp_id T4.9 --seq_len 20 --stride 20 --checkpoints checkpoints/best_AAGCN_T4.5_rel_3d.pt checkpoints/best_AAGCN_T4.6_bone_3d.pt --device auto
+
+# Four-Stream AAGCN (Joint + Bone + Joint Motion + Bone Motion)
+python3 run.py ensemble --method weighted_soft --exp_id T4.10 --seq_len 20 --stride 20 --checkpoints checkpoints/best_AAGCN_T4.5_rel_3d.pt checkpoints/best_AAGCN_T4.6_bone_3d.pt checkpoints/best_AAGCN_T4.7_joint_motion_3d.pt checkpoints/best_AAGCN_T4.8_bone_motion_3d.pt --device auto
+```
+
 ---
 
-### Bảng 5: Heterogeneous Ensemble & Multi-Modal Fusion (7 runs)
-*Hợp nhất các mô hình chuỗi thời gian (Transformer) và mô hình đồ thị (AAGCN) để thiết lập SOTA.*
+### Bảng 5: Heterogeneous Cross-Paradigm Ensemble (5 runs)
+*Hợp nhất đa mô hình giữa chuỗi thời gian (Transformer) và đồ thị thích ứng (AAGCN).*
 
 ```bash
 # 1. Hard Voting (Best Transformer + Best ST-GCN)
@@ -134,31 +138,22 @@ python3 run.py ensemble --method hard --exp_id T5.1 --checkpoints checkpoints/be
 # 2. Soft Voting (Best Transformer + Best ST-GCN)
 python3 run.py ensemble --method soft --exp_id T5.2 --checkpoints checkpoints/best_Transformer_T1.21_mix.pt checkpoints/best_STGCN_T4.2_rel_3d.pt --device auto
 
-# 3. Stacking Ensemble
+# 3. Stacking Ensemble (Best Transformer + Best ST-GCN)
 python3 run.py ensemble --method stacking --exp_id T5.3 --checkpoints checkpoints/best_Transformer_T1.21_mix.pt checkpoints/best_STGCN_T4.2_rel_3d.pt --device auto
 
-# 4. Two-Stream AAGCN (Joint + Bone)
-python3 run.py ensemble --method weighted_soft --exp_id T5.4 --seq_len 20 --stride 20 --checkpoints checkpoints/best_AAGCN_T4.5_rel_3d.pt checkpoints/best_AAGCN_T4.6_bone_3d.pt --device auto
+# 4. Tri-Model Grand Ensemble (Transformer Mix + AAGCN Joint + AAGCN Bone)
+python3 run.py ensemble --method weighted_soft --exp_id T5.4 --checkpoints checkpoints/best_Transformer_T1.21_mix.pt checkpoints/best_AAGCN_T4.5_rel_3d.pt checkpoints/best_AAGCN_T4.6_bone_3d.pt --device auto
 
-# 5. Four-Stream AAGCN (Joint + Bone + J-Motion + B-Motion)
-python3 run.py ensemble --method weighted_soft --exp_id T5.5 --seq_len 20 --stride 20 --checkpoints checkpoints/best_AAGCN_T4.5_rel_3d.pt checkpoints/best_AAGCN_T4.6_bone_3d.pt checkpoints/best_AAGCN_T4.7_joint_motion_3d.pt checkpoints/best_AAGCN_T4.8_bone_motion_3d.pt --device auto
-
-# 6. Tri-Model Grand Ensemble (Transformer Mix + AAGCN Joint + AAGCN Bone)
-python3 run.py ensemble --method weighted_soft --exp_id T5.6 --checkpoints checkpoints/best_Transformer_T1.21_mix.pt checkpoints/best_AAGCN_T4.5_rel_3d.pt checkpoints/best_AAGCN_T4.6_bone_3d.pt --device auto
-
-# 7. Grand 5-Stream SOTA + TTA (Transformer Mix + 4-Stream AAGCN + Bilateral Mirroring)
-python3 run.py ensemble --method weighted_soft --exp_id T5.7 --tta --checkpoints checkpoints/best_Transformer_T1.21_mix.pt checkpoints/best_AAGCN_T4.5_rel_3d.pt checkpoints/best_AAGCN_T4.6_bone_3d.pt checkpoints/best_AAGCN_T4.7_joint_motion_3d.pt checkpoints/best_AAGCN_T4.8_bone_motion_3d.pt --device auto
+# 5. Grand 5-Stream SOTA Ensemble (Transformer Mix + Four-Stream AAGCN)
+python3 run.py ensemble --method weighted_soft --exp_id T5.5 --checkpoints checkpoints/best_Transformer_T1.21_mix.pt checkpoints/best_AAGCN_T4.5_rel_3d.pt checkpoints/best_AAGCN_T4.6_bone_3d.pt checkpoints/best_AAGCN_T4.7_joint_motion_3d.pt checkpoints/best_AAGCN_T4.8_bone_motion_3d.pt --device auto
 ```
 
 ---
 
-### Bảng 6 & 7: Video-Level Aggregation & Test-Time Augmentation (TTA)
-*Đánh giá độ chính xác thực tế trên toàn bộ 236 video bài tập độc lập (Clip/Video-level).*
+### Bảng 6A, 6B & 7: Video-Level Aggregation Benchmark
+*Đánh giá toàn diện cấp độ Video trên toàn bộ 236 video bài tập độc lập (Tự động cập nhật Bảng 6A, 6B và 7).*
 
 ```bash
-# Đánh giá Video-Level trên Grand SOTA Ensemble
+# Chạy đánh giá Video-Level trên Grand SOTA Ensemble (Tự động sinh Classification Report Bảng 6A & 6B)
 python3 run.py ensemble --method weighted_soft --video_level --checkpoints checkpoints/best_Transformer_T1.21_mix.pt checkpoints/best_AAGCN_T4.5_rel_3d.pt checkpoints/best_AAGCN_T4.6_bone_3d.pt checkpoints/best_AAGCN_T4.7_joint_motion_3d.pt checkpoints/best_AAGCN_T4.8_bone_motion_3d.pt --device auto
-
-# Đánh giá Video-Level kết hợp TTA (Test-Time Augmentation)
-python3 run.py ensemble --method weighted_soft --video_level --tta --checkpoints checkpoints/best_Transformer_T1.21_mix.pt checkpoints/best_AAGCN_T4.5_rel_3d.pt checkpoints/best_AAGCN_T4.6_bone_3d.pt checkpoints/best_AAGCN_T4.7_joint_motion_3d.pt checkpoints/best_AAGCN_T4.8_bone_motion_3d.pt --device auto
 ```

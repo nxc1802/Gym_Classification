@@ -190,12 +190,12 @@ def update_experiment_markdown(
             # Table 4: Exp ID | Model | Graph Stream | Tensor Shape | Train Loss | Val Loss | Val Acc | Test Acc | Macro F1 | Checkpoint | Status
             elif exp_id.startswith("T4."):
                 if len(parts) >= 12:
-                    parts[5] = f"{record.get('train_loss', 0.0):.4f}"
-                    parts[6] = f"{record.get('val_loss', 0.0):.4f}"
-                    parts[7] = f"{record.get('val_acc', 0.0) * 100:.2f}%"
+                    parts[5] = f"{record['train_loss']:.4f}" if "train_loss" in record and record["train_loss"] is not None else "-"
+                    parts[6] = f"{record['val_loss']:.4f}" if "val_loss" in record and record["val_loss"] is not None else "-"
+                    parts[7] = f"{record['val_acc'] * 100:.2f}%" if "val_acc" in record and record["val_acc"] is not None else "-"
                     parts[8] = f"{record.get('accuracy', 0.0) * 100:.2f}%"
                     parts[9] = f"{record.get('macro_f1', 0.0):.4f}"
-                    parts[10] = f"`checkpoints/{record.get('checkpoint', '')}`"
+                    parts[10] = f"`checkpoints/{record.get('checkpoint', '')}`" if not str(record.get('checkpoint', '')).startswith("outputs") else f"`{record.get('checkpoint', '')}`"
                     parts[11] = "Done"
                     line = "| " + " | ".join(parts[1:-1]) + " |"
                     updated = True
@@ -785,37 +785,55 @@ def cmd_ensemble(args):
             }
         )
 
-    # Auto-update Table 6 if method is ensemble and requested
+    # Auto-update Table 6A (Window-Level) and Table 6B (Video-Level)
     if args.method in ("stacking", "weighted_soft", "soft") and report_file and Path(report_file).exists():
         try:
             from sklearn.metrics import classification_report as sk_clf_report
-            rep_dict = sk_clf_report(y_test_final, final_preds, target_names=ACTIONS, output_dict=True, zero_division=0)
+            rep_dict_win = sk_clf_report(y_test_final, final_preds, target_names=ACTIONS, output_dict=True, zero_division=0)
+            rep_dict_vid = None
+            if getattr(args, "video_level", False) and 'y_vid_t' in locals() and 'y_vid_p' in locals():
+                rep_dict_vid = sk_clf_report(y_vid_t, y_vid_p, target_names=ACTIONS, output_dict=True, zero_division=0)
+
             rep_text = Path(report_file).read_text(encoding="utf-8")
             new_lines = []
+            curr_section = None
+
             for line in rep_text.splitlines():
-                matched_act = None
-                for act in ACTIONS:
-                    if line.strip().startswith(f"| {act} "):
-                        matched_act = act
-                        break
-                if matched_act and matched_act in rep_dict:
-                    row_data = rep_dict[matched_act]
-                    p = row_data["precision"]
-                    r = row_data["recall"]
-                    f1 = row_data["f1-score"]
-                    supp = int(row_data["support"])
-                    line = f"| {matched_act} | {p:.4f} | {r:.4f} | {f1:.4f} | {supp} |"
-                elif line.strip().startswith("| **Accuracy**"):
-                    acc = rep_dict.get("accuracy", metrics["accuracy"])
-                    tot_supp = len(y_test_final)
-                    line = f"| **Accuracy** | | | **{acc*100:.2f}%** | **{tot_supp}** |"
-                elif line.strip().startswith("| **Macro avg**"):
-                    m_data = rep_dict.get("macro avg", {})
-                    line = f"| **Macro avg** | **{m_data.get('precision', 0):.4f}** | **{m_data.get('recall', 0):.4f}** | **{m_data.get('f1-score', 0):.4f}** | **{int(m_data.get('support', 0))}** |"
-                elif line.strip().startswith("| **Weighted avg**"):
-                    w_data = rep_dict.get("weighted avg", {})
-                    line = f"| **Weighted avg** | **{w_data.get('precision', 0):.4f}** | **{w_data.get('recall', 0):.4f}** | **{w_data.get('f1-score', 0):.4f}** | **{int(w_data.get('support', 0))}** |"
+                if "Table 6A" in line or "Table 6:" in line:
+                    curr_section = "6A"
+                elif "Table 6B" in line:
+                    curr_section = "6B"
+                elif line.startswith("## Table 7") or line.startswith("## Table 8") or line.startswith("---"):
+                    curr_section = None
+
+                active_dict = rep_dict_win if curr_section == "6A" else (rep_dict_vid if curr_section == "6B" else None)
+
+                if active_dict is not None:
+                    matched_act = None
+                    for act in ACTIONS:
+                        if line.strip().startswith(f"| {act} "):
+                            matched_act = act
+                            break
+                    if matched_act and matched_act in active_dict:
+                        row_data = active_dict[matched_act]
+                        p = row_data["precision"]
+                        r = row_data["recall"]
+                        f1 = row_data["f1-score"]
+                        supp = int(row_data["support"])
+                        line = f"| {matched_act} | {p:.4f} | {r:.4f} | {f1:.4f} | {supp} |"
+                    elif line.strip().startswith("| **Accuracy**"):
+                        acc = active_dict.get("accuracy", 0.0)
+                        tot_supp = int(active_dict.get("macro avg", {}).get("support", 0))
+                        line = f"| **Accuracy** | | | **{acc*100:.2f}%** | **{tot_supp}** |"
+                    elif line.strip().startswith("| **Macro avg**"):
+                        m_data = active_dict.get("macro avg", {})
+                        line = f"| **Macro avg** | **{m_data.get('precision', 0):.4f}** | **{m_data.get('recall', 0):.4f}** | **{m_data.get('f1-score', 0):.4f}** | **{int(m_data.get('support', 0))}** |"
+                    elif line.strip().startswith("| **Weighted avg**"):
+                        w_data = active_dict.get("weighted avg", {})
+                        line = f"| **Weighted avg** | **{w_data.get('precision', 0):.4f}** | **{w_data.get('recall', 0):.4f}** | **{w_data.get('f1-score', 0):.4f}** | **{int(w_data.get('support', 0))}** |"
+
                 new_lines.append(line)
+
             Path(report_file).write_text("\n".join(new_lines) + "\n", encoding="utf-8")
             logger.info(f"Updated Table 6 Classification Report in {report_file}")
         except Exception as e:
@@ -952,7 +970,7 @@ def create_parser() -> argparse.ArgumentParser:
         choices=["raw_2d", "raw_3d", "rel_2d", "rel_3d", "bone_2d", "bone_3d", "joint_motion_2d", "joint_motion_3d", "bone_motion_2d", "bone_motion_3d", "angle_2d", "angle_3d", "mix", "full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"],
         help="Feature representation method"
     )
-    p_train.add_argument("--augment", type=str, default="none", choices=["none", "jitter", "rotate", "joint_dropout", "time_warp", "mirror", "speed_perturb", "combined", "skel_gym_aug"], help="Augmentation method")
+    p_train.add_argument("--augment", type=str, default="none", choices=["none", "jitter", "rotate", "joint_dropout", "time_warp", "mirror", "speed_perturb", "skel_gym_aug"], help="Augmentation method")
     p_train.add_argument("--zero_frame", type=str, default="interpolate", choices=["zero", "ffill", "linear", "interpolate"], help="Missing/zero-frame handling strategy")
     p_train.add_argument("--loss", type=str, default="ce", choices=["ce", "focal", "cb_focal"], help="Loss function: ce (CrossEntropy), focal (FocalLoss), cb_focal (Class-Balanced FocalLoss)")
     p_train.add_argument("--focal_gamma", type=float, default=2.0, help="Focal loss focusing parameter gamma (e.g. 2.0)")

@@ -386,38 +386,44 @@ def build_dataset_from_csvs(
                     all_labels.append(class_idx)
                     all_video_ids.append(vid_name)
 
-    # Dataset Expansion: Preserve 100% of clean original samples and append 3 augmented variants (1→4 total)
+    # Augmentation Strategy:
+    # 1. For 'skel_gym_aug': True Dynamic On-the-Fly Augmentation per epoch in DataLoader (__getitem__)
+    # 2. For single methods (jitter, rotate, etc.): Offline Dataset Expansion (1→4 total)
+    dataset_aug = None
     if split == "train" and augment_method and augment_method != "none":
-        augmenter = LandmarkAugmenter()
-        aug_samples = []
-        aug_labels = []
-        aug_video_ids = []
-        for s, l, v_id in zip(all_samples, all_labels, all_video_ids):
-            if is_branch:
-                # For branch: augment first branch, keep second unchanged
-                t1 = torch.from_numpy(s[0]).float()
-                variants = augmenter.generate_augmented_variants(t1, augment_method)
-                for idx_var, v in enumerate(variants):
-                    aug_samples.append((v.numpy(), s[1].copy()))
-                    aug_labels.append(l)
-                    aug_video_ids.append(f"{v_id}_aug_{idx_var}")
-            else:
-                t = torch.from_numpy(s).float()
-                variants = augmenter.generate_augmented_variants(t, augment_method)
-                for idx_var, v in enumerate(variants):
-                    aug_samples.append(v.numpy())
-                    aug_labels.append(l)
-                    aug_video_ids.append(f"{v_id}_aug_{idx_var}")
+        if augment_method == "skel_gym_aug":
+            # Dynamic On-the-Fly Augmentation: keep clean base samples in RAM, apply random pipeline on every fetch
+            dataset_aug = "skel_gym_aug"
+        else:
+            # Single-method offline dataset expansion: Preserve clean samples and append variants (1→4 total)
+            augmenter = LandmarkAugmenter()
+            aug_samples = []
+            aug_labels = []
+            aug_video_ids = []
+            for s, l, v_id in zip(all_samples, all_labels, all_video_ids):
+                if is_branch:
+                    t1 = torch.from_numpy(s[0]).float()
+                    variants = augmenter.generate_augmented_variants(t1, augment_method)
+                    for idx_var, v in enumerate(variants):
+                        aug_samples.append((v.numpy(), s[1].copy()))
+                        aug_labels.append(l)
+                        aug_video_ids.append(f"{v_id}_aug_{idx_var}")
+                else:
+                    t = torch.from_numpy(s).float()
+                    variants = augmenter.generate_augmented_variants(t, augment_method)
+                    for idx_var, v in enumerate(variants):
+                        aug_samples.append(v.numpy())
+                        aug_labels.append(l)
+                        aug_video_ids.append(f"{v_id}_aug_{idx_var}")
 
-        # Retain original clean samples + 3 augmented variants per sample (4× total)
-        all_samples = all_samples + aug_samples
-        all_labels = all_labels + aug_labels
-        all_video_ids = all_video_ids + aug_video_ids
+            all_samples = all_samples + aug_samples
+            all_labels = all_labels + aug_labels
+            all_video_ids = all_video_ids + aug_video_ids
 
     return GymDataset(
         samples=all_samples,
         labels=all_labels,
-        augment_method=None,
+        augment_method=dataset_aug,
         is_branch=is_branch,
         in_memory=in_memory,
         video_ids=all_video_ids

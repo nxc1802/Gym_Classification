@@ -43,30 +43,17 @@ This document serves as the primary tracking log and benchmark sheet for the res
 ---
 
 ## Table 2: Data Augmentation Strategies on Best Transformer
-*Objective:* Assess whether dataset expansion (combining 100% clean original samples + augmented supplementary samples via Scale, Rotate, Time-Warp, and Jitter) or dynamic on-the-fly augmentation (SkelGym-Aug) outperforms the unaugmented baseline.
+*Objective:* Assess whether dynamic on-the-fly augmentation (SkelGym-Aug with bilateral symmetry mirroring, 3D yaw rotation, and temporal warping) outperforms the unaugmented clean baseline.
 
 | Exp ID | Augmentation Strategy | Configuration | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
-| **T2.1** | **None (Baseline)** | `augment: none` (Clean original samples: $N$) | - | - | - | - | - | `checkpoints/best_Transformer_T2.1_mix.pt` | Pending |
-| **T2.2** | **Augmented Expansion (2x Samples)** | `augment: combined` (Original $N$ + Augmented $N$ via Scale, Rotate $\pm 10^\circ$, Time-Warp, Jitter) | - | - | - | - | - | `checkpoints/best_Transformer_T2.2_mix.pt` | Pending |
-| **T2.3** | **SkelGym-Aug (Dynamic On-the-Fly)** | `augment: skel_gym_aug` (Dynamic On-the-Fly Bilateral Flip $p=0.5$, 3D Yaw $\pm 15^\circ$, Scale, Time-Warp, Jitter) | - | - | - | - | - | `checkpoints/best_Transformer_T2.3_mix.pt` | Pending |
+| **T2.1** | **None (Baseline)** | `augment: none` (Clean original samples) | - | - | - | - | - | `checkpoints/best_Transformer_T2.1_mix.pt` | Pending |
+| **T2.2** | **SkelGym-Aug (Dynamic On-the-Fly)** | `augment: skel_gym_aug` (Bilateral Flip $p=0.5$, 3D Yaw $\pm 15^\circ$, Scale, Time-Warp, Jitter) | - | - | - | - | - | `checkpoints/best_Transformer_T2.2_mix.pt` | Pending |
 
 ---
 
-## Table 3: Feature Fusion & SOTA Architecture Ablations
-*Objective:* Compare multi-modal feature fusion strategies (Direct-Concat vs Branch-Concat) and examine modern architectural enhancements (Pre-LN, GeLU, Learnable Positional Embeddings, Label Smoothing, and Focal Loss $\gamma=2.0$).
-
-| Exp ID | Model Architecture | Feature Fusion / Loss Strategy | Configuration | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
-| :---: | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
-| **T3.1** | **Direct-Concat** | Direct Concat Fusion | `feature: direct_concat` (Rel 3D + Angle 3D) | - | - | - | - | - | `checkpoints/best_Transformer_T3.1_direct_concat.pt` | Pending |
-| **T3.2** | **Branch-Concat** | Dual-Branch Fusion | `feature: branch_concat` (Independent Rel & Angle Encoders) | - | - | - | - | - | `checkpoints/best_Transformer_T3.2_branch_concat.pt` | Pending |
-| **T3.3** | **SOTA Transformer** | Unified Mix + Label Smoothing | `feature: mix`, `label_smoothing: 0.1` | - | - | - | - | - | `checkpoints/best_Transformer_T3.3_mix.pt` | Pending |
-| **T3.4** | **SOTA Transformer** | Unified Mix + Focal Loss | `feature: mix`, `loss: focal`, `gamma: 2.0` | - | - | - | - | - | `checkpoints/best_Transformer_T3.4_mix.pt` | Pending |
-
----
-
-## Table 4: Spatial-Temporal Graph Models (ST-GCN & AAGCN Multi-Stream)
-*Objective:* Evaluate Graph Neural Networks under spatial-temporal skeletal graph topology $(B, C, T, V)$, comparing static physical topology (ST-GCN) against dynamic Adaptive Graph Convolutional Networks (AAGCN) across 4 complementary kinematic streams.
+## Table 4: Spatial-Temporal Graph Models & Multi-Stream AAGCN Ablation
+*Objective:* Evaluate Graph Neural Networks under spatial-temporal skeletal graph topology $(B, C, T, V)$, systematically benchmarking baseline ST-GCN against dynamic Adaptive Graph Convolutional Networks (AAGCN) and their multi-stream fusion ablations.
 
 | Exp ID | Model Architecture | Graph Stream | Tensor Shape $(C, T, V)$ | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
@@ -78,26 +65,26 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | **T4.6** | **AAGCN (Adaptive GCN)** | bone_3d (Bone Stream) | $(3, 20, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T4.6_bone_3d.pt` | Pending |
 | **T4.7** | **AAGCN (Adaptive GCN)** | joint_motion_3d ($\Delta X$) | $(3, 20, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T4.7_joint_motion_3d.pt` | Pending |
 | **T4.8** | **AAGCN (Adaptive GCN)** | bone_motion_3d ($\Delta B$) | $(3, 20, 13)$ | - | - | - | - | - | `checkpoints/best_AAGCN_T4.8_bone_motion_3d.pt` | Pending |
+| **T4.9** | **Two-Stream AAGCN** | Joint + Bone Stream Fusion | Late Fusion | - | - | - | - | - | `outputs/ensemble/cm_2s_aagcn.png` | Pending |
+| **T4.10** | **Four-Stream AAGCN** | Joint + Bone + J-Motion + B-Motion | Late Fusion | - | - | - | - | - | `outputs/ensemble/cm_4s_aagcn.png` | Pending |
 
 ---
 
-## Table 5: Heterogeneous Ensemble & Multi-Modal Fusion (SOTA Target)
-*Objective:* Fuse complementary dynamics from the best sequence Transformer (Bảng 1/2/3) and spatial-temporal graph models (Bảng 4) to establish SOTA accuracy.
+## Table 5: Heterogeneous Cross-Paradigm Ensemble (Transformer + AAGCN)
+*Objective:* Fuse complementary dynamics from the best sequence Transformer (Bảng 1/2) and spatial-temporal graph models (Bảng 4) to establish SOTA accuracy.
 
 | Exp ID | Ensemble Strategy | Component Models | Test Acc (%) | Macro F1 | Weighted F1 | Checkpoint / Artifact | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :--- | :---: |
 | **T5.1** | **Hard Voting** | Best Transformer + Best ST-GCN | - | - | - | `outputs/ensemble/cm_ensemble_hard.png` | Pending |
 | **T5.2** | **Soft Voting** | Best Transformer + Best ST-GCN | - | - | - | `outputs/ensemble/cm_ensemble_soft.png` | Pending |
 | **T5.3** | **Stacking Ensemble** | Best Transformer + Best ST-GCN + Meta-Learner | - | - | - | `outputs/ensemble/cm_ensemble_stacking.png` | Pending |
-| **T5.4** | **Two-Stream AAGCN** | Joint Stream + Bone Stream (Equal / Learned) | - | - | - | `outputs/ensemble/cm_2s_aagcn.png` | Pending |
-| **T5.5** | **Four-Stream AAGCN** | Joint + Bone + Joint Motion + Bone Motion | - | - | - | `outputs/ensemble/cm_4s_aagcn.png` | Pending |
-| **T5.6** | **Tri-Model Grand Ensemble** | Transformer Mix + AAGCN Joint + AAGCN Bone | - | - | - | `outputs/ensemble/cm_tri_model.png` | Pending |
-| **T5.7** | **Grand 5-Stream SOTA + TTA** | Transformer Mix + 4-Stream AAGCN + Bilateral Mirroring | - | - | - | `outputs/ensemble/cm_grand_5s_sota_tta.png` | Pending |
+| **T5.4** | **Tri-Model Grand Ensemble** | Transformer Mix + AAGCN Joint + AAGCN Bone | - | - | - | `outputs/ensemble/cm_tri_model.png` | Pending |
+| **T5.5** | **Grand 5-Stream SOTA Ensemble** | Transformer Mix + 4-Stream AAGCN | - | - | - | `outputs/ensemble/cm_grand_5s_sota.png` | Pending |
 
 ---
 
-## Table 6: Detailed Classification Report of Proposed SOTA Ensemble
-*Objective:* Comprehensive per-class evaluation of the proposed Grand SOTA ensemble across all 22 gym exercise categories on the clean leak-free test set ($N=3,337$ windows at $T=32$, or $N=5,416$ windows at $T=20$).
+## Table 6A: Detailed Classification Report (Window-Level Benchmark)
+*Objective:* Comprehensive per-class evaluation of the proposed Grand SOTA ensemble across all 22 gym exercise categories on the held-out test windows ($N=3,337$ at $T=32$, or $N=5,416$ at $T=20$).
 
 | Exercise Class | Precision | Recall | F1-Score | Support |
 | :--- | :---: | :---: | :---: | :---: |
@@ -129,16 +116,50 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 ---
 
-## Table 7: Video-Level Aggregation & Test-Time Augmentation (TTA) Benchmark
-*Objective:* Empirical comparison between frame/window-level predictions and clip/video-level predictions ($N=236$ complete test exercise videos), investigating the synergistic impact of bilateral horizontal mirroring Test-Time Augmentation (TTA) and temporal soft average pooling.
+## Table 6B: Detailed Classification Report (Video-Level Benchmark)
+*Objective:* Comprehensive per-class evaluation of the proposed Grand SOTA ensemble aggregated at the full exercise clip level across all 236 independent held-out test videos ($N=236$ videos).
 
-| Model / Ensemble System | Input Modality / Architecture | Window Acc (%) | Window Macro F1 | Window Acc (TTA) | Window F1 (TTA) | Video Acc (Standard) | Video Macro F1 | Video Acc (TTA) | Video Macro F1 |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Best Baseline (LSTM / BiLSTM)** | Sequential Recurrent Baseline | - | - | - | - | - | - | - | - |
-| **Best Baseline ST-GCN** | Static Graph Convolutional Baseline | - | - | - | - | - | - | - | - |
-| **Best Transformer (Mix)** | Self-Attention on Kinematic Vectors | - | - | - | - | - | - | - | - |
-| **SOTA Transformer (Focal Loss)** | Pre-LN + GeLU + Focal Loss ($\gamma=2.0$) | - | - | - | - | - | - | - | - |
-| **Two-Stream AAGCN** | Joint Stream + Bone Stream | - | - | - | - | - | - | - | - |
-| **Four-Stream AAGCN** | Joint + Bone + Joint Motion + Bone Motion | - | - | - | - | - | - | - | - |
-| **Tri-Model Grand Ensemble** | Transformer Mix + 2-Stream AAGCN | - | - | - | - | - | - | - | - |
-| **Grand 5-Stream SOTA + TTA** | Transformer Mix + 4-Stream AAGCN + Mirroring | - | - | - | - | - | - | - | - |
+| Exercise Class | Precision | Recall | F1-Score | Support |
+| :--- | :---: | :---: | :---: | :---: |
+| barbell biceps curl | - | - | - | - |
+| bench press | - | - | - | - |
+| chest fly machine | - | - | - | - |
+| deadlift | - | - | - | - |
+| decline bench press | - | - | - | - |
+| hammer curl | - | - | - | - |
+| hip thrust | - | - | - | - |
+| incline bench press | - | - | - | - |
+| lat pulldown | - | - | - | - |
+| lateral raise | - | - | - | - |
+| leg extension | - | - | - | - |
+| leg raises | - | - | - | - |
+| plank | - | - | - | - |
+| pull Up | - | - | - | - |
+| push-up | - | - | - | - |
+| romanian deadlift | - | - | - | - |
+| russian twist | - | - | - | - |
+| shoulder press | - | - | - | - |
+| squat | - | - | - | - |
+| t bar row | - | - | - | - |
+| tricep Pushdown | - | - | - | - |
+| tricep dips | - | - | - | - |
+| **Accuracy** | | | **-** | **-** |
+| **Macro avg** | **-** | **-** | **-** | **-** |
+| **Weighted avg** | **-** | **-** | **-** | **-** |
+
+---
+
+## Table 7: Video-Level Aggregation Summary Benchmark
+*Objective:* Empirical comparison between temporal window-level predictions and complete clip/video-level predictions ($N=236$ complete test videos), analyzing the accuracy gains achievable through temporal consensus pooling.
+
+| Model / Ensemble Architecture | Input Modality / Paradigm | Window Acc (%) | Window Macro F1 | Video Acc (%) | Video Macro F1 | Video Gain (+Δ%) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **Baseline LSTM (Mix)** | Sequential Recurrent Model | - | - | - | - | - |
+| **Baseline BiLSTM (Mix)** | Bidirectional Recurrent Model | - | - | - | - | - |
+| **Baseline ST-GCN (Rel 3D)** | Static Graph Convolution | - | - | - | - | - |
+| **Best Transformer (Mix)** | Self-Attention on Kinematic Vectors | - | - | - | - | - |
+| **Best Transformer + SkelGym-Aug** | Self-Attention with Dynamic Aug | - | - | - | - | - |
+| **Two-Stream AAGCN** | Joint Stream + Bone Stream | - | - | - | - | - |
+| **Four-Stream AAGCN** | Joint + Bone + Joint Motion + Bone Motion | - | - | - | - | - |
+| **Tri-Model Grand Ensemble** | Transformer Mix + 2-Stream AAGCN | - | - | - | - | - |
+| **Grand 5-Stream SOTA Ensemble** | Transformer Mix + 4-Stream AAGCN | - | - | - | - | - |
