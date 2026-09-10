@@ -3,7 +3,7 @@ Core constants for Gym Exercise Classification.
 Includes 22 action classes, keypoint definitions, skeleton graph connections, and feature dimensions.
 """
 
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 
 # Canonical 22 Action Classes (sorted as in metadata / publication)
 ACTIONS: List[str] = [
