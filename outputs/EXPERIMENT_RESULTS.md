@@ -65,8 +65,8 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | **T3.6** | **AAGCN (Adaptive GCN)** | bone_3d (Bone Stream) | $(3, 32, 13)$ | 0.2273 | 1.5015 | 69.57% | 52.27% | 0.5338 | `checkpoints/best_AAGCN_T3.6_bone_3d.pt` | Done |
 | **T3.7** | **AAGCN (Adaptive GCN)** | joint_motion_3d ($\Delta X$) | $(3, 32, 13)$ | 0.2709 | 2.6010 | 46.99% | 40.13% | 0.4377 | `checkpoints/best_AAGCN_T3.7_joint_motion_3d.pt` | Done |
 | **T3.8** | **AAGCN (Adaptive GCN)** | bone_motion_3d ($\Delta B$) | $(3, 32, 13)$ | 0.5334 | 2.1556 | 47.25% | 42.35% | 0.4596 | `checkpoints/best_AAGCN_T3.8_bone_motion_3d.pt` | Done |
-| **T3.9** | **Two-Stream AAGCN** | 54.38% | 0.5496 | 71.61% | 0.7146 | +17.23% | 54.38% | 0.5496 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
-| **T3.10** | **Four-Stream AAGCN** | 56.03% | 0.5668 | 73.31% | 0.7313 | +17.28% | 56.03% | 0.5668 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
+| **T3.9** | **Two-Stream AAGCN** | Joint + Bone Stream Fusion | Late Fusion ($T=32$) | - | - | - | 54.38% | 0.5496 | `outputs/ensemble/cm_ensemble_T3.9_weighted_soft.png` | Done |
+| **T3.10** | **Four-Stream AAGCN** | Joint + Bone + J-Motion + B-Motion | Late Fusion ($T=32$) | - | - | - | 56.03% | 0.5668 | `outputs/ensemble/cm_ensemble_T3.10_weighted_soft.png` | Done |
 
 ---
 
@@ -86,12 +86,12 @@ This document serves as the primary tracking log and benchmark sheet for the res
 *Objective:* Fuse complementary dynamics from the best sequence Transformer (Table 1/2) and spatial-temporal graph models (Table 3/4) to establish SOTA accuracy.
 
 | Exp ID | Ensemble Strategy | Component Models | Test Acc (%) | Macro F1 | Weighted F1 | Checkpoint / Artifact | Status |
-| :---: | :--- | :--- | :---: | :---: | :--- | :---: |
+| :---: | :--- | :--- | :---: | :---: | :---: | :--- | :---: |
 | **T5.1** | **Hard Voting** | Best Transformer + Best ST-GCN | 42.12% | 0.4572 | 0.4414 | `outputs/ensemble/cm_ensemble_hard.png` | Done |
 | **T5.2** | **Soft Voting** | Best Transformer + Best ST-GCN | 49.47% | 0.5165 | 0.5055 | `outputs/ensemble/cm_ensemble_soft.png` | Done |
 | **T5.3** | **Stacking Ensemble** | Best Transformer + Best ST-GCN + Meta-Learner | 50.16% | 0.5171 | 0.4978 | `outputs/ensemble/cm_ensemble_stacking.png` | Done |
-| **T5.4** | **Tri-Model Grand Ensemble** | 54.78% | 0.5584 | 71.19% | 0.7033 | +16.40% | Done |
-| **T5.5** | **Grand 5-Stream SOTA Ensemble** | 56.11% | 0.5715 | 72.46% | 0.7215 | +16.34% | Done |
+| **T5.4** | **Tri-Model Grand Ensemble** | Transformer Mix + AAGCN Joint + AAGCN Bone | 54.78% | 0.5584 | 0.5612 | `outputs/ensemble/cm_ensemble_T5.4_weighted_soft.png` | Done |
+| **T5.5** | **Grand 5-Stream SOTA Ensemble** | Transformer Mix + 4-Stream AAGCN | 56.11% | 0.5715 | 0.5771 | `outputs/ensemble/cm_ensemble_T5.5_weighted_soft.png` | Done |
 
 ---
 

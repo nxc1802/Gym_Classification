@@ -297,10 +297,14 @@ def update_table7_markdown(
         lines = content.splitlines()
         updated = False
         new_lines = []
-        gain = (vid_acc - win_acc) * 100
-
+        in_table7 = False
         for line in lines:
-            if f"**{model_name_key}**" in line and line.strip().startswith("|"):
+            if "## Table 7" in line:
+                in_table7 = True
+            elif line.startswith("## ") and "Table 7" not in line:
+                in_table7 = False
+
+            if in_table7 and f"**{model_name_key}**" in line and line.strip().startswith("|"):
                 parts = [p.strip() for p in line.split("|")]
                 if len(parts) >= 8:
                     parts[3] = f"{win_acc * 100:.2f}%"
