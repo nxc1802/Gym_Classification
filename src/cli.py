@@ -1065,13 +1065,16 @@ def cmd_ensemble(args):
     # Auto-update Table 7 (Video-Level Summary Benchmark)
     if getattr(args, "video_level", False) and 'vid_metrics' in locals() and report_file and Path(report_file).exists():
         exp_id = getattr(args, "exp_id", "") or ""
-        t7_key = None
         if exp_id in ("T3.9", "T4.6", "T4.9") or (len(args.checkpoints) == 2 and all("AAGCN" in c for c in args.checkpoints)):
             t7_key = "Two-Stream AAGCN (Aug)" if "aug" in "".join(args.checkpoints).lower() else "Two-Stream AAGCN"
-        elif exp_id in ("T3.10", "T4.8", "T4.10") or (len(args.checkpoints) == 4 and all("AAGCN" in c for c in args.checkpoints)):
+        elif exp_id in ("T3.10", "T4.7", "T4.8", "T4.10") or (len(args.checkpoints) == 4 and all("AAGCN" in c for c in args.checkpoints)):
             t7_key = "Four-Stream AAGCN (Aug)" if "aug" in "".join(args.checkpoints).lower() else "Four-Stream AAGCN"
-        elif exp_id in ("T5.1", "T5.2", "T5.3") or (any("Transformer" in c for c in args.checkpoints) and any("AAGCN" in c for c in args.checkpoints)):
-            t7_key = "Grand SOTA Ensemble"
+        elif exp_id == "T5.1" or len(args.checkpoints) >= 5:
+            t7_key = "Grand 5-Stream SOTA Ensemble"
+        elif exp_id in ("T5.2", "T5.3") or (any("Transformer" in c for c in args.checkpoints) and any("AAGCN" in c for c in args.checkpoints)):
+            t7_key = "Dual-Model Grand Ensemble"
+        else:
+            t7_key = "Grand SOTA Heterogeneous Ensemble"
 
         if t7_key:
             update_table7_markdown(

@@ -48,13 +48,13 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 ---
 
-## Table 2: Data Augmentation Strategies on Best Sequence Model (Transformer rel_3d)
-*Objective:* Assess whether dynamic on-the-fly augmentation (SkelGym-Aug with bilateral symmetry mirroring, 3D yaw rotation, and temporal warping) outperforms the unaugmented clean baseline on the best sequence architecture (`Transformer rel_3d`).
+## Table 2: Data Augmentation Strategies on Best Sequence Model (Transformer mix)
+*Objective:* Assess whether dynamic on-the-fly augmentation (SkelGym-Aug with bilateral symmetry mirroring, 3D yaw rotation, and temporal warping) outperforms the unaugmented clean baseline on the best sequence architecture (`Transformer mix`).
 
 | Exp ID | Augmentation Strategy | Configuration | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
-| :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
-| **T2.1** | **None (Baseline rel_3d)** | `augment: none` (Clean original samples) | 0.0436 | 1.5060 | 71.83% | 56.87% | 0.5772 | `checkpoints/best_Transformer_T2.1_rel_3d.pt` | Done |
-| **T2.2** | **SkelGym-Aug (Dynamic rel_3d)** | `augment: skel_gym_aug` (Bilateral Flip $p=0.5$, 3D Yaw $\pm 15^\circ$, Scale, Time-Warp, Jitter) | 0.1323 | 0.7718 | 81.30% | 71.93% | 0.7062 | `checkpoints/best_Transformer_T2.2_rel_3d.pt` | Done |
+| :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
+| **T2.1** | **None (Baseline mix)** | `augment: none` (Clean original samples) | 0.0118 | 1.7382 | 75.95% | 63.40% | 0.6218 | `checkpoints/best_Transformer_T1.27_mix.pt` | Done |
+| **T2.2** | **SkelGym-Aug (Dynamic mix)** | `augment: skel_gym_aug` (Bilateral Flip $p=0.5$, 3D Yaw $\pm 15^\circ$, Scale, Time-Warp, Jitter) | - | - | - | - | - | `checkpoints/best_Transformer_T2.2_mix.pt` | In Progress |
 
 ---
 
@@ -76,22 +76,28 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 ---
 
-## Table 4: Data Augmentation Ablation on Best Graph Architecture (AAGCN bone_3d)
-*Objective:* Empirical ablation assessing the effectiveness of dynamic skeletal data augmentation (SkelGym-Aug: bilateral symmetry mirroring, 3D yaw rotation $\pm 15^\circ$, time-warping, jitter) on the best graph architecture (`AAGCN bone_3d`).
+## Table 4: Data Augmentation Ablation on Graph Architectures (4-Stream Kinematics)
+*Objective:* Empirical ablation assessing the effectiveness of dynamic skeletal data augmentation (SkelGym-Aug) across the graph streams of AAGCN, culminating in the augmented Four-Stream AAGCN late fusion.
 
 | Exp ID | Model Architecture | Graph Stream | Augmentation Strategy | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
 | **T4.1** | **AAGCN** | bone_3d (Bone) | `augment: none` (Baseline) | 0.2273 | 1.5015 | 69.57% | 52.27% | 0.5338 | `checkpoints/best_AAGCN_T4.1_bone_3d.pt` | Done |
 | **T4.2** | **AAGCN** | bone_3d (Bone) | `augment: skel_gym_aug` (Dynamic) | 0.3206 | 0.8213 | 77.98% | 65.84% | 0.6504 | `checkpoints/best_AAGCN_T4.2_bone_3d.pt` | Done |
+| **T4.3** | **AAGCN** | rel_3d (Joint) | `augment: skel_gym_aug` (Dynamic) | - | - | - | - | - | `checkpoints/best_AAGCN_T4.3_rel_3d.pt` | In Progress |
+| **T4.4** | **AAGCN** | joint_motion_3d (J-Motion) | `augment: skel_gym_aug` (Dynamic) | - | - | - | - | - | `checkpoints/best_AAGCN_T4.4_joint_motion_3d.pt` | In Progress |
+| **T4.5** | **AAGCN** | bone_motion_3d (B-Motion) | `augment: skel_gym_aug` (Dynamic) | - | - | - | - | - | `checkpoints/best_AAGCN_T4.5_bone_motion_3d.pt` | In Progress |
+| **T4.6** | **Two-Stream AAGCN (Aug)** | Joint (Aug) + Bone (Aug) | Late Fusion ($T=32$) | - | - | - | - | - | `outputs/ensemble/cm_ensemble_T4.6_weighted_soft.png` | In Progress |
+| **T4.7** | **Four-Stream AAGCN (Aug)** | 4-Stream Fusion (SkelGym-Aug) | Late Fusion ($T=32$) | - | - | - | - | - | `outputs/ensemble/cm_ensemble_T4.7_weighted_soft.png` | In Progress |
 
 ---
 
 ## Table 5: Heterogeneous Cross-Paradigm Ensemble (Unified Weighted Soft Voting)
-*Objective:* Fuse complementary dynamics from the best sequence Transformer (Table 2: `T2.2`) and best spatial-temporal graph model (Table 4: `T4.2`) using Dual-Target Weighted Soft Voting (SLSQP optimization).
+*Objective:* Fuse complementary dynamics from the best sequence Transformer (Table 2: `T2.2`) and spatial-temporal graph models (Table 4: `T4.2` and `T4.7`) using Dual-Target Weighted Soft Voting (SLSQP optimization).
 
 | Exp ID | Ensemble Strategy | Component Models | Test Acc (%) | Macro F1 | Weighted F1 | Checkpoint / Artifact | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :--- | :---: |
-| **T5.1** | **Grand Ensemble (Weighted Soft Voting)** | Best Transformer (T2.2) + Best Graph (T4.2) | 71.60% | 0.7037 | 0.7160 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
+| **T5.1** | **Grand 5-Stream SOTA Ensemble** | Best Transformer (mix aug) + 4-Stream AAGCN (Aug) | - | - | - | `outputs/ensemble/cm_ensemble_T5.1_weighted_soft.png` | In Progress |
+| **T5.2** | **Dual-Model Grand Ensemble** | Best Transformer (mix aug) + AAGCN Bone (Aug) | - | - | - | `outputs/ensemble/cm_ensemble_T5.2_weighted_soft.png` | In Progress |
 
 ---
 

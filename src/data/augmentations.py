@@ -80,10 +80,10 @@ class LandmarkAugmenter:
         - 4-channel coordinates (52, 53, 132, 133): noise applied only to (x, y, z), visibility preserved.
         """
         dim = x.shape[-1]
-        if dim == 325:
+        if dim in (117, 325):
             noise_rel = torch.randn_like(x[..., :39]) * self.jitter_sigma
             noise_ang = torch.randn_like(x[..., 39:]) * (self.jitter_sigma * 0.5)
-            ang_jittered = torch.clamp(x[..., 39:] + noise_ang, 0.0, math.pi)
+            ang_jittered = torch.clamp(x[..., 39:] + noise_ang, -math.pi, math.pi)
             return torch.cat([x[..., :39] + noise_rel, ang_jittered], dim=-1)
         elif dim == 286:
             noise = torch.randn_like(x) * (self.jitter_sigma * 0.5)
@@ -128,7 +128,7 @@ class LandmarkAugmenter:
 
         x_rot = x.clone()
 
-        if dim == 325:
+        if dim in (117, 325):
             # First 39 dims are rel_3d (13 joints * 3)
             for j in range(13):
                 idx_x = j * 3
@@ -176,7 +176,20 @@ class LandmarkAugmenter:
 
         x_rot = x.clone()
 
-        if dim == 325:
+        if dim == 117:
+            # First 39 dims are rel_3d (stride 3: x, y, z)
+            for j in range(13):
+                idx_x = j * 3
+                idx_z = j * 3 + 2
+                px = x[..., idx_x]
+                pz = x[..., idx_z]
+                x_rot[..., idx_x] = px * cos_a + pz * sin_a
+                x_rot[..., idx_z] = -px * sin_a + pz * cos_a
+            # Last 78 dims are angle2_3d: elevation angles from horizontal ground theta = arctan2(dy, sqrt(dx^2 + dz^2))
+            # Ground distance sqrt(dx^2 + dz^2) and vertical dy are strictly invariant to yaw rotation around Y!
+            return x_rot
+
+        elif dim == 325:
             # First 39 dims are rel_3d (stride 3: x, y, z)
             for j in range(13):
                 idx_x = j * 3
@@ -224,7 +237,7 @@ class LandmarkAugmenter:
         Only applied to coordinate representations (not applied to angle representations).
         """
         dim = x.shape[-1]
-        if dim in (325, 286, 78):
+        if dim in (117, 325, 286, 78):
             # Angles are derived from multiple joints; dropping individual angle channels corrupts topological validity
             return x.clone()
 
@@ -278,7 +291,7 @@ class LandmarkAugmenter:
 
         factor = torch.empty(1).uniform_(scale_min, scale_max).item()
 
-        if dim == 325:
+        if dim in (117, 325):
             scaled_rel = x[..., :39] * factor
             return torch.cat([scaled_rel, x[..., 39:]], dim=-1)
         elif dim in (52, 53, 132, 133) or (dim % 4 == 0 or (dim - 1) % 4 == 0):
@@ -324,7 +337,30 @@ class LandmarkAugmenter:
 
         swap_pairs = [(1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12)]
 
-        if dim == 325:
+        if dim == 117:
+            # Extract and mirror rel_3d (first 39 dims, stride 3)
+            rel = x[..., :39].clone()
+            stride = 3
+            num_joints = 13
+
+            for j_left, j_right in swap_pairs:
+                l_start = j_left * stride
+                l_end = l_start + stride
+                r_start = j_right * stride
+                r_end = r_start + stride
+                rel[..., l_start:l_end], rel[..., r_start:r_end] = (
+                    x[..., r_start:r_end].clone(), x[..., l_start:l_end].clone()
+                )
+
+            for j in range(num_joints):
+                rel[..., j * stride] = -rel[..., j * stride]
+
+            # Mirror pair angles: swap symmetric pair indices
+            sym_idx = self.pair_sym_indices.to(device)
+            mirrored_angles = x[..., 39:][..., sym_idx]
+            return torch.cat([rel, mirrored_angles], dim=-1)
+
+        elif dim == 325:
             # Extract and mirror rel_3d (first 39 dims, stride 3)
             rel = x[..., :39].clone()
             stride = 3
