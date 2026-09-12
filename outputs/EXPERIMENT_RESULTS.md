@@ -54,7 +54,7 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | Exp ID | Augmentation Strategy | Configuration | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
 | **T2.1** | **None (Baseline mix)** | `augment: none` (Clean original samples) | 0.0118 | 1.7382 | 75.95% | 63.40% | 0.6218 | `checkpoints/best_Transformer_T1.27_mix.pt` | Done |
-| **T2.2** | **SkelGym-Aug (Dynamic mix)** | `augment: skel_gym_aug` (Bilateral Flip $p=0.5$, 3D Yaw $\pm 15^\circ$, Scale, Time-Warp, Jitter) | - | - | - | - | - | `checkpoints/best_Transformer_T2.2_mix.pt` | In Progress |
+| **T2.2** | **SkelGym-Aug (Dynamic mix)** | `augment: skel_gym_aug` (Bilateral Flip $p=0.5$, 3D Yaw $\pm 15^\circ$, Scale, Time-Warp, Jitter) | 0.1456 | 1.0072 | 75.57% | 68.65% | 0.6654 | `checkpoints/best_Transformer_T2.2_mix.pt` | Done |
 
 ---
 
@@ -83,11 +83,11 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | :---: | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
 | **T4.1** | **AAGCN** | bone_3d (Bone) | `augment: none` (Baseline) | 0.2273 | 1.5015 | 69.57% | 52.27% | 0.5338 | `checkpoints/best_AAGCN_T4.1_bone_3d.pt` | Done |
 | **T4.2** | **AAGCN** | bone_3d (Bone) | `augment: skel_gym_aug` (Dynamic) | 0.3206 | 0.8213 | 77.98% | 65.84% | 0.6504 | `checkpoints/best_AAGCN_T4.2_bone_3d.pt` | Done |
-| **T4.3** | **AAGCN** | rel_3d (Joint) | `augment: skel_gym_aug` (Dynamic) | - | - | - | - | - | `checkpoints/best_AAGCN_T4.3_rel_3d.pt` | In Progress |
-| **T4.4** | **AAGCN** | joint_motion_3d (J-Motion) | `augment: skel_gym_aug` (Dynamic) | - | - | - | - | - | `checkpoints/best_AAGCN_T4.4_joint_motion_3d.pt` | In Progress |
-| **T4.5** | **AAGCN** | bone_motion_3d (B-Motion) | `augment: skel_gym_aug` (Dynamic) | - | - | - | - | - | `checkpoints/best_AAGCN_T4.5_bone_motion_3d.pt` | In Progress |
-| **T4.6** | **Two-Stream AAGCN (Aug)** | Joint (Aug) + Bone (Aug) | Late Fusion ($T=32$) | - | - | - | - | - | `outputs/ensemble/cm_ensemble_T4.6_weighted_soft.png` | In Progress |
-| **T4.7** | **Four-Stream AAGCN (Aug)** | 4-Stream Fusion (SkelGym-Aug) | Late Fusion ($T=32$) | - | - | - | - | - | `outputs/ensemble/cm_ensemble_T4.7_weighted_soft.png` | In Progress |
+| **T4.3** | **AAGCN** | rel_3d (Joint) | `augment: skel_gym_aug` (Dynamic) | 0.3014 | 1.1160 | 71.76% | 61.72% | 0.5982 | `checkpoints/best_AAGCN_T4.3_rel_3d.pt` | Done |
+| **T4.4** | **AAGCN** | joint_motion_3d (J-Motion) | `augment: skel_gym_aug` (Dynamic) | 0.7403 | 1.6642 | 52.72% | 46.81% | 0.4765 | `checkpoints/best_AAGCN_T4.4_joint_motion_3d.pt` | Done |
+| **T4.5** | **AAGCN** | bone_motion_3d (B-Motion) | `augment: skel_gym_aug` (Dynamic) | 0.1852 | 1.6715 | 56.87% | 57.49% | 0.5767 | `checkpoints/best_AAGCN_T4.5_bone_motion_3d.pt` | Done |
+| **T4.6** | **Two-Stream AAGCN (Aug)** | Joint (Aug) + Bone (Aug) | Late Fusion ($T=32$) | - | - | - | 66.61% | 0.6586 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
+| **T4.7** | **Four-Stream AAGCN (Aug)** | 4-Stream Fusion (SkelGym-Aug) | Late Fusion ($T=32$) | - | - | - | 67.34% | 0.6662 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
 
 ---
 
@@ -96,8 +96,8 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 | Exp ID | Ensemble Strategy | Component Models | Test Acc (%) | Macro F1 | Weighted F1 | Checkpoint / Artifact | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :--- | :---: |
-| **T5.1** | **Grand 5-Stream SOTA Ensemble** | Best Transformer (mix aug) + 4-Stream AAGCN (Aug) | - | - | - | `outputs/ensemble/cm_ensemble_T5.1_weighted_soft.png` | In Progress |
-| **T5.2** | **Dual-Model Grand Ensemble** | Best Transformer (mix aug) + AAGCN Bone (Aug) | - | - | - | `outputs/ensemble/cm_ensemble_T5.2_weighted_soft.png` | In Progress |
+| **T5.1** | **Grand 5-Stream SOTA Ensemble** | Best Transformer (mix aug) + 4-Stream AAGCN (Aug) | 70.11% | 0.6858 | 0.7025 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
+| **T5.2** | **Dual-Model Grand Ensemble** | Best Transformer (mix aug) + AAGCN Bone (Aug) | 69.27% | 0.6771 | 0.6931 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
 
 ---
 
@@ -106,31 +106,31 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 | Exercise Class | Precision | Recall | F1-Score | Support |
 | :--- | :---: | :---: | :---: | :---: |
-| barbell biceps curl | 0.3427 | 0.8841 | 0.4939 | 69 |
-| bench press | 0.3987 | 0.6354 | 0.4900 | 96 |
-| chest fly machine | 0.8587 | 0.9634 | 0.9080 | 82 |
-| deadlift | 0.4135 | 0.6418 | 0.5029 | 67 |
-| decline bench press | 0.4940 | 0.6194 | 0.5497 | 134 |
-| hammer curl | 0.5556 | 0.3106 | 0.3984 | 161 |
-| hip thrust | 0.8679 | 0.5847 | 0.6987 | 236 |
-| incline bench press | 0.8913 | 0.5395 | 0.6721 | 76 |
-| lat pulldown | 0.6443 | 0.9600 | 0.7711 | 100 |
-| lateral raise | 0.8874 | 0.8645 | 0.8758 | 155 |
+| barbell biceps curl | 0.3444 | 0.7536 | 0.4727 | 69 |
+| bench press | 0.4474 | 0.5312 | 0.4857 | 96 |
+| chest fly machine | 0.7800 | 0.9512 | 0.8571 | 82 |
+| deadlift | 0.3383 | 0.6716 | 0.4500 | 67 |
+| decline bench press | 0.3519 | 0.6119 | 0.4469 | 134 |
+| hammer curl | 0.6064 | 0.3540 | 0.4471 | 161 |
+| hip thrust | 0.8418 | 0.6314 | 0.7215 | 236 |
+| incline bench press | 0.8519 | 0.6053 | 0.7077 | 76 |
+| lat pulldown | 0.6242 | 0.9800 | 0.7626 | 100 |
+| lateral raise | 0.9329 | 0.8968 | 0.9145 | 155 |
 | leg extension | 0.9843 | 1.0000 | 0.9921 | 125 |
-| leg raises | 0.8713 | 0.7719 | 0.8186 | 114 |
-| plank | 0.6610 | 0.6964 | 0.6783 | 56 |
-| pull Up | 0.7356 | 0.7805 | 0.7574 | 82 |
-| push-up | 0.8416 | 0.9770 | 0.9043 | 87 |
-| romanian deadlift | 0.7536 | 0.3562 | 0.4837 | 146 |
-| russian twist | 0.8889 | 0.8759 | 0.8824 | 137 |
-| shoulder press | 0.7600 | 0.5000 | 0.6032 | 152 |
-| squat | 0.8305 | 0.8235 | 0.8270 | 238 |
-| t bar row | 0.6216 | 0.5897 | 0.6053 | 117 |
-| tricep Pushdown | 0.5820 | 0.7634 | 0.6605 | 93 |
-| tricep dips | 0.9415 | 0.8773 | 0.9082 | 220 |
-| **Accuracy** | | | **71.60%** | **2743** |
-| **Macro avg** | **0.7194** | **0.7280** | **0.7037** | **2743** |
-| **Weighted avg** | **0.7518** | **0.7160** | **0.7160** | **2743** |
+| leg raises | 0.9194 | 0.5000 | 0.6477 | 114 |
+| plank | 0.7391 | 0.6071 | 0.6667 | 56 |
+| pull Up | 0.7794 | 0.6463 | 0.7067 | 82 |
+| push-up | 0.7909 | 1.0000 | 0.8832 | 87 |
+| romanian deadlift | 0.5732 | 0.3219 | 0.4123 | 146 |
+| russian twist | 0.8824 | 0.8759 | 0.8791 | 137 |
+| shoulder press | 0.6381 | 0.4408 | 0.5214 | 152 |
+| squat | 0.8655 | 0.8109 | 0.8373 | 238 |
+| t bar row | 0.6947 | 0.5641 | 0.6226 | 117 |
+| tricep Pushdown | 0.7000 | 0.7527 | 0.7254 | 93 |
+| tricep dips | 0.9119 | 0.9409 | 0.9262 | 220 |
+| **Accuracy** | | | **70.11%** | **2743** |
+| **Macro avg** | **0.7090** | **0.7022** | **0.6858** | **2743** |
+| **Weighted avg** | **0.7383** | **0.7011** | **0.7025** | **2743** |
 
 ---
 
@@ -139,31 +139,31 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 | Exercise Class | Precision | Recall | F1-Score | Support |
 | :--- | :---: | :---: | :---: | :---: |
-| barbell biceps curl | 0.6364 | 1.0000 | 0.7778 | 14 |
-| bench press | 0.6667 | 0.5714 | 0.6154 | 14 |
-| chest fly machine | 0.8889 | 1.0000 | 0.9412 | 8 |
-| deadlift | 0.6667 | 0.8000 | 0.7273 | 10 |
-| decline bench press | 0.5000 | 0.6250 | 0.5556 | 8 |
-| hammer curl | 0.8333 | 0.3571 | 0.5000 | 14 |
+| barbell biceps curl | 0.5385 | 1.0000 | 0.7000 | 14 |
+| bench press | 0.6429 | 0.6429 | 0.6429 | 14 |
+| chest fly machine | 0.8750 | 0.8750 | 0.8750 | 8 |
+| deadlift | 0.7273 | 0.8000 | 0.7619 | 10 |
+| decline bench press | 0.3846 | 0.6250 | 0.4762 | 8 |
+| hammer curl | 0.8000 | 0.2857 | 0.4211 | 14 |
 | hip thrust | 0.8000 | 0.8889 | 0.8421 | 9 |
 | incline bench press | 1.0000 | 0.4444 | 0.6154 | 9 |
-| lat pulldown | 0.7222 | 1.0000 | 0.8387 | 13 |
-| lateral raise | 1.0000 | 0.9333 | 0.9655 | 15 |
+| lat pulldown | 0.6842 | 1.0000 | 0.8125 | 13 |
+| lateral raise | 0.8750 | 0.9333 | 0.9032 | 15 |
 | leg extension | 1.0000 | 1.0000 | 1.0000 | 13 |
-| leg raises | 1.0000 | 1.0000 | 1.0000 | 11 |
+| leg raises | 1.0000 | 0.7273 | 0.8421 | 11 |
 | plank | 0.6667 | 1.0000 | 0.8000 | 2 |
-| pull Up | 0.7778 | 0.7000 | 0.7368 | 10 |
-| push-up | 0.9231 | 1.0000 | 0.9600 | 12 |
-| romanian deadlift | 1.0000 | 0.3333 | 0.5000 | 6 |
-| russian twist | 0.8571 | 1.0000 | 0.9231 | 6 |
-| shoulder press | 0.8333 | 0.7692 | 0.8000 | 13 |
-| squat | 0.9333 | 0.9333 | 0.9333 | 15 |
+| pull Up | 1.0000 | 0.5000 | 0.6667 | 10 |
+| push-up | 0.8571 | 1.0000 | 0.9231 | 12 |
+| romanian deadlift | 0.6667 | 0.3333 | 0.4444 | 6 |
+| russian twist | 1.0000 | 1.0000 | 1.0000 | 6 |
+| shoulder press | 0.6667 | 0.6154 | 0.6400 | 13 |
+| squat | 1.0000 | 0.9333 | 0.9655 | 15 |
 | t bar row | 0.7778 | 0.7000 | 0.7368 | 10 |
-| tricep Pushdown | 0.7857 | 0.9167 | 0.8462 | 12 |
-| tricep dips | 1.0000 | 0.8889 | 0.9412 | 9 |
-| **Accuracy** | | | **81.55%** | **233** |
-| **Macro avg** | **0.8304** | **0.8119** | **0.7980** | **233** |
-| **Weighted avg** | **0.8354** | **0.8155** | **0.8055** | **233** |
+| tricep Pushdown | 0.9091 | 0.8333 | 0.8696 | 12 |
+| tricep dips | 0.8889 | 0.8889 | 0.8889 | 9 |
+| **Accuracy** | | | **77.68%** | **233** |
+| **Macro avg** | **0.8073** | **0.7739** | **0.7649** | **233** |
+| **Weighted avg** | **0.8124** | **0.7768** | **0.7692** | **233** |
 
 ---
 
@@ -179,8 +179,8 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | **Clean Baseline AAGCN (Bone 3D)** | Adaptive Skeletal Graph (T4.1) | 52.27% | 0.5338 | 69.53% | 0.6904 | +17.26% |
 | **SkelGym-Aug AAGCN (Bone 3D)** | Adaptive Skeletal Graph + Aug (T4.2) | 65.84% | 0.6504 | 72.96% | 0.7295 | +7.12% |
 | **Clean Baseline Transformer (Mix)** | Self-Attention Baseline (T2.1) | 63.40% | 0.6218 | 74.25% | 0.7304 | +10.85% |
-| **SkelGym-Aug Transformer (Mix)** | Self-Attention + Aug (T2.2) | - | - | - | - | - |
-| **Two-Stream AAGCN (Aug)** | Joint (Aug) + Bone (Aug) (T4.6) | - | - | - | - | - |
-| **Four-Stream AAGCN (Aug)** | 4-Stream Late Fusion (Aug) (T4.7) | - | - | - | - | - |
-| **Dual-Model Grand Ensemble** | Best Transformer (mix aug) + AAGCN Bone (Aug) (T5.2) | - | - | - | - | - |
-| **Grand 5-Stream SOTA Ensemble** | **Dual-Target Weighted Soft Voting (T5.1)** | - | - | - | - | - |
+| **SkelGym-Aug Transformer (Mix)** | Self-Attention + Aug (T2.2) | 68.65% | 0.6654 | 72.10% | 0.6983 | +3.46% |
+| **Two-Stream AAGCN (Aug)** | Joint (Aug) + Bone (Aug) (T4.6) | 66.61% | 0.6586 | 73.82% | 0.7348 | +7.21% |
+| **Four-Stream AAGCN (Aug)** | 4-Stream Late Fusion (Aug) (T4.7) | 67.34% | 0.6662 | 75.54% | 0.7500 | +8.20% |
+| **Dual-Model Grand Ensemble** | Best Transformer (mix aug) + AAGCN Bone (Aug) (T5.2) | 69.27% | 0.6771 | 76.82% | 0.7550 | +7.56% |
+| **Grand 5-Stream SOTA Ensemble** | **Dual-Target Weighted Soft Voting (T5.1)** | 70.11% | 0.6858 | 77.68% | 0.7649 | +7.58% |
