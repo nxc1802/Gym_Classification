@@ -26,7 +26,7 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | **T1.6** | **LSTM** | rel_3d | 39 | 0.1391 | 2.3413 | 65.23% | 51.84% | 0.5070 | `checkpoints/best_LSTM_T1.6_rel_3d.pt` | Done |
 | **T1.7** | **LSTM** | angle_3d | 286 | 0.1719 | 2.3113 | 59.92% | 41.46% | 0.4133 | `checkpoints/best_LSTM_T1.7_angle_3d.pt` | Done |
 | **T1.8** | **LSTM** | angle2_3d | 78 | 0.1452 | 2.1205 | 63.40% | 46.12% | 0.4710 | `checkpoints/best_LSTM_T1.8_angle2_3d.pt` | Done |
-| **T1.9** | **LSTM** | mix (rel_3d + angle2_3d) | 117 | - | - | - | - | - | `checkpoints/best_LSTM_T1.9_mix.pt` | Pending |
+| **T1.9** | **LSTM** | mix (rel_3d + angle2_3d) | 117 | 0.1820 | 1.3346 | 73.40% | 57.67% | 0.5681 | `checkpoints/best_LSTM_T1.9_mix.pt` | Done |
 | **T1.10** | **BiLSTM** | raw_2d | 26 | 0.2606 | 1.9333 | 63.29% | 44.32% | 0.4515 | `checkpoints/best_BiLSTM_T1.10_raw_2d.pt` | Done |
 | **T1.11** | **BiLSTM** | rel_2d | 26 | 0.2950 | 1.9242 | 65.10% | 50.19% | 0.5113 | `checkpoints/best_BiLSTM_T1.11_rel_2d.pt` | Done |
 | **T1.12** | **BiLSTM** | angle_2d | 286 | 0.0443 | 3.7970 | 58.37% | 42.82% | 0.4287 | `checkpoints/best_BiLSTM_T1.12_angle_2d.pt` | Done |
@@ -35,7 +35,7 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | **T1.15** | **BiLSTM** | rel_3d | 39 | 0.0998 | 2.2450 | 66.39% | 50.80% | 0.5125 | `checkpoints/best_BiLSTM_T1.15_rel_3d.pt` | Done |
 | **T1.16** | **BiLSTM** | angle_3d | 286 | 0.0978 | 2.9793 | 58.59% | 42.79% | 0.4271 | `checkpoints/best_BiLSTM_T1.16_angle_3d.pt` | Done |
 | **T1.17** | **BiLSTM** | angle2_3d | 78 | 0.1245 | 2.0512 | 64.10% | 47.90% | 0.4855 | `checkpoints/best_BiLSTM_T1.17_angle2_3d.pt` | Done |
-| **T1.18** | **BiLSTM** | mix (rel_3d + angle2_3d) | 117 | - | - | - | - | - | `checkpoints/best_BiLSTM_T1.18_mix.pt` | Pending |
+| **T1.18** | **BiLSTM** | mix (rel_3d + angle2_3d) | 117 | 0.0897 | 1.4966 | 73.30% | 61.17% | 0.6008 | `checkpoints/best_BiLSTM_T1.18_mix.pt` | Done |
 | **T1.19** | **Transformer** | raw_2d | 26 | 0.0254 | 1.6511 | 72.63% | 53.98% | 0.5548 | `checkpoints/best_Transformer_T1.19_raw_2d.pt` | Done |
 | **T1.20** | **Transformer** | rel_2d | 26 | 0.0138 | 2.0363 | 71.97% | 56.61% | 0.5657 | `checkpoints/best_Transformer_T1.20_rel_2d.pt` | Done |
 | **T1.21** | **Transformer** | angle_2d | 286 | 0.0660 | 2.0764 | 65.94% | 48.68% | 0.4961 | `checkpoints/best_Transformer_T1.21_angle_2d.pt` | Done |
@@ -44,7 +44,7 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | **T1.24** | **Transformer** | rel_3d | 39 | 0.0436 | 1.5060 | 71.83% | 56.87% | 0.5772 | `checkpoints/best_Transformer_T1.24_rel_3d.pt` | Done |
 | **T1.25** | **Transformer** | angle_3d | 286 | 0.0440 | 2.2274 | 64.70% | 43.39% | 0.4483 | `checkpoints/best_Transformer_T1.25_angle_3d.pt` | Done |
 | **T1.26** | **Transformer** | angle2_3d | 78 | 0.0289 | 1.7650 | 71.20% | 55.40% | 0.5610 | `checkpoints/best_Transformer_T1.26_angle2_3d.pt` | Done |
-| **T1.27** | **Transformer** | mix (rel_3d + angle2_3d) | 117 | - | - | - | - | - | `checkpoints/best_Transformer_T1.27_mix.pt` | Pending |
+| **T1.27** | **Transformer** | mix (rel_3d + angle2_3d) | 117 | 0.0118 | 1.7382 | 75.95% | 63.40% | 0.6218 | `checkpoints/best_Transformer_T1.27_mix.pt` | Done |
 
 ---
 
@@ -54,7 +54,7 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | Exp ID | Augmentation Strategy | Configuration | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
 | **T2.1** | **None (Baseline rel_3d)** | `augment: none` (Clean original samples) | 0.0436 | 1.5060 | 71.83% | 56.87% | 0.5772 | `checkpoints/best_Transformer_T2.1_rel_3d.pt` | Done |
-| **T2.2** | **SkelGym-Aug (Dynamic rel_3d)** | `augment: skel_gym_aug` (Bilateral Flip $p=0.5$, 3D Yaw $\pm 15^\circ$, Scale, Time-Warp, Jitter) | - | - | - | - | - | `checkpoints/best_Transformer_T2.2_rel_3d.pt` | Pending |
+| **T2.2** | **SkelGym-Aug (Dynamic rel_3d)** | `augment: skel_gym_aug` (Bilateral Flip $p=0.5$, 3D Yaw $\pm 15^\circ$, Scale, Time-Warp, Jitter) | 0.1323 | 0.7718 | 81.30% | 71.93% | 0.7062 | `checkpoints/best_Transformer_T2.2_rel_3d.pt` | Done |
 
 ---
 
@@ -82,7 +82,7 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | Exp ID | Model Architecture | Graph Stream | Augmentation Strategy | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
 | **T4.1** | **AAGCN** | bone_3d (Bone) | `augment: none` (Baseline) | 0.2273 | 1.5015 | 69.57% | 52.27% | 0.5338 | `checkpoints/best_AAGCN_T4.1_bone_3d.pt` | Done |
-| **T4.2** | **AAGCN** | bone_3d (Bone) | `augment: skel_gym_aug` (Dynamic) | - | - | - | - | - | `checkpoints/best_AAGCN_T4.2_bone_3d.pt` | Pending |
+| **T4.2** | **AAGCN** | bone_3d (Bone) | `augment: skel_gym_aug` (Dynamic) | 0.3206 | 0.8213 | 77.98% | 65.84% | 0.6504 | `checkpoints/best_AAGCN_T4.2_bone_3d.pt` | Done |
 
 ---
 
@@ -91,7 +91,7 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 | Exp ID | Ensemble Strategy | Component Models | Test Acc (%) | Macro F1 | Weighted F1 | Checkpoint / Artifact | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :--- | :---: |
-| **T5.1** | **Grand Ensemble (Weighted Soft Voting)** | Best Transformer (T2.2) + Best Graph (T4.2) | - | - | - | `outputs/ensemble/cm_ensemble_T5.1_weighted_soft.png` | Pending |
+| **T5.1** | **Grand Ensemble (Weighted Soft Voting)** | Best Transformer (T2.2) + Best Graph (T4.2) | 71.60% | 0.7037 | 0.7160 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
 
 ---
 
@@ -100,31 +100,31 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 | Exercise Class | Precision | Recall | F1-Score | Support |
 | :--- | :---: | :---: | :---: | :---: |
-| barbell biceps curl | 0.2646 | 0.7246 | 0.3876 | 69 |
-| bench press | 0.2995 | 0.6633 | 0.4127 | 98 |
-| chest fly machine | 0.7297 | 0.9878 | 0.8394 | 82 |
-| deadlift | 0.3194 | 0.6866 | 0.4360 | 67 |
-| decline bench press | 0.2286 | 0.5156 | 0.3168 | 192 |
-| hammer curl | 0.3148 | 0.3018 | 0.3082 | 169 |
-| hip thrust | 0.8086 | 0.3201 | 0.4586 | 528 |
-| incline bench press | 0.8654 | 0.5696 | 0.6870 | 79 |
-| lat pulldown | 0.6048 | 0.9619 | 0.7426 | 105 |
-| lateral raise | 0.9714 | 0.8500 | 0.9067 | 160 |
-| leg extension | 0.7194 | 0.9792 | 0.8294 | 144 |
-| leg raises | 0.9792 | 0.4052 | 0.5732 | 116 |
-| plank | 0.9250 | 0.6607 | 0.7708 | 56 |
-| pull Up | 0.7264 | 0.8750 | 0.7938 | 88 |
-| push-up | 0.7965 | 0.9890 | 0.8824 | 91 |
-| romanian deadlift | 0.6466 | 0.5181 | 0.5753 | 166 |
-| russian twist | 0.8784 | 0.8725 | 0.8754 | 149 |
-| shoulder press | 0.7387 | 0.3727 | 0.4955 | 220 |
-| squat | 0.8386 | 0.7305 | 0.7808 | 256 |
-| t bar row | 0.5447 | 0.5194 | 0.5317 | 129 |
-| tricep Pushdown | 0.6931 | 0.7527 | 0.7216 | 93 |
-| tricep dips | 0.7713 | 0.5622 | 0.6504 | 402 |
-| **Accuracy** | | | **60.22%** | **3459** |
-| **Macro avg** | **0.6666** | **0.6736** | **0.6353** | **3459** |
-| **Weighted avg** | **0.6955** | **0.6022** | **0.6097** | **3459** |
+| barbell biceps curl | 0.3427 | 0.8841 | 0.4939 | 69 |
+| bench press | 0.3987 | 0.6354 | 0.4900 | 96 |
+| chest fly machine | 0.8587 | 0.9634 | 0.9080 | 82 |
+| deadlift | 0.4135 | 0.6418 | 0.5029 | 67 |
+| decline bench press | 0.4940 | 0.6194 | 0.5497 | 134 |
+| hammer curl | 0.5556 | 0.3106 | 0.3984 | 161 |
+| hip thrust | 0.8679 | 0.5847 | 0.6987 | 236 |
+| incline bench press | 0.8913 | 0.5395 | 0.6721 | 76 |
+| lat pulldown | 0.6443 | 0.9600 | 0.7711 | 100 |
+| lateral raise | 0.8874 | 0.8645 | 0.8758 | 155 |
+| leg extension | 0.9843 | 1.0000 | 0.9921 | 125 |
+| leg raises | 0.8713 | 0.7719 | 0.8186 | 114 |
+| plank | 0.6610 | 0.6964 | 0.6783 | 56 |
+| pull Up | 0.7356 | 0.7805 | 0.7574 | 82 |
+| push-up | 0.8416 | 0.9770 | 0.9043 | 87 |
+| romanian deadlift | 0.7536 | 0.3562 | 0.4837 | 146 |
+| russian twist | 0.8889 | 0.8759 | 0.8824 | 137 |
+| shoulder press | 0.7600 | 0.5000 | 0.6032 | 152 |
+| squat | 0.8305 | 0.8235 | 0.8270 | 238 |
+| t bar row | 0.6216 | 0.5897 | 0.6053 | 117 |
+| tricep Pushdown | 0.5820 | 0.7634 | 0.6605 | 93 |
+| tricep dips | 0.9415 | 0.8773 | 0.9082 | 220 |
+| **Accuracy** | | | **71.60%** | **2743** |
+| **Macro avg** | **0.7194** | **0.7280** | **0.7037** | **2743** |
+| **Weighted avg** | **0.7518** | **0.7160** | **0.7160** | **2743** |
 
 ---
 
@@ -133,31 +133,31 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 | Exercise Class | Precision | Recall | F1-Score | Support |
 | :--- | :---: | :---: | :---: | :---: |
-| barbell biceps curl | 0.5417 | 0.9286 | 0.6842 | 14 |
-| bench press | 0.6000 | 0.6000 | 0.6000 | 15 |
+| barbell biceps curl | 0.6364 | 1.0000 | 0.7778 | 14 |
+| bench press | 0.6667 | 0.5714 | 0.6154 | 14 |
 | chest fly machine | 0.8889 | 1.0000 | 0.9412 | 8 |
-| deadlift | 0.7273 | 0.8000 | 0.7619 | 10 |
-| decline bench press | 0.3000 | 0.6667 | 0.4138 | 9 |
-| hammer curl | 0.6667 | 0.2857 | 0.4000 | 14 |
-| hip thrust | 0.8333 | 0.5556 | 0.6667 | 9 |
-| incline bench press | 1.0000 | 0.5556 | 0.7143 | 9 |
-| lat pulldown | 0.7647 | 0.9286 | 0.8387 | 14 |
-| lateral raise | 1.0000 | 1.0000 | 1.0000 | 15 |
+| deadlift | 0.6667 | 0.8000 | 0.7273 | 10 |
+| decline bench press | 0.5000 | 0.6250 | 0.5556 | 8 |
+| hammer curl | 0.8333 | 0.3571 | 0.5000 | 14 |
+| hip thrust | 0.8000 | 0.8889 | 0.8421 | 9 |
+| incline bench press | 1.0000 | 0.4444 | 0.6154 | 9 |
+| lat pulldown | 0.7222 | 1.0000 | 0.8387 | 13 |
+| lateral raise | 1.0000 | 0.9333 | 0.9655 | 15 |
 | leg extension | 1.0000 | 1.0000 | 1.0000 | 13 |
-| leg raises | 1.0000 | 0.5455 | 0.7059 | 11 |
-| plank | 1.0000 | 1.0000 | 1.0000 | 2 |
-| pull Up | 0.8889 | 0.8000 | 0.8421 | 10 |
+| leg raises | 1.0000 | 1.0000 | 1.0000 | 11 |
+| plank | 0.6667 | 1.0000 | 0.8000 | 2 |
+| pull Up | 0.7778 | 0.7000 | 0.7368 | 10 |
 | push-up | 0.9231 | 1.0000 | 0.9600 | 12 |
-| romanian deadlift | 0.7143 | 0.8333 | 0.7692 | 6 |
-| russian twist | 1.0000 | 1.0000 | 1.0000 | 6 |
-| shoulder press | 0.8000 | 0.6154 | 0.6957 | 13 |
-| squat | 1.0000 | 0.9333 | 0.9655 | 15 |
-| t bar row | 1.0000 | 0.7000 | 0.8235 | 10 |
-| tricep Pushdown | 1.0000 | 0.8333 | 0.9091 | 12 |
-| tricep dips | 0.7273 | 0.8889 | 0.8000 | 9 |
-| **Accuracy** | | | **78.39%** | **236** |
-| **Macro avg** | **0.8353** | **0.7941** | **0.7951** | **236** |
-| **Weighted avg** | **0.8280** | **0.7839** | **0.7857** | **236** |
+| romanian deadlift | 1.0000 | 0.3333 | 0.5000 | 6 |
+| russian twist | 0.8571 | 1.0000 | 0.9231 | 6 |
+| shoulder press | 0.8333 | 0.7692 | 0.8000 | 13 |
+| squat | 0.9333 | 0.9333 | 0.9333 | 15 |
+| t bar row | 0.7778 | 0.7000 | 0.7368 | 10 |
+| tricep Pushdown | 0.7857 | 0.9167 | 0.8462 | 12 |
+| tricep dips | 1.0000 | 0.8889 | 0.9412 | 9 |
+| **Accuracy** | | | **81.55%** | **233** |
+| **Macro avg** | **0.8304** | **0.8119** | **0.7980** | **233** |
+| **Weighted avg** | **0.8354** | **0.8155** | **0.8055** | **233** |
 
 ---
 
@@ -166,12 +166,12 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 | Model / Ensemble Architecture | Input Modality / Paradigm | Window Acc (%) | Window Macro F1 | Video Acc (%) | Video Macro F1 | Video Gain (+Δ%) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Baseline LSTM (Mix)** | Sequential Recurrent Model | 48.37% | 0.4931 | 67.37% | 0.6575 | +19.01% |
-| **Baseline BiLSTM (Mix)** | Bidirectional Recurrent Model | 47.44% | 0.4853 | 63.98% | 0.6060 | +16.54% |
-| **Baseline ST-GCN (Rel 3D)** | Static Graph Convolution | 43.57% | 0.4595 | 58.47% | 0.5817 | +14.91% |
-| **Best Transformer (raw_3d)** | Self-Attention on 3D Vectors (Baseline) | 57.21% | 0.5864 | 72.46% | 0.7140 | +15.25% |
-| **Best Transformer + SkelGym-Aug** | Self-Attention with Dynamic Aug (raw_3d) | 57.59% | 0.6167 | 77.12% | 0.7832 | +19.53% |
-| **Two-Stream AAGCN (Aug)** | Joint + Bone Stream (SkelGym-Aug) | 57.88% | 0.6033 | 77.12% | 0.7635 | +19.24% |
-| **Four-Stream AAGCN (Aug)** | 4-Stream Fusion (SkelGym-Aug) | 57.79% | 0.6044 | 77.97% | 0.7711 | +20.17% |
-| **Tri-Model Grand Ensemble** | Best Transformer + 2-Stream AAGCN (Aug) | 60.25% | 0.6341 | 77.54% | 0.7863 | +17.29% |
-| **Grand 5-Stream SOTA Ensemble** | Best Transformer + 4-Stream AAGCN (Aug) | 60.22% | 0.6353 | 78.39% | 0.7951 | +18.17% |
+| **Baseline LSTM (Mix 117d)** | Sequential Recurrent Model (T1.9) | 57.67% | 0.5681 | 67.81% | 0.6618 | +10.14% |
+| **Baseline BiLSTM (Mix 117d)** | Bidirectional Recurrent Model (T1.18) | 61.17% | 0.6008 | 68.24% | 0.6802 | +7.07% |
+| **Transformer (Mix 117d)** | Self-Attention on Mix (T1.27) | 63.40% | 0.6218 | 74.25% | 0.7304 | +10.85% |
+| **Baseline ST-GCN (Rel 3D)** | Static Graph Convolution (T3.2) | 43.57% | 0.4595 | 58.47% | 0.5817 | +14.90% |
+| **Clean Baseline AAGCN (Bone 3D)** | Adaptive Skeletal Graph (T4.1) | 52.27% | 0.5338 | 69.53% | 0.6904 | +17.26% |
+| **SkelGym-Aug AAGCN (Bone 3D)** | Adaptive Skeletal Graph + Aug (T4.2) | 65.84% | 0.6504 | 72.96% | 0.7295 | +7.12% |
+| **Clean Baseline Transformer (Rel 3D)** | Self-Attention Baseline (T2.1) | 56.87% | 0.5772 | 75.11% | 0.7203 | +18.24% |
+| **SkelGym-Aug Transformer (Rel 3D)** | Self-Attention + Aug (T2.2) | 71.93% | 0.7062 | 81.12% | 0.7917 | +9.19% |
+| **Grand SOTA Heterogeneous Ensemble** | **Dual-Target Weighted Soft Voting (T5.1)** | **71.60%** | **0.7037** | **81.55%** | **0.7980** | **+9.95%** |
