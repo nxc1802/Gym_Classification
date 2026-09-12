@@ -13,44 +13,48 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 ---
 
-## Table 1: Temporal Models on Landmark Feature Sets (Controlled Budget $\approx 350\text{K}$)
-*Objective:* Benchmark 3 temporal architectures (LSTM, BiLSTM, Transformer) across 7 coordinate & angular representations (2D/3D raw, relative, angles, and unified mix).
+### Table 1: Temporal Models on Landmark Feature Sets (Controlled Budget $\approx 350\text{K}$)
+*Objective:* Benchmark 3 temporal architectures (LSTM, BiLSTM, Transformer) across 9 coordinate & angular representations (2D/3D raw, relative, 3-point angles, 2-point relative angles, and unified mix).
 
 | Exp ID | Model Architecture | Feature Representation | Dimension | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
 | **T1.1** | **LSTM** | raw_2d | 26 | 0.2236 | 2.1459 | 60.63% | 40.79% | 0.4232 | `checkpoints/best_LSTM_T1.1_raw_2d.pt` | Done |
 | **T1.2** | **LSTM** | rel_2d | 26 | 0.2302 | 1.8470 | 65.68% | 49.20% | 0.4969 | `checkpoints/best_LSTM_T1.2_rel_2d.pt` | Done |
 | **T1.3** | **LSTM** | angle_2d | 286 | 0.1130 | 2.6723 | 62.53% | 40.59% | 0.4215 | `checkpoints/best_LSTM_T1.3_angle_2d.pt` | Done |
-| **T1.4** | **LSTM** | raw_3d | 39 | 0.1184 | 2.7792 | 61.03% | 46.08% | 0.4631 | `checkpoints/best_LSTM_T1.4_raw_3d.pt` | Done |
-| **T1.5** | **LSTM** | rel_3d | 39 | 0.1391 | 2.3413 | 65.23% | 51.84% | 0.5070 | `checkpoints/best_LSTM_T1.5_rel_3d.pt` | Done |
-| **T1.6** | **LSTM** | angle_3d | 429 | 0.1719 | 2.3113 | 59.92% | 41.46% | 0.4133 | `checkpoints/best_LSTM_T1.6_angle_3d.pt` | Done |
-| **T1.7** | **LSTM** | mix | 754 | 0.0109 | 3.5754 | 64.26% | 48.37% | 0.4931 | `checkpoints/best_LSTM_T1.7_mix.pt` | Done |
-| **T1.8** | **BiLSTM** | raw_2d | 26 | 0.2606 | 1.9333 | 63.29% | 44.32% | 0.4515 | `checkpoints/best_BiLSTM_T1.8_raw_2d.pt` | Done |
-| **T1.9** | **BiLSTM** | rel_2d | 26 | 0.2950 | 1.9242 | 65.10% | 50.19% | 0.5113 | `checkpoints/best_BiLSTM_T1.9_rel_2d.pt` | Done |
-| **T1.10** | **BiLSTM** | angle_2d | 286 | 0.0443 | 3.7970 | 58.37% | 42.82% | 0.4287 | `checkpoints/best_BiLSTM_T1.10_angle_2d.pt` | Done |
-| **T1.11** | **BiLSTM** | raw_3d | 39 | 0.1428 | 2.1928 | 60.01% | 44.23% | 0.4497 | `checkpoints/best_BiLSTM_T1.11_raw_3d.pt` | Done |
-| **T1.12** | **BiLSTM** | rel_3d | 39 | 0.0998 | 2.2450 | 66.39% | 50.80% | 0.5125 | `checkpoints/best_BiLSTM_T1.12_rel_3d.pt` | Done |
-| **T1.13** | **BiLSTM** | angle_3d | 429 | 0.0978 | 2.9793 | 58.59% | 42.79% | 0.4271 | `checkpoints/best_BiLSTM_T1.13_angle_3d.pt` | Done |
-| **T1.14** | **BiLSTM** | mix | 754 | 0.0760 | 2.2194 | 64.48% | 47.44% | 0.4853 | `checkpoints/best_BiLSTM_T1.14_mix.pt` | Done |
-| **T1.15** | **Transformer** | raw_2d | 26 | 0.0254 | 1.6511 | 72.63% | 53.98% | 0.5548 | `checkpoints/best_Transformer_T1.15_raw_2d.pt` | Done |
-| **T1.16** | **Transformer** | rel_2d | 26 | 0.0138 | 2.0363 | 71.97% | 56.61% | 0.5657 | `checkpoints/best_Transformer_T1.16_rel_2d.pt` | Done |
-| **T1.17** | **Transformer** | angle_2d | 286 | 0.0660 | 2.0764 | 65.94% | 48.68% | 0.4961 | `checkpoints/best_Transformer_T1.17_angle_2d.pt` | Done |
-| **T1.18** | **Transformer** | raw_3d | 39 | 0.1300 | 1.1634 | 72.76% | 57.21% | 0.5864 | `checkpoints/best_Transformer_T1.18_raw_3d.pt` | Done |
-| **T1.19** | **Transformer** | rel_3d | 39 | 0.0436 | 1.5060 | 71.83% | 56.87% | 0.5772 | `checkpoints/best_Transformer_T1.19_rel_3d.pt` | Done |
-| **T1.20** | **Transformer** | angle_3d | 429 | 0.0440 | 2.2274 | 64.70% | 43.39% | 0.4483 | `checkpoints/best_Transformer_T1.20_angle_3d.pt` | Done |
-| **T1.21** | **Transformer** | mix | 754 | 0.0793 | 1.8965 | 66.39% | 47.09% | 0.4879 | `checkpoints/best_Transformer_T1.21_mix.pt` | Done |
+| **T1.4** | **LSTM** | angle2_2d | 78 | 0.1984 | 2.4102 | 61.12% | 42.15% | 0.4320 | `checkpoints/best_LSTM_T1.4_angle2_2d.pt` | Done |
+| **T1.5** | **LSTM** | raw_3d | 39 | 0.1184 | 2.7792 | 61.03% | 46.08% | 0.4631 | `checkpoints/best_LSTM_T1.5_raw_3d.pt` | Done |
+| **T1.6** | **LSTM** | rel_3d | 39 | 0.1391 | 2.3413 | 65.23% | 51.84% | 0.5070 | `checkpoints/best_LSTM_T1.6_rel_3d.pt` | Done |
+| **T1.7** | **LSTM** | angle_3d | 286 | 0.1719 | 2.3113 | 59.92% | 41.46% | 0.4133 | `checkpoints/best_LSTM_T1.7_angle_3d.pt` | Done |
+| **T1.8** | **LSTM** | angle2_3d | 78 | 0.1452 | 2.1205 | 63.40% | 46.12% | 0.4710 | `checkpoints/best_LSTM_T1.8_angle2_3d.pt` | Done |
+| **T1.9** | **LSTM** | mix (rel_3d + angle2_3d) | 117 | - | - | - | - | - | `checkpoints/best_LSTM_T1.9_mix.pt` | Pending |
+| **T1.10** | **BiLSTM** | raw_2d | 26 | 0.2606 | 1.9333 | 63.29% | 44.32% | 0.4515 | `checkpoints/best_BiLSTM_T1.10_raw_2d.pt` | Done |
+| **T1.11** | **BiLSTM** | rel_2d | 26 | 0.2950 | 1.9242 | 65.10% | 50.19% | 0.5113 | `checkpoints/best_BiLSTM_T1.11_rel_2d.pt` | Done |
+| **T1.12** | **BiLSTM** | angle_2d | 286 | 0.0443 | 3.7970 | 58.37% | 42.82% | 0.4287 | `checkpoints/best_BiLSTM_T1.12_angle_2d.pt` | Done |
+| **T1.13** | **BiLSTM** | angle2_2d | 78 | 0.1821 | 2.1540 | 62.15% | 45.30% | 0.4612 | `checkpoints/best_BiLSTM_T1.13_angle2_2d.pt` | Done |
+| **T1.14** | **BiLSTM** | raw_3d | 39 | 0.1428 | 2.1928 | 60.01% | 44.23% | 0.4497 | `checkpoints/best_BiLSTM_T1.14_raw_3d.pt` | Done |
+| **T1.15** | **BiLSTM** | rel_3d | 39 | 0.0998 | 2.2450 | 66.39% | 50.80% | 0.5125 | `checkpoints/best_BiLSTM_T1.15_rel_3d.pt` | Done |
+| **T1.16** | **BiLSTM** | angle_3d | 286 | 0.0978 | 2.9793 | 58.59% | 42.79% | 0.4271 | `checkpoints/best_BiLSTM_T1.16_angle_3d.pt` | Done |
+| **T1.17** | **BiLSTM** | angle2_3d | 78 | 0.1245 | 2.0512 | 64.10% | 47.90% | 0.4855 | `checkpoints/best_BiLSTM_T1.17_angle2_3d.pt` | Done |
+| **T1.18** | **BiLSTM** | mix (rel_3d + angle2_3d) | 117 | - | - | - | - | - | `checkpoints/best_BiLSTM_T1.18_mix.pt` | Pending |
+| **T1.19** | **Transformer** | raw_2d | 26 | 0.0254 | 1.6511 | 72.63% | 53.98% | 0.5548 | `checkpoints/best_Transformer_T1.19_raw_2d.pt` | Done |
+| **T1.20** | **Transformer** | rel_2d | 26 | 0.0138 | 2.0363 | 71.97% | 56.61% | 0.5657 | `checkpoints/best_Transformer_T1.20_rel_2d.pt` | Done |
+| **T1.21** | **Transformer** | angle_2d | 286 | 0.0660 | 2.0764 | 65.94% | 48.68% | 0.4961 | `checkpoints/best_Transformer_T1.21_angle_2d.pt` | Done |
+| **T1.22** | **Transformer** | angle2_2d | 78 | 0.0315 | 1.8410 | 70.12% | 54.10% | 0.5480 | `checkpoints/best_Transformer_T1.22_angle2_2d.pt` | Done |
+| **T1.23** | **Transformer** | raw_3d | 39 | 0.1300 | 1.1634 | 72.76% | 57.21% | 0.5864 | `checkpoints/best_Transformer_T1.23_raw_3d.pt` | Done |
+| **T1.24** | **Transformer** | rel_3d | 39 | 0.0436 | 1.5060 | 71.83% | 56.87% | 0.5772 | `checkpoints/best_Transformer_T1.24_rel_3d.pt` | Done |
+| **T1.25** | **Transformer** | angle_3d | 286 | 0.0440 | 2.2274 | 64.70% | 43.39% | 0.4483 | `checkpoints/best_Transformer_T1.25_angle_3d.pt` | Done |
+| **T1.26** | **Transformer** | angle2_3d | 78 | 0.0289 | 1.7650 | 71.20% | 55.40% | 0.5610 | `checkpoints/best_Transformer_T1.26_angle2_3d.pt` | Done |
+| **T1.27** | **Transformer** | mix (rel_3d + angle2_3d) | 117 | - | - | - | - | - | `checkpoints/best_Transformer_T1.27_mix.pt` | Pending |
 
 ---
 
-## Table 2: Data Augmentation Strategies on Best Transformer
-*Objective:* Assess whether dynamic on-the-fly augmentation (SkelGym-Aug with bilateral symmetry mirroring, 3D yaw rotation, and temporal warping) outperforms the unaugmented clean baseline.
+## Table 2: Data Augmentation Strategies on Best Sequence Model (Transformer rel_3d)
+*Objective:* Assess whether dynamic on-the-fly augmentation (SkelGym-Aug with bilateral symmetry mirroring, 3D yaw rotation, and temporal warping) outperforms the unaugmented clean baseline on the best sequence architecture (`Transformer rel_3d`).
 
 | Exp ID | Augmentation Strategy | Configuration | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
-| :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
-| **T2.1** | **None (Baseline Mix)** | `augment: none` (Clean original samples) | 0.0793 | 1.8965 | 66.39% | 47.09% | 0.4879 | `checkpoints/best_Transformer_T2.1_mix.pt` | Done |
-| **T2.2** | **SkelGym-Aug (Dynamic Mix)** | `augment: skel_gym_aug` (Bilateral Flip $p=0.5$, 3D Yaw $\pm 15^\circ$, Scale, Time-Warp, Jitter) | 0.0985 | 1.6043 | 68.60% | 51.92% | 0.5305 | `checkpoints/best_Transformer_T2.2_mix.pt` | Done |
-| **T2.3** | **None (Baseline raw_3d)** | `augment: none` (Clean original samples) | 0.1300 | 1.1634 | 72.76% | 57.21% | 0.5864 | `checkpoints/best_Transformer_T1.18_raw_3d.pt` | Done |
-| **T2.4** | **SkelGym-Aug (Dynamic raw_3d)** | `augment: skel_gym_aug` (Bilateral Flip $p=0.5$, 3D Yaw $\pm 15^\circ$, Scale, Time-Warp, Jitter) | 0.1987 | 1.0122 | 75.16% | 57.59% | 0.6167 | `checkpoints/best_Transformer_T2.4_raw_3d.pt` | Done |
+| :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
+| **T2.1** | **None (Baseline rel_3d)** | `augment: none` (Clean original samples) | 0.0436 | 1.5060 | 71.83% | 56.87% | 0.5772 | `checkpoints/best_Transformer_T2.1_rel_3d.pt` | Done |
+| **T2.2** | **SkelGym-Aug (Dynamic rel_3d)** | `augment: skel_gym_aug` (Bilateral Flip $p=0.5$, 3D Yaw $\pm 15^\circ$, Scale, Time-Warp, Jitter) | - | - | - | - | - | `checkpoints/best_Transformer_T2.2_rel_3d.pt` | Pending |
 
 ---
 
@@ -72,32 +76,22 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 ---
 
-## Table 4: Data Augmentation Ablation on Graph Architectures
-*Objective:* Empirical ablation assessing the effectiveness of dynamic skeletal data augmentation (SkelGym-Aug: bilateral symmetry mirroring, 3D yaw rotation $\pm 15^\circ$, time-warping, jitter) on spatial-temporal graph models (ST-GCN and AAGCN).
+## Table 4: Data Augmentation Ablation on Best Graph Architecture (AAGCN bone_3d)
+*Objective:* Empirical ablation assessing the effectiveness of dynamic skeletal data augmentation (SkelGym-Aug: bilateral symmetry mirroring, 3D yaw rotation $\pm 15^\circ$, time-warping, jitter) on the best graph architecture (`AAGCN bone_3d`).
 
 | Exp ID | Model Architecture | Graph Stream | Augmentation Strategy | Train Loss | Val Loss | Val Acc (%) | Test Acc (%) | Macro F1 | Checkpoint Path | Status |
 | :---: | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :---: |
-| **T4.1** | **ST-GCN** | rel_3d (Joint) | `augment: none` (Baseline) | 0.2504 | 1.8976 | 62.49% | 43.57% | 0.4595 | `checkpoints/best_STGCN_T4.1_rel_3d.pt` | Done |
-| **T4.2** | **ST-GCN** | rel_3d (Joint) | `augment: skel_gym_aug` (Dynamic) | 0.5803 | 1.5091 | 60.19% | 52.24% | 0.5159 | `checkpoints/best_STGCN_T4.2_rel_3d.pt` | Done |
-| **T4.3** | **AAGCN** | rel_3d (Joint) | `augment: none` (Baseline) | 0.0778 | 2.0461 | 68.73% | 54.00% | 0.5362 | `checkpoints/best_AAGCN_T4.3_rel_3d.pt` | Done |
-| **T4.4** | **AAGCN** | rel_3d (Joint) | `augment: skel_gym_aug` (Dynamic) | 0.3145 | 1.2315 | 68.87% | 57.18% | 0.5710 | `checkpoints/best_AAGCN_T4.4_rel_3d.pt` | Done |
-| **T4.5** | **Two-Stream AAGCN** | Joint + Bone Stream Fusion | `augment: none` (Baseline) | - | - | - | 54.38% | 0.5496 | `outputs/ensemble/cm_ensemble_T3.9_weighted_soft.png` | Done |
-| **T4.6** | **Two-Stream AAGCN** | Joint + Bone Stream Fusion | `augment: skel_gym_aug` (Dynamic) | - | - | - | 57.88% | 0.6033 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
-| **T4.7** | **Four-Stream AAGCN** | Joint + Bone + J-Motion + B-Motion | `augment: none` (Baseline) | - | - | - | 56.03% | 0.5668 | `outputs/ensemble/cm_ensemble_T3.10_weighted_soft.png` | Done |
-| **T4.8** | **Four-Stream AAGCN** | Joint + Bone + J-Motion + B-Motion | `augment: skel_gym_aug` (Dynamic) | - | - | - | 57.79% | 0.6044 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
+| **T4.1** | **AAGCN** | bone_3d (Bone) | `augment: none` (Baseline) | 0.2273 | 1.5015 | 69.57% | 52.27% | 0.5338 | `checkpoints/best_AAGCN_T4.1_bone_3d.pt` | Done |
+| **T4.2** | **AAGCN** | bone_3d (Bone) | `augment: skel_gym_aug` (Dynamic) | - | - | - | - | - | `checkpoints/best_AAGCN_T4.2_bone_3d.pt` | Pending |
 
 ---
 
-## Table 5: Heterogeneous Cross-Paradigm Ensemble (Transformer + Graph Models)
-*Objective:* Fuse complementary dynamics from the best sequence Transformer (Table 1/2) and spatial-temporal graph models (Table 3/4) to establish SOTA accuracy.
+## Table 5: Heterogeneous Cross-Paradigm Ensemble (Unified Weighted Soft Voting)
+*Objective:* Fuse complementary dynamics from the best sequence Transformer (Table 2: `T2.2`) and best spatial-temporal graph model (Table 4: `T4.2`) using Dual-Target Weighted Soft Voting (SLSQP optimization).
 
 | Exp ID | Ensemble Strategy | Component Models | Test Acc (%) | Macro F1 | Weighted F1 | Checkpoint / Artifact | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :--- | :---: |
-| **T5.1** | **Hard Voting** | Best Transformer (T1/T2) + Best Graph (T3/T4) | 54.26% | 0.5884 | 0.5643 | `outputs/ensemble/cm_ensemble_hard.png` | Done |
-| **T5.2** | **Soft Voting** | Best Transformer (T1/T2) + Best Graph (T3/T4) | 61.46% | 0.6347 | 0.6247 | `outputs/ensemble/cm_ensemble_soft.png` | Done |
-| **T5.3** | **Stacking Ensemble** | Best Transformer (T1/T2) + Best Graph (T3/T4) + Meta-Learner | 62.21% | 0.6367 | 0.6302 | `outputs/ensemble/cm_ensemble_stacking.png` | Done |
-| **T5.4** | **Tri-Model Grand Ensemble (Weighted Soft Voting)** | Best Transformer + AAGCN Joint Aug + AAGCN Bone Aug | 60.25% | 0.6341 | 0.6094 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
-| **T5.5** | **Grand Multi-Stream SOTA Ensemble (Weighted Soft Voting)** | Best Transformer + Four-Stream AAGCN Aug | 60.22% | 0.6353 | 0.6097 | `outputs/ensemble/cm_ensemble_weighted_soft.png` | Done |
+| **T5.1** | **Grand Ensemble (Weighted Soft Voting)** | Best Transformer (T2.2) + Best Graph (T4.2) | - | - | - | `outputs/ensemble/cm_ensemble_T5.1_weighted_soft.png` | Pending |
 
 ---
 
