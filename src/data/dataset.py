@@ -297,71 +297,69 @@ def extract_windows_from_segment(
     is_branch = (feature_method == "branch_concat")
     windows = []
 
-    def _process_candidate_window(df_win: pd.DataFrame) -> Optional[Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]]:
-        L = len(df_win)
+    # 1. Clean zero frames across segment once
+    if coord_cols:
+        zeros_mask = (df_seg[coord_cols].abs() < 1e-6) | df_seg[coord_cols].isna()
+        row_is_zero = zeros_mask.all(axis=1).to_numpy()
+        df_clean = df_seg.copy()
+        if row_is_zero.any() and zero_frame_handling in ("interpolate", "linear", "ffill"):
+            df_clean.loc[row_is_zero, coord_cols] = np.nan
+            if zero_frame_handling == "ffill":
+                df_clean[coord_cols] = df_clean[coord_cols].ffill().bfill().fillna(0.0)
+            else:
+                df_clean[coord_cols] = df_clean[coord_cols].interpolate(method="linear", limit_direction="both").fillna(0.0)
+        else:
+            df_clean = df_clean.fillna(0.0)
+    else:
+        row_is_zero = np.zeros(T, dtype=bool)
+        df_clean = df_seg.copy().fillna(0.0)
+
+    if is_horizontal_flip:
+        df_clean = mirror_dataframe_horizontally(df_clean)
+
+    # 2. Extract features ONCE on the entire segment
+    feat = extract_features_by_method(df_clean, feature_method)
+
+    def _slice_window(s_idx: int, e_idx: int) -> Optional[Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]]:
+        L = e_idx - s_idx
         if L < half_seq:
             return None
+        # Discard corrupted window if zero frame ratio exceeds threshold
+        if np.mean(row_is_zero[s_idx:e_idx]) > max_zero_ratio:
+            return None
 
-        # Check zero frames
-        if coord_cols:
-            zeros_mask = (df_win[coord_cols].abs() < 1e-6) | df_win[coord_cols].isna()
-            row_is_zero = zeros_mask.all(axis=1)
-            n_zero = row_is_zero.sum()
-            zero_ratio = n_zero / L
-
-            if zero_ratio > max_zero_ratio:
-                # Discard corrupted window with excessive zero frames
-                return None
-
-            df_clean = df_win.copy()
-            if n_zero > 0 and zero_frame_handling in ("interpolate", "linear", "ffill"):
-                df_clean.loc[row_is_zero, coord_cols] = np.nan
-                if zero_frame_handling == "ffill":
-                    df_clean[coord_cols] = df_clean[coord_cols].ffill().bfill().fillna(0.0)
-                else:
-                    df_clean[coord_cols] = df_clean[coord_cols].interpolate(method="linear", limit_direction="both").fillna(0.0)
-            else:
-                df_clean = df_clean.fillna(0.0)
-        else:
-            df_clean = df_win.copy().fillna(0.0)
-
-        if is_horizontal_flip:
-            df_clean = mirror_dataframe_horizontally(df_clean)
-
-        # Extract features
-        feat = extract_features_by_method(df_clean, feature_method)
-
-        # Stretch if L < seq_len (partial window >= half_seq)
-        if L < seq_len:
-            if is_branch:
-                f1, f2 = feat
-                t1 = torch.from_numpy(f1).float().unsqueeze(0).permute(0, 2, 1)
-                t2 = torch.from_numpy(f2).float().unsqueeze(0).permute(0, 2, 1)
+        if is_branch:
+            f1, f2 = feat
+            w1 = f1[s_idx:e_idx]
+            w2 = f2[s_idx:e_idx]
+            if L < seq_len:
+                t1 = torch.from_numpy(w1).float().unsqueeze(0).permute(0, 2, 1)
+                t2 = torch.from_numpy(w2).float().unsqueeze(0).permute(0, 2, 1)
                 s1 = F.interpolate(t1, size=seq_len, mode="linear", align_corners=False).squeeze(0).permute(1, 0).numpy()
                 s2 = F.interpolate(t2, size=seq_len, mode="linear", align_corners=False).squeeze(0).permute(1, 0).numpy()
                 return (s1, s2)
-            else:
-                tw = torch.from_numpy(feat).float().unsqueeze(0).permute(0, 2, 1)
+            return (w1, w2)
+        else:
+            w = feat[s_idx:e_idx]
+            if L < seq_len:
+                tw = torch.from_numpy(w).float().unsqueeze(0).permute(0, 2, 1)
                 sw = F.interpolate(tw, size=seq_len, mode="linear", align_corners=False).squeeze(0).permute(1, 0).numpy()
                 return sw
-        else:
-            return feat
+            return w
 
     if T < seq_len:
-        cand = _process_candidate_window(df_seg)
+        cand = _slice_window(0, T)
         if cand is not None:
             windows.append(cand)
     else:
         for start in range(0, T, stride):
             end = start + seq_len
             if end <= T:
-                df_win = df_seg.iloc[start:end]
-                cand = _process_candidate_window(df_win)
+                cand = _slice_window(start, end)
                 if cand is not None:
                     windows.append(cand)
             else:
-                df_part = df_seg.iloc[start:]
-                cand = _process_candidate_window(df_part)
+                cand = _slice_window(start, T)
                 if cand is not None:
                     windows.append(cand)
                 break
