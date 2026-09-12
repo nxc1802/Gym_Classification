@@ -178,6 +178,9 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | **Baseline ST-GCN (Rel 3D)** | Static Graph Convolution (T3.2) | 43.57% | 0.4595 | 58.47% | 0.5817 | +14.90% |
 | **Clean Baseline AAGCN (Bone 3D)** | Adaptive Skeletal Graph (T4.1) | 52.27% | 0.5338 | 69.53% | 0.6904 | +17.26% |
 | **SkelGym-Aug AAGCN (Bone 3D)** | Adaptive Skeletal Graph + Aug (T4.2) | 65.84% | 0.6504 | 72.96% | 0.7295 | +7.12% |
-| **Clean Baseline Transformer (Rel 3D)** | Self-Attention Baseline (T2.1) | 56.87% | 0.5772 | 75.11% | 0.7203 | +18.24% |
-| **SkelGym-Aug Transformer (Rel 3D)** | Self-Attention + Aug (T2.2) | 71.93% | 0.7062 | 81.12% | 0.7917 | +9.19% |
-| **Grand SOTA Heterogeneous Ensemble** | **Dual-Target Weighted Soft Voting (T5.1)** | **71.60%** | **0.7037** | **81.55%** | **0.7980** | **+9.95%** |
+| **Clean Baseline Transformer (Mix)** | Self-Attention Baseline (T2.1) | 63.40% | 0.6218 | 74.25% | 0.7304 | +10.85% |
+| **SkelGym-Aug Transformer (Mix)** | Self-Attention + Aug (T2.2) | - | - | - | - | - |
+| **Two-Stream AAGCN (Aug)** | Joint (Aug) + Bone (Aug) (T4.6) | - | - | - | - | - |
+| **Four-Stream AAGCN (Aug)** | 4-Stream Late Fusion (Aug) (T4.7) | - | - | - | - | - |
+| **Dual-Model Grand Ensemble** | Best Transformer (mix aug) + AAGCN Bone (Aug) (T5.2) | - | - | - | - | - |
+| **Grand 5-Stream SOTA Ensemble** | **Dual-Target Weighted Soft Voting (T5.1)** | - | - | - | - | - |

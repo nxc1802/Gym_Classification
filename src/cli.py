@@ -603,12 +603,14 @@ def cmd_train(args):
         logger.info(f"🔥 VIDEO-LEVEL Test Accuracy: {vid_metrics['accuracy'] * 100:.2f}% | Macro F1: {vid_metrics['macro_f1']:.4f}")
         metrics["video_level"] = vid_metrics
         t7_map = {
-            "T1.7": "Baseline LSTM (Mix)",
-            "T1.14": "Baseline BiLSTM (Mix)",
+            "T1.9": "Baseline LSTM (Mix 117d)",
+            "T1.18": "Baseline BiLSTM (Mix 117d)",
+            "T1.27": "Transformer (Mix 117d)",
             "T3.2": "Baseline ST-GCN (Rel 3D)",
-            "T4.1": "Baseline ST-GCN (Rel 3D)",
-            "T1.21": "Best Transformer (Mix)",
-            "T2.2": "Best Transformer + SkelGym-Aug"
+            "T4.1": "Clean Baseline AAGCN (Bone 3D)",
+            "T4.2": "SkelGym-Aug AAGCN (Bone 3D)",
+            "T2.1": "Clean Baseline Transformer (Mix)",
+            "T2.2": "SkelGym-Aug Transformer (Mix)"
         }
         exp_id = getattr(args, "exp_id", None)
         if exp_id in t7_map:
