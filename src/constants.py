@@ -168,7 +168,17 @@ FEATURE_DIMS: Dict[str, int] = {
     "bone_motion_3d": 39,
     "angle_2d": 286,
     "angle_3d": 286,
-    "mix": 325,
+    "angle2_2d": 78,
+    "angle2_3d": 78,
+    "mix": 117,  # rel_3d (39) + angle2_3d (78)
+    "raw_13": 39,
+    "raw_13_2d": 26,
+    "raw_13_3d": 39,
+    "raw_13_4": 52,
+    "rel_13": 39,
+    "rel_13_2d": 26,
+    "rel_13_3d": 39,
+    "rel_13_4": 53,
     "full_4": 132,
     "full_rel_4": 133,
     "13_4": 52,
@@ -178,6 +188,34 @@ FEATURE_DIMS: Dict[str, int] = {
     "direct_concat": 339,
     "branch_concat": -1  # Dual branch tuple (53, 286)
 }
+
+def get_feature_dimension(feature_method: str) -> int:
+    """
+    Computes feature dimension dynamically for single features or arbitrary combinations.
+    Supports:
+      - Standard names: 'rel_3d' -> 39, 'angle2_3d' -> 78, 'mix' -> 117
+      - Concat with '+': 'rel_3d+angle2_3d' -> 117, 'raw_3d+bone_3d' -> 78
+      - Mix prefix: 'mix:rel_3d,angle2_3d' -> 117
+    """
+    if not feature_method:
+        return 39
+
+    if feature_method in FEATURE_DIMS:
+        return FEATURE_DIMS[feature_method]
+
+    # Handle '+' concatenation
+    if "+" in feature_method:
+        parts = [p.strip() for p in feature_method.split("+") if p.strip()]
+        return sum(get_feature_dimension(p) for p in parts)
+
+    # Handle 'mix:feat1,feat2'
+    if feature_method.startswith("mix:"):
+        inner = feature_method[4:]
+        parts = [p.strip() for p in inner.split(",") if p.strip()]
+        return sum(get_feature_dimension(p) for p in parts)
+
+    return FEATURE_DIMS.get(feature_method, 39)
+
 
 # Standard Sliding Window defaults
 DEFAULT_SEQ_LEN: int = 32

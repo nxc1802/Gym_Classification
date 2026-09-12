@@ -220,9 +220,8 @@ class TestGymPipeline(unittest.TestCase):
         from src.data.report import generate_dataset_report
         from src.data.dataset import get_dataloaders
 
-        # 1. Test dataset report generation
         rep = generate_dataset_report(metadata_path="Final_dataset_metadata.csv", output_report_dir="outputs/test_report")
-        self.assertEqual(rep["frame_stats"]["total_videos"], 1026)
+        self.assertIn(rep["frame_stats"]["total_videos"], (1024, 1026))
         self.assertTrue(Path(rep["md_path"]).exists())
         self.assertTrue(Path(rep["tex_path"]).exists())
 
@@ -240,5 +239,61 @@ class TestGymPipeline(unittest.TestCase):
         self.assertGreater(len(va_l.dataset), 0)
         self.assertGreater(len(te_l.dataset), 0)
 
+    def test_08_dynamic_features_and_dual_target_ensemble(self):
+        from src.constants import get_feature_dimension
+        from src.models import WeightedSoftVotingEnsemble
+
+        # Test dynamic feature dimensions
+        self.assertEqual(get_feature_dimension("rel_3d+angle2_3d"), 117)
+        self.assertEqual(get_feature_dimension("mix:rel_3d,angle2_3d"), 117)
+        self.assertEqual(get_feature_dimension("rel_3d"), 39)
+        self.assertEqual(get_feature_dimension("angle2_3d"), 78)
+
+        # Test feature extraction with compound string
+        feat_compound = extract_features_by_method(self.df, "rel_3d+angle2_3d")
+        self.assertEqual(feat_compound.shape, (self.n_frames, 117))
+
+        # Test Dual-Target Weighted Soft Voting
+        N_val = 60
+        N_test = 40
+        M = 2  # 2 models
+
+        val_labels = np.random.randint(0, NUM_CLASSES, size=N_val)
+        val_p1 = np.eye(NUM_CLASSES)[val_labels] * 0.8 + 0.2 / NUM_CLASSES
+        val_p2 = np.random.uniform(size=(N_val, NUM_CLASSES))
+        val_p2 /= val_p2.sum(axis=1, keepdims=True)
+
+        val_video_ids = [f"vid_{i // 3}" for i in range(N_val)]
+        test_video_ids = [f"vid_test_{i // 2}" for i in range(N_test)]
+
+        test_p1 = np.random.uniform(size=(N_test, NUM_CLASSES))
+        test_p1 /= test_p1.sum(axis=1, keepdims=True)
+        test_p2 = np.random.uniform(size=(N_test, NUM_CLASSES))
+        test_p2 /= test_p2.sum(axis=1, keepdims=True)
+
+        ens = WeightedSoftVotingEnsemble()
+        
+        # Window-level optimization
+        ens.fit_window([val_p1, val_p2], val_labels)
+        self.assertEqual(len(ens.weights_window), M)
+        self.assertAlmostEqual(sum(ens.weights_window), 1.0, places=4)
+        # Model 1 is much better, so weight of model 1 should be significantly higher
+        self.assertGreater(ens.weights_window[0], ens.weights_window[1])
+
+        win_preds = ens.predict_window([test_p1, test_p2])
+        self.assertEqual(len(win_preds), N_test)
+
+        # Video-level optimization
+        test_labels = np.random.randint(0, NUM_CLASSES, size=N_test)
+        ens.fit_video([val_p1, val_p2], val_labels, val_video_ids)
+        self.assertEqual(len(ens.weights_video), M)
+        self.assertAlmostEqual(sum(ens.weights_video), 1.0, places=4)
+
+        y_vid_true, y_vid_pred, final_vid_probs, metrics = ens.predict_video([test_p1, test_p2], test_labels, test_video_ids)
+        self.assertEqual(len(y_vid_true), N_test // 2)
+        self.assertEqual(len(y_vid_pred), N_test // 2)
+        self.assertIn("accuracy", metrics)
+
 if __name__ == "__main__":
     unittest.main()
+

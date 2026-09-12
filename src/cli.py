@@ -23,11 +23,15 @@ import pandas as pd
 import numpy as np
 import torch
 import torch.nn as nn
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from src.constants import (
     ACTIONS,
     NUM_CLASSES,
     FEATURE_DIMS,
+    get_feature_dimension,
     DEFAULT_SEQ_LEN,
     DEFAULT_TRAIN_STRIDE,
     DEFAULT_VAL_TEST_STRIDE
@@ -39,7 +43,9 @@ from src.utils.hf_hub import (
     upload_file_to_hf,
     upload_checkpoints_to_hf,
     push_landmarks_to_hf,
+    push_metadata_to_hf,
     pull_landmarks_from_hf,
+    ensure_checkpoint_available,
     DEFAULT_MODEL_REPO,
     DEFAULT_DATASET_REPO
 )
@@ -92,7 +98,7 @@ def build_model(
     Model Factory instantiating the requested architecture with compatible input dimensions.
     Defaults are calibrated to a fair ~350K parameter budget.
     """
-    feat_dim = FEATURE_DIMS.get(feature_method, 39)
+    feat_dim = get_feature_dimension(feature_method)
 
     if model_type == "LSTM":
         if feature_method == "branch_concat":
@@ -413,6 +419,18 @@ def cmd_push_landmarks_hf(args):
         logger.info(f"Landmarks pushed successfully: {url}")
     else:
         logger.error("Failed to push landmarks to HF.")
+
+def cmd_push_metadata_hf(args):
+    """
+    Uploads Final_dataset_metadata.csv to Hugging Face dataset repository.
+    """
+    token = args.token or os.environ.get("HF_TOKEN")
+    logger.info(f"Pushing metadata {args.metadata} to HF dataset repo {args.repo_id} ...")
+    url = push_metadata_to_hf(args.metadata, repo_id=args.repo_id, token=token)
+    if url:
+        logger.info(f"Metadata pushed successfully: {url}")
+    else:
+        logger.error("Failed to push metadata to HF.")
 
 def cmd_pull_landmarks_hf(args):
     """
@@ -784,6 +802,16 @@ def cmd_ensemble(args):
         ensure_smoke_report_file(args.report_file)
 
     device = resolve_device(args.device)
+    hf_token = getattr(args, "hf_token", None) or os.environ.get("HF_TOKEN")
+    hf_repo = getattr(args, "hf_repo", DEFAULT_MODEL_REPO)
+
+    # Auto-resolve / download missing checkpoints from HF Hub
+    resolved_checkpoints = []
+    for ckpt in args.checkpoints:
+        p_res = ensure_checkpoint_available(ckpt, repo_id=hf_repo, token=hf_token)
+        resolved_checkpoints.append(p_res)
+    args.checkpoints = resolved_checkpoints
+
     logger.info(f"Running Ensemble method: {args.method.upper()} on {len(args.checkpoints)} checkpoints using device: {device}.")
 
     model_entries = []
@@ -809,7 +837,7 @@ def cmd_ensemble(args):
 
         # Identify feature method from filename
         f_type = None
-        for feat in ["mix", "angle_3d", "angle_2d", "joint_motion_3d", "joint_motion_2d", "bone_motion_3d", "bone_motion_2d", "bone_3d", "bone_2d", "raw_3d", "raw_2d", "rel_3d", "rel_2d", "branch_concat", "direct_concat", "full_rel_4", "full_4", "12rel_4", "13_4"]:
+        for feat in ["mix", "angle2_3d", "angle2_2d", "angle_3d", "angle_2d", "angle2", "angle3", "joint_motion_3d", "joint_motion_2d", "bone_motion_3d", "bone_motion_2d", "bone_motion_2d", "bone_3d", "bone_2d", "raw_13_4", "rel_13_4", "raw_13_3d", "rel_13_3d", "raw_13_2d", "rel_13_2d", "raw_13", "rel_13", "raw_3d", "raw_2d", "rel_3d", "rel_2d", "branch_concat", "direct_concat", "full_rel_4", "full_4", "12rel_4", "13_4"]:
             if f"_{feat}." in p.name or f"_{feat}_" in p.name or p.name.endswith(f"_{feat}") or feat in p.name:
                 f_type = feat
                 break
@@ -849,6 +877,7 @@ def cmd_ensemble(args):
     all_preds_list = []
     all_probs_list = []
     val_probs_list = []
+    val_video_ids = None
     y_val_final = None
     y_test_final = None
 
@@ -869,6 +898,9 @@ def cmd_ensemble(args):
             in_memory=True,
             smoke_test=is_smoke
         )
+        if val_video_ids is None and hasattr(val_loader.dataset, "video_ids"):
+            val_video_ids = val_loader.dataset.video_ids
+
         tr = Trainer(model=m, device=device)
 
         if getattr(args, "tta", False):
@@ -910,35 +942,48 @@ def cmd_ensemble(args):
         if y_test_final is None:
             y_test_final = y_t
 
-    if args.method == "hard":
+    if args.method == "weighted_soft":
+        ens = WeightedSoftVotingEnsemble()
+        # Phase 1: Window-Level Optimization
+        ens.fit_window(val_probs_list, y_val_final)
+        logger.info(f"Optimized Window Soft Voting Weights (SLSQP): {[round(float(w), 4) for w in ens.weights_window]}")
+        final_preds = ens.predict_window(all_probs_list)
+        final_test_probs = ens.predict_proba_window(all_probs_list)
+    elif args.method == "hard":
         ens = HardVotingEnsemble()
         final_preds = ens.predict(all_preds_list)
+        final_test_probs = np.mean(all_probs_list, axis=0)
     elif args.method == "soft":
         ens = SoftVotingEnsemble()
         final_preds = ens.predict(all_probs_list)
-    elif args.method == "weighted_soft":
-        ens = WeightedSoftVotingEnsemble()
-        ens.fit(val_probs_list, y_val_final)
-        logger.info(f"Optimized Soft Voting Weights (SLSQP): {[round(w, 4) for w in ens.weights]}")
-        final_preds = ens.predict(all_probs_list)
+        final_test_probs = ens.predict_proba(all_probs_list)
     elif args.method == "stacking":
         ens = StackingEnsemble()
         ens.fit(val_probs_list, y_val_final)
         final_preds = ens.predict(all_probs_list)
+        final_test_probs = np.mean(all_probs_list, axis=0)
 
     metrics = compute_metrics(y_test_final, final_preds)
     logger.info(f"Ensemble ({args.method.upper()}) Window-Level Test Accuracy: {metrics['accuracy'] * 100:.2f}% | Macro F1: {metrics['macro_f1']:.4f}")
 
     if getattr(args, "video_level", False) and hasattr(test_loader.dataset, "video_ids") and test_loader.dataset.video_ids:
-        if hasattr(ens, "predict_proba"):
-            final_test_probs = ens.predict_proba(all_probs_list)
+        if args.method == "weighted_soft" and val_video_ids is not None:
+            # Phase 2: Video-Level Dual-Target Optimization
+            ens.fit_video(val_probs_list, y_val_final, val_video_ids)
+            logger.info(f"Optimized Video Soft Voting Weights (SLSQP): {[round(float(w), 4) for w in ens.weights_video]}")
+            y_vid_t, y_vid_p, final_video_probs, vid_metrics = ens.predict_video(
+                all_probs_list, y_test_final, test_loader.dataset.video_ids
+            )
         else:
-            final_test_probs = np.mean(all_probs_list, axis=0)
-        y_vid_t, y_vid_p, _, vid_metrics = aggregate_video_level_predictions(
-            final_test_probs, y_test_final, test_loader.dataset.video_ids
-        )
+            if hasattr(ens, "predict_proba"):
+                final_test_probs = ens.predict_proba(all_probs_list)
+            else:
+                final_test_probs = np.mean(all_probs_list, axis=0)
+            y_vid_t, y_vid_p, final_video_probs, vid_metrics = aggregate_video_level_predictions(
+                final_test_probs, y_test_final, test_loader.dataset.video_ids
+            )
         logger.info(f"============================================================")
-        logger.info(f"🔥 VIDEO-LEVEL Ensemble ({args.method.upper()}) Test Accuracy: {vid_metrics['accuracy'] * 100:.2f}% | Macro F1: {vid_metrics['macro_f1']:.4f}")
+        logger.info(f"🔥 VIDEO-LEVEL Ensemble ({args.method.upper()} Dual-Target) Test Accuracy: {vid_metrics['accuracy'] * 100:.2f}% | Macro F1: {vid_metrics['macro_f1']:.4f}")
         logger.info(f"============================================================")
 
     exp_id = getattr(args, "exp_id", None)
@@ -963,7 +1008,7 @@ def cmd_ensemble(args):
         )
 
     # Auto-update Table 6A (Window-Level) and Table 6B (Video-Level)
-    if args.method in ("stacking", "weighted_soft", "soft") and report_file and Path(report_file).exists():
+    if report_file and Path(report_file).exists():
         try:
             from sklearn.metrics import classification_report as sk_clf_report
             rep_dict_win = sk_clf_report(y_test_final, final_preds, target_names=ACTIONS, output_dict=True, zero_division=0)
@@ -1022,13 +1067,11 @@ def cmd_ensemble(args):
         exp_id = getattr(args, "exp_id", "") or ""
         t7_key = None
         if exp_id in ("T3.9", "T4.6", "T4.9") or (len(args.checkpoints) == 2 and all("AAGCN" in c for c in args.checkpoints)):
-            t7_key = "Two-Stream AAGCN"
+            t7_key = "Two-Stream AAGCN (Aug)" if "aug" in "".join(args.checkpoints).lower() else "Two-Stream AAGCN"
         elif exp_id in ("T3.10", "T4.8", "T4.10") or (len(args.checkpoints) == 4 and all("AAGCN" in c for c in args.checkpoints)):
-            t7_key = "Four-Stream AAGCN"
-        elif exp_id == "T5.4" or (len(args.checkpoints) == 3 and any("Transformer" in c for c in args.checkpoints)):
-            t7_key = "Tri-Model Grand Ensemble"
-        elif exp_id == "T5.5" or (len(args.checkpoints) == 5):
-            t7_key = "Grand 5-Stream SOTA Ensemble"
+            t7_key = "Four-Stream AAGCN (Aug)" if "aug" in "".join(args.checkpoints).lower() else "Four-Stream AAGCN"
+        elif exp_id in ("T5.1", "T5.2", "T5.3") or (any("Transformer" in c for c in args.checkpoints) and any("AAGCN" in c for c in args.checkpoints)):
+            t7_key = "Grand SOTA Ensemble"
 
         if t7_key:
             update_table7_markdown(
@@ -1039,6 +1082,7 @@ def cmd_ensemble(args):
                 vid_acc=vid_metrics["accuracy"],
                 vid_f1=vid_metrics["macro_f1"]
             )
+
 
     if getattr(args, "push_to_hf", False):
         token = getattr(args, "hf_token", None) or os.environ.get("HF_TOKEN")
@@ -1157,10 +1201,15 @@ def create_parser() -> argparse.ArgumentParser:
     p_push_hf.add_argument("--repo_id", type=str, default=DEFAULT_DATASET_REPO, help="Hugging Face dataset repository ID")
     p_push_hf.add_argument("--token", type=str, default=None, help="Hugging Face auth token")
 
-    p_pull_hf = subparsers.add_parser("pull-landmarks-hf", help="Download landmarks archive from Hugging Face dataset repository")
+    p_push_meta = subparsers.add_parser("push-metadata-hf", help="Upload Final_dataset_metadata.csv to Hugging Face dataset repository")
+    p_push_meta.add_argument("--metadata", type=str, default="data/Final_dataset_metadata.csv", help="Path to metadata CSV")
+    p_push_meta.add_argument("--repo_id", type=str, default=DEFAULT_DATASET_REPO, help="Hugging Face dataset repository ID")
+    p_push_meta.add_argument("--token", type=str, default=None, help="Hugging Face auth token")
+
+    p_pull_hf = subparsers.add_parser("pull-landmarks-hf", help="Download landmarks archive and metadata from Hugging Face dataset repository")
     p_pull_hf.add_argument("--dest_dir", type=str, default="data/landmarks", help="Directory to unpack landmarks into")
     p_pull_hf.add_argument("--repo_id", type=str, default=DEFAULT_DATASET_REPO, help="Hugging Face dataset repository ID")
-    p_pull_hf.add_argument("--filename", type=str, default="landmarks_smoketest.zip", help="Landmarks ZIP filename in repository")
+    p_pull_hf.add_argument("--filename", type=str, default="landmarks_dataset.zip", help="Landmarks ZIP filename in repository")
     p_pull_hf.add_argument("--token", type=str, default=None, help="Hugging Face auth token")
 
     # Train
@@ -1168,8 +1217,7 @@ def create_parser() -> argparse.ArgumentParser:
     p_train.add_argument("--model", type=str, default="Transformer", choices=["LSTM", "BiLSTM", "Transformer", "STGCN", "AAGCN", "BranchConcat"], help="Model architecture")
     p_train.add_argument(
         "--feature", type=str, default="mix",
-        choices=["raw_2d", "raw_3d", "rel_2d", "rel_3d", "bone_2d", "bone_3d", "joint_motion_2d", "joint_motion_3d", "bone_motion_2d", "bone_motion_3d", "angle_2d", "angle_3d", "mix", "full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"],
-        help="Feature representation method"
+        help="Feature representation method (supports single features or dynamic mix like 'rel_3d+angle2_3d', 'mix')"
     )
     p_train.add_argument("--augment", type=str, default="none", choices=["none", "jitter", "rotate", "joint_dropout", "time_warp", "mirror", "speed_perturb", "skel_gym_aug"], help="Augmentation method")
     p_train.add_argument("--zero_frame", type=str, default="interpolate", choices=["zero", "ffill", "linear", "interpolate"], help="Missing/zero-frame handling strategy")
@@ -1221,7 +1269,7 @@ def create_parser() -> argparse.ArgumentParser:
     p_eval.add_argument("--model", type=str, default="Transformer", choices=["LSTM", "BiLSTM", "Transformer", "STGCN", "AAGCN", "BranchConcat"])
     p_eval.add_argument(
         "--feature", type=str, default="mix",
-        choices=["raw_2d", "raw_3d", "rel_2d", "rel_3d", "bone_2d", "bone_3d", "joint_motion_2d", "joint_motion_3d", "bone_motion_2d", "bone_motion_3d", "angle_2d", "angle_3d", "mix", "full_4", "full_rel_4", "13_4", "12rel_4", "angle3", "angle2", "direct_concat", "branch_concat"]
+        help="Feature representation method (supports single features or dynamic mix like 'rel_3d+angle2_3d', 'mix')"
     )
     p_eval.add_argument("--split", type=str, default="test", choices=["train", "val", "test"])
     p_eval.add_argument("--metadata", type=str, default="Final_dataset_metadata.csv")
@@ -1300,6 +1348,8 @@ def main():
         cmd_data_report(args)
     elif args.command == "push-landmarks-hf":
         cmd_push_landmarks_hf(args)
+    elif args.command == "push-metadata-hf":
+        cmd_push_metadata_hf(args)
     elif args.command == "pull-landmarks-hf":
         cmd_pull_landmarks_hf(args)
     elif args.command == "preprocess":

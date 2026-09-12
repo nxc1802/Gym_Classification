@@ -15,6 +15,18 @@ import numpy as np
 from src.constants import ACTIONS
 from src.data.extractor import extract_landmarks_from_video
 
+def _resolve_metadata_path(metadata_path: str) -> Path:
+    p = Path(metadata_path)
+    if p.exists():
+        return p
+    cand1 = Path("data") / p.name
+    if cand1.exists():
+        return cand1
+    cand2 = Path(__file__).resolve().parent.parent.parent / "data" / p.name
+    if cand2.exists():
+        return cand2
+    return p
+
 def generate_dataset_report(
     metadata_path: str = "Final_dataset_metadata.csv",
     output_report_dir: str = "outputs/dataset_report"
@@ -26,7 +38,7 @@ def generate_dataset_report(
     out_dir = Path(output_report_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    df = pd.read_csv(metadata_path)
+    df = pd.read_csv(_resolve_metadata_path(metadata_path))
 
     # 1. Video counts per class by split
     video_counts = df.groupby(["class", "split"]).size().unstack(fill_value=0)
@@ -160,7 +172,7 @@ def run_mediapipe_extraction_pipeline(
     out_dir = Path(output_landmark_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    meta_df = pd.read_csv(metadata_path)
+    meta_df = pd.read_csv(_resolve_metadata_path(metadata_path))
     if smoke_test:
         print(f"\n[SMOKE TEST MODE] Limiting extraction to class: '{smoke_class}'")
         meta_df = meta_df[meta_df["class"] == smoke_class].copy()

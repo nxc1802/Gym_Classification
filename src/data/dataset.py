@@ -23,23 +23,37 @@ from src.constants import (
 from src.data.features import extract_features_by_method
 from src.data.augmentations import LandmarkAugmenter
 
-def parse_segment_range(label_content: str, total_frames: int) -> Tuple[int, int]:
+def parse_segment_ranges(label_content: str, total_frames: int) -> List[Tuple[int, int]]:
     """
-    Parses start and end frame indices from label_content string like 'frame_000000 frame_000074'.
-    Converts 0-indexed strings into slice bounds [s, e].
+    Parses start and end frame indices from label_content string like:
+      'frame_000000 frame_000074'
+      or multi-segment 'frame_000000 frame_000003 frame_000018 frame_000200'
+    Returns a list of [s, e] slice bounds.
     """
     if not isinstance(label_content, str) or not label_content.strip():
-        return 0, total_frames
+        return [(0, total_frames)]
 
     tokens = label_content.strip().split()
-    try:
-        s_num = int(tokens[0].split("_")[-1])
-        e_num = int(tokens[1].split("_")[-1])
-        s = max(0, min(s_num, total_frames - 1))
-        e = min(total_frames, max(s + 1, e_num + 1))
-        return s, e
-    except Exception:
-        return 0, total_frames
+    segments = []
+    for i in range(0, len(tokens), 2):
+        if i + 1 < len(tokens):
+            try:
+                s_num = int(tokens[i].split("_")[-1])
+                e_num = int(tokens[i + 1].split("_")[-1])
+                s = max(0, min(s_num, total_frames - 1))
+                e = min(total_frames, max(s + 1, e_num + 1))
+                if e > s:
+                    segments.append((s, e))
+            except Exception:
+                continue
+    return segments if segments else [(0, total_frames)]
+
+def parse_segment_range(label_content: str, total_frames: int) -> Tuple[int, int]:
+    """
+    Backward-compatible single segment parser (returns the first segment).
+    """
+    ranges = parse_segment_ranges(label_content, total_frames)
+    return ranges[0] if ranges else (0, total_frames)
 
 def handle_zero_frames(df: pd.DataFrame, method: str = "interpolate") -> pd.DataFrame:
     """
@@ -252,6 +266,108 @@ def mirror_dataframe_horizontally(df: pd.DataFrame) -> pd.DataFrame:
                     df_flipped[r_col] = df[l_col]
     return df_flipped
 
+def extract_windows_from_segment(
+    df_seg: pd.DataFrame,
+    feature_method: str,
+    seq_len: int = DEFAULT_SEQ_LEN,
+    stride: int = DEFAULT_TRAIN_STRIDE,
+    zero_frame_handling: str = "interpolate",
+    max_zero_ratio: float = 0.20,
+    is_horizontal_flip: bool = False
+) -> List[Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]]:
+    """
+    Unified window sequence generator with zero-frame quality gating and local imputation.
+    For each candidate window:
+      1. Checks length: if < seq_len // 2 -> discards.
+      2. Checks zero-frame ratio: if > max_zero_ratio (default 0.20) -> discards corrupted window.
+      3. If zero_ratio <= max_zero_ratio: linearly interpolates zero frames locally.
+      4. Stretches partial windows (seq_len // 2 <= L < seq_len) to seq_len.
+      5. Applies horizontal flip if is_horizontal_flip.
+      6. Extracts features directly on the clean 32-frame sequence.
+    """
+    T = len(df_seg)
+    if T == 0:
+        return []
+
+    half_seq = seq_len // 2
+    if T < half_seq:
+        return []
+
+    coord_cols = [c for c in df_seg.columns if any(c.endswith(f"_{d}") for d in ["x", "y", "z"])]
+    is_branch = (feature_method == "branch_concat")
+    windows = []
+
+    def _process_candidate_window(df_win: pd.DataFrame) -> Optional[Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]]:
+        L = len(df_win)
+        if L < half_seq:
+            return None
+
+        # Check zero frames
+        if coord_cols:
+            zeros_mask = (df_win[coord_cols].abs() < 1e-6) | df_win[coord_cols].isna()
+            row_is_zero = zeros_mask.all(axis=1)
+            n_zero = row_is_zero.sum()
+            zero_ratio = n_zero / L
+
+            if zero_ratio > max_zero_ratio:
+                # Discard corrupted window with excessive zero frames
+                return None
+
+            df_clean = df_win.copy()
+            if n_zero > 0 and zero_frame_handling in ("interpolate", "linear", "ffill"):
+                df_clean.loc[row_is_zero, coord_cols] = np.nan
+                if zero_frame_handling == "ffill":
+                    df_clean[coord_cols] = df_clean[coord_cols].ffill().bfill().fillna(0.0)
+                else:
+                    df_clean[coord_cols] = df_clean[coord_cols].interpolate(method="linear", limit_direction="both").fillna(0.0)
+            else:
+                df_clean = df_clean.fillna(0.0)
+        else:
+            df_clean = df_win.copy().fillna(0.0)
+
+        if is_horizontal_flip:
+            df_clean = mirror_dataframe_horizontally(df_clean)
+
+        # Extract features
+        feat = extract_features_by_method(df_clean, feature_method)
+
+        # Stretch if L < seq_len (partial window >= half_seq)
+        if L < seq_len:
+            if is_branch:
+                f1, f2 = feat
+                t1 = torch.from_numpy(f1).float().unsqueeze(0).permute(0, 2, 1)
+                t2 = torch.from_numpy(f2).float().unsqueeze(0).permute(0, 2, 1)
+                s1 = F.interpolate(t1, size=seq_len, mode="linear", align_corners=False).squeeze(0).permute(1, 0).numpy()
+                s2 = F.interpolate(t2, size=seq_len, mode="linear", align_corners=False).squeeze(0).permute(1, 0).numpy()
+                return (s1, s2)
+            else:
+                tw = torch.from_numpy(feat).float().unsqueeze(0).permute(0, 2, 1)
+                sw = F.interpolate(tw, size=seq_len, mode="linear", align_corners=False).squeeze(0).permute(1, 0).numpy()
+                return sw
+        else:
+            return feat
+
+    if T < seq_len:
+        cand = _process_candidate_window(df_seg)
+        if cand is not None:
+            windows.append(cand)
+    else:
+        for start in range(0, T, stride):
+            end = start + seq_len
+            if end <= T:
+                df_win = df_seg.iloc[start:end]
+                cand = _process_candidate_window(df_win)
+                if cand is not None:
+                    windows.append(cand)
+            else:
+                df_part = df_seg.iloc[start:]
+                cand = _process_candidate_window(df_part)
+                if cand is not None:
+                    windows.append(cand)
+                break
+
+    return windows
+
 def build_dataset_from_csvs(
     metadata_df: pd.DataFrame,
     split: str,
@@ -264,12 +380,13 @@ def build_dataset_from_csvs(
     smoke_test: bool = False,
     smoke_class: Optional[str] = "barbell biceps curl",
     in_memory: bool = True,
-    is_horizontal_flip: bool = False
+    is_horizontal_flip: bool = False,
+    max_zero_ratio: float = 0.20
 ) -> GymDataset:
     """
-    Loads landmark CSVs based on metadata split and constructs a GymDataset.
-    Supports smoke_test mode to select minimal samples for debugging.
-    Supports is_horizontal_flip for Test-Time Augmentation (TTA).
+    Loads landmark CSVs based on metadata split, extracts action segments,
+    and generates clean fixed-length windows with unified zero-frame quality gating.
+    Supports smoke_test mode and horizontal flip for TTA.
     """
     split_df = metadata_df[metadata_df["split"] == split].reset_index(drop=True)
     if smoke_test:
@@ -286,105 +403,54 @@ def build_dataset_from_csvs(
     all_labels = []
     all_video_ids = []
 
-    has_folder_structure = False
-    if landmark_dir:
-        split_dir = Path(landmark_dir) / split
-        if split_dir.exists() and any(split_dir.iterdir()):
-            has_folder_structure = True
+    for _, row in split_df.iterrows():
+        action_name = row["class"]
+        if action_name not in ACTION_TO_IDX:
+            continue
+        class_idx = ACTION_TO_IDX[action_name]
 
-    if has_folder_structure:
-        action_names = sorted([d.name for d in (Path(landmark_dir) / split).iterdir() if d.is_dir() and d.name in ACTION_TO_IDX])
-        if smoke_test:
-            action_names = [smoke_class] if smoke_class in action_names else action_names[:1]
+        vid_name = Path(row.get("filepath", f"video_{class_idx}")).stem
+        csv_path = None
+        if landmark_dir:
+            cand1 = Path(landmark_dir) / split / action_name / f"{vid_name}.csv"
+            cand2 = Path(landmark_dir) / f"{vid_name}.csv"
+            for c in [cand1, cand2]:
+                if c.exists():
+                    csv_path = c
+                    break
 
-        for action_name in action_names:
-            class_idx = ACTION_TO_IDX[action_name]
-            class_dir = Path(landmark_dir) / split / action_name
-            csv_files = sorted(list(class_dir.glob("*.csv")))
-            if smoke_test:
-                csv_files = csv_files[:(2 if split == "train" else 1)]
-
-            for csv_path in csv_files:
-                try:
-                    vid_name = csv_path.stem
-                    df = pd.read_csv(csv_path)
-                    if len(df) == 0:
-                        continue
-                    df = handle_zero_frames(df, method=zero_frame_handling)
-                    if is_horizontal_flip:
-                        df = mirror_dataframe_horizontally(df)
-                    feat = extract_features_by_method(df, feature_method)
-                    if is_branch:
-                        f1, f2 = feat
-                        w1 = sliding_windows(f1, seq_len, stride)
-                        w2 = sliding_windows(f2, seq_len, stride)
-                        n_wins = min(len(w1), len(w2))
-                        for i in range(n_wins):
-                            all_samples.append((w1[i], w2[i]))
-                            all_labels.append(class_idx)
-                            all_video_ids.append(vid_name)
-                    else:
-                        wins = sliding_windows(feat, seq_len, stride)
-                        for w in wins:
-                            all_samples.append(w)
-                            all_labels.append(class_idx)
-                            all_video_ids.append(vid_name)
-                except Exception:
-                    continue
-    else:
-        for _, row in split_df.iterrows():
-            action_name = row["class"]
-            if action_name not in ACTION_TO_IDX:
-                continue
-            class_idx = ACTION_TO_IDX[action_name]
-
-            vid_name = Path(row.get("filepath", f"video_{class_idx}")).stem
-            csv_path = None
-            if landmark_dir:
-                # Priority 1: split-specific directory structure
-                cand1 = Path(landmark_dir) / split / action_name / f"{Path(row['filepath']).stem}.csv"
-                # Priority 2: flat landmark directory (legacy, no split separation)
-                cand2 = Path(landmark_dir) / f"{Path(row['filepath']).stem}.csv"
-                # NOTE: Removed cand3 (landmark_dir/action/) to prevent cross-split data leakage
-                for c in [cand1, cand2]:
-                    if c.exists():
-                        csv_path = c
-                        break
-
-            if csv_path and csv_path.exists():
+        if csv_path and csv_path.exists():
+            try:
                 df = pd.read_csv(csv_path)
-                s, e = parse_segment_range(row["label_content"], len(df))
-                df_segment = df.iloc[s:e].reset_index(drop=True)
-                df_segment = handle_zero_frames(df_segment, method=zero_frame_handling)
-                if is_horizontal_flip:
-                    df_segment = mirror_dataframe_horizontally(df_segment)
-                feat = extract_features_by_method(df_segment, feature_method)
-            else:
-                n_frames = int(row.get("num_frames", 75))
-                dummy_cols = ["Frame"] + [f"{pt}_{d}" for pt in ["NOSE", "LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_ELBOW", "RIGHT_ELBOW", "LEFT_WRIST", "RIGHT_WRIST", "LEFT_HIP", "RIGHT_HIP", "LEFT_KNEE", "RIGHT_KNEE", "LEFT_ANKLE", "RIGHT_ANKLE"] for d in ["x", "y", "z", "visibility"]]
-                df = pd.DataFrame(np.random.randn(n_frames, len(dummy_cols)), columns=dummy_cols)
-                s, e = parse_segment_range(row["label_content"], n_frames)
-                df_segment = df.iloc[s:e].reset_index(drop=True)
-                df_segment = handle_zero_frames(df_segment, method=zero_frame_handling)
-                if is_horizontal_flip:
-                    df_segment = mirror_dataframe_horizontally(df_segment)
-                feat = extract_features_by_method(df_segment, feature_method)
+            except Exception:
+                continue
+            if len(df) == 0:
+                continue
+            segments = parse_segment_ranges(row.get("label_content", ""), len(df))
+        else:
+            n_frames = int(row.get("num_frames", 75))
+            dummy_cols = ["Frame"] + [f"{pt}_{d}" for pt in ["NOSE", "LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_ELBOW", "RIGHT_ELBOW", "LEFT_WRIST", "RIGHT_WRIST", "LEFT_HIP", "RIGHT_HIP", "LEFT_KNEE", "RIGHT_KNEE", "LEFT_ANKLE", "RIGHT_ANKLE"] for d in ["x", "y", "z", "visibility"]]
+            df = pd.DataFrame(np.random.randn(n_frames, len(dummy_cols)), columns=dummy_cols)
+            segments = parse_segment_ranges(row.get("label_content", ""), n_frames)
 
-            if is_branch:
-                f1, f2 = feat
-                w1 = sliding_windows(f1, seq_len, stride)
-                w2 = sliding_windows(f2, seq_len, stride)
-                n_wins = min(len(w1), len(w2))
-                for i in range(n_wins):
-                    all_samples.append((w1[i], w2[i]))
-                    all_labels.append(class_idx)
-                    all_video_ids.append(vid_name)
-            else:
-                wins = sliding_windows(feat, seq_len, stride)
-                for w in wins:
-                    all_samples.append(w)
-                    all_labels.append(class_idx)
-                    all_video_ids.append(vid_name)
+        for s, e in segments:
+            df_seg = df.iloc[s:e].reset_index(drop=True)
+            if len(df_seg) == 0:
+                continue
+            wins = extract_windows_from_segment(
+                df_seg=df_seg,
+                feature_method=feature_method,
+                seq_len=seq_len,
+                stride=stride,
+                zero_frame_handling=zero_frame_handling,
+                max_zero_ratio=max_zero_ratio,
+                is_horizontal_flip=is_horizontal_flip
+            )
+            for w in wins:
+                all_samples.append(w)
+                all_labels.append(class_idx)
+                all_video_ids.append(vid_name)
+
 
     # Augmentation Strategy:
     # 1. For 'skel_gym_aug': True Dynamic On-the-Fly Augmentation per epoch in DataLoader (__getitem__)
@@ -491,31 +557,43 @@ def get_dataloaders(
     smoke_test: bool = False,
     smoke_class: Optional[str] = "barbell biceps curl",
     in_memory: bool = True,
-    is_horizontal_flip: bool = False
+    is_horizontal_flip: bool = False,
+    max_zero_ratio: float = 0.20
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
     """
     Constructs train, validation, and test DataLoaders.
     Applies global z-score normalization using train-set statistics to prevent data leakage.
     Optimized for high-throughput GPU training with in-memory caching and pinned memory.
     """
-    meta_df = pd.read_csv(metadata_path)
+    meta_p = Path(metadata_path)
+    if not meta_p.exists():
+        cand = Path("data") / meta_p.name
+        if cand.exists():
+            meta_p = cand
+        else:
+            cand2 = Path(__file__).resolve().parent.parent.parent / "data" / meta_p.name
+            if cand2.exists():
+                meta_p = cand2
+    meta_df = pd.read_csv(meta_p)
     vt_stride = val_test_stride if val_test_stride is not None else DEFAULT_VAL_TEST_STRIDE
 
     train_ds = build_dataset_from_csvs(
         meta_df, "train", feature_method, seq_len, stride or DEFAULT_TRAIN_STRIDE,
         augment_method=augment_method, zero_frame_handling=zero_frame_handling,
-        landmark_dir=landmark_dir, smoke_test=smoke_test, smoke_class=smoke_class, in_memory=in_memory
+        landmark_dir=landmark_dir, smoke_test=smoke_test, smoke_class=smoke_class, in_memory=in_memory,
+        max_zero_ratio=max_zero_ratio
     )
     val_ds = build_dataset_from_csvs(
         meta_df, "val", feature_method, seq_len, vt_stride,
         augment_method=None, zero_frame_handling=zero_frame_handling,
-        landmark_dir=landmark_dir, smoke_test=smoke_test, smoke_class=smoke_class, in_memory=in_memory
+        landmark_dir=landmark_dir, smoke_test=smoke_test, smoke_class=smoke_class, in_memory=in_memory,
+        max_zero_ratio=max_zero_ratio
     )
     test_ds = build_dataset_from_csvs(
         meta_df, "test", feature_method, seq_len, vt_stride,
         augment_method=None, zero_frame_handling=zero_frame_handling,
         landmark_dir=landmark_dir, smoke_test=smoke_test, smoke_class=smoke_class, in_memory=in_memory,
-        is_horizontal_flip=is_horizontal_flip
+        is_horizontal_flip=is_horizontal_flip, max_zero_ratio=max_zero_ratio
     )
 
     # Global z-score normalization using TRAIN-SET statistics only (prevents data leakage)

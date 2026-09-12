@@ -37,6 +37,17 @@ class LandmarkAugmenter:
         self.triplet_b = torch.tensor([t[1] for t in triplets], dtype=torch.long)
         self.triplet_c = torch.tensor([t[2] for t in triplets], dtype=torch.long)
 
+        # Precompute bijective symmetric permutations for left-right skeletal mirroring
+        SWAP_MAP = {0: 0, 1: 2, 2: 1, 3: 4, 4: 3, 5: 6, 6: 5, 7: 8, 8: 7, 9: 10, 10: 9, 11: 12, 12: 11}
+        pairs = list(combinations(range(13), 2))
+        pair_to_idx = {p: i for i, p in enumerate(pairs)}
+        pair_sym = [pair_to_idx[(min(SWAP_MAP[a], SWAP_MAP[b]), max(SWAP_MAP[a], SWAP_MAP[b]))] for a, b in pairs]
+        self.pair_sym_indices = torch.tensor(pair_sym, dtype=torch.long)
+
+        triplet_to_idx = {t: i for i, t in enumerate(triplets)}
+        triplet_sym = [triplet_to_idx[tuple(sorted([SWAP_MAP[a], SWAP_MAP[b], SWAP_MAP[c]]))] for a, b, c in triplets]
+        self.triplet_sym_indices = torch.tensor(triplet_sym, dtype=torch.long)
+
     def recompute_mix_angles(self, rel_3d: torch.Tensor) -> torch.Tensor:
         """
         Vectorized recomputation of 286 triplet 3D angles in [0, pi] from rel_3d coordinates.
@@ -63,14 +74,31 @@ class LandmarkAugmenter:
 
     def jitter(self, x: torch.Tensor) -> torch.Tensor:
         """
-        Adds zero-mean Gaussian noise to feature values.
-        For mix features (325 dims), applies lighter noise to angles.
+        Adds zero-mean Gaussian noise to feature values while strictly preserving structure.
+        - mix (325 dims): coordinates receive jitter_sigma, angles receive jitter_sigma * 0.5.
+        - triplet angles (286 dims) / pair angles (78 dims): light noise bounded in valid range.
+        - 4-channel coordinates (52, 53, 132, 133): noise applied only to (x, y, z), visibility preserved.
         """
         dim = x.shape[-1]
         if dim == 325:
             noise_rel = torch.randn_like(x[..., :39]) * self.jitter_sigma
             noise_ang = torch.randn_like(x[..., 39:]) * (self.jitter_sigma * 0.5)
-            return torch.cat([x[..., :39] + noise_rel, x[..., 39:] + noise_ang], dim=-1)
+            ang_jittered = torch.clamp(x[..., 39:] + noise_ang, 0.0, math.pi)
+            return torch.cat([x[..., :39] + noise_rel, ang_jittered], dim=-1)
+        elif dim == 286:
+            noise = torch.randn_like(x) * (self.jitter_sigma * 0.5)
+            return torch.clamp(x + noise, 0.0, math.pi)
+        elif dim == 78:
+            noise = torch.randn_like(x) * (self.jitter_sigma * 0.5)
+            return torch.clamp(x + noise, -math.pi, math.pi)
+        elif dim in (52, 53, 132, 133) or (dim % 4 == 0 or (dim - 1) % 4 == 0):
+            # Coordinates with visibility: apply jitter only to (x, y, z), skip visibility
+            x_jit = x.clone()
+            stride = 4
+            num_joints = (dim - 1) // stride if (dim - 1) % stride == 0 else dim // stride
+            for j in range(num_joints):
+                x_jit[..., j * stride: j * stride + 3] += torch.randn_like(x[..., j * stride: j * stride + 3]) * self.jitter_sigma
+            return x_jit
         else:
             noise = torch.randn_like(x) * self.jitter_sigma
             return x + noise
@@ -78,15 +106,27 @@ class LandmarkAugmenter:
     def rotate(self, x: torch.Tensor) -> torch.Tensor:
         """
         Applies a random 2D in-plane rotation [-angle, +angle] to coordinate pairs (x, y).
-        For mix representation (325 dims), rotates only the rel_3d coordinates and preserves angles.
+        - Preserves z-coordinate and visibility untouched for 3D coordinates.
+        - Triplet angles (286 dims) are rigid-rotation invariant -> untouched.
+        - 2D pair angles (78 dims) are shifted by the rotation angle.
+        - mix representation (325 dims): rotates only rel_3d (x, y) and preserves angles.
         """
+        dim = x.shape[-1]
+        if dim == 286:
+            # Triplet angles are strictly invariant under in-plane rigid rotation
+            return x.clone()
+        elif dim == 78:
+            # 2D pair inclination angles shift by the rotation angle
+            angle = (torch.rand(1).item() * 2 - 1) * self.max_rotation_degrees
+            rad = math.radians(angle)
+            return (x + rad + math.pi) % (2 * math.pi) - math.pi
+
         angle = (torch.rand(1).item() * 2 - 1) * self.max_rotation_degrees
         rad = math.radians(angle)
         cos_a = math.cos(rad)
         sin_a = math.sin(rad)
 
         x_rot = x.clone()
-        dim = x.shape[-1]
 
         if dim == 325:
             # First 39 dims are rel_3d (13 joints * 3)
@@ -97,7 +137,7 @@ class LandmarkAugmenter:
                 py = x[..., idx_y]
                 x_rot[..., idx_x] = px * cos_a - py * sin_a
                 x_rot[..., idx_y] = px * sin_a + py * cos_a
-            # Angles remain invariant under rigid rotation
+            # Z coordinates (idx_z = j * 3 + 2) and angles remain untouched
             return x_rot
 
         stride = 4 if (dim % 4 == 0 or (dim - 1) % 4 == 0) else (3 if dim % 3 == 0 else 2)
@@ -111,6 +151,7 @@ class LandmarkAugmenter:
                 py = x[..., idx_y]
                 x_rot[..., idx_x] = px * cos_a - py * sin_a
                 x_rot[..., idx_y] = px * sin_a + py * cos_a
+            # Notice: z coordinate (idx_x + 2) and visibility (idx_x + 3) are strictly untouched!
 
         return x_rot
 
@@ -120,15 +161,20 @@ class LandmarkAugmenter:
         x' = x * cos(theta) + z * sin(theta)
         y' = y
         z' = -x * sin(theta) + z * cos(theta)
-        Simulates subject turning relative to the camera viewpoint.
+        Strictly preserves y-coordinate and visibility.
+        Angle features (286, 78) are invariant to yaw rotation around vertical axis -> untouched.
         """
+        dim = x.shape[-1]
+        if dim in (286, 78):
+            # Spatial triplet angles and elevation angles from horizontal ground are invariant to yaw rotation
+            return x.clone()
+
         angle = (torch.rand(1).item() * 2 - 1) * max_yaw_degrees
         rad = math.radians(angle)
         cos_a = math.cos(rad)
         sin_a = math.sin(rad)
 
         x_rot = x.clone()
-        dim = x.shape[-1]
 
         if dim == 325:
             # First 39 dims are rel_3d (stride 3: x, y, z)
@@ -139,7 +185,9 @@ class LandmarkAugmenter:
                 pz = x[..., idx_z]
                 x_rot[..., idx_x] = px * cos_a + pz * sin_a
                 x_rot[..., idx_z] = -px * sin_a + pz * cos_a
-            return x_rot
+            # Dynamically recompute angles from the yaw-rotated coordinates
+            mirrored_angles = self.recompute_mix_angles(x_rot[..., :39])
+            return torch.cat([x_rot[..., :39], mirrored_angles], dim=-1)
 
         elif dim == 39 or dim % 3 == 0:
             stride = 3
@@ -153,9 +201,10 @@ class LandmarkAugmenter:
                 x_rot[..., idx_z] = -px * sin_a + pz * cos_a
             return x_rot
 
-        elif dim % 4 == 0:
+        elif dim % 4 == 0 or (dim - 1) % 4 == 0:
+            # Covers 4-channel formats (13_4: 52, 12rel_4: 53, full_4: 132, full_rel_4: 133)
             stride = 4
-            num_joints = dim // stride
+            num_joints = (dim - 1) // stride if (dim - 1) % stride == 0 else dim // stride
             for j in range(num_joints):
                 idx_x = j * stride
                 idx_z = j * stride + 2
@@ -166,19 +215,24 @@ class LandmarkAugmenter:
             return x_rot
 
         else:
-            # Fallback for 2D representations
+            # Fallback for 2D representations (in-plane rotation)
             return self.rotate(x)
 
     def joint_dropout(self, x: torch.Tensor) -> torch.Tensor:
         """
         Randomly drops (zeros out) 1 to 2 joints throughout the sequence to simulate occlusions.
+        Only applied to coordinate representations (not applied to angle representations).
         """
-        x_drop = x.clone()
         dim = x.shape[-1]
+        if dim in (325, 286, 78):
+            # Angles are derived from multiple joints; dropping individual angle channels corrupts topological validity
+            return x.clone()
+
+        x_drop = x.clone()
         stride = 3 if dim == 39 else (4 if dim % 4 == 0 or (dim - 1) % 4 == 0 else 2)
         num_joints = (dim - 1) // stride if (dim - 1) % stride == 0 else dim // stride
 
-        if num_joints > 0 and dim != 325:
+        if num_joints > 0:
             drop_mask = torch.rand(num_joints) < self.dropout_prob
             for j in range(num_joints):
                 if drop_mask[j]:
@@ -213,20 +267,38 @@ class LandmarkAugmenter:
     def scale(self, x: torch.Tensor, scale_min: float = 0.9, scale_max: float = 1.1) -> torch.Tensor:
         """
         Applies random uniform scaling to simulate subject distance / body size variations.
-        For mix representation (325 dims), scales only coordinate features and preserves angles.
+        - mix (325 dims): scales only 3D coordinates, preserves angles.
+        - angle features (286, 78): scale invariant -> untouched.
+        - 4-channel coordinates (52, 53, 132, 133): scales only (x, y, z), preserves visibility channel.
         """
-        factor = torch.empty(1).uniform_(scale_min, scale_max).item()
         dim = x.shape[-1]
+        if dim in (286, 78):
+            # Angles are scale-invariant
+            return x.clone()
+
+        factor = torch.empty(1).uniform_(scale_min, scale_max).item()
+
         if dim == 325:
             scaled_rel = x[..., :39] * factor
             return torch.cat([scaled_rel, x[..., 39:]], dim=-1)
-        return x * factor
+        elif dim in (52, 53, 132, 133) or (dim % 4 == 0 or (dim - 1) % 4 == 0):
+            x_scaled = x.clone()
+            stride = 4
+            num_joints = (dim - 1) // stride if (dim - 1) % stride == 0 else dim // stride
+            for j in range(num_joints):
+                # Scale only (x, y, z), skip visibility
+                x_scaled[..., j * stride: j * stride + 3] *= factor
+            return x_scaled
+        else:
+            return x * factor
 
     def mirror(self, x: torch.Tensor) -> torch.Tensor:
         """
         Horizontal bilateral mirror (left/right flip) by swapping corresponding L/R joint features.
-        Negates x coordinates and preserves anatomical consistency.
-        For mix representation (325 dims), flips rel_3d and recomputes the 286 3D angles dynamically.
+        - Coordinates: Negates x coordinates (x -> -x), preserves y, z and visibility.
+        - Triplet angles (286 dims): Swaps symmetric triplet channels without negating values.
+        - Pair angles (78 dims): Swaps symmetric pair channels.
+        - mix representation (325 dims): flips rel_3d and recomputes the 286 3D angles dynamically.
 
         Joint swap pairs for 13-joint layout (RAW_POINTS_13 order):
           idx 0: NOSE (no swap, x -> -x)
@@ -238,6 +310,18 @@ class LandmarkAugmenter:
           idx 11 <-> 12: LEFT_ANKLE <-> RIGHT_ANKLE
         """
         dim = x.shape[-1]
+        device = x.device
+
+        # Dedicated handling for Angle representations
+        if dim == 286:
+            # Triplet angles: swap symmetric triplet indices, angles remain positive in [0, pi]
+            sym_idx = self.triplet_sym_indices.to(device)
+            return x[..., sym_idx]
+        elif dim == 78:
+            # Pair angles: swap symmetric pair indices
+            sym_idx = self.pair_sym_indices.to(device)
+            return x[..., sym_idx]
+
         swap_pairs = [(1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12)]
 
         if dim == 325:
@@ -270,7 +354,7 @@ class LandmarkAugmenter:
         else:
             stride = 2
 
-        num_joints = dim // stride
+        num_joints = (dim - 1) // stride if (dim - 1) % stride == 0 else dim // stride
 
         for j_left, j_right in swap_pairs:
             if j_left >= num_joints or j_right >= num_joints:
@@ -287,6 +371,7 @@ class LandmarkAugmenter:
             idx_x = j * stride
             if idx_x < dim:
                 x_mir[..., idx_x] = -x_mir[..., idx_x]
+        # Notice: y, z, and visibility channels are fully preserved!
 
         return x_mir
 
@@ -355,7 +440,7 @@ class LandmarkAugmenter:
             return self.mirror(x)
         elif method == "speed_perturb":
             return self.speed_perturb(x)
-        elif method == "skel_gym_aug":
+        elif method in ("skel_gym_aug", "combined"):
             return self.skel_gym_aug(x)
         elif method == "none" or not method:
             return x

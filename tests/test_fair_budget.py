@@ -30,7 +30,7 @@ from src.data.features import (
     extract_mix_features,
     extract_features_by_method
 )
-from src.data.dataset import handle_zero_frames
+from src.data.dataset import handle_zero_frames, parse_segment_ranges, extract_windows_from_segment
 from src.models import (
     LSTMModel,
     BiLSTMModel,
@@ -75,9 +75,9 @@ class TestFairBudgetAndFeatures(unittest.TestCase):
         ang_3d = extract_features_by_method(self.df, "angle_3d")
         self.assertEqual(ang_3d.shape, (self.n_frames, 286))
 
-        # mix: 39 + 286 = 325
+        # mix: 39 + 78 = 117 (rel_3d + angle2_3d)
         mix = extract_features_by_method(self.df, "mix")
-        self.assertEqual(mix.shape, (self.n_frames, 325))
+        self.assertEqual(mix.shape, (self.n_frames, 117))
         self.assertFalse(np.isnan(mix).any())
 
     def test_02_zero_frame_handling(self):
@@ -95,6 +95,27 @@ class TestFairBudgetAndFeatures(unittest.TestCase):
         # Forward fill
         df_ffill = handle_zero_frames(df_corrupt, method="ffill")
         self.assertTrue((df_ffill.loc[10:15, coord_cols] != 0.0).any().any())
+
+        # 1. Multi-segment parsing validation
+        multi_label = "frame_000000 frame_000010 frame_000020 frame_000045"
+        ranges = parse_segment_ranges(multi_label, 100)
+        self.assertEqual(ranges, [(0, 11), (20, 46)])
+
+        # 2. Window-level zero frame quality gating
+        # A) Minor zero frames (2 frames out of 32 = 6.25% <= 20%) -> smoothly interpolated
+        df_minor = self.df.iloc[:40].copy().reset_index(drop=True)
+        df_minor.loc[5:6, coord_cols] = 0.0
+        wins_minor = extract_windows_from_segment(df_minor, "rel_3d", seq_len=32, stride=32, max_zero_ratio=0.20)
+        self.assertEqual(len(wins_minor), 1)
+        self.assertEqual(wins_minor[0].shape, (32, 39))
+        self.assertFalse(np.isnan(wins_minor[0]).any())
+
+        # B) Heavy zero frames (> 20%) -> window discarded
+        df_heavy = self.df.iloc[:32].copy().reset_index(drop=True)
+        df_heavy.loc[0:15, coord_cols] = 0.0  # 16/32 = 50% zeros
+        wins_heavy = extract_windows_from_segment(df_heavy, "rel_3d", seq_len=32, stride=32, max_zero_ratio=0.20)
+        self.assertEqual(len(wins_heavy), 0)
+
 
     def test_03_model_parameter_budgets(self):
         # Target: ~350K parameters +- 15% (297K to 402K)

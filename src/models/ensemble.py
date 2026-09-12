@@ -90,17 +90,22 @@ class StackingEnsemble:
 
 class WeightedSoftVotingEnsemble:
     """
-    Weighted Soft Voting Ensemble with continuous weights optimized on Validation set via SLSQP.
-    Directly implements Section 6 of RESEARCH_UPGRADE_ROADMAP.md.
-    Objective: minimize negative log-likelihood on validation probabilities.
+    Weighted Soft Voting Ensemble with Dual-Target Optimization (Window-Level and Video-Level).
+    Uses SLSQP constrained optimization to minimize negative log-likelihood (NLL).
     """
-    def __init__(self, weights: Optional[List[float]] = None):
-        self.weights = weights
-        self.is_fitted = (weights is not None)
+    def __init__(
+        self,
+        weights_window: Optional[List[float]] = None,
+        weights_video: Optional[List[float]] = None
+    ):
+        self.weights_window = weights_window
+        self.weights_video = weights_video
+        self.weights = weights_window  # Default backward compatibility
+        self.is_fitted = (weights_window is not None)
 
-    def fit(self, val_probabilities: List[np.ndarray], val_labels: np.ndarray) -> "WeightedSoftVotingEnsemble":
+    def fit_window(self, val_probabilities: List[np.ndarray], val_labels: np.ndarray) -> "WeightedSoftVotingEnsemble":
         """
-        Optimizes weights w in [0, 1] with sum(w) = 1 to minimize cross-entropy / negative log-likelihood on validation set.
+        Phase 1: Optimizes weights w_win in [0, 1] with sum(w) = 1 to minimize NLL on validation windows.
         """
         from scipy.optimize import minimize
         M = len(val_probabilities)
@@ -121,20 +126,129 @@ class WeightedSoftVotingEnsemble:
 
         res = minimize(nll_objective, init_weights, method='SLSQP', bounds=bounds, constraints=constraints)
         opt_w = np.array(res.x, dtype=np.float64)
-        self.weights = list(opt_w / np.sum(opt_w))
+        self.weights_window = list(opt_w / np.sum(opt_w))
+        self.weights = self.weights_window
         self.is_fitted = True
         return self
 
-    def predict_proba(self, model_probabilities: List[np.ndarray]) -> np.ndarray:
-        if not self.is_fitted or self.weights is None:
+    def fit_video(
+        self,
+        val_probabilities: List[np.ndarray],
+        val_labels: np.ndarray,
+        val_video_ids: List[str]
+    ) -> "WeightedSoftVotingEnsemble":
+        """
+        Phase 2: Optimizes weights w_vid in [0, 1] with sum(w) = 1 to minimize NLL on validation video consensus.
+        First aggregates each model's validation windows to video level, then optimizes w_vid.
+        """
+        from scipy.optimize import minimize
+        M = len(val_probabilities)
+        unique_vids = []
+        vid_to_indices = {}
+        for idx, v in enumerate(val_video_ids):
+            if v not in vid_to_indices:
+                unique_vids.append(v)
+                vid_to_indices[v] = []
+            vid_to_indices[v].append(idx)
+
+        # Aggregate each model's probabilities to video level
+        # Shape per model: (N_unique_videos, num_classes)
+        val_video_probs_per_model = []
+        video_true_labels = []
+        for v in unique_vids:
+            indices = vid_to_indices[v]
+            video_true_labels.append(val_labels[indices[0]])
+        video_true_labels = np.array(video_true_labels, dtype=np.int64)
+
+        for m_idx in range(M):
+            m_probs = val_probabilities[m_idx]
+            v_probs_m = [np.mean(m_probs[vid_to_indices[v]], axis=0) for v in unique_vids]
+            val_video_probs_per_model.append(np.array(v_probs_m, dtype=np.float64))
+
+        init_weights = np.ones(M, dtype=np.float64) / M
+        bounds = [(0.0, 1.0) for _ in range(M)]
+        constraints = ({'type': 'eq', 'fun': lambda w: np.sum(w) - 1.0})
+        eps = 1e-12
+
+        def nll_video_objective(w):
+            w = np.array(w, dtype=np.float64)
+            w_sum = np.sum(w)
+            if w_sum <= 0:
+                return 1e6
+            w_norm = w / w_sum
+            blended = sum(p * weight for p, weight in zip(val_video_probs_per_model, w_norm))
+            prob_true = blended[np.arange(len(video_true_labels)), video_true_labels]
+            return -np.mean(np.log(np.clip(prob_true, eps, 1.0)))
+
+        res = minimize(nll_video_objective, init_weights, method='SLSQP', bounds=bounds, constraints=constraints)
+        opt_w = np.array(res.x, dtype=np.float64)
+        self.weights_video = list(opt_w / np.sum(opt_w))
+        return self
+
+    def fit(self, val_probabilities: List[np.ndarray], val_labels: np.ndarray) -> "WeightedSoftVotingEnsemble":
+        return self.fit_window(val_probabilities, val_labels)
+
+    def predict_proba_window(self, model_probabilities: List[np.ndarray]) -> np.ndarray:
+        w = self.weights_window if self.weights_window is not None else self.weights
+        if w is None:
             return np.mean(model_probabilities, axis=0)
-        w = np.array(self.weights, dtype=np.float64)
-        w_norm = w / np.sum(w)
+        w_arr = np.array(w, dtype=np.float64)
+        w_norm = w_arr / np.sum(w_arr)
         return sum(p * weight for p, weight in zip(model_probabilities, w_norm))
 
-    def predict(self, model_probabilities: List[np.ndarray]) -> np.ndarray:
-        avg_probs = self.predict_proba(model_probabilities)
+    def predict_window(self, model_probabilities: List[np.ndarray]) -> np.ndarray:
+        avg_probs = self.predict_proba_window(model_probabilities)
         return np.argmax(avg_probs, axis=1)
+
+    def predict_proba(self, model_probabilities: List[np.ndarray]) -> np.ndarray:
+        return self.predict_proba_window(model_probabilities)
+
+    def predict(self, model_probabilities: List[np.ndarray]) -> np.ndarray:
+        return self.predict_window(model_probabilities)
+
+    def predict_video(
+        self,
+        model_probabilities: List[np.ndarray],
+        y_trues: np.ndarray,
+        video_ids: List[str]
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Dict[str, Any]]:
+        """
+        Evaluates at Video level using weights_video.
+        First aggregates each model's test windows to video level, then blends with weights_video.
+        """
+        unique_vids = []
+        vid_to_indices = {}
+        for idx, v in enumerate(video_ids):
+            if v not in vid_to_indices:
+                unique_vids.append(v)
+                vid_to_indices[v] = []
+            vid_to_indices[v].append(idx)
+
+        M = len(model_probabilities)
+        w = self.weights_video if self.weights_video is not None else self.weights_window
+        if w is None:
+            w = [1.0 / M] * M
+        w_norm = np.array(w, dtype=np.float64) / np.sum(w)
+
+        # Video-level probabilities per model
+        video_probs_per_model = []
+        y_video_true = []
+        for v in unique_vids:
+            indices = vid_to_indices[v]
+            y_video_true.append(int(y_trues[indices[0]]))
+
+        for m_idx in range(M):
+            m_probs = model_probabilities[m_idx]
+            v_probs_m = [np.mean(m_probs[vid_to_indices[v]], axis=0) for v in unique_vids]
+            video_probs_per_model.append(np.array(v_probs_m, dtype=np.float64))
+
+        final_video_probs = sum(p * weight for p, weight in zip(video_probs_per_model, w_norm))
+        y_video_pred = np.argmax(final_video_probs, axis=1)
+        y_video_true = np.array(y_video_true, dtype=np.int64)
+
+        from src.training.metrics import compute_metrics
+        metrics = compute_metrics(y_video_true, y_video_pred)
+        return y_video_true, y_video_pred, final_video_probs.astype(np.float32), metrics
 
 def aggregate_video_level_predictions(
     y_probs: np.ndarray,

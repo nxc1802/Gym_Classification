@@ -7,7 +7,7 @@ from .features import (
     extract_features_by_method
 )
 from .augmentations import LandmarkAugmenter
-from .dataset import GymDataset, get_dataloaders, sliding_windows, parse_segment_range
+from .dataset import GymDataset, get_dataloaders, sliding_windows, parse_segment_range, parse_segment_ranges, extract_windows_from_segment
 from .download import download_kaggle_dataset
 from .report import generate_dataset_report, run_mediapipe_extraction_pipeline
 
@@ -24,6 +24,8 @@ __all__ = [
     "get_dataloaders",
     "sliding_windows",
     "parse_segment_range",
+    "parse_segment_ranges",
+    "extract_windows_from_segment",
     "download_kaggle_dataset",
     "generate_dataset_report",
     "run_mediapipe_extraction_pipeline"

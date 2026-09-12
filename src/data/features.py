@@ -187,10 +187,11 @@ def compute_triplet_angles_3d(df: pd.DataFrame, points: List[str] = RAW_POINTS_1
 # Alias for backwards compatibility
 compute_triplet_angles = compute_triplet_angles_2d
 
-def compute_pair_angles(df: pd.DataFrame, points: List[str] = RAW_POINTS_13) -> np.ndarray:
+def compute_pair_angles_2d(df: pd.DataFrame, points: List[str] = RAW_POINTS_13) -> np.ndarray:
     """
-    Computes absolute angle relative to horizontal axis for all C(len(points), 2) pairs.
+    Computes absolute angle relative to horizontal axis for all C(len(points), 2) pairs in 2D.
     For 13 points, total pairs = 78 angles.
+    theta = arctan2(dy, dx) in [-pi, pi].
     Shape: (N_frames, 78)
     """
     n_frames = len(df)
@@ -210,18 +211,54 @@ def compute_pair_angles(df: pd.DataFrame, points: List[str] = RAW_POINTS_13) -> 
 
     return angles
 
-def extract_mix_features(df: pd.DataFrame) -> np.ndarray:
-    """
-    Extracts the unified Proposed Mix representation:
-    Combines hip-midpoint-relative coordinates (rel_3d: 13*3 = 39 dims)
-    and joint angles (angle_3d: 286 dims) = 325 dimensions.
-    NOTE: Raw concatenation without per-sequence z-score.
-    Normalization should be applied at dataset level using train-set statistics.
-    """
-    rel = extract_relative_features(df, RAW_POINTS_13, dims=["x", "y", "z"], include_origin_vis=False)  # (N, 39)
-    ang = compute_triplet_angles_3d(df, RAW_POINTS_13)  # (N, 286)
+# Alias for backwards compatibility
+compute_pair_angles = compute_pair_angles_2d
 
-    return np.concatenate([rel, ang], axis=1).astype(np.float32)
+def compute_pair_angles_3d(df: pd.DataFrame, points: List[str] = RAW_POINTS_13) -> np.ndarray:
+    """
+    Computes 3D inclination angle relative to the horizontal ground plane (X-Z) for all C(len(points), 2) pairs.
+    In MediaPipe coordinates: Y is vertical, (X, Z) is horizontal ground plane.
+    Elevation angle from horizontal ground: theta = arctan2(dy, sqrt(dx^2 + dz^2)) in [-pi/2, pi/2].
+    Invariant to camera yaw rotation around the vertical Y-axis.
+    For 13 points, total pairs = 78 angles.
+    Shape: (N_frames, 78)
+    """
+    n_frames = len(df)
+    coords_3d = {}
+    for pt in points:
+        x = df[f"{pt}_x"].fillna(0.0).values if f"{pt}_x" in df.columns else np.zeros(n_frames, dtype=np.float32)
+        y = df[f"{pt}_y"].fillna(0.0).values if f"{pt}_y" in df.columns else np.zeros(n_frames, dtype=np.float32)
+        z = df[f"{pt}_z"].fillna(0.0).values if f"{pt}_z" in df.columns else np.zeros(n_frames, dtype=np.float32)
+        coords_3d[pt] = np.stack([x, y, z], axis=1)
+
+    pairs = list(combinations(points, 2))
+    angles = np.zeros((n_frames, len(pairs)), dtype=np.float32)
+
+    for idx, (a, b) in enumerate(pairs):
+        dx = coords_3d[b][:, 0] - coords_3d[a][:, 0]
+        dy = coords_3d[b][:, 1] - coords_3d[a][:, 1]
+        dz = coords_3d[b][:, 2] - coords_3d[a][:, 2]
+        ground_dist = np.sqrt(dx**2 + dz**2)
+        angles[:, idx] = np.arctan2(dy, ground_dist)
+
+    return angles
+
+def extract_mix_features(df: pd.DataFrame, components: Optional[List[str]] = None) -> np.ndarray:
+    """
+    Extracts unified Mix representation by dynamically concatenating arbitrary feature sets.
+    Default components: ["rel_3d", "angle2_3d"] -> 39 + 78 = 117 dimensions.
+    """
+    if components is None:
+        components = ["rel_3d", "angle2_3d"]
+
+    extracted = []
+    for comp in components:
+        feat = extract_features_by_method(df, comp.strip())
+        if isinstance(feat, tuple):
+            feat = np.concatenate(feat, axis=1)
+        extracted.append(feat)
+
+    return np.concatenate(extracted, axis=1).astype(np.float32)
 
 def extract_joint_motion_features(
     df: pd.DataFrame,
@@ -268,23 +305,40 @@ def extract_bone_motion_features(
 def extract_features_by_method(df: pd.DataFrame, method: str) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
     """
     Dispatches feature extraction based on method name.
-    Unified feature extraction dispatch matching the exact paper specification:
-      - raw_2d (26), raw_3d (39)
-      - rel_2d (26), rel_3d (39)
+    Supports single feature streams or dynamic combinations via '+' or 'mix:':
+      - raw_2d (26), raw_3d (39), raw_13 (39), raw_13_2d (26), raw_13_3d (39), raw_13_4 (52)
+      - rel_2d (26), rel_3d (39), rel_13 (39), rel_13_2d (26), rel_13_3d (39), rel_13_4 (53)
       - bone_2d (26), bone_3d (39)
       - joint_motion_2d (26), joint_motion_3d (39)
       - bone_motion_2d (26), bone_motion_3d (39)
       - angle_2d (286), angle_3d (286)
-      - mix (325): Unified angle_3d + rel_3d + velocity
+      - angle2_2d (78), angle2_3d (78)
+      - mix (117): Default unified rel_3d (39) + angle2_3d (78)
+      - Arbitrary combinations: e.g. 'rel_3d+angle2_3d', 'mix:raw_3d,bone_3d'
     """
-    if method == "raw_2d":
+    # Dynamic combination check
+    if "+" in method:
+        parts = [p.strip() for p in method.split("+") if p.strip()]
+        return extract_mix_features(df, components=parts)
+    elif method.startswith("mix:"):
+        inner = method[4:]
+        parts = [p.strip() for p in inner.split(",") if p.strip()]
+        return extract_mix_features(df, components=parts)
+    elif method == "mix":
+        return extract_mix_features(df, components=["rel_3d", "angle2_3d"])  # 117
+
+    if method in ("raw_2d", "raw_13_2d"):
         return extract_raw_features(df, RAW_POINTS_13, ["x", "y"])  # 26
-    elif method == "raw_3d":
+    elif method in ("raw_3d", "raw_13", "raw_13_3d"):
         return extract_raw_features(df, RAW_POINTS_13, ["x", "y", "z"])  # 39
-    elif method == "rel_2d":
+    elif method in ("rel_2d", "rel_13_2d"):
         return extract_relative_features(df, RAW_POINTS_13, ["x", "y"], include_origin_vis=False)  # 26
-    elif method == "rel_3d":
+    elif method in ("rel_3d", "rel_13", "rel_13_3d"):
         return extract_relative_features(df, RAW_POINTS_13, ["x", "y", "z"], include_origin_vis=False)  # 39
+    elif method in ("raw_13_4", "13_4"):
+        return extract_raw_features(df, RAW_POINTS_13, ["x", "y", "z", "visibility"])  # 52
+    elif method in ("rel_13_4", "12rel_4"):
+        return extract_relative_features(df, RAW_POINTS_13, ["x", "y", "z", "visibility"], include_origin_vis=True)  # 53
     elif method == "bone_2d":
         return extract_bone_features(df, RAW_POINTS_13, ["x", "y"])  # 26
     elif method == "bone_3d":
@@ -301,22 +355,18 @@ def extract_features_by_method(df: pd.DataFrame, method: str) -> Union[np.ndarra
         return compute_triplet_angles_2d(df, RAW_POINTS_13)  # 286
     elif method == "angle_3d":
         return compute_triplet_angles_3d(df, RAW_POINTS_13)  # 286
-    elif method == "mix":
-        return extract_mix_features(df)  # 325
+    elif method in ("angle2_2d", "angle2"):
+        return compute_pair_angles_2d(df, RAW_POINTS_13)  # 78
+    elif method == "angle2_3d":
+        return compute_pair_angles_3d(df, RAW_POINTS_13)  # 78
 
     # Legacy support
     elif method == "full_4":
         return extract_raw_features(df, RAW_POINTS_33, ["x", "y", "z", "visibility"])  # 132
     elif method == "full_rel_4":
         return extract_relative_features(df, RAW_POINTS_33, ["x", "y", "z", "visibility"], include_origin_vis=True)  # 133
-    elif method == "13_4":
-        return extract_raw_features(df, RAW_POINTS_13, ["x", "y", "z", "visibility"])  # 52
-    elif method == "12rel_4":
-        return extract_relative_features(df, RAW_POINTS_13, ["x", "y", "z", "visibility"], include_origin_vis=True)  # 53
     elif method == "angle3":
         return compute_triplet_angles_2d(df, RAW_POINTS_13)  # 286
-    elif method == "angle2":
-        return compute_pair_angles(df, RAW_POINTS_13)  # 78
     elif method == "direct_concat":
         rel = extract_relative_features(df, RAW_POINTS_13, ["x", "y", "z", "visibility"], include_origin_vis=True)  # 53
         ang = compute_triplet_angles_2d(df, RAW_POINTS_13)  # 286
@@ -327,3 +377,4 @@ def extract_features_by_method(df: pd.DataFrame, method: str) -> Union[np.ndarra
         return (rel, ang)
     else:
         raise ValueError(f"Unsupported feature extraction method: {method}")
+

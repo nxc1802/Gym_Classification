@@ -7,13 +7,13 @@
 >   - **Validation Set (208 videos):** 2,147 windows (stride = 32).
 >   - **Held-out Test Set (236 videos):** 3,337 windows (stride = 32).
 > - **Tham số huấn luyện cố định:** **`--epochs 100 --patience 10`** trên toàn bộ các mô hình đơn lẻ.
-> - **Đồng bộ dữ liệu:** Đã lưu trữ trên Hugging Face Hub: [`Cuong2004/gym-exercise-landmarks`](https://huggingface.co/datasets/Cuong2004/gym-exercise-landmarks) và đồng bộ tại `data/landmarks/`.
+> - **Đồng bộ dữ liệu:** Đã lưu trữ trên Hugging Face Hub: [`Cuong2004/gym-exercise-landmarks`](https://huggingface.co/datasets/Cuong2004/gym-exercise-landmarks). Tải toàn bộ bằng: `python3 run.py pull-landmarks-hf --dest_dir data/landmarks` (tự động giải nén landmarks và tải đồng bộ file metadata phân đoạn `data/Final_dataset_metadata.csv`).
 
 ---
 
 ## I. Danh Sách Nhiệm Vụ Cốt Lõi (Core Tasks)
 - [x] 1. Setup & kết nối Marimo server, clone repository, trích xuất landmarks MediaPipe Pose Heavy (complexity=2).
-- [x] 2. Push landmarks dataset lên Hugging Face và đồng bộ về local `data/landmarks/`.
+- [x] 2. Push landmarks dataset và `Final_dataset_metadata.csv` lên Hugging Face và đồng bộ về local (`data/landmarks/` & `data/Final_dataset_metadata.csv`).
 - [x] 3. Chạy Smoke Test (cách ly tại `outputs/smoke_test/` và `checkpoints/smoke_test/`, kiểm tra $SL=32$, train, eval, ensemble).
 - [x] 4. Thực thi tuần tự các Bảng thực nghiệm với $SL=32$, epochs=100, patience=10 (Bảng 1 $\rightarrow$ Bảng 2 $\rightarrow$ Bảng 3 $\rightarrow$ Bảng 4 $\rightarrow$ Bảng 5 $\rightarrow$ Bảng 6A, 6B & Bảng 7).
 - [x] 5. Tự động đồng bộ checkpoint, kết quả và confusion matrix vào `outputs/EXPERIMENT_RESULTS.md` và Hugging Face Hub.
@@ -22,6 +22,14 @@
 ---
 
 ## II. Hướng Dẫn Quy Trình Cho Researcher & Developer
+
+0. **Chuẩn bị Dữ Liệu & Metadata từ Hugging Face Hub:**
+   - Để đồng bộ môi trường dữ liệu trên server mới hoặc máy cá nhân, chạy duy nhất 1 lệnh CLI:
+     ```bash
+     python3 run.py pull-landmarks-hf --dest_dir data/landmarks
+     ```
+   - **Lưu ý quan trọng:** Lệnh trên tự động tải đồng thời cả tập tin landmarks nén (`landmarks_dataset.zip` giải nén vào `data/landmarks/`) và file metadata phân đoạn [`data/Final_dataset_metadata.csv`](data/Final_dataset_metadata.csv).
+   - Tệp [`data/Final_dataset_metadata.csv`](data/Final_dataset_metadata.csv) là nguồn chân lý (Ground Truth) chứa danh sách 1,024 video phân chia Train/Val/Test và các mốc thời gian động tác (`label_content`) để trích xuất Action Segments trước khi tạo sliding windows $T=32$.
 
 1. **Thứ tự thực nghiệm chuẩn (Bảng 1 $\rightarrow$ Bảng 7 không khoảng trống):**
    $$\text{Bảng 1 (Temporal Baselines)} \longrightarrow \text{Bảng 2 (Temporal Aug)} \longrightarrow \text{Bảng 3 (GNN \& AAGCN Multi-Stream)} \longrightarrow \text{Bảng 4 (Graph Aug Ablation)} \longrightarrow \text{Bảng 5 (Ensemble)} \longrightarrow \text{Bảng 6A, 6B \& 7}$$
@@ -49,80 +57,79 @@
      - Bone: `checkpoints/best_AAGCN_T3.6_bone_3d.pt`
      - Joint Motion: `checkpoints/best_AAGCN_T3.7_joint_motion_3d.pt`
      - Bone Motion: `checkpoints/best_AAGCN_T3.8_bone_motion_3d.pt`
-   - **Bảng 5 Cross-Paradigm Ensemble:** Kết hợp Best Transformer (`checkpoints/best_Transformer_T1.21_mix.pt` hoặc `checkpoints/best_Transformer_T2.2_mix.pt`) với các mô hình đồ thị từ Bảng 3/4.
+   - **Bảng 5 Cross-Paradigm Ensemble:** Kết hợp Best Sequence Model (`checkpoints/best_Transformer_T2.2_raw_3d.pt`) với mô hình đồ thị tốt nhất (`checkpoints/best_AAGCN_T4.2_rel_3d.pt`).
 
 ---
 
 ## III. Danh Sách CLI Thực Nghiệm Chi Tiết
 
-### 0. Smoke Test Pipeline (Kiểm tra nhanh toàn diện)
+### 0. Tải Dữ Liệu & Smoke Test Pipeline
 
-#### Cách 1: Chạy toàn bộ test suite tự động (Train $\rightarrow$ Eval $\rightarrow$ Ensemble $\rightarrow$ Video-Level $\rightarrow$ Verify Isolation)
+#### Tải đồng bộ Landmarks và Metadata từ HF Hub:
+```bash
+python3 run.py pull-landmarks-hf --dest_dir data/landmarks
+```
+
+#### Smoke Test tự động (Train $\rightarrow$ Eval $\rightarrow$ Ensemble $\rightarrow$ Video-Level $\rightarrow$ Verify Isolation):
 ```bash
 python3 scripts/smoke_test.py
 ```
 
-#### Cách 2: Chạy lẻ từng thành phần Smoke Test
-```bash
-# 1. Smoke test Transformer (Mix, SL=32)
-python3 run.py train --model Transformer --feature mix --smoke_test --epochs 2 --device auto --use_amp --in_memory
-
-# 2. Smoke test Graph AAGCN (Rel 3D, SL=32)
-python3 run.py train --model AAGCN --feature rel_3d --smoke_test --epochs 2 --device auto --use_amp --in_memory
-
-# 3. Smoke test Single-Model Video-Level Evaluation
-python3 run.py evaluate --checkpoint checkpoints/smoke_test/best_Transformer_T1.21_mix.pt --model Transformer --feature mix --video_level --smoke_test --device auto
-
-# 4. Smoke test Ensemble Video-Level Evaluation (SL=32, Stride=32)
-python3 run.py ensemble --method weighted_soft --checkpoints checkpoints/smoke_test/best_Transformer_T1.21_mix.pt checkpoints/smoke_test/best_AAGCN_T3.5_rel_3d.pt --seq_len 32 --stride 32 --video_level --smoke_test --device auto
-```
-
 ---
 
-### Bảng 1: Temporal Models on Landmark Feature Sets (21 runs, $SL=32$)
-*Benchmark 3 kiến trúc chuỗi thời gian trên 7 không gian biểu diễn (Controlled Budget $\approx 350\text{K}$, Epochs 100, Patience 10).*
+### Bảng 1: Temporal Models on Landmark Feature Sets (27 runs, $SL=32$)
+*Benchmark 3 kiến trúc chuỗi thời gian trên 9 không gian biểu diễn (Controlled Budget $\approx 350\text{K}$, Epochs 100, Patience 10).*
 
-#### 1. LSTM (7 runs)
+#### 1. LSTM (9 runs)
 ```bash
 python3 run.py train --model LSTM --feature raw_2d --exp_id T1.1 --epochs 100 --patience 10 --device auto --use_amp --in_memory
 python3 run.py train --model LSTM --feature rel_2d --exp_id T1.2 --epochs 100 --patience 10 --device auto --use_amp --in_memory
 python3 run.py train --model LSTM --feature angle_2d --exp_id T1.3 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model LSTM --feature raw_3d --exp_id T1.4 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model LSTM --feature rel_3d --exp_id T1.5 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model LSTM --feature angle_3d --exp_id T1.6 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model LSTM --feature mix --exp_id T1.7 --epochs 100 --patience 10 --video_level --device auto --use_amp --in_memory
+python3 run.py train --model LSTM --feature angle2_2d --exp_id T1.4 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model LSTM --feature raw_3d --exp_id T1.5 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model LSTM --feature rel_3d --exp_id T1.6 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model LSTM --feature angle_3d --exp_id T1.7 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model LSTM --feature angle2_3d --exp_id T1.8 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model LSTM --feature mix --exp_id T1.9 --epochs 100 --patience 10 --video_level --device auto --use_amp --in_memory
 ```
 
-#### 2. BiLSTM (7 runs)
+#### 2. BiLSTM (9 runs)
 ```bash
-python3 run.py train --model BiLSTM --feature raw_2d --exp_id T1.8 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model BiLSTM --feature rel_2d --exp_id T1.9 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model BiLSTM --feature angle_2d --exp_id T1.10 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model BiLSTM --feature raw_3d --exp_id T1.11 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model BiLSTM --feature rel_3d --exp_id T1.12 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model BiLSTM --feature angle_3d --exp_id T1.13 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model BiLSTM --feature mix --exp_id T1.14 --epochs 100 --patience 10 --video_level --device auto --use_amp --in_memory
+python3 run.py train --model BiLSTM --feature raw_2d --exp_id T1.10 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model BiLSTM --feature rel_2d --exp_id T1.11 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model BiLSTM --feature angle_2d --exp_id T1.12 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model BiLSTM --feature angle2_2d --exp_id T1.13 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model BiLSTM --feature raw_3d --exp_id T1.14 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model BiLSTM --feature rel_3d --exp_id T1.15 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model BiLSTM --feature angle_3d --exp_id T1.16 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model BiLSTM --feature angle2_3d --exp_id T1.17 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model BiLSTM --feature mix --exp_id T1.18 --epochs 100 --patience 10 --video_level --device auto --use_amp --in_memory
 ```
 
-#### 3. Transformer (7 runs)
+#### 3. Transformer (9 runs)
 ```bash
-python3 run.py train --model Transformer --feature raw_2d --exp_id T1.15 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model Transformer --feature rel_2d --exp_id T1.16 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model Transformer --feature angle_2d --exp_id T1.17 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model Transformer --feature raw_3d --exp_id T1.18 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model Transformer --feature rel_3d --exp_id T1.19 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model Transformer --feature angle_3d --exp_id T1.20 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model Transformer --feature mix --exp_id T1.21 --epochs 100 --patience 10 --video_level --device auto --use_amp --in_memory
+python3 run.py train --model Transformer --feature raw_2d --exp_id T1.19 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model Transformer --feature rel_2d --exp_id T1.20 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model Transformer --feature angle_2d --exp_id T1.21 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model Transformer --feature angle2_2d --exp_id T1.22 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model Transformer --feature raw_3d --exp_id T1.23 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model Transformer --feature rel_3d --exp_id T1.24 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model Transformer --feature angle_3d --exp_id T1.25 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model Transformer --feature angle2_3d --exp_id T1.26 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+python3 run.py train --model Transformer --feature mix --exp_id T1.27 --epochs 100 --patience 10 --video_level --device auto --use_amp --in_memory
 ```
 
 ---
 
-### Bảng 2: Data Augmentation Strategies on Best Transformer (2 runs, $SL=32$)
-*Khảo sát tăng cường dữ liệu: Baseline sạch (None) vs. SkelGym-Aug động trên Transformer Mix.*
+### Bảng 2: Data Augmentation Strategies on Best Sequence Model (SL=32)
+*Khảo sát tăng cường dữ liệu: Baseline sạch (None) vs. SkelGym-Aug động trên mô hình chuỗi thời gian tốt nhất (Transformer rel_3d).*
 
 ```bash
-python3 run.py train --model Transformer --feature mix --augment none --exp_id T2.1 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-python3 run.py train --model Transformer --feature mix --augment skel_gym_aug --exp_id T2.2 --epochs 100 --patience 10 --video_level --device auto --use_amp --in_memory
+# T2.1: Baseline sạch không augmentation (kế thừa từ T1.24)
+python3 run.py train --model Transformer --feature rel_3d --augment none --exp_id T2.1 --epochs 100 --patience 10 --video_level --device auto --use_amp --in_memory
+
+# T2.2: SkelGym-Aug động (Lật gương song ánh, Xoay yaw 3D +-15 deg, Co dãn không hỏng vis, Jitter kẹp biên)
+python3 run.py train --model Transformer --feature rel_3d --augment skel_gym_aug --exp_id T2.2 --epochs 100 --patience 10 --video_level --device auto --use_amp --in_memory
 ```
 
 ---
@@ -157,74 +164,29 @@ python3 run.py ensemble --method weighted_soft --exp_id T3.10 --seq_len 32 --str
 
 ---
 
-### Bảng 4: Data Augmentation Ablation on Graph Architectures (4 runs, $SL=32$)
-*Ablation study đánh giá định lượng tác động của SkelGym-Aug (None vs Dynamic Augmentation) trên mô hình đồ thị không-thời gian (ST-GCN và AAGCN).*
+### Bảng 4: Data Augmentation Ablation on Graph Architectures (2 runs, $SL=32$)
+*Ablation study đánh giá định lượng tác động của SkelGym-Aug (None vs Dynamic Augmentation) trên mô hình đồ thị tốt nhất (AAGCN bone_3d).*
 
-#### 1. ST-GCN Augmentation Ablation (2 runs)
 ```bash
-# ST-GCN (Rel 3D) - Baseline sạch (None)
-python3 run.py train --model STGCN --feature rel_3d --augment none --exp_id T4.1 --epochs 100 --patience 10 --video_level --device auto --use_amp --in_memory
+# T4.1: AAGCN (Bone 3D) - Baseline sạch (None, kế thừa từ T3.6)
+python3 run.py train --model AAGCN --feature bone_3d --augment none --exp_id T4.1 --epochs 100 --patience 10 --video_level --device auto --use_amp --in_memory
 
-# ST-GCN (Rel 3D) - SkelGym-Aug (Dynamic on-the-fly)
-python3 run.py train --model STGCN --feature rel_3d --augment skel_gym_aug --exp_id T4.2 --epochs 100 --patience 10 --video_level --device auto --use_amp --in_memory
-```
-
-#### 2. Adaptive GCN (AAGCN) Augmentation Ablation (2 runs)
-```bash
-# AAGCN (Rel 3D) - Baseline sạch (None)
-python3 run.py train --model AAGCN --feature rel_3d --augment none --exp_id T4.3 --epochs 100 --patience 10 --device auto --use_amp --in_memory
-
-# AAGCN (Rel 3D) - SkelGym-Aug (Dynamic on-the-fly)
-python3 run.py train --model AAGCN --feature rel_3d --augment skel_gym_aug --exp_id T4.4 --epochs 100 --patience 10 --device auto --use_amp --in_memory
+# T4.2: AAGCN (Bone 3D) - SkelGym-Aug (Dynamic on-the-fly)
+python3 run.py train --model AAGCN --feature bone_3d --augment skel_gym_aug --exp_id T4.2 --epochs 100 --patience 10 --video_level --device auto --use_amp --in_memory
 ```
 
 ---
 
-### Bảng 5: Heterogeneous Cross-Paradigm Ensemble (5 runs, $SL=32$)
-*Hợp nhất đa mô hình giữa chuỗi thời gian (Transformer) và đồ thị thích ứng (AAGCN) trên cùng độ dài chuỗi $SL=32$.*
+### Bảng 5: Heterogeneous Cross-Paradigm Ensemble (Thống nhất Weighted Soft Voting)
+*Hợp nhất đa mô hình giữa chuỗi thời gian (Best Sequence: Transformer rel_3d aug) và đồ thị thích ứng (Best Graph: AAGCN bone_3d aug) qua Dual-Target Optimization.*
 
 ```bash
-# 1. Hard Voting (Best Transformer + Best ST-GCN)
-python3 run.py ensemble --method hard --exp_id T5.1 --seq_len 32 --stride 32 --checkpoints checkpoints/best_Transformer_T1.21_mix.pt checkpoints/best_STGCN_T3.2_rel_3d.pt --device auto
-
-# 2. Soft Voting (Best Transformer + Best ST-GCN)
-python3 run.py ensemble --method soft --exp_id T5.2 --seq_len 32 --stride 32 --checkpoints checkpoints/best_Transformer_T1.21_mix.pt checkpoints/best_STGCN_T3.2_rel_3d.pt --device auto
-
-# 3. Stacking Ensemble (Best Transformer + Best ST-GCN)
-python3 run.py ensemble --method stacking --exp_id T5.3 --seq_len 32 --stride 32 --checkpoints checkpoints/best_Transformer_T1.21_mix.pt checkpoints/best_STGCN_T3.2_rel_3d.pt --device auto
-
-# 4. Tri-Model Grand Ensemble (Transformer Mix + AAGCN Joint + AAGCN Bone) - Tự động cập nhật Bảng 5 (T5.4) và Bảng 7
-python3 run.py ensemble --method weighted_soft --exp_id T5.4 --seq_len 32 --stride 32 --video_level --checkpoints checkpoints/best_Transformer_T1.21_mix.pt checkpoints/best_AAGCN_T3.5_rel_3d.pt checkpoints/best_AAGCN_T3.6_bone_3d.pt --device auto
-
-# 5. Grand 5-Stream SOTA Ensemble (Transformer Mix + Four-Stream AAGCN) - Tự động cập nhật Bảng 5 (T5.5), Bảng 6A, Bảng 6B và Bảng 7
-python3 run.py ensemble --method weighted_soft --exp_id T5.5 --seq_len 32 --stride 32 --video_level --checkpoints checkpoints/best_Transformer_T1.21_mix.pt checkpoints/best_AAGCN_T3.5_rel_3d.pt checkpoints/best_AAGCN_T3.6_bone_3d.pt checkpoints/best_AAGCN_T3.7_joint_motion_3d.pt checkpoints/best_AAGCN_T3.8_bone_motion_3d.pt --device auto
+# Grand Heterogeneous Ensemble (Weighted Soft Voting với Tối ưu hóa kép: Window Phase 1 & Video Phase 2)
+# Tự động cập nhật Bảng 5, Bảng 6A, 6B và dòng Grand SOTA trong Bảng 7
+python3 run.py ensemble --method weighted_soft --exp_id T5.1 --seq_len 32 --stride 32 --video_level --checkpoints checkpoints/best_Transformer_T2.2_rel_3d.pt checkpoints/best_AAGCN_T4.2_bone_3d.pt --device auto
 ```
 
 ---
 
 ### Bảng 6A, 6B & 7: Video-Level Aggregation Benchmark
-*Đánh giá toàn diện cấp độ Video trên toàn bộ 236 video bài tập độc lập.*
-
-#### 1. Đánh giá Grand SOTA Ensemble (Tự động cập nhật Bảng 6A, 6B và dòng Grand SOTA trong Bảng 7)
-```bash
-python3 run.py ensemble --method weighted_soft --exp_id T5.5 --video_level --seq_len 32 --stride 32 --checkpoints checkpoints/best_Transformer_T1.21_mix.pt checkpoints/best_AAGCN_T3.5_rel_3d.pt checkpoints/best_AAGCN_T3.6_bone_3d.pt checkpoints/best_AAGCN_T3.7_joint_motion_3d.pt checkpoints/best_AAGCN_T3.8_bone_motion_3d.pt --device auto
-```
-
-#### 2. Đánh giá Video-Level cho các Baseline chuỗi thời gian & Đồ thị đơn lẻ (Cập nhật Bảng 7)
-*(Chỉ cần chạy nếu trong lúc train chưa kèm cờ `--video_level`)*
-```bash
-# Baseline LSTM (Mix)
-python3 run.py evaluate --checkpoint checkpoints/best_LSTM_T1.7_mix.pt --model LSTM --feature mix --video_level --device auto
-
-# Baseline BiLSTM (Mix)
-python3 run.py evaluate --checkpoint checkpoints/best_BiLSTM_T1.14_mix.pt --model BiLSTM --feature mix --video_level --device auto
-
-# Baseline ST-GCN (Rel 3D)
-python3 run.py evaluate --checkpoint checkpoints/best_STGCN_T3.2_rel_3d.pt --model STGCN --feature rel_3d --video_level --device auto
-
-# Best Transformer (Mix)
-python3 run.py evaluate --checkpoint checkpoints/best_Transformer_T1.21_mix.pt --model Transformer --feature mix --video_level --device auto
-
-# Best Transformer + SkelGym-Aug
-python3 run.py evaluate --checkpoint checkpoints/best_Transformer_T2.2_mix.pt --model Transformer --feature mix --video_level --device auto
-```
+*Đánh giá toàn diện cấp độ Video trên toàn bộ 236 video bài tập độc lập (tự động cập nhật bởi lệnh ensemble trên).*

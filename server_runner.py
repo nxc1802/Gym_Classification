@@ -30,41 +30,48 @@ REPORT_FILE = ROOT_DIR / "outputs" / "EXPERIMENT_RESULTS.md"
 LOGS_DIR = ROOT_DIR / "outputs" / "logs"
 
 # ==============================================================================
-# TABLE 1: Temporal Models on Landmark Feature Sets (21 runs, SL=32)
+# TABLE 1: Temporal Models on Landmark Feature Sets (27 runs, SL=32)
 # ==============================================================================
 TABLE1_EXPERIMENTS = [
-    # LSTM on 7 feature spaces
+    # LSTM on 9 feature spaces
     {"name": "T1.1_LSTM_raw_2d", "exp_id": "T1.1", "ckpt": "checkpoints/best_LSTM_T1.1_raw_2d.pt", "cmd": ["run.py", "train", "--model", "LSTM", "--feature", "raw_2d", "--exp_id", "T1.1", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
     {"name": "T1.2_LSTM_rel_2d", "exp_id": "T1.2", "ckpt": "checkpoints/best_LSTM_T1.2_rel_2d.pt", "cmd": ["run.py", "train", "--model", "LSTM", "--feature", "rel_2d", "--exp_id", "T1.2", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
     {"name": "T1.3_LSTM_angle_2d", "exp_id": "T1.3", "ckpt": "checkpoints/best_LSTM_T1.3_angle_2d.pt", "cmd": ["run.py", "train", "--model", "LSTM", "--feature", "angle_2d", "--exp_id", "T1.3", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.4_LSTM_raw_3d", "exp_id": "T1.4", "ckpt": "checkpoints/best_LSTM_T1.4_raw_3d.pt", "cmd": ["run.py", "train", "--model", "LSTM", "--feature", "raw_3d", "--exp_id", "T1.4", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.5_LSTM_rel_3d", "exp_id": "T1.5", "ckpt": "checkpoints/best_LSTM_T1.5_rel_3d.pt", "cmd": ["run.py", "train", "--model", "LSTM", "--feature", "rel_3d", "--exp_id", "T1.5", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.6_LSTM_angle_3d", "exp_id": "T1.6", "ckpt": "checkpoints/best_LSTM_T1.6_angle_3d.pt", "cmd": ["run.py", "train", "--model", "LSTM", "--feature", "angle_3d", "--exp_id", "T1.6", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.7_LSTM_mix", "exp_id": "T1.7", "ckpt": "checkpoints/best_LSTM_T1.7_mix.pt", "cmd": ["run.py", "train", "--model", "LSTM", "--feature", "mix", "--exp_id", "T1.7", "--epochs", "100", "--patience", "10", "--video_level", "--device", "auto", "--use_amp", "--in_memory"]},
-    # BiLSTM on 7 feature spaces
-    {"name": "T1.8_BiLSTM_raw_2d", "exp_id": "T1.8", "ckpt": "checkpoints/best_BiLSTM_T1.8_raw_2d.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "raw_2d", "--exp_id", "T1.8", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.9_BiLSTM_rel_2d", "exp_id": "T1.9", "ckpt": "checkpoints/best_BiLSTM_T1.9_rel_2d.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "rel_2d", "--exp_id", "T1.9", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.10_BiLSTM_angle_2d", "exp_id": "T1.10", "ckpt": "checkpoints/best_BiLSTM_T1.10_angle_2d.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "angle_2d", "--exp_id", "T1.10", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.11_BiLSTM_raw_3d", "exp_id": "T1.11", "ckpt": "checkpoints/best_BiLSTM_T1.11_raw_3d.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "raw_3d", "--exp_id", "T1.11", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.12_BiLSTM_rel_3d", "exp_id": "T1.12", "ckpt": "checkpoints/best_BiLSTM_T1.12_rel_3d.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "rel_3d", "--exp_id", "T1.12", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.13_BiLSTM_angle_3d", "exp_id": "T1.13", "ckpt": "checkpoints/best_BiLSTM_T1.13_angle_3d.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "angle_3d", "--exp_id", "T1.13", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.14_BiLSTM_mix", "exp_id": "T1.14", "ckpt": "checkpoints/best_BiLSTM_T1.14_mix.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "mix", "--exp_id", "T1.14", "--epochs", "100", "--patience", "10", "--video_level", "--device", "auto", "--use_amp", "--in_memory"]},
-    # Transformer on 7 feature spaces
-    {"name": "T1.15_Transformer_raw_2d", "exp_id": "T1.15", "ckpt": "checkpoints/best_Transformer_T1.15_raw_2d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "raw_2d", "--exp_id", "T1.15", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.16_Transformer_rel_2d", "exp_id": "T1.16", "ckpt": "checkpoints/best_Transformer_T1.16_rel_2d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "rel_2d", "--exp_id", "T1.16", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.17_Transformer_angle_2d", "exp_id": "T1.17", "ckpt": "checkpoints/best_Transformer_T1.17_angle_2d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "angle_2d", "--exp_id", "T1.17", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.18_Transformer_raw_3d", "exp_id": "T1.18", "ckpt": "checkpoints/best_Transformer_T1.18_raw_3d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "raw_3d", "--exp_id", "T1.18", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.19_Transformer_rel_3d", "exp_id": "T1.19", "ckpt": "checkpoints/best_Transformer_T1.19_rel_3d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "rel_3d", "--exp_id", "T1.19", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.20_Transformer_angle_3d", "exp_id": "T1.20", "ckpt": "checkpoints/best_Transformer_T1.20_angle_3d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "angle_3d", "--exp_id", "T1.20", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T1.21_Transformer_mix", "exp_id": "T1.21", "ckpt": "checkpoints/best_Transformer_T1.21_mix.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "mix", "--exp_id", "T1.21", "--epochs", "100", "--patience", "10", "--video_level", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.4_LSTM_angle2_2d", "exp_id": "T1.4", "ckpt": "checkpoints/best_LSTM_T1.4_angle2_2d.pt", "cmd": ["run.py", "train", "--model", "LSTM", "--feature", "angle2_2d", "--exp_id", "T1.4", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.5_LSTM_raw_3d", "exp_id": "T1.5", "ckpt": "checkpoints/best_LSTM_T1.5_raw_3d.pt", "cmd": ["run.py", "train", "--model", "LSTM", "--feature", "raw_3d", "--exp_id", "T1.5", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.6_LSTM_rel_3d", "exp_id": "T1.6", "ckpt": "checkpoints/best_LSTM_T1.6_rel_3d.pt", "cmd": ["run.py", "train", "--model", "LSTM", "--feature", "rel_3d", "--exp_id", "T1.6", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.7_LSTM_angle_3d", "exp_id": "T1.7", "ckpt": "checkpoints/best_LSTM_T1.7_angle_3d.pt", "cmd": ["run.py", "train", "--model", "LSTM", "--feature", "angle_3d", "--exp_id", "T1.7", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.8_LSTM_angle2_3d", "exp_id": "T1.8", "ckpt": "checkpoints/best_LSTM_T1.8_angle2_3d.pt", "cmd": ["run.py", "train", "--model", "LSTM", "--feature", "angle2_3d", "--exp_id", "T1.8", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.9_LSTM_mix", "exp_id": "T1.9", "ckpt": "checkpoints/best_LSTM_T1.9_mix.pt", "cmd": ["run.py", "train", "--model", "LSTM", "--feature", "mix", "--exp_id", "T1.9", "--epochs", "100", "--patience", "10", "--video_level", "--device", "auto", "--use_amp", "--in_memory"]},
+    # BiLSTM on 9 feature spaces
+    {"name": "T1.10_BiLSTM_raw_2d", "exp_id": "T1.10", "ckpt": "checkpoints/best_BiLSTM_T1.10_raw_2d.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "raw_2d", "--exp_id", "T1.10", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.11_BiLSTM_rel_2d", "exp_id": "T1.11", "ckpt": "checkpoints/best_BiLSTM_T1.11_rel_2d.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "rel_2d", "--exp_id", "T1.11", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.12_BiLSTM_angle_2d", "exp_id": "T1.12", "ckpt": "checkpoints/best_BiLSTM_T1.12_angle_2d.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "angle_2d", "--exp_id", "T1.12", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.13_BiLSTM_angle2_2d", "exp_id": "T1.13", "ckpt": "checkpoints/best_BiLSTM_T1.13_angle2_2d.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "angle2_2d", "--exp_id", "T1.13", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.14_BiLSTM_raw_3d", "exp_id": "T1.14", "ckpt": "checkpoints/best_BiLSTM_T1.14_raw_3d.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "raw_3d", "--exp_id", "T1.14", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.15_BiLSTM_rel_3d", "exp_id": "T1.15", "ckpt": "checkpoints/best_BiLSTM_T1.15_rel_3d.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "rel_3d", "--exp_id", "T1.15", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.16_BiLSTM_angle_3d", "exp_id": "T1.16", "ckpt": "checkpoints/best_BiLSTM_T1.16_angle_3d.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "angle_3d", "--exp_id", "T1.16", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.17_BiLSTM_angle2_3d", "exp_id": "T1.17", "ckpt": "checkpoints/best_BiLSTM_T1.17_angle2_3d.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "angle2_3d", "--exp_id", "T1.17", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.18_BiLSTM_mix", "exp_id": "T1.18", "ckpt": "checkpoints/best_BiLSTM_T1.18_mix.pt", "cmd": ["run.py", "train", "--model", "BiLSTM", "--feature", "mix", "--exp_id", "T1.18", "--epochs", "100", "--patience", "10", "--video_level", "--device", "auto", "--use_amp", "--in_memory"]},
+    # Transformer on 9 feature spaces
+    {"name": "T1.19_Transformer_raw_2d", "exp_id": "T1.19", "ckpt": "checkpoints/best_Transformer_T1.19_raw_2d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "raw_2d", "--exp_id", "T1.19", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.20_Transformer_rel_2d", "exp_id": "T1.20", "ckpt": "checkpoints/best_Transformer_T1.20_rel_2d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "rel_2d", "--exp_id", "T1.20", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.21_Transformer_angle_2d", "exp_id": "T1.21", "ckpt": "checkpoints/best_Transformer_T1.21_angle_2d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "angle_2d", "--exp_id", "T1.21", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.22_Transformer_angle2_2d", "exp_id": "T1.22", "ckpt": "checkpoints/best_Transformer_T1.22_angle2_2d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "angle2_2d", "--exp_id", "T1.22", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.23_Transformer_raw_3d", "exp_id": "T1.23", "ckpt": "checkpoints/best_Transformer_T1.23_raw_3d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "raw_3d", "--exp_id", "T1.23", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.24_Transformer_rel_3d", "exp_id": "T1.24", "ckpt": "checkpoints/best_Transformer_T1.24_rel_3d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "rel_3d", "--exp_id", "T1.24", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.25_Transformer_angle_3d", "exp_id": "T1.25", "ckpt": "checkpoints/best_Transformer_T1.25_angle_3d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "angle_3d", "--exp_id", "T1.25", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.26_Transformer_angle2_3d", "exp_id": "T1.26", "ckpt": "checkpoints/best_Transformer_T1.26_angle2_3d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "angle2_3d", "--exp_id", "T1.26", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T1.27_Transformer_mix", "exp_id": "T1.27", "ckpt": "checkpoints/best_Transformer_T1.27_mix.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "mix", "--exp_id", "T1.27", "--epochs", "100", "--patience", "10", "--video_level", "--device", "auto", "--use_amp", "--in_memory"]},
 ]
 
 # ==============================================================================
-# TABLE 2: Data Augmentation Strategies on Best Transformer (2 runs, SL=32)
+# TABLE 2: Data Augmentation Strategies on Best Sequence Model (SL=32)
+# Baseline: Best Practice Sequence Backbone = Transformer rel_3d (T1.24)
 # ==============================================================================
 TABLE2_EXPERIMENTS = [
-    {"name": "T2.1_Transformer_mix_none", "exp_id": "T2.1", "ckpt": "checkpoints/best_Transformer_T2.1_mix.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "mix", "--augment", "none", "--exp_id", "T2.1", "--epochs", "100", "--patience", "10", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T2.2_Transformer_mix_skel_gym_aug", "exp_id": "T2.2", "ckpt": "checkpoints/best_Transformer_T2.2_mix.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "mix", "--augment", "skel_gym_aug", "--exp_id", "T2.2", "--epochs", "100", "--patience", "10", "--video_level", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T2.1_Transformer_rel_3d_none", "exp_id": "T2.1", "ckpt": "checkpoints/best_Transformer_T1.24_rel_3d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "rel_3d", "--augment", "none", "--exp_id", "T2.1", "--epochs", "100", "--patience", "10", "--video_level", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T2.2_Transformer_rel_3d_skel_gym_aug", "exp_id": "T2.2", "ckpt": "checkpoints/best_Transformer_T2.2_rel_3d.pt", "cmd": ["run.py", "train", "--model", "Transformer", "--feature", "rel_3d", "--augment", "skel_gym_aug", "--exp_id", "T2.2", "--epochs", "100", "--patience", "10", "--video_level", "--device", "auto", "--use_amp", "--in_memory"]},
 ]
 
 # ==============================================================================
@@ -85,62 +92,41 @@ TABLE3_EXPERIMENTS = [
     {
         "name": "T3.9_TwoStream_AAGCN",
         "exp_id": "T3.9",
-        "ckpt": "outputs/ensemble/cm_ensemble_weighted_soft.png",
+        "ckpt": "outputs/ensemble/cm_ensemble_T3.9_weighted_soft.png",
         "cmd": ["run.py", "ensemble", "--method", "weighted_soft", "--exp_id", "T3.9", "--seq_len", "32", "--stride", "32", "--video_level", "--checkpoints", "checkpoints/best_AAGCN_T3.5_rel_3d.pt", "checkpoints/best_AAGCN_T3.6_bone_3d.pt", "--device", "auto"]
     },
     {
         "name": "T3.10_FourStream_AAGCN",
         "exp_id": "T3.10",
-        "ckpt": "outputs/ensemble/cm_ensemble_weighted_soft.png",
+        "ckpt": "outputs/ensemble/cm_ensemble_T3.10_weighted_soft.png",
         "cmd": ["run.py", "ensemble", "--method", "weighted_soft", "--exp_id", "T3.10", "--seq_len", "32", "--stride", "32", "--video_level", "--checkpoints", "checkpoints/best_AAGCN_T3.5_rel_3d.pt", "checkpoints/best_AAGCN_T3.6_bone_3d.pt", "checkpoints/best_AAGCN_T3.7_joint_motion_3d.pt", "checkpoints/best_AAGCN_T3.8_bone_motion_3d.pt", "--device", "auto"]
     },
 ]
 
 # ==============================================================================
-# TABLE 4: Data Augmentation Ablation on Graph Architectures (4 runs)
+# TABLE 4: Data Augmentation Ablation on Graph Architectures (2 runs)
+# Baseline: Best Practice Single-Stream Backbone = AAGCN bone_3d (T3.6)
 # ==============================================================================
 TABLE4_EXPERIMENTS = [
-    {"name": "T4.1_STGCN_rel_3d_none", "exp_id": "T4.1", "ckpt": "checkpoints/best_STGCN_T4.1_rel_3d.pt", "cmd": ["run.py", "train", "--model", "STGCN", "--feature", "rel_3d", "--augment", "none", "--exp_id", "T4.1", "--epochs", "100", "--patience", "10", "--video_level", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T4.2_STGCN_rel_3d_skel_gym_aug", "exp_id": "T4.2", "ckpt": "checkpoints/best_STGCN_T4.2_rel_3d.pt", "cmd": ["run.py", "train", "--model", "STGCN", "--feature", "rel_3d", "--augment", "skel_gym_aug", "--exp_id", "T4.2", "--epochs", "100", "--patience", "10", "--video_level", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T4.3_AAGCN_rel_3d_none", "exp_id": "T4.3", "ckpt": "checkpoints/best_AAGCN_T4.3_rel_3d.pt", "cmd": ["run.py", "train", "--model", "AAGCN", "--feature", "rel_3d", "--augment", "none", "--exp_id", "T4.3", "--epochs", "100", "--patience", "10", "--video_level", "--device", "auto", "--use_amp", "--in_memory"]},
-    {"name": "T4.4_AAGCN_rel_3d_skel_gym_aug", "exp_id": "T4.4", "ckpt": "checkpoints/best_AAGCN_T4.4_rel_3d.pt", "cmd": ["run.py", "train", "--model", "AAGCN", "--feature", "rel_3d", "--augment", "skel_gym_aug", "--exp_id", "T4.4", "--epochs", "100", "--patience", "10", "--video_level", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T4.1_AAGCN_bone_3d_none", "exp_id": "T4.1", "ckpt": "checkpoints/best_AAGCN_T3.6_bone_3d.pt", "cmd": ["run.py", "train", "--model", "AAGCN", "--feature", "bone_3d", "--augment", "none", "--exp_id", "T4.1", "--epochs", "100", "--patience", "10", "--video_level", "--device", "auto", "--use_amp", "--in_memory"]},
+    {"name": "T4.2_AAGCN_bone_3d_skel_gym_aug", "exp_id": "T4.2", "ckpt": "checkpoints/best_AAGCN_T4.2_bone_3d.pt", "cmd": ["run.py", "train", "--model", "AAGCN", "--feature", "bone_3d", "--augment", "skel_gym_aug", "--exp_id", "T4.2", "--epochs", "100", "--patience", "10", "--video_level", "--device", "auto", "--use_amp", "--in_memory"]},
 ]
 
 # ==============================================================================
-# TABLE 5: Heterogeneous Cross-Paradigm Ensemble (5 runs)
+# TABLE 5: Heterogeneous Cross-Paradigm Ensemble (Unified Weighted Soft Voting)
+# Combines: Best Sequence (T2.2: Transformer rel_3d aug) + Best Graph (T4.2: AAGCN bone_3d aug)
+# Evaluates with Dual-Target Optimization (Window-level Phase 1 & Video-level Phase 2)
 # ==============================================================================
 TABLE5_EXPERIMENTS = [
     {
-        "name": "T5.1_Ensemble_HardVoting",
+        "name": "T5.1_Grand_Ensemble_WeightedSoft",
         "exp_id": "T5.1",
-        "ckpt": "outputs/ensemble/cm_ensemble_hard.png",
-        "cmd": ["run.py", "ensemble", "--method", "hard", "--exp_id", "T5.1", "--seq_len", "32", "--stride", "32", "--checkpoints", "checkpoints/best_Transformer_T1.21_mix.pt", "checkpoints/best_STGCN_T3.2_rel_3d.pt", "--device", "auto"]
-    },
-    {
-        "name": "T5.2_Ensemble_SoftVoting",
-        "exp_id": "T5.2",
-        "ckpt": "outputs/ensemble/cm_ensemble_soft.png",
-        "cmd": ["run.py", "ensemble", "--method", "soft", "--exp_id", "T5.2", "--seq_len", "32", "--stride", "32", "--checkpoints", "checkpoints/best_Transformer_T1.21_mix.pt", "checkpoints/best_STGCN_T3.2_rel_3d.pt", "--device", "auto"]
-    },
-    {
-        "name": "T5.3_Ensemble_Stacking",
-        "exp_id": "T5.3",
-        "ckpt": "outputs/ensemble/cm_ensemble_stacking.png",
-        "cmd": ["run.py", "ensemble", "--method", "stacking", "--exp_id", "T5.3", "--seq_len", "32", "--stride", "32", "--checkpoints", "checkpoints/best_Transformer_T1.21_mix.pt", "checkpoints/best_STGCN_T3.2_rel_3d.pt", "--device", "auto"]
-    },
-    {
-        "name": "T5.4_TriModel_GrandEnsemble",
-        "exp_id": "T5.4",
-        "ckpt": "outputs/ensemble/cm_ensemble_weighted_soft.png",
-        "cmd": ["run.py", "ensemble", "--method", "weighted_soft", "--exp_id", "T5.4", "--seq_len", "32", "--stride", "32", "--video_level", "--checkpoints", "checkpoints/best_Transformer_T1.21_mix.pt", "checkpoints/best_AAGCN_T3.5_rel_3d.pt", "checkpoints/best_AAGCN_T3.6_bone_3d.pt", "--device", "auto"]
-    },
-    {
-        "name": "T5.5_Grand_5Stream_SOTA",
-        "exp_id": "T5.5",
-        "ckpt": "outputs/ensemble/cm_ensemble_weighted_soft.png",
-        "cmd": ["run.py", "ensemble", "--method", "weighted_soft", "--exp_id", "T5.5", "--seq_len", "32", "--stride", "32", "--video_level", "--checkpoints", "checkpoints/best_Transformer_T1.21_mix.pt", "checkpoints/best_AAGCN_T3.5_rel_3d.pt", "checkpoints/best_AAGCN_T3.6_bone_3d.pt", "checkpoints/best_AAGCN_T3.7_joint_motion_3d.pt", "checkpoints/best_AAGCN_T3.8_bone_motion_3d.pt", "--device", "auto"]
+        "ckpt": "outputs/ensemble/cm_ensemble_T5.1_weighted_soft.png",
+        "cmd": ["run.py", "ensemble", "--method", "weighted_soft", "--exp_id", "T5.1", "--seq_len", "32", "--stride", "32", "--video_level", "--checkpoints", "checkpoints/best_Transformer_T2.2_rel_3d.pt", "checkpoints/best_AAGCN_T4.2_bone_3d.pt", "--device", "auto"]
     },
 ]
+
+
 
 class ParallelServerDaemon:
     def __init__(
