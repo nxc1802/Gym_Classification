@@ -1,0 +1,53 @@
+\documentclass[11pt]{letter}
+\usepackage[T1]{fontenc}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, urlcolor=blue, linkcolor=blue}
+
+\signature{Xuan-Cuong Nguyen, Nhat-Quang Truong, Quoc-Trinh Vo\\
+FPT University, Da Nang, Viet Nam\\
+\texttt{quangtnde180544@fpt.edu.vn} (Corresponding Author)}
+
+\address{Xuan-Cuong Nguyen\\FPT University\\FPT City, Ngu Hanh Son\\Da Nang 550000, Viet Nam\\
+\texttt{cuongnxde180528@fpt.edu.vn}}
+
+\date{\today}
+
+\begin{document}
+
+\begin{letter}{Editor-in-Chief\\Expert Systems with Applications\\Elsevier}
+
+\opening{Dear Editor,}
+
+We are pleased to submit our manuscript entitled \textbf{``SkelGym: Cross-Paradigm Kinematic Fusion and Dynamic Augmentation for 22-Class Gym Exercise Classification''} for consideration for publication in \textit{Expert Systems with Applications}.
+
+\noindent\textbf{Why Expert Systems with Applications}
+
+SkelGym represents an end-to-end \textbf{intelligent exercise recognition system} with direct practical deployment value, making it well suited to the scope of ESWA. Rather than presenting a purely theoretical deep learning study, our work delivers a complete automated pipeline---from raw monocular video input through 3D skeletal extraction, biomechanical feature engineering, physiologically valid data augmentation, multi-paradigm classification, to optimized ensemble fusion and real-time edge deployment---that addresses the practical challenge of automated virtual personal training in home and commercial gym environments.
+
+\noindent\textbf{Novelty and Contributions}
+
+The manuscript introduces three core innovations:
+\begin{enumerate}
+    \item \textbf{117-dimensional Biomechanical Compound Representation:} A compact kinematic descriptor unifying 3D relative joint displacements with pairwise elevation and azimuth angles, resolving the multicollinearity of combinatorial 3-joint angle triplets while remaining computationally lightweight.
+
+    \item \textbf{SkelGym-Aug:} An anatomically valid skeletal data augmentation protocol that preserves musculoskeletal constraints via bilateral sagittal reflection and gravitational yaw rotation, unlike conventional augmentations that violate biological joint limits.
+
+    \item \textbf{Validation-Calibrated Cross-Paradigm Ensemble:} A principled SLSQP-optimized soft voting formulation coupling self-attention Transformers with four-stream Adaptive Graph Convolutional Networks, with calibration performed strictly on validation partitions to prevent test-set contamination.
+\end{enumerate}
+
+\noindent\textbf{Practical Application Value}
+
+SkelGym achieves 77.68\% video-level consensus accuracy across 22 fine-grained resistance exercises with a classifier inference latency of merely 1.01~ms on consumer Apple Silicon hardware. By operating exclusively on privacy-preserving 3D skeletal coordinates, the system eliminates the need for continuous RGB video streaming, making it suitable for privacy-sensitive deployment on smart mirrors, mobile phones, and embedded gym displays. All improvements are confirmed statistically significant (McNemar $p < 10^{-11}$, Wilcoxon $p < 0.005$), and a comprehensive biomechanical error taxonomy identifies the physical limitations of monocular pose estimation.
+
+\noindent\textbf{Originality Statement}
+
+This manuscript has not been previously published and is not under simultaneous consideration for publication elsewhere. All authors have read and approved the final manuscript. The work is original and all sources are properly cited. All code, extracted skeletal datasets, and pre-trained model checkpoints are publicly available at \url{https://huggingface.co/Cuong2004/gym-exercise-classification}.
+
+We believe that the combination of practical deployment feasibility, rigorous statistical validation, and open-science reproducibility makes this work a strong fit for the readership of \textit{Expert Systems with Applications}. We look forward to your consideration.
+
+\closing{Sincerely,}
+
+\end{letter}
+\end{document}

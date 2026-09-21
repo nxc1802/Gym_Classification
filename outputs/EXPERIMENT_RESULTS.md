@@ -4,9 +4,9 @@ This document serves as the primary tracking log and benchmark sheet for the res
 
 ### Experimental Protocol & Standards (MediaPipe Pose Heavy SOTA Dataset)
 - **Dataset Source of Truth:** 1,024 clean, un-shuffled video recordings across 22 classes from Kaggle (`nguyenxuancuongk18dn/gym-exercise-classification-dataset`).
-  - **Train Set:** 580 videos (266,717 frames $\rightarrow$ 15,820 windows at $T=32$, stride 16).
-  - **Validation Set:** 208 videos (72,105 frames $\rightarrow$ 2,147 windows at $T=32$, stride 32).
-  - **Held-out Test Set:** 236 videos (110,577 frames $\rightarrow$ 3,337 windows at $T=32$, stride 32).
+  - **Train Set:** 580 videos (639 segments $\rightarrow$ 13,136 action windows at $T=32$, stride 16; 15,820 un-trimmed raw windows).
+  - **Validation Set:** 208 videos (210 segments $\rightarrow$ 2,075 action windows at $T=32$, stride 32; 2,147 un-trimmed raw windows).
+  - **Held-out Test Set:** 236 videos (259 segments $\rightarrow$ 2,743 action windows at $T=32$, stride 32 across 233 valid videos; 3,337 un-trimmed raw windows).
 - **Landmark Model:** MediaPipe Pose `model_complexity = 2` (Heavy) with 33 full-body landmarks (13 calibrated keypoints used for spatial body kinematics).
 - **Controlled Parameter Budget:** All individual backbones calibrated to $\approx 350\text{K} \pm 15\%$ parameters for strict fairness.
 - **Optimization:** Adam / AdamW optimizer, Cosine Annealing with Warmup or ReduceLROnPlateau, fixed 100 epochs, early stopping patience = 10, Automatic Mixed Precision (AMP) enabled.
@@ -102,7 +102,7 @@ This document serves as the primary tracking log and benchmark sheet for the res
 ---
 
 ## Table 6A: Detailed Classification Report (Window-Level Benchmark)
-*Objective:* Comprehensive per-class evaluation of the proposed Grand SOTA ensemble across all 22 gym exercise categories on the held-out test windows ($N=3,337$ windows at $T=32$, stride 32).
+*Objective:* Comprehensive per-class evaluation of the proposed Grand SOTA ensemble across all 22 gym exercise categories on the held-out test windows ($N=2,743$ action windows at $T=32$, stride 32).
 
 | Exercise Class | Precision | Recall | F1-Score | Support |
 | :--- | :---: | :---: | :---: | :---: |
@@ -184,3 +184,40 @@ This document serves as the primary tracking log and benchmark sheet for the res
 | **Four-Stream AAGCN (Aug)** | 4-Stream Late Fusion (Aug) (T4.7) | 67.34% | 0.6662 | 75.54% | 0.7500 | +8.20% |
 | **Dual-Model Grand Ensemble** | Best Transformer (mix aug) + AAGCN Bone (Aug) (T5.2) | 69.27% | 0.6771 | 76.82% | 0.7550 | +7.56% |
 | **Grand 5-Stream SOTA Ensemble** | **Dual-Target Weighted Soft Voting (T5.1)** | 70.11% | 0.6858 | 77.68% | 0.7649 | +7.58% |
+
+---
+
+## Table 8: External S&C Benchmark Evaluation (Deyzel et al. CVPRW 2023 Overlap)
+*Objective:* Cross-domain evaluation and external benchmarking inspired by Deyzel et al. (CVPRW 2023, *SU-EMD* dataset). Evaluates all benchmark backbones and ensembles on the 4 shared Strength & Conditioning (S&C) exercises (`squat` [Back squat], `deadlift` [Deadlift], `barbell biceps curl` [Biceps curl], `lateral raise` [Lateral raise]) across 54 held-out test videos ($N=529$ temporal windows).
+
+### 1. Performance Comparison on 4-Class S&C Subspace
+* **Closed-Set:** Re-normalized probability distribution restricted strictly to the 4 S&C exercises (matching Deyzel's closed S&C setting).
+* **Open-Set:** Direct inference from the full 22-class model output without restricting class space.
+
+| Model / Ensemble Architecture | Open-Set Win Acc (%) | Open-Set Vid Acc (%) | Closed-Set Win Acc (%) | Closed-Set Vid Acc (%) | Closed-Set Vid F1 |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **ST-GCN (Rel 3D)** *(Deyzel baseline)* | 59.74% | 68.52% | 82.61% | 85.19% | 0.8563 |
+| **LSTM (Mix 117-d)** | 64.08% | 85.19% | 78.64% | 90.74% | 0.9071 |
+| **BiLSTM (Mix 117-d)** | 71.64% | 85.19% | 84.12% | 90.74% | 0.9126 |
+| **AAGCN (Bone 3D)** | 72.02% | 85.19% | 87.90% | 92.59% | 0.9281 |
+| **Transformer (Mix 117-d)** | **77.88%** | **85.19%** | **96.03%** | **98.15%** | **0.9788** |
+| **SkelGym-Lite (Transformer + Bone)** | **84.12%** | **94.44%** | **95.84%** | **98.15%** | **0.9782** |
+| **SkelGym-Full (Transformer + 4-Stream AAGCN)** | **80.72%** | **96.30%** | **93.01%** | **96.30%** | **0.9626** |
+
+### 2. Squat vs. Deadlift Ambiguity Breakdown (The Deyzel Dilemma)
+In Deyzel et al. (CVPRW 2023), ST-GCN suffered from severe mutual confusion between Squat and Deadlift due to ambiguous sagittal $(x, y, z)$ keypoints. Evaluated on 305 held-out test windows ($N=25$ videos):
+
+| Architecture | Squat Recall (Window) | Deadlift Recall (Window) | Squat Video Recall | Deadlift Video Recall | Error Observation |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **ST-GCN (Rel 3D)** *(Deyzel)* | 52.9% | 31.3% | 66.7% | 30.0% | Heavy confusion; deadlifts lost into squat motion |
+| **Transformer (Mix 117-d)** | 80.7% | 53.7% | 93.3% | 80.0% | Elevation angle $\theta_{\text{hip, knee}}$ separates hinge from squat |
+| **AAGCN (Bone 3D)** | 65.5% | 71.6% | 80.0% | 80.0% | Bone orientation vectors balance precision |
+| **SkelGym-Full (Ensemble)** | **80.3%** | **65.7%** | **93.3%** | **90.0%** | **Ambiguity resolved**: 90% Deadlift & 93.3% Squat recall |
+
+### 3. One-Shot Transfer Learning (Deyzel One-Shot Metric Protocol)
+Emulating Deyzel's 1-shot transfer protocol (1 random exemplar video per S&C class as reference support, classifying remaining query videos via cosine similarity, averaged over 100 trials):
+* **Deyzel et al. (CVPRW 2023) Reported**: **87.4%** on SU-EMD 7 classes.
+* **Transformer (Mix 117-d)**: **97.32% ± 1.96%** (95% CI: [94.00%, 98.00%])
+* **AAGCN (Bone 3D)**: **92.02% ± 7.24%** (95% CI: [74.95%, 96.00%])
+* **SkelGym-Full**: **95.34% ± 3.89%** (95% CI: [80.00%, 98.00%])
+

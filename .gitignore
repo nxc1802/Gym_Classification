@@ -35,9 +35,9 @@ checkpoints/
 models_cache/
 
 # Datasets & Heavy Artifacts
-data/raw/
-data/landmarks/
-data/kaggle_landmarks/
+data/
+mm-fit/
+*.npy
 *.zip
 *.tar.gz
 *.mp4
@@ -45,6 +45,13 @@ data/kaggle_landmarks/
 *.mov
 .cache/
 2.archive/
+
+# LaTeX build artifacts
+*.aux
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
 
 # Outputs & Temporary Files
 outputs/*.png

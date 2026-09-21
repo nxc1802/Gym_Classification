@@ -1,0 +1,431 @@
+
+
+
+                                                                           DATA ARTICLE TEMPLATE V.19 (DECEMBER 2024)
+AUTHOR INSTRUCTIONS
+• Please check that your dataset meets the criteria on our webpage What Data are Suitable for Data
+in Brief. Please also see our FAQ page, which introduces further Data in Brief article types.
+• Please fill in the template below.  Note that we can only consider data articles submitted using this
+template. For help with preparing your manuscript, please also see our webinar on how to fill in the
+template, our Guide for Authors, and our step-by-step video guide on how to submit to Data in Brief.
+• Please be advised that parts of this template are locked for editing. The parts that are editable are
+highlighted in yellow. Please do not edit the template other than the section highlighted in yellow.
+• Brief instructions are in blue italics. Additional instructions appear in comment boxes to the right
+of the main text.
+• It is mandatory to publicly share your research data in a repository referred to in your Data in Brief
+article.
+• Before submitting your data article, please delete this page as well as all instructional text in blue
+italics and all comment boxes in this template.
+• For inspiration on how to complete the Data in Brief template, please find exemplary articles here.
+
+In case you still have questions, please email our Scientific Editors at: dib-me@elsevier.com.
+
+Please click here for a survey to share your anonymous feedback on this template and how it might
+be improved.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ARTICLE INFORMATION
+Article title
+GYMED: GYM Exercise Dataset for Pose-based Action Classification
+Authors
+Xuan-Cuong Nguyen, Nhat-Quang Truong*, Quoc-Trinh Vo
+Affiliations
+FPT University, FPT City, Ngu Hanh Son, Da Nang 550000, Viet Nam
+Corresponding author’s email address and Twitter handle
+
+quangtnde180544@fpt.edu.vn
+
+Keywords
+Gym exercise classification, pose estimation, dataset, human action recognition.
+Abstract
+Gym exercise is important in daily life as it can help improve physical and mental health. In scenarios
+where people have insufficient time to go to the center, doing gym exercises at home becomes the
+most suitable choice. However, without expert supervision, home exercisers often adopt incorrect
+form, leading to risking injury or, more seriously, unexpected results. Therefore, the demand for a
+virtual personal trainer, who can accurately recognize gym exercises and deliver correct feedback, has
+become pressing. To realize such a system, this dataset is built to provide data for deep learning
+models which serve as the core of gym exercise recognition tasks. The videos in the dataset are
+categorized into 22 classes of gym exercises. The dataset  includes 580 videos for training, 208 for
+validation and 236 for testing, without any overlap of content between sets, for gym exercise
+classification using video. The videos are collected from multiple internet sources in two formats
+(.mp4 and .mov). The videos are collected in  different camera angles, lighting conditions, subject
+appearances, and recording qualities, which indicates a deliberate strategy to enhance the dataset’s
+diversity and robustness to real-world variations. In addition, action-relevant frames are manually
+segmented, which eliminates the redundant frames, such as transitions, rest periods or off-camera
+motion. This helps increase the fidelity of the dataset for gym exercise classification tasks. With the
+first publicly available numerous videos, this dataset is a valuable resource for deep learning models
+to detect and classify gym exercises using video.
+
+SPECIFICATIONS TABLE​
+[Instruction for SPECIFICATIONS TABLE in comment box]
+Subject                     Computer Sciences
+
+
+
+
+
+
+
+Specific subject         Gym exercise classification, Video processing
+area
+
+Type of data             Video and Text Files
+
+Data collection          The videos are collected from various public sources and the author's own
+                         recordings in different conditions of camera angles, lighting levels, subject
+                         appearances and recording qualities. Then the frames in each video are manually
+                         segmented to the ones containing the actions of a gym exercise before it is
+                         categorized into corresponding gym exercises.
+
+Data source              Workout/Exercise Video Dataset.
+location                 YouTube fitness channels.
+                         Pexels Website [2].
+                         Freepik Website [3].
+                         recorded by the authors.
+Data accessibility       Repository name: The GYM Exercise Classification Dataset
+                         Data identification number: (or DOI or persistent identifier)
+                         Direct URL to data:
+                         https://www.kaggle.com/datasets/nguyenxuancuongk18dn/gym-exercise-classific
+                         ation-dataset
+
+Related research         None
+article
+
+
+
+
+VALUE OF THE DATA
+• This is the first large-scale, public video dataset of gym exercises. In addition, the videos that
+illustrate the actions of gym exercises in different conditions of camera angles, lighting levels can
+support the development of pose estimation and gym exercise classification algorithms.
+• The frames in the videos in the dataset are segmented into the frames with and without actions,
+which can allow researchers to develop and validate the computer vision algorithms to detect the
+frames containing the action of gym exercises in videos.
+• The dataset is a valuable resource for facilitating the development of practical applications of
+virtual personal trainers and automated exercise feedback systems.
+
+
+
+
+
+
+
+BACKGROUND
+As general living standards rise, more individuals turn to gym workouts to improve both physical
+fitness and mental well-being. Without expert supervision, individuals doing exercises at home often
+adopt incorrect form, which can cause injury or suboptimal results. For such a scenario, the demand
+for a virtual personal trainer capable of accurately recognizing the performed exercise, and thereby
+delivering frequent feedback and correction, has become pressing. The increasing number of  home
+exercisers without direct professional guidance directly drives the need for automated solutions. The
+core of such an automated system is AI-driven computer vision algorithms which can detect and
+recognize  gym exercises. This suggests that video datasets of gym exercises have played an
+important role not only in developing AI models in academia but also in building practical
+applications that offer significant public health and fitness benefits. Although the previous datasets
+of gym exercises were published, the number of videos and classes was limited, which is suitable for
+small AI-based systems or academic research. Therefore, the videos collected from various internet
+resources in different conditions of lighting level, camera angles, subject appearances and recording
+qualities are the valuable resources for advancing deep learning approaches for gym exercise
+recognition.
+
+
+DATA DESCRIPTION
+Overall Dataset Summary
+This report provides a summary of the GYM Exercise Classification Dataset statistics [4]:
+    ●​   Total videos: 1024
+    ●​   Total capacity: 10225.37 MB
+    ●​   Number of different resolutions: 33
+    ●​   Number of different actions: 22
+    ●​   Number of different file formats: 2
+List of 22 Gym Exercise Classes
+The dataset includes 22 distinct gym exercises: barbell biceps curl, bench press, chest fly machine,
+deadlift, decline bench press, hammer curl, hip thrust, incline bench press, lat pulldown, lateral raise,
+leg extension, leg raises, plank, pull-up, push-up, Romanian deadlift, Russian twist, shoulder press,
+squat, t-bar row, tricep dips, and tricep pushdown. The selection of these 22 exercises represents a
+significant and diverse set of movements, ranging from isolated muscle groups to complex compound
+movements. This broad coverage increases the dataset's complexity and practical applicability, as
+models must learn to distinguish between subtle variations and distinct actions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   Figure 1: Frame samples from 22 classes of gym exercises in dataset
+Detailed Analysis of Video Counts
+The dataset contains a total of 1,024 unique videos. The dataset is split at the video level in a 6:2:2
+ratio to prevent content overlap between the training, validation, and test sets.
+Video-Level Splitting Strategy and Rationale
+The dataset is split at the video level in a 6:2:2 ratio with the explicit aim of preventing content
+overlap between the training, validation, and test sets. This strategy is crucial to avoid data leakage,
+a phenomenon that can artificially inflate test performance and lead to an overestimation of a
+model's generalization capabilities to unseen data. Splitting at the video level ensures that a specific
+video and all segments/clips generated from it reside in only one dataset split, preventing models
+from memorizing video-specific patterns rather than learning general exercise characteristics.
+File Format Statistics
+The distribution of video file formats in the dataset is as follows:
+                                  Table I: Distribution of Video File Formats
+             File Format                        Number of Videos                          Percentage (%)
+                .mp4                                     964                                    94.1
+                .mov                                      60                                     5.9
+
+
+
+
+
+
+
+
+
+
+Resolution Statistics
+
+The dataset comprises videos with 33 different resolutions. A summarized breakdown by resolution is
+provided below, focusing on resolutions with more than 20 videos, with others grouped for
+conciseness:
+
+                             Table II: Summarized Video Counts per Resolution
+
+                       Resolution                                             Number of Videos
+                        1280x720                                                       385
+                       1920x1080                                                       315
+                        720x1280                                                       130
+                        854x480                                                         35
+                        640x360                                                         28
+                       3840x2160                                                        23
+      Resolutions with ≤ 20 videos (27 others)                                         108
+
+
+The resolutions with 20 or fewer videos collectively account for 108 videos. These resolutions vary in
+total capacity, associated actions, dataset splits (train, val, test), file formats (.mp4, .mov), and were
+processed using ffprobe.
+
+Class Imbalance Analysis
+
+The distribution of videos across the 22 gym exercise classes reveals significant imbalance. The video
+counts per action are presented in Table III (with percentages based on total 1024 videos).
+
+
+
+                      Table III: Video counts per exercise class and their percentage
+
+                Class                           Number of Videos                          Percentage (%)
+         barbell biceps curl                              84                                     8.2
+            bench press                                   84                                     8.2
+            lat pulldown                                  71                                     6.9
+               push-up                                    66                                     6.4
+          tricep Pushdown                                 65                                     6.3
+               pull Up                                    52                                     5.1
+               deadlift                                   50                                     4.9
+           shoulder press                                 50                                     4.9
+                squat                                     49                                     4.8
+            lateral raise                                 47                                     4.6
+            hammer curl                                   46                                     4.5
+        incline bench press                               46                                     4.5
+         chest fly machine                                45                                     4.4
+            leg extension                                 44                                     4.3
+
+
+
+
+
+             tricep dips                                  43                                     4.2
+              leg raises                                  32                                     3.1
+        decline bench press                               32                                     3.1
+              hip thrust                                  29                                     2.8
+              t bar row                                   29                                     2.8
+            russian twist                                 27                                     2.6
+         romanian deadlift                                24                                     2.3
+                plank                                     9                                      0.9
+
+
+This pronounced imbalance—for instance, "plank" is represented by only 9 videos (0.9%) while
+"barbell biceps curl" has 84 videos (8.2%) and "bench press" has 84 videos (8.2%)—can bias the
+classifier toward well-represented classes and severely degrade performance on underrepresented
+ones unless addressed by augmentation or sampling strategies. The detailed presentation of class
+imbalance is a crucial transparency point for the dataset. This sets a clear direction for future
+research using this dataset, emphasizing the need for specialized imbalance-handling techniques.
+
+Each raw video is manually trimmed into "clean" segments to contain only the target exercise. This
+precise segmentation was achieved by referring to pre-generated `.txt` files, manually created by the
+authors. These `.txt` files meticulously define the start and end timestamps of relevant exercise
+actions within each video, thereby effectively excluding transition scenes, irrelevant footage, setup
+sequences, advertisements, and conversations. This meticulous process ensures that each segment
+contains only the intended exercise, maximizing data quality for classification. On average, each
+video yielded 1.09 segments, producing a total of 1,108 segments across the entire dataset: 639 in
+the training set, 210 in validation, and 259 in the test. This segmented dataset, along with its
+metadata, is available as part of the public Kaggle dataset [4]. The detailed distribution of segments
+per exercise class by split is provided in Table IV.
+
+                       Table IV: Video and segment counts per exercise class by split
+
+                                            Videos                                       Segments
+          Class
+                              Train           Val            Test           Train             Val            Test
+  barbell biceps curl           52             18             14              53               18             14
+      bench press               51             18             15              51               18             15
+     lat pulldown               28             9               8              29               9               8
+        push-up                 30             10             10              30               10             10
+   tricep Pushdown              18             5               9              29               5              10
+        pull Up                 24             8              14              28               8              14
+        deadlift                14             6               9              19               6              15
+    shoulder press              27             10              9              27               10              9
+         squat                  42             15             14              42               15             15
+      lateral raise             24             8              15              24               8              15
+     hammer curl                22             9              13              27               9              13
+incline bench press             15             6              11              15               6              11
+  chest fly machine             5              2               2               5               2               2
+     leg extension              31             11             10              31               11             10
+      tricep dips               40             14             12              43               14             14
+
+
+
+
+
+
+      leg raises            12            6            6             13             6             8
+decline bench press         15            6            6             19             6             6
+      hip thrust            27           10           13             28            10            14
+      t bar row             24           10           15             27            11            17
+    russian twist           15            4           10             17             4            10
+  romanian deadlift         39           14           12             39            14            12
+        plank               25            9            9             43            10            17
+
+
+EXPERIMENTAL DESIGN, MATERIALS AND METHODS
+Data collection
+
+Primary data were sourced from public datasets or from platforms, including Pexels, Freepik, and
+YouTube Fitness. For each class, 1-2 high-quality videos with clear, distinct movements were collected
+from each source. These raw videos were then trimmed into specific segments, strictly isolating the
+target exercises and eliminating any irrelevant frames or extraneous actions. Specifically, 652 videos
+were recovered from a public Workout/Exercise Video Dataset, 103 clips were downloaded from
+YouTube fitness channels,  65 videos were recovered from Pexels Website [2], 76 videos were
+recovered from Freepik Website [3].
+
+To expand and enrich the dataset, 128 supplementary videos were collected at a fully equipped
+gymnasium for all 22 gym exercise classes. Filming was conducted using two human models, with
+each video lasting between 20 to 30 seconds. To enhance dataset diversity, each exercise was
+recorded using two techniques: a fixed camera angle and a dynamic, moving camera to capture the
+full range of motion from multiple perspectives.
+
+Data segmentation
+
+After collection, the entire video is analyzed to precisely extract the parts that can perform the
+targeted exercise. Each video is cut into short segments corresponding to the completion of the task
+once, ensuring the removal of irrelevant parts such as rest times, scene changes, or movements
+outside the exercise. The analysis process is performed manually with the support of video processing
+tools to ensure high accuracy.
+
+Cross verification
+
+A rigorous data quality control process was implemented. Each team member was independently
+responsible for preprocessing a subset of videos, evaluating the appropriateness of duration, camera
+angles, and visual clarity. Subsequently, a mutual cross-check was performed among team members
+to verify accuracy, ensuring all data was correctly and precisely categorized into the 22 predefined
+classes prior to model training.
+
+LIMITATIONS
+Reiteration of Class Imbalance and Its Impact
+
+
+
+
+
+
+
+The dataset includes some underrepresented classes like “plank”, which causes imbalance in the
+dataset. This imbalance can lead to models being biased towards majority classes, potentially limiting
+their real-world applicability where all exercises need to be reliably recognized.
+
+Exercises with subtle movement differences or persistent data scarcity are likely to pose challenges.
+Conversely, highly distinct movements (e.g., push-up, leg extension) are expected to be robustly
+recognized by deep learning models.
+
+ETHICS STATEMENT
+The work described in this article involves human subjects and data collected from social media and
+public platforms.
+For the 128 videos recorded by the authors: Informed consent was obtained from all participants
+appearing in the videos. The data collection protocol was carried out in accordance with the
+Declaration of Helsinki and followed ethical standards.
+
+For the data collected from online platforms (Pexels, Freepik, YouTube, and Kaggle): The data was
+collected in full compliance with the Terms of Service and redistribution policies of each respective
+platform. The videos from Pexels and Freepik are used under their specific licenses which allow for
+such usage. Data collected from YouTube and Kaggle consists of publicly available content, and no
+private or personally identifiable information beyond what is publicly displayed was harvested.
+
+CRediT AUTHOR STATEMENT
+Nguyen Xuan Cuong: Conceptualization, Methodology, Writing - Original draft preparation.
+
+Truong Nhat Quang: Resources, Data curation, Validation, Visualization.
+Vo Quoc Trinh: Conceptualization, Review & Editing, Supervision.
+
+ACKNOWLEDGEMENTS
+
+Sincere gratitude is extended for the valuable video resources that form the foundation of the GYMED
+dataset. Special acknowledgement is given to the Workout/Exercise Video Dataset on Kaggle ,
+content from YouTube fitness channels, and resources provided by Pexels and Freepik. These
+contributions were essential for the dataset's diversity and richness.
+
+Thanks are also given to AIT laboratory, FPT University, Da Nang Campus, Viet Nam for providing the
+necessary equipment and resources to complete this project.
+
+DECLARATION OF COMPETING INTERESTS
+The authors declare that they have no known competing financial interests or personal relationships
+that could have appeared to influence the work reported in this paper.
+
+REFERENCES
+[1] Abdillah, H. (2023). WorkoutFitness Video. Kaggle Dataset.
+https://www.kaggle.com/datasets/hasyimabdillah/workoutfitness-video
+
+
+
+
+
+[2] Pexels. Free stock photos and videos shared by talented creators. From https://www.pexels.com/
+[3] Freepik. Free graphic resources for everyone. From https://www.freepik.com/
+[4]  Truong, N.-Q. (202X). Kaggle Dataset: VideoStats [Data Set]. Kaggle.
+https://www.kaggle.com/datasets/nguyenxuancuongk18dn/gym-exercise-classification-dataset
+[5] Hochreiter, S., & Schmidhuber, J. (1997). Long Short-Term Memory. Neural Computation, 9(8),
+1735-1780. https://www.bioinf.jku.at/publications/older/2604.pdf
+[6] Graves, A., Fernández, S., & Schmidhuber, J. (2005). Bidirectional LSTM networks for improved
+phoneme classification and recognition. In Artificial Neural Networks: Formal Models and Their
+Applications–ICANN 2005 (pp. 799–804). Springer, Berlin, Heidelberg.
+https://www.researchgate.net/publication/221080352
+[7] Plizzari, C., Cannici, M., & Matteucci, M. (2021). Skeleton-based Action Recognition via Spatial and
+Temporal Transformer Networks. Computer Vision and Image Understanding, 208–209, 103219.
+[8] QangQang. (2025). GYM_Benchmarks [Source Code]. GitHub.
+https://github.com/QangQang/GYM_Benchmarks
+[9] Truong, N.-Q. (2025). GYM_Benchmarks_Models [Data and Models]. Google Drive.
+https://drive.google.com/drive/folders/1dUmXk_m13SmWjfUbDfucmlWjDoWfUQx2
+
+
+
+
+
+
+
+
+
+
