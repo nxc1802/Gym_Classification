@@ -439,7 +439,7 @@ class LandmarkAugmenter:
 
     def skel_gym_aug(self, x: torch.Tensor) -> torch.Tensor:
         """
-        Proposed SOTA SkelGym-Aug Pipeline:
+        Proposed SkelGym-Aug Pipeline:
         1. Bilateral Mirroring (p=0.5)
         2. 3D Yaw Rotation (+-15 deg)
         3. Body / Scale adjustment (0.9 - 1.1)

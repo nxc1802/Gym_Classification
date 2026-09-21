@@ -1,161 +1,367 @@
-# SkelGym — Final Submission Checklist (Version 2)
+# SkelGym — Final Submission Checklist (Version 3 — Unfinished Items Only)
 
-> **Mục tiêu**: Checklist chi tiết theo sát trạng thái commit mới nhất của codebase `Gym_Classification`, kèm vị trí file chính xác cần kiểm tra/chỉnh sửa, phân cấp rõ ràng theo các mức độ ưu tiên **🔴 P0 (Bắt buộc)** $\rightarrow$ **🟠 P1 (Nên hoàn thành)** $\rightarrow$ **🟡 P2 (Tùy chọn nếu có thời gian)** để sẵn sàng nộp bài báo (submission-ready).
-
----
-
-## 🔴 P0 — Bắt Buộc Trước Khi Submit
-
-| # | Việc cần làm | Vị trí cần sửa / kiểm tra | Trạng thái |
-| :--- | :--- | :--- | :---: |
-| **1** | **Audit Bootstrap CI**<br>• Đã audit $B=1,000$ bootstrap resamples trực tiếp từ model predictions (`scripts/compute_statistical_tests.py`).<br>• **Đã giải quyết triệt để anomaly**: Point estimate `70.11%` (window) và `77.68%` (video) hiện nằm hoàn toàn tự nhiên và chặt chẽ bên trong 95% CI mới: Window $[68.46\%, 71.75\%]$, Video $[72.09\%, 83.26\%]$. Đồng bộ nhất quán sampling unit. | `outputs/bootstrap_confidence_intervals.md`<br>`scripts/compute_statistical_tests.py`<br>`paper/paper_eswa.tex` / `paper/paper_llncs.tex` (Table 11) | 🟢 **Xong** |
-| **2** | **Chuẩn hóa Latency Benchmark**<br>• Đã chuẩn hóa quy trình benchmark (`scripts/benchmark_hardware_latency.py`): 50 warm-up runs $\rightarrow$ sync $\rightarrow$ 200 timing runs $\rightarrow$ sync.<br>• Báo cáo đầy đủ Mean, Median, p95 percentile latency trên Apple Silicon GPU (MPS) và CPU.<br>• Phân định tường minh: Model Latency (0.34 ms - 2.14 ms) vs Pipeline Feature Extraction vs End-to-End Latency với MediaPipe Pose (12.3 ms - 14.1 ms). | `scripts/benchmark_hardware_latency.py`<br>`paper/paper_eswa.tex` / `paper/paper_llncs.tex` (Table 12 & Section 4.5) | 🟢 **Xong** |
-| **3** | **Audit External Benchmark**<br>• Đã xây dựng script audit độc lập (`scripts/evaluate_external_benchmark.py`).<br>• Xác nhận tính nhất quán thực nghiệm 100% trên 54 test videos ($N=529$ windows) và 25 Squat/Deadlift videos ($N=305$ windows).<br>• Xác minh thực nghiệm claim tăng Recall Deadlift từ $30\% \to 90\%$ ($40\% \to 80\%-90\%$ video, $53.7\% \to 90\%$ window) và 1-shot transfer simulation trung bình $90.36\%$, đỉnh đạt $98.00\%$. | `scripts/evaluate_external_benchmark.py`<br>`paper/paper_eswa.tex` / `paper/paper_llncs.tex` (Table 8 & Section 4.3) | 🟢 **Xong** |
-| **4** | **Kiểm tra Tính Tái Lập (Reproducibility)**<br>• Đồng nhất đường dẫn dữ liệu `data/Final_dataset_metadata.csv` và cơ chế fallback tự động tải từ Hugging Face.<br>• Phân định rõ ràng: GitHub chứa source code & scripts; Hugging Face Hub chứa checkpoint mô hình và file tọa độ skeleton trích xuất.<br>• Các script chạy hoàn toàn độc lập và tái lập 1-click không phụ thuộc môi trường. | `README.md`<br>`run.py`<br>`scripts/evaluate_local_ensemble.py`<br>`scripts/evaluate_external_benchmark.py` | 🟢 **Xong** |
+> **Mục tiêu**: Checklist tập trung 100% vào **những việc còn chưa hoàn thành** sau khi kiểm tra commit mới nhất. Loại bỏ hoàn toàn SkateFormer/CTR-GCN. Giữ lại đầy đủ từng chi tiết kỹ thuật, protocol và vị trí file cần xử lý theo phân cấp **🔴 P0 (Bắt buộc)** $\rightarrow$ **🟠 P1 (Cleanup quan trọng)** $\rightarrow$ **🟡 P2 (Audit số liệu toàn diện)**.
 
 ---
 
-## 🟠 P1 — Nên Hoàn Thành Trước Khi Gửi
+## 🔴 P0 — Cần Hoàn Thành Trước Khi Submit
 
-### 5. Xóa Toàn Bộ Thuật Ngữ "SOTA" Tự Xưng — 🟢 Đã Hoàn Thành
+### 1. External Benchmark / One-Shot Protocol
 
-- **Trạng thái**: Đã rà soát và thay thế toàn bộ trong toàn bộ repository và các file bài báo (`paper_eswa.tex`, `paper_llncs.tex`, `preprint/main.tex`, `src/cli.py`, `src/models/transformer.py`, `scripts/evaluate_local_ensemble.py`).
-- **Nội dung thay thế:**
-  - Đổi cụm từ `Grand 5-Stream SOTA Ensemble` $\rightarrow$ `SkelGym-Full` hoặc `Five-Stream Cross-Paradigm Ensemble`.
-  - Thay các tuyên bố "state-of-the-art" bằng ngôn từ khách quan: *"superior performance among evaluated backbones"* hoặc *"consistently outperforms single-stream architectures"*.
+#### 1.1. Audit Lại Claim “1-shot transfer”
+- **File cần kiểm tra**:
+  - `scripts/evaluate_external_benchmark.py`
+  - `paper/paper_eswa.tex`
+  - `paper/paper_llncs.tex`
+  - `README.md`
+- **Vấn đề hiện tại**:
+  Script đang lấy embedding từ các test video của chính SkelGym, sau đó:
+  - Chọn 1 support video/class;
+  - Dùng cosine similarity;
+  - Classify các video còn lại.
+  
+  *Quy trình này phù hợp hơn với:* **1-shot classification simulation** (hoặc 1-shot recognition simulation) chứ chưa nên gọi mạnh là **1-shot transfer learning**.
 
----
+- [x] Xác định chính xác experiment đang đo cái gì: Đo metric space generalizability của frozen representation mà không cần finetuning.
+- [x] Ghi rõ source domain (22-class Gym dataset) và target domain (4 S&C classes).
+- [x] Ghi rõ 4 classes được sử dụng (`squat`, `deadlift`, `barbell biceps curl`, `lateral raise`).
+- [x] Ghi rõ số support videos/class: 1 exemplar per class (4 support videos total per trial).
+- [x] Ghi rõ số query videos/trial: 50 query videos per trial (tổng 54 test videos).
+- [x] Ghi rõ $K=1$.
+- [x] Ghi rõ số trial = 100.
+- [x] Ghi rõ random seed = 42.
+- [x] Ghi rõ classifier = cosine nearest prototype/support trên $L_2$-normalized mean temporal embeddings.
+- [x] Xác nhận không fine-tuning trong experiment này (zero-adaptation / frozen backbone).
+- [x] Nếu không có adaptation/fine-tuning, không gọi là transfer learning.
+- [x] Đổi terminology thành **1-shot classification simulation** (hoặc 1-shot recognition simulation) trong cả 2 bản TeX, README và checklist.
+- [x] Giải thích rõ ràng metric matching qua cosine similarity.
 
-### 6. Làm Rõ Kiến Trúc 5-Stream Trong Phương Pháp — 🟢 Đã Hoàn Thành
+#### 1.2. Đồng Bộ Số Liệu 1-Shot
+Đã đồng bộ hóa 100% về một bộ số liệu duy nhất:
+- Mean accuracy chính thức: **90.36%**
+- Standard deviation: **7.35%**
+- 95% Confidence Interval: **[68.95%, 98.00%]**
+- Maximum single trial peak: **98.00%**
 
-- **Trạng thái**: Đã làm rõ chi tiết trong Section 4.4 của cả `paper_eswa.tex` và `paper_llncs.tex`.
-- **Cấu trúc kiến trúc minh bạch:**
-  - SkelGym-Full là mô hình **Late-Fusion** tập hợp 5 mô hình độc lập (1 Transformer Mix 117-d + 4 mô hình AAGCN trên Bone 3D, Relative 3D, Joint Motion 3D, Bone Motion 3D).
-  - Tối ưu hóa trọng số kết hợp trên tập Validation bằng Sequential Least Squares Programming (SLSQP) dưới ràng buộc simplex ($w_i \ge 0, \sum w_i = 1$).
-  - Tránh hoàn toàn sự nhầm lẫn với một mạng backbone đơn nhất.
-
----
-
-### 7. Sửa Wording Về Data Leakage — 🟢 Đã Hoàn Thành
-
-- **Trạng thái**: Đã cập nhật ở Abstract, Section 3.2, và Section 5 trong cả hai bản TeX.
-- **Wording chuẩn xác**:
-  > *"strict video-level partitioning with no source-video overlap across train, validation, and test sets"*
-- **Mô tả pipeline 4 bước phân lập tuyệt đối:**
-  1. *Video-Level Isolation*: Phân chia theo source video ID (6:2:2).
-  2. *Independent Landmark Extraction*: Trích xuất khung xương MediaPipe Pose độc lập từng video.
-  3. *Within-Video Sliding Window Segmentation*: Cắt cửa sổ temporal $T=32$ chỉ trong từng video (Train $S=16$, Val/Test $S=32$ không đè chéo).
-  4. *Independent Window Normalization*: Chuẩn hóa tọa độ tương đối theo mid-hip trên từng cửa sổ/khung hình, không tính tham số toàn cục.
-
----
-
-### 8. Điều Chỉnh Tuyên Bố Về Ý Nghĩa Thống Kê (Statistical Significance) — 🟢 Đã Hoàn Thành
-
-- **Trạng thái**: Đã loại bỏ hoàn toàn câu "All improvements are statistically significant" trong Abstract, Section 4.4, Conclusion, và `paper/cover_letter.tex`.
-- **Phát biểu chính xác đã chuẩn hóa:**
-  > *"Key architectural improvements between evaluated configurations were statistically supported using McNemar’s test at the window level ($p < 10^{-11}$) and Wilcoxon signed-rank test at the video level ($p < 0.005$). Cross-paradigm comparisons were evaluated against a Bonferroni-adjusted threshold of $\alpha_{\text{adj}} = 0.01$."*
-
----
-
-### 9. Audit Lại Tuyên Bố Bản Quyền Dữ Liệu (Dataset Licensing Wording) — 🟢 Đã Hoàn Thành
-
-- **Trạng thái**: Đã bổ sung phân định rõ ràng trong Abstract, Section 3.1, và `README.md`.
-- **Quy tắc phân định bản quyền:**
-  - **Raw videos**: Thu thập từ các nguồn ngoại vi công khai cho mục đích nghiên cứu học thuật phi thương mại (academic fair-use), không tái phân phối file nhị phân video gốc.
-  - **Skeletons (3D Coordinates)**, **Segment Metadata**: Phát hành công khai theo giấy phép Creative Commons Attribution 4.0 International (CC BY 4.0).
-  - **Model Checkpoints & Codebase**: Phát hành theo giấy phép MIT License.
-
----
-
-### 10. Giảm Tuyên Bố Bảo Mật Tuyệt Đối ("Privacy-Preserving") — 🟢 Đã Hoàn Thành
-
-- **Trạng thái**: Đã tinh chỉnh sắc thái học thuật khách quan trong Abstract, Section 1, và Section 4.5.
-- **Diễn đạt chuẩn mực:**
-  - Nhấn mạnh: Hệ thống giảm thiểu phơi nhiễm dữ liệu hình ảnh nhạy cảm bằng cách loại bỏ nhận diện khuôn mặt và bối cảnh phòng tập ngay sau khi trích xuất tọa độ xương trên thiết bị biên.
-  - Thừa nhận khách quan giới hạn: Dữ liệu khung xương vẫn có thể phản ánh gián tiếp một phần tỷ lệ nhân trắc (body proportions) và dáng đi thô (coarse gait dynamics).
+- [x] Chạy lại experiment từ commit mới nhất (`scripts/evaluate_external_benchmark.py`).
+- [x] Xác định mean accuracy chính thức: **90.36%**.
+- [x] Xác định standard deviation: **7.35%**.
+- [x] Xác định 95% CI: **[68.95%, 98.00%]**.
+- [x] Xác định maximum trial: **98.00%**.
+- [x] Chọn một bộ số liệu duy nhất.
+- [x] Update Table 8.
+- [x] Update Section External Evaluation.
+- [x] Update Abstract (nếu có claim liên quan).
+- [x] Update `README.md`.
+- [x] Xóa hoàn toàn số `97.32%` khỏi toàn bộ codebase và bài báo.
 
 ---
 
-## 🟡 P2 — Có Thể Làm Nếu Còn Thời Gian
+### 2. External Benchmark — Deadlift/Squat Claim
 
-### 11. Bổ Sung Phân Tích Độ Phức Tạp Lý Thuyết (FLOPs / MACs) — 🟢 Đã Hoàn Thành
+Script mới đã kiểm tra khá kỹ, nhưng paper cần biến kết quả thành protocol rõ ràng trong bản thảo.
 
-- **Trạng thái**: Đã đo đạc chính xác bằng thư viện `thop` trên tensor đầu vào chuẩn ($T=32$) và cập nhật vào Table 12 & Section 4.5 của cả 2 bản TeX.
-- **Bảng số liệu thực tế đã bổ sung vào bài báo:**
+- [x] Ghi rõ số lượng external videos: 54 held-out test videos.
+- [x] Ghi rõ số lượng windows: 529 windows.
+- [x] Ghi rõ số class được overlap giữa hai dataset: 4 classes (`squat`, `deadlift`, `barbell biceps curl`, `lateral raise`).
+- [x] Ghi rõ định nghĩa Open-Set evaluation (suy luận trực tiếp từ không gian 22 lớp gốc).
+- [x] Ghi rõ định nghĩa Closed-Set evaluation (tái chuẩn hóa phân phối xác suất hạn chế trong 4 lớp S&C).
+- [x] Giải thích tại sao cần cả Open-Set và Closed-Set: Closed-Set đối sánh trực tiếp với Deyzel et al., Open-Set chứng minh không rò rỉ xác suất sang 18 lớp khác.
+- [x] Ghi rõ Video-level aggregation (mean softmax across windows).
+- [x] Ghi rõ Window-level aggregation.
+- [x] Xác minh lại claim Deadlift recall $30\% \to 90\%$.
+- [x] Xác minh chính xác:
+  - [x] Window recall trước (ST-GCN baseline: 53.7% deadlift, 0.0% squat);
+  - [x] Window recall sau (Transformer Mix: 53.7% deadlift, 80.7% squat; SkelGym-Full: 67.2% deadlift, 81.5% squat);
+  - [x] Video recall trước (ST-GCN baseline: 40.0% deadlift, 0.0% squat; y văn Deyzel báo cáo baseline ~30.0%);
+  - [x] Video recall sau (Transformer Mix: 80.0% deadlift, 93.3% squat; SkelGym-Full: 80.0% deadlift, 86.7% squat, lên tới 90.0% trong closed-set consensus).
+- [x] Không dùng một con số $30\% \to 90\%$ nếu nó đến từ hai metric khác nhau (đã tách bạch rõ ràng metric video recall và window recall).
+- [x] Đưa protocol vào Methods/Experimental Setup (Section 4.3).
 
-| Model | Parameter Count | FLOPs / MACs | Inference Latency (M4 MPS) | GPU Memory (MB) |
-| :--- | :---: | :---: | :---: | :---: |
-| **Transformer (Mix 117-d)** | 399K | **12.50 MFLOPs** | 0.34 ms | 12.4 MB |
-| **AAGCN (Bone 3D)** | 378K | **101.43 MFLOPs** | 0.44 ms | 18.2 MB |
-| **SkelGym-Lite** | 777K | **113.93 MFLOPs** | 0.78 ms | 30.6 MB |
-| **SkelGym-Full** | 1.91M | **418.21 MFLOPs** | 2.14 ms | 55.8 MB |
-
----
-
-### 12. Triển Khai Thêm Baseline Đồ Thị / Transformer Hiện Đại (Optional)
-
-- **Các mô hình cân nhắc:**
-  - **CTR-GCN** (Channel-wise Topology Refinement Graph Convolution)
-  - **SkateFormer** (Skeletal-Temporal Transformer)
-- **Định hướng xử lý:**
-  - **Nếu bổ sung:** Đưa vào tiểu mục riêng *"Modern Skeleton Baselines"*, đảm bảo huấn luyện từ đầu trên cùng giao thức và cùng kích thước cửa sổ $T=32$.
-  - **Nếu không bổ sung:** Giữ nguyên lập luận vững chắc trong phần Discussion về chi phí tính toán (computational overhead), quy mô hàng triệu tham số không khả thi cho thiết bị Edge AI biên mỏng so với ngân sách chuẩn $\approx 350\text{K}$ của SkelGym.
-
----
-
-## 🟢 Các Hạng Mục Hiện Tại Đã Hoàn Toàn Ổn Định
-
-| Hạng mục đã nghiệm thu | Trạng thái hiện tại | Ghi chú kỹ thuật |
-| :--- | :---: | :--- |
-| **22-class Gym task** | 🟢 OK | Bao phủ đầy đủ 22 bài tập gym phổ biến, không bị overlap lớp |
-| **117-d Compound representation** | 🟢 OK | Kết hợp chuẩn $39$ rel coordinates + $78$ joint pair cosine angles |
-| **Relative coordinates normalization** | 🟢 OK | Tịnh tiến gốc tọa độ về Mid-Hip, triệt tiêu biến thiên vị trí khung hình |
-| **SkelGym-Augmentation pipeline** | 🟢 OK | Đối xứng giải phẫu $\mathbb{Z}_2$, xoay trục ngẫu nhiên $\mathrm{SO}(2)$, jittering, time-warping |
-| **Đánh giá kiến trúc đơn lẻ** | 🟢 OK | Đối sánh công bằng LSTM, BiLSTM, Transformer, ST-GCN, AAGCN ($\approx 350\text{K}$) |
-| **Cross-paradigm ensemble framework** | 🟢 OK | Kết hợp đa miền giữa Sequence Transformer và Spatial Graph AAGCN |
-| **Hiệu chỉnh trọng số SLSQP** | 🟢 OK | Tối ưu hóa trọng số mềm trên tập Validation, áp dụng cố định cho Test |
-| **Cơ chế Video-level consensus** | 🟢 OK | Soft-voting trung bình xác suất toàn bộ temporal windows của video |
-| **Phân tích lỗi cấp độ lớp (Class-level)** | 🟢 OK | Confusion matrix 22 lớp, taxonomy 4 cơ chế lỗi cơ sinh học chi tiết |
-| **Số liệu kết quả cuối cùng** | 🟢 OK | Thống nhất $70.11\%$ (Window Acc) / $77.68\%$ (Video Consensus Acc) |
-| **Báo cáo Macro-averaged F1** | 🟢 OK | Phản ánh chính xác hiệu năng khi tập dữ liệu có class imbalance |
-| **Khái niệm External benchmark** | 🟡 Cần audit | Đã có Table 8 đối sánh Deyzel et al., chỉ cần làm rõ protocol chi tiết |
-| **Thêm Modern SOTA baselines** | 🟡 Tùy chọn | Đã có biện giải lý thuyết vững chắc trong phần Discussion |
+> [!NOTE]
+> **Đã nghiệm thu**: Đã giải thích tường minh trong Section 4.3 của cả hai bản `paper_eswa.tex` và `paper_llncs.tex`.
 
 ---
 
-## 🎯 Thứ Tự Thực Hiện Tối Ưu (Optimal Workflow)
+## 🟠 P1 — Cleanup Quan Trọng Trước Submission
 
-Để đạt hiệu quả cao nhất và tăng độ vững chắc của bài báo mà không tốn công vô ích, thực hiện theo đúng trình tự sau:
+### 3. Chuẩn Hóa Latency Benchmark
 
+- **File liên quan**:
+  - `scripts/benchmark_hardware_latency.py`
+  - `paper/paper_eswa.tex`
+  - `paper/paper_llncs.tex`
+  - `README.md`
+
+- [x] Chốt số warm-up runs chính thức: 50 runs.
+- [x] Chốt số timing iterations chính thức: 500 timed runs (với per-pass timestamping).
+- [x] Đồng bộ checklist với code: 50 warm-up, 500 timed runs.
+- [x] Chốt device chính thức báo cáo trong paper: Host CPU (0.42--4.33 ms), CUDA (0.08--0.54 ms), Apple Silicon MPS (1.11--9.91 ms).
+- [x] Chốt batch size: batch size = 1.
+- [x] Chốt input shape chuẩn $T=32$ frames.
+- [x] Chốt precision/dtype: `torch.float32`.
+- [x] Có synchronization trước khi bấm giờ timing (`torch.cuda.synchronize()` hoặc `torch.mps.synchronize()`).
+- [x] Có synchronization sau khi bấm giờ timing.
+- [x] Loại bỏ hoàn toàn giai đoạn warm-up khỏi thống kê.
+- [x] Báo cáo đầy đủ: Mean, Median, P95 percentile latency.
+- [x] Phân biệt rõ ràng 3 cấp độ trễ:
+  - [x] Model latency (chỉ riêng forward pass của classifier: CPU 0.42--4.33 ms, CUDA 0.08--0.54 ms)
+  - [x] Feature extraction latency (~0.08 ms)
+  - [x] End-to-end latency (MediaPipe Pose ~8--15 ms + Normalization + Classifier -> ~10--18 ms)
+- [x] Không gọi estimated latency là measured latency.
+- [x] Ghi rõ MediaPipe latency là edge reference / literature benchmark.
+- [x] Đồng bộ số liệu latency giữa Paper, README, Tables, Figures, Cover Letter.
+- [x] Kiểm tra tính hợp lệ của claim real-time (tất cả đều dưới 33.3 ms budget, đạt 71--2,000+ FPS).
+- [x] Làm rõ con số `1.01 ms` (đo trên Apple Silicon MPS trong cấu hình un-synchronized/early baseline; đã bổ sung bảng đo đạc chính xác chi tiết cho từng thiết bị).
+
+**Output chuẩn đã cập nhật vào Table 12 của bài báo:**
+
+| Model | Params | FLOPs / MACs | CPU Mean (ms) | MPS Mean (ms) | CUDA Mean (ms) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Transformer Mix** | 399K | **12.50 MFLOPs** | 0.42 ms | 1.11 ms | 0.08 ms |
+| **AAGCN Single Stream** | 378K | **101.43 MFLOPs** | 0.98 ms | 2.11--2.31 ms | 0.11 ms |
+| **SkelGym-Lite (2 Models)** | 777K | **113.93 MFLOPs** | 1.40 ms | 3.42 ms | 0.19 ms |
+| **SkelGym-Full (5 Streams)** | 1.91M | **418.21 MFLOPs** | 4.33 ms | 9.91 ms | 0.54 ms |
+
+---
+
+### 4. Reproducibility
+
+- **File liên quan**:
+  - `README.md`
+  - `run.py`
+  - `scripts/evaluate_local_ensemble.py`
+  - `scripts/evaluate_external_benchmark.py`
+
+#### Dataset / Path
+- [x] Kiểm tra đường dẫn `data/Final_dataset_metadata.csv`.
+- [x] Kiểm tra fallback tự động tải từ Hugging Face.
+- [x] Đảm bảo local path và HF path dùng cùng version metadata.
+- [x] Đảm bảo checkpoint version khớp với paper.
+- [x] Đảm bảo skeleton data version khớp với metadata.
+- [x] Không để README hướng dẫn một path nhưng code sử dụng path khác.
+
+#### Repository Structure
+README phải phân biệt rõ:
 ```text
-① Audit Bootstrap CI & Sampling Unit
-       ↓
-② Chuẩn hóa quy trình đo Latency Benchmark
-       ↓
-③ Audit External Benchmark & 1-shot protocol
-       ↓
-④ Kiểm tra Reproducibility & chuẩn hóa README
-       ↓
-⑤ Xóa bỏ toàn bộ terminology "SOTA" tự xưng
-       ↓
-⑥ Làm rõ sơ đồ kiến trúc 5-stream Late Fusion
-       ↓
-⑦ Sửa câu từ Data Leakage (Video-level partition)
-       ↓
-⑧ Sửa câu từ Statistical Significance
-       ↓
-⑨ Rà soát tuyên bố Licensing & Privacy
-       ↓
-⑩ Tính FLOPs / MACs lý thuyết (Optional)
-       ↓
-⑪ Thử nghiệm SkateFormer / CTR-GCN (Optional)
-       ↓
-🚀 Biên dịch Final PDF & Sẵn sàng nộp bài (Submission-Ready)
+GitHub
+├── source code
+├── scripts
+├── configuration
+└── paper
+
+Hugging Face
+├── skeleton coordinates
+├── metadata/data artifacts
+└── model checkpoints
 ```
 
-> [!IMPORTANT]
-> **Nếu thời gian có hạn, bắt buộc ưu tiên 4 việc cốt lõi sau:**
-> 1. **Bootstrap CI Audit:** Đảm bảo tính toán đúng và logic chặt chẽ giữa point estimate và confidence intervals.
-> 2. **Latency Benchmark:** Chuẩn hóa quy trình đo có warm-up, báo cáo mean/median/p95 và phân tách classifier vs end-to-end.
-> 3. **External Benchmark:** Làm rõ protocol 1-shot transfer và chứng minh thực nghiệm cho claim Deadlift $30\% \to 90\%$.
-> 4. **Reproducibility:** Đồng nhất đường dẫn file metadata, phân định rõ GitHub vs Hugging Face để người khác có thể reproduce kết quả dễ dàng.
+#### Reproduction Commands
+- [x] Người mới clone repo có thể biết phải chạy command nào.
+- [x] Có command reproduce final result: `python scripts/evaluate_local_ensemble.py`.
+- [x] Có command evaluate local test set.
+- [x] Có command evaluate external benchmark: `python scripts/evaluate_external_benchmark.py`.
+- [x] Có command benchmark latency: `python scripts/benchmark_hardware_latency.py --device auto`.
+- [x] Có thông tin dependency / version (`requirements.txt`).
+- [x] Có fixed random seed ($42$).
+- [x] Có khai báo hardware / software environment.
+
+> [!NOTE]
+> **Đã nghiệm thu**:
+> - README không tuyên bố raw video được public bừa bãi; ghi rõ academic fair-use và không tái phân phối file raw video.
+> - Tất cả số liệu trong `README.md` khớp hoàn toàn 100% với paper.
+
+---
+
+### 5. Statistical Significance — Đồng Bộ Toàn Bộ Tài Liệu
+
+- **File liên quan**:
+  - `paper/paper_eswa.tex`
+  - `paper/paper_llncs.tex`
+  - `paper/cover_letter.tex`
+  - `README.md`
+
+- [x] Abstract chỉ claim những comparison thực sự được kiểm định.
+- [x] Results ghi rõ test nào được sử dụng.
+- [x] Ghi rõ:
+  - [x] McNemar’s test — window level
+  - [x] Wilcoxon signed-rank test — video level
+- [x] Ghi rõ sample unit:
+  - [x] 2,743 windows
+  - [x] 233 videos
+- [x] Ghi rõ Bonferroni correction nếu đang sử dụng.
+- [x] Kiểm tra ngưỡng $\alpha_{\text{adj}} = 0.01$.
+- [x] Kiểm tra tất cả $p$-values ($p < 10^{-11}$, $p < 0.005$).
+- [x] **Không dùng câu**: *"All improvements are statistically significant."*
+- [x] Cover Letter phải dùng cùng wording chuẩn với paper.
+- [x] Kiểm tra effect size nếu đã báo cáo.
+- [x] Đảm bảo mỗi claim significance đều có corresponding statistical test.
+
+**Cách diễn đạt chuẩn đã áp dụng đồng bộ:**
+> *"Key architectural comparisons were statistically evaluated using McNemar’s test at the window level ($N=2,743, p < 10^{-11}$) and Wilcoxon signed-rank tests at the video level ($N=233, p < 0.005$) against a Bonferroni-adjusted threshold of $\alpha_{\text{adj}} = 0.01$."*
+
+---
+
+### 6. Dataset Licensing
+
+- **File liên quan**:
+  - `paper/paper_eswa.tex`
+  - `paper/paper_llncs.tex`
+  - `README.md`
+  - `paper/cover_letter.tex`
+
+- [x] Phân biệt rạch ròi giữa Raw videos và Derived skeleton data.
+- [x] Không nói toàn bộ raw videos được public nếu không redistribute.
+- [x] Kiểm tra quyền sử dụng từng nguồn:
+  - [x] YouTube
+  - [x] Pexels
+  - [x] Freepik
+  - [x] Author-recorded (Informed consent under Helsinki Declaration)
+  - [x] Public dataset (Abdillah 2023)
+- [x] Ghi rõ raw videos không được redistribute nếu đúng (academic fair-use, withheld from public redistribution).
+- [x] Ghi rõ các thành phần được release công khai:
+  - [x] Skeleton coordinates (13 landmarks, 32 frames)
+  - [x] Metadata manifests
+  - [x] Segment information (`.txt`)
+  - [x] Checkpoints
+  - [x] Source code
+- [x] Kiểm tra claim CC BY 4.0 áp dụng cho toàn bộ derived skeleton package.
+- [x] Kiểm tra claim MIT License cho code / checkpoints.
+
+> [!NOTE]
+> **Đã cập nhật câu chuẩn**:
+> *"All source code, extracted skeletal representations, metadata, and pretrained checkpoints used for reproducibility are publicly available."*
+
+---
+
+### 7. Privacy Wording
+
+- **File liên quan**:
+  - `paper/paper_eswa.tex`
+  - `paper/paper_llncs.tex`
+  - `README.md`
+  - `paper/cover_letter.tex`
+
+- [x] Thay `privacy-preserving` bằng `privacy-aware`.
+- [x] Không tuyên bố skeleton hoàn toàn không chứa thông tin cá nhân.
+- [x] Nêu rõ skeleton vẫn có thể chứa:
+  - [x] Body proportions
+  - [x] Movement patterns
+  - [x] Coarse gait / motion characteristics
+- [x] Claim chính: **giảm exposure của raw RGB information bằng cách xử lý ephemerally trong RAM và hủy ngay lập tức**.
+- [x] Đồng bộ wording giữa Abstract / Introduction / Discussion / Conclusion / README / Cover Letter.
+
+---
+
+## 🟡 P2 — Audit Số Liệu Toàn Diện
+
+### 8. README Final Consistency Audit — 🟢 Đã Hoàn Thành
+
+Đã tìm kiếm toàn repository và xác nhận:
+- [x] Không còn bootstrap CI cũ (đã cập nhật $[68.46\%, 71.75\%]$ và $[72.09\%, 83.26\%]$).
+- [x] Không còn `97.32%` (đã cập nhật chính thức Mean $90.36\% \pm 7.35\%$, peak $98.00\%$).
+- [x] Không còn số liệu latency cũ hay mâu thuẫn (đã phân tách rõ ràng classifier CPU 0.42--4.33 ms, CUDA 0.08--0.54 ms, MPS 1.11--9.91 ms).
+- [x] Không còn statistical claim cũ overclaim (chỉ claim các cặp kiểm định đạt $p < 10^{-11}$ và $p < 0.005$ với Bonferroni correction).
+- [x] Không còn thuật ngữ `SOTA` tự xưng.
+- [x] Không còn `Grand 5-Stream SOTA`.
+- [x] Không còn `zero temporal leakage` (thay bằng `strict video-level partitioning with no source-video overlap across splits`).
+- [x] Không còn claim raw dataset public không chính xác (ghi rõ academic fair-use và không tái phân phối raw videos).
+- [x] Không còn claim privacy tuyệt đối (dùng `privacy-aware`, thừa nhận giới hạn về tỷ lệ thân hình và dáng đi thô).
+
+---
+
+### 9. Final Paper Numerical Audit — 🟢 Đã Nghiệm Thu Hoàn Toàn
+
+Toàn bộ các con số đã được đối soát chéo và khớp 100% giữa Code, Scripts, Tables, TeX, README và Cover Letter:
+
+#### Core Metrics
+- [x] Window Accuracy = **70.11%**
+- [x] Window Macro-F1 = **0.6858**
+- [x] Video Accuracy = **77.68%**
+- [x] Video Macro-F1 = **0.7649**
+- [x] Test windows = **2,743**
+- [x] Test videos = **233**
+- [x] Params = **1.91M** (Full Ensemble) / **777K** (Lite) / **399K** (Transformer Mix)
+
+#### Statistical Metrics
+- [x] Window CI = $[68.46\%, 71.75\%]$ (Bootstrap Mean: $70.14\%$)
+- [x] Video CI = $[72.09\%, 83.26\%]$ (Bootstrap Mean: $77.65\%$)
+- [x] Khoảng CI bắt buộc chứa point estimate (Cả $70.11\%$ và $77.68\%$ đều nằm ở trung tâm của khoảng tin cậy).
+
+#### Architecture
+- [x] 1 Transformer (Mix 117-d)
+- [x] 4 AAGCN streams (Bone 3D, Relative 3D, Joint Motion 3D, Bone Motion 3D)
+- [x] 5 independent models trained separately
+- [x] SLSQP late fusion
+- [x] Validation-calibrated weights under simplex constraints ($\sum w_i = 1, w_i \ge 0$)
+
+#### Efficiency
+- [x] FLOPs thống nhất: Transformer 12.50 MFLOPs, AAGCN Stream 101.43 MFLOPs, SkelGym-Lite 113.93 MFLOPs, SkelGym-Full 418.21 MFLOPs.
+- [x] Params thống nhất: Transformer 399K, AAGCN Stream 378K, Lite 777K, Full 1.91M.
+- [x] Latency thống nhất: CPU 0.42--4.33 ms, CUDA 0.08--0.54 ms, MPS 1.11--9.91 ms.
+- [x] Hardware thống nhất: Apple Silicon M4 GPU (MPS) / CPU, NVIDIA RTX PRO 6000 (CUDA).
+
+#### Dataset Statistics
+- [x] 1,024 source videos (10.2 GB).
+- [x] 22 classes.
+- [x] 6:2:2 video-level split (580 train, 208 val, 236 test / 233 valid $\ge 32$ frames).
+- [x] Window generation thực hiện nghiêm ngặt sau video-level split.
+- [x] 32-frame window ($T=32$).
+- [x] Train stride 16 ($S=16$, 13,136 windows).
+- [x] Val/Test stride 32 ($S=32$, Val: 2,075 windows, Test: 2,743 windows).
+
+---
+
+## 🟢 Những Task Đã Hoàn Thành (Đóng Hoàn Toàn)
+
+Toàn bộ các hạng mục sau đã được nghiệm thu và đánh dấu **DONE**:
+- [x] Bootstrap CI methodology (khắc phục hoàn toàn anomaly điểm ước lượng nằm ngoài CI).
+- [x] Xóa self-claimed SOTA trong code và văn bản.
+- [x] Làm rõ kiến trúc 5-stream late fusion.
+- [x] Sửa leakage wording sang strict video-level partitioning.
+- [x] FLOPs/MACs lý thuyết tính toán qua `thop`.
+- [x] Core 22-class experiment chuẩn hóa.
+- [x] 117-d biomechanical compound representation.
+- [x] SkelGym-Augmentation pipeline.
+- [x] SLSQP validation calibration under simplex constraints.
+- [x] Video consensus aggregation (soft voting).
+- [x] Class-level biomechanical error analysis.
+- [x] External S&C benchmark và 1-shot classification simulation.
+- [x] Tách bạch rõ rệt và chính xác Deadlift/Squat recall ($40\% \to 80\%-90\%$ video recall).
+- [x] Đồng bộ hóa Licensing (Raw video fair-use vs CC BY 4.0 skeletons vs MIT codebase).
+- [x] Đồng bộ hóa Privacy-aware wording toàn diện.
+
+---
+
+## 🎯 Checklist Cuối Cùng (Action Plan 12 Bước) — 🟢 100% Complete
+
+```text
+[x] 1. Chốt lại 1-shot experiment
+      └─ Đổi terminology thành 1-shot classification simulation (zero-adaptation)
+      └─ Chốt 1 bộ số liệu duy nhất: Mean 90.36% ± 7.35%, CI [68.95%, 98.00%], Peak 98.00%
+[x] 2. Chốt External Benchmark
+      └─ Deadlift/Squat: ST-GCN 40% -> Transformer 80%, SkelGym 80%-90% video recall
+      └─ Open-set / Closed-set định nghĩa rõ ràng
+      └─ Video/Window protocol chi tiết
+[x] 3. Chốt Latency
+      └─ 50 warm-up, 500 timing iterations
+      └─ Đồng bộ sync trước/sau timing
+      └─ Báo cáo mean / median / p95
+      └─ Phân định model vs feature extraction vs end-to-end (MediaPipe)
+[x] 4. Đồng bộ Reproducibility
+      └─ GitHub (code) vs Hugging Face (data/checkpoints)
+      └─ Metadata & Checkpoints versioning đồng nhất
+      └─ Lệnh reproduce hoàn chỉnh
+[x] 5. Sửa Statistical wording
+      └─ Paper & Cover Letter: McNemar (p < 10^-11), Wilcoxon (p < 0.005), Bonferroni alpha = 0.01
+[x] 6. Sửa Licensing wording (Raw video fair-use vs CC BY 4.0 Skeletons vs MIT Code)
+[x] 7. Sửa Privacy wording (Privacy-aware thay cho claim bảo mật tuyệt đối)
+[x] 8. README numerical audit (Khớp 100% với paper)
+[x] 9. Full paper numerical audit (Khớp 100% chéo các file)
+[x] 10. Compile final packages (Overleaf ZIPs: paper_eswa_overleaf.zip & paper_llncs_overleaf.zip)
+[x] 11. Search toàn repo lần cuối (Đã sạch toàn bộ legacy terms)
+[x] 12. Final submission package (manuscript ESWA/LNCS, cover letter, overleaf packages, checklist)
+```
+
+> [!NOTE]
+> Tất cả 12 bước trong kế hoạch hành động đã được hoàn tất và nghiệm thu toàn diện. Toàn bộ repository và bản thảo bài báo hiện đã đạt trạng thái **100% Submission-Ready**!

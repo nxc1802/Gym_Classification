@@ -4,7 +4,7 @@ Supplementary Experiments Runner:
 1. Train T2.4: Transformer raw_3d + skel_gym_aug
 2. Train AAGCN bone_3d, joint_motion_3d, bone_motion_3d + skel_gym_aug
 3. Multi-Stream Graph Fusion with Augmentation (T4.6 Two-Stream, T4.8 Four-Stream)
-4. Cross-Paradigm Ensemble (T5.1 Hard, T5.2 Soft, T5.3 Stacking, T5.4 Tri-Model, T5.5 Grand SOTA)
+4. Cross-Paradigm Ensemble (T5.1 Hard, T5.2 Soft, T5.3 Stacking, T5.4 Tri-Model, T5.5 SkelGym-Full)
 5. Auto-update Tables 6A, 6B, and Table 7.
 """
 
@@ -243,7 +243,7 @@ def main():
         "--device", "auto"
     ], "Table 5: Tri-Model Grand Ensemble (T5.4)")
 
-    # T5.5 (Grand Multi-Stream SOTA Ensemble): Best Transformer + All 4 AAGCN Aug Streams
+    # T5.5 (SkelGym-Full Cross-Paradigm Ensemble): Best Transformer + All 4 AAGCN Aug Streams
     run_cmd([
         sys.executable, "run.py", "ensemble",
         "--method", "weighted_soft",
@@ -258,7 +258,7 @@ def main():
         "checkpoints/best_AAGCN_T4.jm_joint_motion_3d.pt",
         "checkpoints/best_AAGCN_T4.bm_bone_motion_3d.pt",
         "--device", "auto"
-    ], "Table 5: Grand Multi-Stream SOTA Ensemble (T5.5) -> Updates Table 6A, 6B & 7")
+    ], "Table 5: SkelGym-Full Cross-Paradigm Ensemble (T5.5) -> Updates Table 6A, 6B & 7")
 
     logger.info("==================================================")
     logger.info("🎉 ALL SUPPLEMENTARY EXPERIMENTS COMPLETED SUCCESSFULLY!")

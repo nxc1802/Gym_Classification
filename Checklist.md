@@ -73,7 +73,7 @@
     - $K=1$ random exemplar video sampled per class as support (4 support videos total across the 4 classes).
     - Remaining 50 test videos served as query samples.
     - Nearest-neighbor classification using cosine similarity over temporal mean-aggregated feature representations.
-    - Results: Transformer Mix ($97.32\% \pm 1.96\%$, 95% CI: $[94.00\%, 98.00\%]$), AAGCN Bone ($92.02\% \pm 7.24\%$), SkelGym-Full ($95.34\% \pm 3.89\%$).
+    - Results: Transformer Mix ($90.36\% \pm 7.35\%$, 95% CI: $[68.95\%, 98.00\%]$, Peak: $98.00\%$), AAGCN Bone ($68.82\% \pm 11.14\%$), SkelGym-Full ($86.18\% \pm 9.50\%$).
 
 - [x] **11. Kiểm tra toàn bộ references**
   - **Audit**: Python automated citation validator confirms:

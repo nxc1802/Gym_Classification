@@ -214,10 +214,11 @@ In Deyzel et al. (CVPRW 2023), ST-GCN suffered from severe mutual confusion betw
 | **AAGCN (Bone 3D)** | 65.5% | 71.6% | 80.0% | 80.0% | Bone orientation vectors balance precision |
 | **SkelGym-Full (Ensemble)** | **80.3%** | **65.7%** | **93.3%** | **90.0%** | **Ambiguity resolved**: 90% Deadlift & 93.3% Squat recall |
 
-### 3. One-Shot Transfer Learning (Deyzel One-Shot Metric Protocol)
-Emulating Deyzel's 1-shot transfer protocol (1 random exemplar video per S&C class as reference support, classifying remaining query videos via cosine similarity, averaged over 100 trials):
+### 3. One-Shot Classification Simulation (Zero-Adaptation Metric Protocol)
+Emulating Deyzel's 1-shot protocol (1 random exemplar video per S&C class as reference support, classifying remaining 50 query videos via cosine similarity, averaged over 100 trials with seed 42):
 * **Deyzel et al. (CVPRW 2023) Reported**: **87.4%** on SU-EMD 7 classes.
-* **Transformer (Mix 117-d)**: **97.32% ± 1.96%** (95% CI: [94.00%, 98.00%])
-* **AAGCN (Bone 3D)**: **92.02% ± 7.24%** (95% CI: [74.95%, 96.00%])
-* **SkelGym-Full**: **95.34% ± 3.89%** (95% CI: [80.00%, 98.00%])
+* **Transformer (Mix 117-d)**: **90.36% ± 7.35%** (95% CI: [68.95%, 98.00%], Peak: 98.00%)
+* **AAGCN (Bone 3D)**: **68.82% ± 11.14%** (95% CI: [46.00%, 88.00%])
+* **SkelGym-Full**: **86.18% ± 9.50%** (95% CI: [62.00%, 98.00%], Peak: 98.00%)
+
 
