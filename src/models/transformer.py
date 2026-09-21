@@ -42,7 +42,7 @@ class LearnablePositionalEncoding(nn.Module):
 
 class TransformerModel(nn.Module):
     """
-    Modern SOTA Skeletal Transformer Classifier (~350K params).
+    Skeletal Transformer Classifier (~350K params).
     Roadmap Upgrades:
       - Learnable Positional Embeddings
       - Pre-LayerNorm (norm_first=True) for smooth gradient propagation

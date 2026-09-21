@@ -34,7 +34,7 @@ def run_local_evaluation():
         logger.error(f"Required data paths not found: metadata={metadata_path}, landmarks={landmark_dir}")
         return
 
-    # Checkpoint configuration for Grand 5-Stream SOTA Ensemble
+    # Checkpoint configuration for SkelGym-Full (Cross-Paradigm Ensemble)
     component_models = [
         {"name": "Transformer Mix (Aug)", "ckpt": "checkpoints/best_Transformer_T2.2_mix.pt", "model": "Transformer", "feat": "mix"},
         {"name": "AAGCN Joint (Aug)", "ckpt": "checkpoints/best_AAGCN_T4.3_rel_3d.pt", "model": "AAGCN", "feat": "rel_3d"},
@@ -184,7 +184,7 @@ def run_local_evaluation():
     # Save final ensemble confusion matrix
     cm_path = "outputs/ensemble/cm_ensemble_T5.1_weighted_soft.png"
     os.makedirs("outputs/ensemble", exist_ok=True)
-    plot_confusion_matrix(y_test_true, ens_test_win_preds, cm_path, title="Grand 5-Stream SOTA Ensemble (Weighted Soft)")
+    plot_confusion_matrix(y_test_true, ens_test_win_preds, cm_path, title="SkelGym-Full Ensemble (Weighted Soft)")
     logger.info(f"Verified & Saved final ensemble confusion matrix: {cm_path}")
 
     # Summary comparison table
@@ -196,7 +196,7 @@ def run_local_evaluation():
     for r in results_table:
         print(f"{r['name']:<26} | {r['val_win_acc']:>10.2f}% | {r['val_vid_acc']:>10.2f}% | {r['test_win_acc']:>11.2f}% | {r['test_vid_acc']:>11.2f}% | {r['latency_ms']:>8.2f}ms")
     print("-" * 95)
-    print(f"{'Grand 5-Stream Ensemble':<26} | {ens_val_win_acc:>10.2f}% | {ens_val_vid_acc:>10.2f}% | {ens_test_win_acc:>11.2f}% | {ens_test_vid_acc:>11.2f}% | {'~' + str(round(sum(r['latency_ms'] for r in results_table), 2)) + 'ms':>9}")
+    print(f"{'SkelGym-Full Ensemble':<26} | {ens_val_win_acc:>10.2f}% | {ens_val_vid_acc:>10.2f}% | {ens_test_win_acc:>11.2f}% | {ens_test_vid_acc:>11.2f}% | {'~' + str(round(sum(r['latency_ms'] for r in results_table), 2)) + 'ms':>9}")
     print("=" * 95)
 
 if __name__ == '__main__':

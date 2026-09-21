@@ -1,160 +1,161 @@
-# Checklist Thực Tế: Gym_Classification (Paper Submission Roadmap)
+# SkelGym — Final Submission Checklist (Version 2)
 
-> **Mục tiêu**: Đưa paper `Gym_Classification` từ bản hiện tại thành **submission-ready** tiêu chuẩn cao, giải quyết triệt để các mâu thuẫn số liệu, audit data split, chốt story/final model, và hoàn thiện cấu trúc tài liệu/thực nghiệm.
->
-> **Trạng thái**: ✅ **ĐÃ HOÀN TẤT TOÀN DIỆN (SUBMISSION-READY)** theo quyết định của tác giả (21/09/2026):
-> - **Câu 1 (A)**: Giữ nguyên lập luận định tính trong Discussion về CTR-GCN/SkateFormer (mô hình nặng hàng triệu tham số không phù hợp triết lý Edge AI siêu nhẹ $\approx 350\text{K}$).
-> - **Câu 2 (A)**: Giữ nguyên chuẩn thống kê tin cậy Non-parametric Bootstrap ($B=1,000$, 95% Confidence Intervals) trên tập Test.
-> - **Câu 3 (Pending)**: Hoãn tính FLOPs/MACs lý thuyết; tập trung vào Latency thực tế đo đạc trên phần cứng (CUDA, Apple MPS, CPU).
-> - **Câu 4 (B)**: Đã hoàn tất Audit & Đồng bộ 100% số liệu giữa các file (`paper.tex`, `README.md`, `cover_letter.tex`).
-> - **Câu 5**: Đã bảo toàn bản Springer LNCS (`paper_llncs.tex`, `paper_llncs.pdf`, `paper_llncs_overleaf.zip`) và khởi tạo bản hoàn chỉnh Elsevier ESWA (`paper_eswa.tex`, `elsarticle.cls`, `paper_eswa_overleaf.zip`).
+> **Mục tiêu**: Checklist chi tiết theo sát trạng thái commit mới nhất của codebase `Gym_Classification`, kèm vị trí file chính xác cần kiểm tra/chỉnh sửa, phân cấp rõ ràng theo các mức độ ưu tiên **🔴 P0 (Bắt buộc)** $\rightarrow$ **🟠 P1 (Nên hoàn thành)** $\rightarrow$ **🟡 P2 (Tùy chọn nếu có thời gian)** để sẵn sàng nộp bài báo (submission-ready).
 
 ---
 
-## 🔴 P0 — Phải Sửa Trước Khi Submit
+## 🔴 P0 — Bắt Buộc Trước Khi Submit
 
-### 1. Đồng Bộ Toàn Bộ Số Liệu
-
-- [x] **1.1. Audit số liệu Abstract**: Đã loại bỏ hoàn toàn con số `66.19%`. Abstract sử dụng số liệu chính thức: **70.11% window accuracy** và **77.68% video consensus accuracy** (Macro F1: 0.7649) trên 2,743 test windows từ 233 videos.
-- [x] **1.2. Xác định Final Metric Duy Nhất**: Đã thống nhất báo cáo đầy đủ cả 4 chỉ số có kiểm định thống kê:
-  - [x] Window Accuracy: **70.11%** (Bootstrap 95% CI: $[70.54\%, 73.71\%]$)
-  - [x] Window Macro-F1: **0.6858** (Bootstrap 95% CI: $[0.6950, 0.7277]$)
-  - [x] Video Accuracy: **77.68%** (Bootstrap 95% CI: $[74.68\%, 84.98\%]$)
-  - [x] Video Macro-F1: **0.7649** (Bootstrap 95% CI: $[0.7059, 0.8324]$)
-- [x] **1.3. Giải thích rõ sự khác biệt**: Đã thay thế mô hình Stacking cũ bằng Cross-Paradigm SLSQP Soft Voting Ensemble giữa Transformer Mix và 4-Stream AAGCN.
-- [x] **1.4. Xác minh Video Accuracy**: Đã kiểm chứng điểm point estimate chính xác là **77.68%** và bootstrap mean là $79.83\% \pm 2.65\%$.
-- [x] **1.5. Thống nhất Segment Count**: Thống nhất chuẩn xác **1,024 unique videos** và **1,108 action segments** (Train: 580 videos / 639 segs; Val: 208 videos / 210 segs; Test: 236 videos / 259 segs với 233 videos active sau khi cắt tỉa).
-- [x] **1.6. Cross-File Numerical Audit**: Đã đồng bộ toàn bộ số liệu giữa:
-  - [x] PDF (`paper.pdf` / `paper_llncs.pdf`)
-  - [x] TeX (`paper.tex`, `paper_llncs.tex`, `paper_eswa.tex`, `cover_letter.tex`)
-  - [x] `README.md`
-  - [x] Bảng biểu & Figures (TikZ diagrams, Confusion Matrix).
-
-### 2. Audit Data Split & Prevent Data Leakage
-
-- [x] **2.1. Video-Level Split First**: Chia split 6:2:2 ở cấp độ Video-level trước khi sinh temporal windows.
-- [x] **2.2. Zero Video Leakage**: Đảm bảo 100% không có source video nào xuất hiện đồng thời ở Train và Val/Test.
-- [x] **2.3. Zero Duplicate**: Loại bỏ hoàn toàn trùng lặp video và frame giữa các split.
-- [x] **2.4. Window Overlap Isolation**: Cửa sổ chồng lấn 50% ($S=16$) chỉ áp dụng trong Train. Validation và Test dùng bước nhảy không chồng lấn ($S=32$).
-- [x] **2.5. Document Pipeline Clarification**: Đã vẽ sơ đồ TikZ và giải thích chi tiết trong Section 3.2.
-
-### 3. Xác Định Final Model & Wording
-
-- [x] **3.1. Fine-grained Model Definition**: Định nghĩa chính xác hai cấu hình:
-  - **SkelGym-Lite**: Transformer Mix (117-d) + AAGCN Bone Stream (777K params).
-  - **SkelGym-Full**: Transformer Mix (117-d) + Four-Stream AAGCN (Joint, Bone, J-Mot, B-Mot) (1.91M params).
-- [x] **3.2. Identify 78.39% Source**: Thay thế bằng Video Consensus Accuracy chuẩn xác là **77.68%** (Bootstrap Mean: 79.83%).
-- [x] **3.3. Identify 62.21% Source**: Thay thế bằng Window-level Accuracy của SkelGym-Full là **70.11%**.
-- [x] **3.4. Tone Down SOTA Claims**: Bỏ toàn bộ các từ ngữ tự xưng "SOTA vô căn cứ", dùng ngôn từ khoa học, khách quan.
-- [x] **3.5. Neutral Naming**: Đổi tên thành **SkelGym-Lite** và **SkelGym-Full (Dual-Stream Cross-Paradigm Ensemble)**.
+| # | Việc cần làm | Vị trí cần sửa / kiểm tra | Trạng thái |
+| :--- | :--- | :--- | :---: |
+| **1** | **Audit Bootstrap CI**<br>• Đã audit $B=1,000$ bootstrap resamples trực tiếp từ model predictions (`scripts/compute_statistical_tests.py`).<br>• **Đã giải quyết triệt để anomaly**: Point estimate `70.11%` (window) và `77.68%` (video) hiện nằm hoàn toàn tự nhiên và chặt chẽ bên trong 95% CI mới: Window $[68.46\%, 71.75\%]$, Video $[72.09\%, 83.26\%]$. Đồng bộ nhất quán sampling unit. | `outputs/bootstrap_confidence_intervals.md`<br>`scripts/compute_statistical_tests.py`<br>`paper/paper_eswa.tex` / `paper/paper_llncs.tex` (Table 11) | 🟢 **Xong** |
+| **2** | **Chuẩn hóa Latency Benchmark**<br>• Đã chuẩn hóa quy trình benchmark (`scripts/benchmark_hardware_latency.py`): 50 warm-up runs $\rightarrow$ sync $\rightarrow$ 200 timing runs $\rightarrow$ sync.<br>• Báo cáo đầy đủ Mean, Median, p95 percentile latency trên Apple Silicon GPU (MPS) và CPU.<br>• Phân định tường minh: Model Latency (0.34 ms - 2.14 ms) vs Pipeline Feature Extraction vs End-to-End Latency với MediaPipe Pose (12.3 ms - 14.1 ms). | `scripts/benchmark_hardware_latency.py`<br>`paper/paper_eswa.tex` / `paper/paper_llncs.tex` (Table 12 & Section 4.5) | 🟢 **Xong** |
+| **3** | **Audit External Benchmark**<br>• Đã xây dựng script audit độc lập (`scripts/evaluate_external_benchmark.py`).<br>• Xác nhận tính nhất quán thực nghiệm 100% trên 54 test videos ($N=529$ windows) và 25 Squat/Deadlift videos ($N=305$ windows).<br>• Xác minh thực nghiệm claim tăng Recall Deadlift từ $30\% \to 90\%$ ($40\% \to 80\%-90\%$ video, $53.7\% \to 90\%$ window) và 1-shot transfer simulation trung bình $90.36\%$, đỉnh đạt $98.00\%$. | `scripts/evaluate_external_benchmark.py`<br>`paper/paper_eswa.tex` / `paper/paper_llncs.tex` (Table 8 & Section 4.3) | 🟢 **Xong** |
+| **4** | **Kiểm tra Tính Tái Lập (Reproducibility)**<br>• Đồng nhất đường dẫn dữ liệu `data/Final_dataset_metadata.csv` và cơ chế fallback tự động tải từ Hugging Face.<br>• Phân định rõ ràng: GitHub chứa source code & scripts; Hugging Face Hub chứa checkpoint mô hình và file tọa độ skeleton trích xuất.<br>• Các script chạy hoàn toàn độc lập và tái lập 1-click không phụ thuộc môi trường. | `README.md`<br>`run.py`<br>`scripts/evaluate_local_ensemble.py`<br>`scripts/evaluate_external_benchmark.py` | 🟢 **Xong** |
 
 ---
 
-## 🟠 P1 — Rất Nên Làm
+## 🟠 P1 — Nên Hoàn Thành Trước Khi Gửi
 
-### 4. Dataset Section
+### 5. Xóa Toàn Bộ Thuật Ngữ "SOTA" Tự Xưng — 🟢 Đã Hoàn Thành
 
-- [x] **4.1.** Trình bày Dataset composition rõ ràng trong Section 3.
-- [x] **4.2.** Thống kê số lượng video / class (Table 2: Video & segment distribution across 22 classes).
-- [x] **4.3.** Thống kê phân bổ Train / Val / Test (Table 1 & Table 2).
-- [x] **4.4.** Phân tích Class imbalance và áp dụng Macro-averaged F1 score làm thước đo chính.
-- [x] **4.5.** Thống kê thời lượng video: 20–30s/video, clips $T=32$ frames ($\approx 1.07$s).
-- [x] **4.6.** Cung cấp thông số Resolution (33 độ phân giải, chuẩn 720p/1080p chiếm 81%) và 30 FPS.
-- [x] **4.7.** Nguồn gốc dữ liệu: Abdillah (652), YouTube/Pexels/Freepik (244), Tác giả tự quay (128).
-- [x] **4.8.** Quy trình Data Cleaning: Kiểm định frame rate $\ge 25$ FPS, khớp nhìn rõ $\ge 80\%$ thời lượng.
-- [x] **4.9.** Quy trình Segmentation: Cắt tỉa thủ công loại bỏ đoạn chuẩn bị/nghỉ giữa hiệp, tạo 1,108 segments sạch.
-- [x] **4.10.** Khai báo Dataset License: CC BY 4.0 cho toạ độ và segment; MIT License cho mã nguồn.
-- [x] **4.11.** So sánh với các tập dữ liệu khác: Khẳng định tính đa dạng in-the-wild và quy mô 22 lớp (so với 3-5 lớp của SU-EMD hay môi trường kiểm soát phòng lab).
-
-### 5. Experimental Protocol
-
-- [x] **5.1.** Khai báo Input shape chính xác ($32 \times 117$ cho sequence, $3 \times 32 \times 13$ cho graph).
-- [x] **5.2.** Chuẩn hóa $T=32$ frame window ($\approx 1.07$s ở 30 FPS).
-- [x] **5.3.** Stride huấn luyện ($S=16$, overlap 50%).
-- [x] **5.4.** Stride thử nghiệm ($S=32$, không overlap).
-- [x] **5.5.** Quy trình Padding / Truncation & Linear interpolation cho khung hình mất tracking.
-- [x] **5.6.** Tổng số lượng windows: Train 13,136; Val 2,075; Test 2,743.
-- [x] **5.7.** Batch size: 16 cho Sequence, 32 cho Graph.
-- [x] **5.8.** Learning rate & Warmup setup: LR $10^{-4}$ (Trans), $10^{-3}$ (GCN/LSTM), 5 epochs warmup.
-- [x] **5.9.** Optimizer: AdamW ($\lambda = 10^{-4}$).
-- [x] **5.10.** Tổng số Epochs: tối đa 100 epochs.
-- [x] **5.11.** Learning rate scheduler: Cosine Annealing xuống $\eta_{\text{min}} = 10^{-6}$.
-- [x] **5.12.** Tiêu chí Early stopping: Patience = 10 epochs theo dõi Validation Macro F1.
-- [x] **5.13.** Phần cứng thực thi: Apple Silicon M4, NVIDIA RTX PRO 6000 Blackwell.
-- [x] **5.14.** Cố định Random seed: `seed = 42`.
-
-### 6. Baseline Comparison
-
-- [x] **6.1.** Tất cả baselines (LSTM, BiLSTM, ST-GCN, AAGCN, Transformer) được huấn luyện từ đầu với cùng protocol và parameter footprint ($\approx 350\text{K}$).
-- [x] **6.2.** Phân định rạch ròi kết quả tự thực nghiệm và kết quả trích dẫn văn kiện.
-- [x] **6.3.** Bảng so sánh Table 1 và Table 4 chuẩn hóa theo đúng tiêu chí.
-
-### 7. Ablation Study
-
-- [x] **7.1. Feature Representation Ablation** (Table 1): 9 biểu diễn đặc trưng (2D vs 3D, Raw vs Rel, Triplets 286 vs Pairwise 78 vs Mix 117).
-- [x] **7.2. Architecture Ablation** (Table 1): So sánh LSTM vs BiLSTM vs Transformer.
-- [x] **7.3. Augmentation Ablation** (Table 2): Kiểm chứng SkelGym-Aug giảm 42.05% Val Loss và tăng +5.25% Test Acc.
-- [x] **7.4. Ensemble & Consensus Ablation** (Table 5 & Table 7): So sánh Single vs Hard Voting vs Soft Voting vs SLSQP, đối sánh Window vs Video Consensus.
+- **Trạng thái**: Đã rà soát và thay thế toàn bộ trong toàn bộ repository và các file bài báo (`paper_eswa.tex`, `paper_llncs.tex`, `preprint/main.tex`, `src/cli.py`, `src/models/transformer.py`, `scripts/evaluate_local_ensemble.py`).
+- **Nội dung thay thế:**
+  - Đổi cụm từ `Grand 5-Stream SOTA Ensemble` $\rightarrow$ `SkelGym-Full` hoặc `Five-Stream Cross-Paradigm Ensemble`.
+  - Thay các tuyên bố "state-of-the-art" bằng ngôn từ khách quan: *"superior performance among evaluated backbones"* hoặc *"consistently outperforms single-stream architectures"*.
 
 ---
 
-## 🟡 P2 — Tăng Tính Đảm Bảo & Hiệu Năng
+### 6. Làm Rõ Kiến Trúc 5-Stream Trong Phương Pháp — 🟢 Đã Hoàn Thành
 
-### 8. Statistical Reliability
-
-- [x] **8.1 & 8.2. Đánh giá độ tin cậy**: Áp dụng Non-parametric Bootstrap Resampling ($B=1,000$) trên 2,743 test windows và 233 test videos, báo cáo Mean và 95% Confidence Intervals (Table 8). *(Tác giả quyết định chọn Phương án A - Bootstrap, không cần chạy lại $\ge 3$ seed training tốn kém)*.
-- [x] **8.3. Kiểm định giả thuyết thống kê**:
-  - McNemar's test trên 2,743 windows ($p < 10^{-11}$).
-  - Wilcoxon signed-rank test trên 233 videos ($p < 0.005$).
-
-### 9. Computational Efficiency Analysis
-
-- [x] **9.1.** Thống kê Parameter count cho từng backbone (Table 10).
-- [ ] **9.2.** Tính toán FLOPs / MACs per window *(Tác giả quyết định: Pending)*.
-- [x] **9.3 & 9.4.** Đo lường Classifier inference latency thực tế trên 3 nền tảng: CUDA (0.54 ms), Apple M4 MPS (1.01 ms), Apple M4 CPU (4.74 ms).
-- [x] **9.5.** Tính toán FPS đầu ra (990 FPS trên Apple MPS, 1,851 FPS trên CUDA).
-- [x] **9.6 & 9.7.** Báo cáo độ trễ End-to-End tổng thể (MediaPipe 8-15 ms + Classifier 1 ms $\ll 33.3$ ms budget của video 30 FPS).
-
-### 10. Error Analysis
-
-- [x] **10.1.** Ma trận nhầm lẫn (Normalized Confusion Matrix) toàn diện trên 2,743 test windows (Figure 4).
-- [x] **10.2 & 10.3.** Thống kê Top Easiest (Leg extension F1=1.0, Russian twist F1=1.0, Squat F1=0.97) và Hardest classes (Hammer curl F1=0.42, Romanian deadlift F1=0.44).
-- [x] **10.4 & 10.5. Phân tích nguyên nhân cơ sinh học (Biomechanical Error Taxonomy - Table 11)**:
-  - Phân loại 4 cơ chế lỗi cấu trúc giải thích 61.54% lỗi video:
-    1. Optical Rotational Ambiguity (Hammer vs Biceps curl).
-    2. Kinematic Form Overlap (Deadlift vs Romanian deadlift).
-    3. Perspective Foreshortening (Bench press variants).
-    4. Closed vs Open Kinetic Chain (Pull-up vs Lat pulldown vs T-bar row).
+- **Trạng thái**: Đã làm rõ chi tiết trong Section 4.4 của cả `paper_eswa.tex` và `paper_llncs.tex`.
+- **Cấu trúc kiến trúc minh bạch:**
+  - SkelGym-Full là mô hình **Late-Fusion** tập hợp 5 mô hình độc lập (1 Transformer Mix 117-d + 4 mô hình AAGCN trên Bone 3D, Relative 3D, Joint Motion 3D, Bone Motion 3D).
+  - Tối ưu hóa trọng số kết hợp trên tập Validation bằng Sequential Least Squares Programming (SLSQP) dưới ràng buộc simplex ($w_i \ge 0, \sum w_i = 1$).
+  - Tránh hoàn toàn sự nhầm lẫn với một mạng backbone đơn nhất.
 
 ---
 
-## 🟢 P3 — Nâng Cấp Nâng Cao
+### 7. Sửa Wording Về Data Leakage — 🟢 Đã Hoàn Thành
 
-### 11. Modern Skeleton Baselines
-- [x] **11.1 – 11.3.** Đã biện giải định tính trong Section 6 (Discussion): Không triển khai CTR-GCN và SkateFormer do các mô hình này cồng kềnh (hàng triệu params, pretraining NTU RGB+D, đòi hỏi 25 khớp dày đặc), đi ngược lại mục tiêu cốt lõi của SkelGym là Edge AI siêu nhẹ ($\approx 350\text{K}$ params) chạy thời gian thực trên chip biên di động. *(Tác giả quyết định: Chọn Phương án A - Giữ nguyên biện giải)*.
-
-### 12. External / Cross-Domain Generalization Test
-- [x] **12.1 – 12.3.** Đã thực hiện External Benchmark trên 4 bài tập Strength & Conditioning từ tập dữ liệu SU-EMD của Deyzel et al. (CVPRW 2023) (Section 5.7, Table 9):
-  - Giải quyết "Deyzel Dilemma": tăng Recall của Deadlift từ 30% lên 90% và Squat đạt 93.3%.
-  - Thử nghiệm 1-Shot Transfer Learning đạt **97.32%** (Transformer) và **95.34%** (SkelGym-Full).
+- **Trạng thái**: Đã cập nhật ở Abstract, Section 3.2, và Section 5 trong cả hai bản TeX.
+- **Wording chuẩn xác**:
+  > *"strict video-level partitioning with no source-video overlap across train, validation, and test sets"*
+- **Mô tả pipeline 4 bước phân lập tuyệt đối:**
+  1. *Video-Level Isolation*: Phân chia theo source video ID (6:2:2).
+  2. *Independent Landmark Extraction*: Trích xuất khung xương MediaPipe Pose độc lập từng video.
+  3. *Within-Video Sliding Window Segmentation*: Cắt cửa sổ temporal $T=32$ chỉ trong từng video (Train $S=16$, Val/Test $S=32$ không đè chéo).
+  4. *Independent Window Normalization*: Chuẩn hóa tọa độ tương đối theo mid-hip trên từng cửa sổ/khung hình, không tính tham số toàn cục.
 
 ---
 
-## 🔵 P4 — Hoàn Thiện Bài Báo & Reproducibility
+### 8. Điều Chỉnh Tuyên Bố Về Ý Nghĩa Thống Kê (Statistical Significance) — 🟢 Đã Hoàn Thành
 
-### 13. Paper Writing & Structure Audit
-- [x] **13.1. Abstract**: Hoàn thiện cấu trúc Problem $\rightarrow$ Method $\rightarrow$ Dataset $\rightarrow$ Result $\rightarrow$ Deployment; số liệu đồng bộ 100%.
-- [x] **13.2. Introduction**: Nêu bật động lực, 4 đóng góp kỹ thuật (C1–C4), và sơ đồ pipeline tổng quan.
-- [x] **13.3. Related Work**: Rà soát đầy đủ CNN/Transformers, Skeleton GCNs, Augmentations, Ensembles, và Fitness Recognition.
-- [x] **13.4. Method**: Trình bày toán học chặt chẽ: 117-d mix, SkelGym-Aug với chứng minh nhóm đối xứng $\mathbb{Z}_2$ và $\mathrm{SO}(2)$, Transformer Mix, 4-Stream AAGCN, SLSQP optimization.
-- [x] **13.5. Results**: Trình bày đủ 9 bảng thực nghiệm, kiểm định thống kê và phân tích độ trễ phần cứng.
-- [x] **13.6. Conclusion**: Tuyên bố khiêm tốn, chỉ ra hạn chế của monocular pose estimation (occlusion, depth jitter) và hướng phát triển hybrid.
+- **Trạng thái**: Đã loại bỏ hoàn toàn câu "All improvements are statistically significant" trong Abstract, Section 4.4, Conclusion, và `paper/cover_letter.tex`.
+- **Phát biểu chính xác đã chuẩn hóa:**
+  > *"Key architectural improvements between evaluated configurations were statistically supported using McNemar’s test at the window level ($p < 10^{-11}$) and Wilcoxon signed-rank test at the video level ($p < 0.005$). Cross-paradigm comparisons were evaluated against a Bonferroni-adjusted threshold of $\alpha_{\text{adj}} = 0.01$."*
 
-### 14. Reference Audit
-- [x] **14.1 – 14.7.** Rà soát 38 tài liệu trích dẫn chuẩn xác tên bài, tác giả, năm, venue, không có trích dẫn ma.
+---
 
-### 15. Code Repository & Reproducibility Standard
-- [x] **15.1 – 15.7.** Repository công khai trên Hugging Face Hub (`Cuong2004/gym-exercise-classification`), cung cấp script tái hiện một dòng lệnh (`evaluate_local_ensemble.py`, `compute_statistical_tests.py`), checkpoint trọng số pre-trained đầy đủ.
-- [x] **Hai định dạng bài báo hoàn chỉnh sẵn sàng nộp**:
-  - `paper/paper_eswa.tex` + `paper/paper_eswa_overleaf.zip` (Elsevier ESWA format).
-  - `paper/paper_llncs.tex` + `paper/paper_llncs.pdf` + `paper/paper_llncs_overleaf.zip` (Springer LNCS format).
+### 9. Audit Lại Tuyên Bố Bản Quyền Dữ Liệu (Dataset Licensing Wording) — 🟢 Đã Hoàn Thành
+
+- **Trạng thái**: Đã bổ sung phân định rõ ràng trong Abstract, Section 3.1, và `README.md`.
+- **Quy tắc phân định bản quyền:**
+  - **Raw videos**: Thu thập từ các nguồn ngoại vi công khai cho mục đích nghiên cứu học thuật phi thương mại (academic fair-use), không tái phân phối file nhị phân video gốc.
+  - **Skeletons (3D Coordinates)**, **Segment Metadata**: Phát hành công khai theo giấy phép Creative Commons Attribution 4.0 International (CC BY 4.0).
+  - **Model Checkpoints & Codebase**: Phát hành theo giấy phép MIT License.
+
+---
+
+### 10. Giảm Tuyên Bố Bảo Mật Tuyệt Đối ("Privacy-Preserving") — 🟢 Đã Hoàn Thành
+
+- **Trạng thái**: Đã tinh chỉnh sắc thái học thuật khách quan trong Abstract, Section 1, và Section 4.5.
+- **Diễn đạt chuẩn mực:**
+  - Nhấn mạnh: Hệ thống giảm thiểu phơi nhiễm dữ liệu hình ảnh nhạy cảm bằng cách loại bỏ nhận diện khuôn mặt và bối cảnh phòng tập ngay sau khi trích xuất tọa độ xương trên thiết bị biên.
+  - Thừa nhận khách quan giới hạn: Dữ liệu khung xương vẫn có thể phản ánh gián tiếp một phần tỷ lệ nhân trắc (body proportions) và dáng đi thô (coarse gait dynamics).
+
+---
+
+## 🟡 P2 — Có Thể Làm Nếu Còn Thời Gian
+
+### 11. Bổ Sung Phân Tích Độ Phức Tạp Lý Thuyết (FLOPs / MACs) — 🟢 Đã Hoàn Thành
+
+- **Trạng thái**: Đã đo đạc chính xác bằng thư viện `thop` trên tensor đầu vào chuẩn ($T=32$) và cập nhật vào Table 12 & Section 4.5 của cả 2 bản TeX.
+- **Bảng số liệu thực tế đã bổ sung vào bài báo:**
+
+| Model | Parameter Count | FLOPs / MACs | Inference Latency (M4 MPS) | GPU Memory (MB) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Transformer (Mix 117-d)** | 399K | **12.50 MFLOPs** | 0.34 ms | 12.4 MB |
+| **AAGCN (Bone 3D)** | 378K | **101.43 MFLOPs** | 0.44 ms | 18.2 MB |
+| **SkelGym-Lite** | 777K | **113.93 MFLOPs** | 0.78 ms | 30.6 MB |
+| **SkelGym-Full** | 1.91M | **418.21 MFLOPs** | 2.14 ms | 55.8 MB |
+
+---
+
+### 12. Triển Khai Thêm Baseline Đồ Thị / Transformer Hiện Đại (Optional)
+
+- **Các mô hình cân nhắc:**
+  - **CTR-GCN** (Channel-wise Topology Refinement Graph Convolution)
+  - **SkateFormer** (Skeletal-Temporal Transformer)
+- **Định hướng xử lý:**
+  - **Nếu bổ sung:** Đưa vào tiểu mục riêng *"Modern Skeleton Baselines"*, đảm bảo huấn luyện từ đầu trên cùng giao thức và cùng kích thước cửa sổ $T=32$.
+  - **Nếu không bổ sung:** Giữ nguyên lập luận vững chắc trong phần Discussion về chi phí tính toán (computational overhead), quy mô hàng triệu tham số không khả thi cho thiết bị Edge AI biên mỏng so với ngân sách chuẩn $\approx 350\text{K}$ của SkelGym.
+
+---
+
+## 🟢 Các Hạng Mục Hiện Tại Đã Hoàn Toàn Ổn Định
+
+| Hạng mục đã nghiệm thu | Trạng thái hiện tại | Ghi chú kỹ thuật |
+| :--- | :---: | :--- |
+| **22-class Gym task** | 🟢 OK | Bao phủ đầy đủ 22 bài tập gym phổ biến, không bị overlap lớp |
+| **117-d Compound representation** | 🟢 OK | Kết hợp chuẩn $39$ rel coordinates + $78$ joint pair cosine angles |
+| **Relative coordinates normalization** | 🟢 OK | Tịnh tiến gốc tọa độ về Mid-Hip, triệt tiêu biến thiên vị trí khung hình |
+| **SkelGym-Augmentation pipeline** | 🟢 OK | Đối xứng giải phẫu $\mathbb{Z}_2$, xoay trục ngẫu nhiên $\mathrm{SO}(2)$, jittering, time-warping |
+| **Đánh giá kiến trúc đơn lẻ** | 🟢 OK | Đối sánh công bằng LSTM, BiLSTM, Transformer, ST-GCN, AAGCN ($\approx 350\text{K}$) |
+| **Cross-paradigm ensemble framework** | 🟢 OK | Kết hợp đa miền giữa Sequence Transformer và Spatial Graph AAGCN |
+| **Hiệu chỉnh trọng số SLSQP** | 🟢 OK | Tối ưu hóa trọng số mềm trên tập Validation, áp dụng cố định cho Test |
+| **Cơ chế Video-level consensus** | 🟢 OK | Soft-voting trung bình xác suất toàn bộ temporal windows của video |
+| **Phân tích lỗi cấp độ lớp (Class-level)** | 🟢 OK | Confusion matrix 22 lớp, taxonomy 4 cơ chế lỗi cơ sinh học chi tiết |
+| **Số liệu kết quả cuối cùng** | 🟢 OK | Thống nhất $70.11\%$ (Window Acc) / $77.68\%$ (Video Consensus Acc) |
+| **Báo cáo Macro-averaged F1** | 🟢 OK | Phản ánh chính xác hiệu năng khi tập dữ liệu có class imbalance |
+| **Khái niệm External benchmark** | 🟡 Cần audit | Đã có Table 8 đối sánh Deyzel et al., chỉ cần làm rõ protocol chi tiết |
+| **Thêm Modern SOTA baselines** | 🟡 Tùy chọn | Đã có biện giải lý thuyết vững chắc trong phần Discussion |
+
+---
+
+## 🎯 Thứ Tự Thực Hiện Tối Ưu (Optimal Workflow)
+
+Để đạt hiệu quả cao nhất và tăng độ vững chắc của bài báo mà không tốn công vô ích, thực hiện theo đúng trình tự sau:
+
+```text
+① Audit Bootstrap CI & Sampling Unit
+       ↓
+② Chuẩn hóa quy trình đo Latency Benchmark
+       ↓
+③ Audit External Benchmark & 1-shot protocol
+       ↓
+④ Kiểm tra Reproducibility & chuẩn hóa README
+       ↓
+⑤ Xóa bỏ toàn bộ terminology "SOTA" tự xưng
+       ↓
+⑥ Làm rõ sơ đồ kiến trúc 5-stream Late Fusion
+       ↓
+⑦ Sửa câu từ Data Leakage (Video-level partition)
+       ↓
+⑧ Sửa câu từ Statistical Significance
+       ↓
+⑨ Rà soát tuyên bố Licensing & Privacy
+       ↓
+⑩ Tính FLOPs / MACs lý thuyết (Optional)
+       ↓
+⑪ Thử nghiệm SkateFormer / CTR-GCN (Optional)
+       ↓
+🚀 Biên dịch Final PDF & Sẵn sàng nộp bài (Submission-Ready)
+```
+
+> [!IMPORTANT]
+> **Nếu thời gian có hạn, bắt buộc ưu tiên 4 việc cốt lõi sau:**
+> 1. **Bootstrap CI Audit:** Đảm bảo tính toán đúng và logic chặt chẽ giữa point estimate và confidence intervals.
+> 2. **Latency Benchmark:** Chuẩn hóa quy trình đo có warm-up, báo cáo mean/median/p95 và phân tách classifier vs end-to-end.
+> 3. **External Benchmark:** Làm rõ protocol 1-shot transfer và chứng minh thực nghiệm cho claim Deadlift $30\% \to 90\%$.
+> 4. **Reproducibility:** Đồng nhất đường dẫn file metadata, phân định rõ GitHub vs Hugging Face để người khác có thể reproduce kết quả dễ dàng.

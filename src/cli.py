@@ -292,7 +292,7 @@ def update_table7_markdown(
       - "Two-Stream AAGCN"
       - "Four-Stream AAGCN"
       - "Tri-Model Grand Ensemble"
-      - "Grand 5-Stream SOTA Ensemble"
+      - "SkelGym-Full (Cross-Paradigm Ensemble)"
     """
     rep_path = Path(report_file)
     if not rep_path.exists():
@@ -1072,11 +1072,11 @@ def cmd_ensemble(args):
         elif exp_id in ("T3.10", "T4.7", "T4.8", "T4.10") or (len(args.checkpoints) == 4 and all("AAGCN" in c for c in args.checkpoints)):
             t7_key = "Four-Stream AAGCN (Aug)" if "aug" in "".join(args.checkpoints).lower() else "Four-Stream AAGCN"
         elif exp_id == "T5.1" or len(args.checkpoints) >= 5:
-            t7_key = "Grand 5-Stream SOTA Ensemble"
+            t7_key = "SkelGym-Full (Cross-Paradigm Ensemble)"
         elif exp_id in ("T5.2", "T5.3") or (any("Transformer" in c for c in args.checkpoints) and any("AAGCN" in c for c in args.checkpoints)):
             t7_key = "Dual-Model Grand Ensemble"
         else:
-            t7_key = "Grand SOTA Heterogeneous Ensemble"
+            t7_key = "SkelGym-Full (Cross-Paradigm Ensemble)"
 
         if t7_key:
             update_table7_markdown(
