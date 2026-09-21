@@ -11,7 +11,7 @@ Official PyTorch implementation, pre-trained model checkpoints, and dataset arti
 
 **SkelGym** is an end-to-end, privacy-aware, and computationally lightweight intelligent exercise recognition framework operating exclusively on 3D skeletal coordinates extracted from monocular video via Google MediaPipe Pose Heavy. 
 
-By abstracting raw video frames into sparse 3D joint trajectories on edge hardware, SkelGym eliminates the heavy computational footprint of 3D-CNNs/Video Transformers, prevents background/apparel memorization, and mitigates privacy exposure by processing video frames ephemerally in volatile memory without persistent video streaming or disk storage.
+By abstracting raw video frames into sparse 3D joint trajectories on edge hardware, SkelGym eliminates the heavy computational footprint of 3D-CNNs/Video Transformers, reduces reliance on background and athletic apparel appearance cues, and mitigates privacy exposure by processing video frames ephemerally in volatile memory without persistent video streaming or disk storage.
 
 ```
                                   SKELGYM END-TO-END PIPELINE
@@ -48,7 +48,7 @@ By abstracting raw video frames into sparse 3D joint trajectories on edge hardwa
 
 1. **117-dimensional Biomechanical Compound Representation:** Fuses 3D relative joint coordinates ($39$-d) with pairwise directional elevation angles ($78$-d), reducing dimensionality by $59.1\%$ compared to combinatorial $3$-joint triplets ($\binom{13}{3} = 286$-d) while resolving multicollinearity and retaining scale-invariant directional orientation.
 2. **Physiologically Grounded Augmentation (SkelGym-Aug):** Restricts data transformations to physically valid human postures through bilateral sagittal reflection ($\mathbb{Z}_2$ symmetry with exact joint permutations) and gravitational yaw rotation ($\mathrm{SO}(2)$ invariance about the vertical axis). Applied strictly on-the-fly during training forward passes (zero test-time corruption).
-3. **Ultra-Lightweight Scratch-Trained Backbones:** All models ($\approx 350\text{K} \pm 15\%$ parameters per stream) are trained entirely from scratch without external pre-training weights, achieving an edge classifier latency of **$0.42\text{--}1.40\text{ ms}$** on host CPU ($0.54\text{ ms}$ on CUDA, $1.11\text{--}9.91\text{ ms}$ on MPS).
+3. **Ultra-Lightweight Scratch-Trained Backbones:** All models ($\approx 350\text{K} \pm 15\%$ parameters per stream) are trained entirely from scratch without external pre-training weights, achieving an edge classifier latency of **$0.42\text{--}4.33\text{ ms}$** on host CPU ($0.08\text{--}0.54\text{ ms}$ on CUDA, $1.11\text{--}9.91\text{ ms}$ on MPS; where individual backbones require $0.42\text{--}1.16\text{ ms}$ on CPU and the full 5-stream ensemble executes in $4.33\text{ ms}$).
 4. **Validation-Calibrated Ensemble (SLSQP):** Formulates soft voting stream weights via Sequential Least Squares Programming minimizing Negative Log-Likelihood strictly on validation partitions (leakage-free), combined with temporal video consensus aggregation.
 
 ---
@@ -59,18 +59,21 @@ Evaluated on **$2,743$ held-out test windows** across **$233$ out-of-sample test
 
 | Model / Ensemble Architecture | Parameter Footprint | FLOPs / MACs | Window Accuracy | Window Macro F1 | Video Consensus Acc | Video Macro F1 |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Baseline LSTM (Mix 117-d)** | 378K | 11.20 MFLOPs | 57.67% | 0.5681 | 67.81% | 0.6618 |
-| **Baseline BiLSTM (Mix 117-d)** | 367K | 22.40 MFLOPs | 61.17% | 0.6008 | 68.24% | 0.6802 |
-| **Baseline ST-GCN (Rel 3D)** | 365K | 98.60 MFLOPs | 43.57% | 0.4595 | 58.47% | 0.5817 |
-| **Transformer Mix (SkelGym-Aug)** | 399K | **12.50 MFLOPs** | 68.65% | 0.6654 | 72.10% | 0.6983 |
-| **AAGCN Bone Stream (SkelGym-Aug)** | 378K | **101.43 MFLOPs** | 65.84% | 0.6504 | 72.96% | 0.7295 |
-| **Four-Stream AAGCN (Unified)** | 1.51M | 405.71 MFLOPs | 67.34% | 0.6662 | 75.54% | 0.7500 |
-| **SkelGym-Lite (Transformer + Bone)** | **777K** | **113.93 MFLOPs** | **69.27%** | **0.6771** | **76.82%** | **0.7550** |
-| **SkelGym-Full (Transformer + 4S-AAGCN)** | **1.91M** | **418.21 MFLOPs** | **70.11%** | **0.6858** | **77.68%** | **0.7649** |
+| **ST-GCN Baseline** (Rel 3D) | 378K | 101.43 MFLOPs | 43.57% | 0.4595 | 58.47% | 0.5817 |
+| **LSTM Baseline** (Mix 117-d) | 362K | 7.42 MFLOPs | 57.67% | 0.5681 | 67.81% | 0.6618 |
+| **BiLSTM Baseline** (Mix 117-d) | 384K | 14.84 MFLOPs | 61.17% | 0.6008 | 68.24% | 0.6802 |
+| **AAGCN Baseline** (Bone 3D) | 378K | 101.43 MFLOPs | 52.27% | 0.5338 | 69.53% | 0.6904 |
+| **SkelGym-Aug AAGCN** (Bone 3D) | 378K | 101.43 MFLOPs | 65.84% | 0.6504 | 72.96% | 0.7295 |
+| **Transformer Mix** (Clean) | 399K | 12.50 MFLOPs | 63.40% | 0.6218 | 74.25% | 0.7304 |
+| **SkelGym-Aug Transformer** (Mix) | 399K | 12.50 MFLOPs | 68.65% | 0.6654 | 72.10% | 0.6983 |
+| **Two-Stream AAGCN** (Aug) | 756K | 202.86 MFLOPs | 66.61% | 0.6586 | 73.82% | 0.7348 |
+| **Four-Stream AAGCN** (Aug) | 1.51M | 405.71 MFLOPs | 67.34% | 0.6662 | 75.54% | 0.7500 |
+| **SkelGym-Lite** (Transformer + Bone) | **777K** | **113.93 MFLOPs** | **69.27%** | **0.6771** | **76.82%** | **0.7550** |
+| **SkelGym-Full** (Cross-Paradigm Ensemble) | **1.91M** | **418.21 MFLOPs** | **70.11%** | **0.6858** | **77.68%** | **0.7649** |
 
 * **Statistical Significance:** Key architectural improvements confirmed statistically significant via McNemar's test at window level ($N=2,743, p < 10^{-11}$) and Wilcoxon signed-rank test at video level ($N=233, p < 0.005$) against a Bonferroni-adjusted threshold $\alpha_{\text{adj}} = 0.01$.
 * **Bootstrap Reliability:** Non-parametric bootstrap ($B=1,000$) establishes a 95% Confidence Interval for Window Accuracy of **$[68.46\%, 71.75\%]$** (mean: $70.14\% \pm 0.84\%$) and Video Accuracy of **$[72.09\%, 83.26\%]$** (mean: $77.65\% \pm 2.85\%$). Both point estimates lie centrally inside their respective 95% CIs.
-* **External Benchmark:** Resolves the "Deyzel Dilemma" (Squat vs. Deadlift ambiguity from Deyzel et al., CVPRW 2023), elevating Deadlift video recall to **$80.0\%-90.0\%$** (from $40.0\%$ on ST-GCN baseline), and achieving a mean of **$90.36\% \pm 7.35\%$** (peak trial: **$98.00\%$**, 95% CI: $[68.95\%, 98.00\%]$) in 1-shot classification simulations across 100 trials.
+* **External Benchmark:** Mitigates the Squat--Deadlift confusion observed in the Deyzel et al. (CVPRW 2023) benchmark, elevating Deadlift video recall from **$40.0\%$** on baseline ST-GCN to **$80.0\%$** on Transformer Mix and **$90.0\%$** on SkelGym-Full (under closed-set consensus; 80.0% under open-set), and achieving a mean of **$90.36\% \pm 7.35\%$** (peak trial: **$98.00\%$**, 95% CI: $[68.95\%, 98.00\%]$) in 1-shot classification simulations across 100 trials.
 
 ---
 
@@ -168,7 +171,7 @@ python run.py ensemble --method slsqp --val_calibration
 * **Corpus Scale:** 1,024 unique video recordings ($\approx 10.2\text{ GB}$), trimmed into 1,108 active exercise segments across 22 resistance training classes.
 * **Provenance:** 652 videos from Abdillah (2023), 244 videos curated from open stock media (YouTube, Pexels, Freepik), and 128 multi-angle gym videos recorded by the authors with informed consent under the Declaration of Helsinki.
 * **Data Licensing & Artifact Availability:**
-  * **Raw Videos:** Under academic fair-use guidelines for non-commercial research, raw video files from third-party hosting platforms are not redistributed.
+  * **Raw Videos:** Raw third-party videos are not redistributed. Their original hosting locations, attribution information, and segmentation boundaries are retained in the metadata manifests where applicable.
   * **Extracted Skeletal Representations (NPY, CSV), Segment Boundaries, and Metadata:** Publicly available under **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
   * **Source Code, Training Scripts, and Checkpoints:** Fully open-sourced under the **MIT License**.
   * All artifacts are hosted at: [huggingface.co/Cuong2004/gym-exercise-classification](https://huggingface.co/Cuong2004/gym-exercise-classification).

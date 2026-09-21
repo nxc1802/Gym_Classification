@@ -1,6 +1,6 @@
-# SkelGym — Final Submission Checklist (Version 3 — Unfinished Items Only)
+# SkelGym — Final Submission Checklist (Version 4 — Final Pre-Submission Audit)
 
-> **Mục tiêu**: Checklist tập trung 100% vào **những việc còn chưa hoàn thành** sau khi kiểm tra commit mới nhất. Loại bỏ hoàn toàn SkateFormer/CTR-GCN. Giữ lại đầy đủ từng chi tiết kỹ thuật, protocol và vị trí file cần xử lý theo phân cấp **🔴 P0 (Bắt buộc)** $\rightarrow$ **🟠 P1 (Cleanup quan trọng)** $\rightarrow$ **🟡 P2 (Audit số liệu toàn diện)**.
+> **Mục tiêu**: Checklist cập nhật toàn diện theo commit audit mới nhất. Đã chuẩn hóa triệt để 6 hạng mục audit: (1) Bất nhất latency giữa individual classifier và full ensemble; (2) Disaggregation rõ ràng khoảng Deadlift recall $80.0\%\text{--}90.0\%$; (3) Thay đổi thuật ngữ tiếp thị "Deyzel Dilemma" thành "Mitigating Squat–Deadlift confusion"; (4) Loại bỏ tuyên bố "academic fair-use" đối với raw third-party videos, khẳng định không tái phân phối raw videos; (5) Tinh chỉnh claim "prevents background memorization" thành "reduces reliance on background and apparel cues"; (6) Bổ sung giải thích cluster dependence giữa window-level bootstrap và video-level independent clusters.
 
 ---
 
@@ -69,17 +69,20 @@ Script mới đã kiểm tra khá kỹ, nhưng paper cần biến kết quả th
 - [x] Giải thích tại sao cần cả Open-Set và Closed-Set: Closed-Set đối sánh trực tiếp với Deyzel et al., Open-Set chứng minh không rò rỉ xác suất sang 18 lớp khác.
 - [x] Ghi rõ Video-level aggregation (mean softmax across windows).
 - [x] Ghi rõ Window-level aggregation.
-- [x] Xác minh lại claim Deadlift recall $30\% \to 90\%$.
-- [x] Xác minh chính xác:
-  - [x] Window recall trước (ST-GCN baseline: 53.7% deadlift, 0.0% squat);
-  - [x] Window recall sau (Transformer Mix: 53.7% deadlift, 80.7% squat; SkelGym-Full: 67.2% deadlift, 81.5% squat);
-  - [x] Video recall trước (ST-GCN baseline: 40.0% deadlift, 0.0% squat; y văn Deyzel báo cáo baseline ~30.0%);
-  - [x] Video recall sau (Transformer Mix: 80.0% deadlift, 93.3% squat; SkelGym-Full: 80.0% deadlift, 86.7% squat, lên tới 90.0% trong closed-set consensus).
-- [x] Không dùng một con số $30\% \to 90\%$ nếu nó đến từ hai metric khác nhau (đã tách bạch rõ ràng metric video recall và window recall).
+- [x] Xác minh lại claim Deadlift recall: Tách bạch rõ rệt và disaggregate chi tiết khoảng recall $80.0\%\text{--}90.0\%$:
+  - [x] Window recall baseline (ST-GCN: 53.7% deadlift, 0.0% squat);
+  - [x] Window recall proposed (Transformer Mix: 53.7% deadlift, 80.7% squat; SkelGym-Full: 67.2% deadlift, 81.5% squat);
+  - [x] Video recall baseline (ST-GCN: 40.0% deadlift, 0.0% squat; y văn Deyzel báo cáo baseline ~30.0%);
+  - [x] Video recall proposed:
+    - Transformer Mix: **80.0%** deadlift, **93.3%** squat (open-set consensus)
+    - SkelGym-Full: **80.0%** deadlift, **86.7%** squat (open-set consensus)
+    - SkelGym-Full: **90.0%** deadlift, **93.3%** squat (closed-set consensus)
+- [x] Không dùng một con số mơ hồ $80.0\%\text{--}90.0\%$ không có ngữ cảnh; giải thích rõ 80.0% là open-set và 90.0% là closed-set.
+- [x] Đổi tiêu đề và nội dung từ "Deyzel Dilemma" thành "Mitigating Squat vs. Deadlift Ambiguity / Confusion" (bỏ văn phong marketing).
 - [x] Đưa protocol vào Methods/Experimental Setup (Section 4.3).
 
 > [!NOTE]
-> **Đã nghiệm thu**: Đã giải thích tường minh trong Section 4.3 của cả hai bản `paper_eswa.tex` và `paper_llncs.tex`.
+> **Đã nghiệm thu**: Đã giải thích tường minh trong Section 4.3 của cả hai bản `paper_eswa.tex` và `paper_llncs.tex` cũng như `README.md`.
 
 ---
 
@@ -105,12 +108,12 @@ Script mới đã kiểm tra khá kỹ, nhưng paper cần biến kết quả th
 - [x] Loại bỏ hoàn toàn giai đoạn warm-up khỏi thống kê.
 - [x] Báo cáo đầy đủ: Mean, Median, P95 percentile latency.
 - [x] Phân biệt rõ ràng 3 cấp độ trễ:
-  - [x] Model latency (chỉ riêng forward pass của classifier: CPU 0.42--4.33 ms, CUDA 0.08--0.54 ms)
+  - [x] Model latency (chỉ riêng forward pass của classifier: CPU individual 0.42--1.16 ms / ensemble 4.33 ms, CUDA 0.08--0.54 ms, MPS 1.11--9.91 ms)
   - [x] Feature extraction latency (~0.08 ms)
   - [x] End-to-end latency (MediaPipe Pose ~8--15 ms + Normalization + Classifier -> ~10--18 ms)
-- [x] Không gọi estimated latency là measured latency.
+- [x] Không gọi estimated latency là measured latency (đã ghi chú rõ ràng MediaPipe và End-to-End là reference estimates dựa trên hardware profile).
 - [x] Ghi rõ MediaPipe latency là edge reference / literature benchmark.
-- [x] Đồng bộ số liệu latency giữa Paper, README, Tables, Figures, Cover Letter.
+- [x] Đồng bộ số liệu latency giữa Paper, README, Tables, Figures, Cover Letter (0.42--4.33 ms CPU, 0.08--0.54 ms CUDA, 1.11--9.91 ms MPS).
 - [x] Kiểm tra tính hợp lệ của claim real-time (tất cả đều dưới 33.3 ms budget, đạt 71--2,000+ FPS).
 - [x] Làm rõ con số `1.01 ms` (đo trên Apple Silicon MPS trong cấu hình un-synchronized/early baseline; đã bổ sung bảng đo đạc chính xác chi tiết cho từng thiết bị).
 
@@ -119,9 +122,9 @@ Script mới đã kiểm tra khá kỹ, nhưng paper cần biến kết quả th
 | Model | Params | FLOPs / MACs | CPU Mean (ms) | MPS Mean (ms) | CUDA Mean (ms) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Transformer Mix** | 399K | **12.50 MFLOPs** | 0.42 ms | 1.11 ms | 0.08 ms |
-| **AAGCN Single Stream** | 378K | **101.43 MFLOPs** | 0.98 ms | 2.11--2.31 ms | 0.11 ms |
-| **SkelGym-Lite (2 Models)** | 777K | **113.93 MFLOPs** | 1.40 ms | 3.42 ms | 0.19 ms |
-| **SkelGym-Full (5 Streams)** | 1.91M | **418.21 MFLOPs** | 4.33 ms | 9.91 ms | 0.54 ms |
+| **AAGCN Single Stream** | 378K | **101.43 MFLOPs** | 0.96--1.16 ms | 1.82--1.93 ms | 0.11--0.12 ms |
+| **SkelGym-Lite (2 Models)** | 777K | **113.93 MFLOPs** | 1.37--1.40 ms | 3.18--3.42 ms | 0.19 ms |
+| **SkelGym-Full (5 Streams)** | 1.91M | **418.21 MFLOPs** | 4.28--4.33 ms | 8.77--9.91 ms | 0.54 ms |
 
 ---
 
@@ -196,6 +199,7 @@ Hugging Face
 - [x] Cover Letter phải dùng cùng wording chuẩn với paper.
 - [x] Kiểm tra effect size nếu đã báo cáo.
 - [x] Đảm bảo mỗi claim significance đều có corresponding statistical test.
+- [x] **Cluster Dependence Audit**: Thêm giải thích phương pháp luận rõ ràng: Window-level bootstrap ($N=2,743$) tái lấy mẫu các frames với khả năng phụ thuộc cụm nội tại video (intra-video correlation), do đó video-level bootstrap ($N=233$) đại diện cho các cụm độc lập thực sự (truly independent video clusters) và là chỉ số tin cậy nhất cho tổng quát hóa.
 
 **Cách diễn đạt chuẩn đã áp dụng đồng bộ:**
 > *"Key architectural comparisons were statistically evaluated using McNemar’s test at the window level ($N=2,743, p < 10^{-11}$) and Wilcoxon signed-rank tests at the video level ($N=233, p < 0.005$) against a Bonferroni-adjusted threshold of $\alpha_{\text{adj}} = 0.01$."*
@@ -212,13 +216,12 @@ Hugging Face
 
 - [x] Phân biệt rạch ròi giữa Raw videos và Derived skeleton data.
 - [x] Không nói toàn bộ raw videos được public nếu không redistribute.
+- [x] **Loại bỏ tuyên bố "academic fair-use"** đối với raw third-party videos: Khẳng định minh bạch rằng các video thô từ bên thứ ba (YouTube, Pexels, Freepik) **không được tái phân phối trực tiếp** trong kho lưu trữ, chỉ giữ lại metadata nguồn gốc và mốc thời gian để tôn trọng quyền sở hữu trí tuệ của tác giả gốc.
 - [x] Kiểm tra quyền sử dụng từng nguồn:
-  - [x] YouTube
-  - [x] Pexels
-  - [x] Freepik
+  - [x] YouTube (giữ nguyên attribution link, không phân phối video thô)
+  - [x] Pexels / Freepik (giữ nguyên attribution link, không phân phối video thô)
   - [x] Author-recorded (Informed consent under Helsinki Declaration)
   - [x] Public dataset (Abdillah 2023)
-- [x] Ghi rõ raw videos không được redistribute nếu đúng (academic fair-use, withheld from public redistribution).
 - [x] Ghi rõ các thành phần được release công khai:
   - [x] Skeleton coordinates (13 landmarks, 32 frames)
   - [x] Metadata manifests
@@ -230,11 +233,11 @@ Hugging Face
 
 > [!NOTE]
 > **Đã cập nhật câu chuẩn**:
-> *"All source code, extracted skeletal representations, metadata, and pretrained checkpoints used for reproducibility are publicly available."*
+> *"All source code, extracted skeletal representations, metadata, and pretrained checkpoints used for reproducibility are publicly available. Raw third-party RGB videos are withheld from redistribution to respect original source rights, with source attributions preserved in metadata."*
 
 ---
 
-### 7. Privacy Wording
+### 7. Privacy & Appearance Cue Wording
 
 - **File liên quan**:
   - `paper/paper_eswa.tex`
@@ -248,7 +251,8 @@ Hugging Face
   - [x] Body proportions
   - [x] Movement patterns
   - [x] Coarse gait / motion characteristics
-- [x] Claim chính: **giảm exposure của raw RGB information bằng cách xử lý ephemerally trong RAM và hủy ngay lập tức**.
+- [x] **Background Appearance Overclaim**: Thay thế khẳng định tuyệt đối *"prevents background/apparel memorization"* bằng *"reduces reliance on background and athletic apparel appearance cues"*.
+- [x] Claim chính: **giảm exposure của raw RGB information bằng cách xử lý ephemerally trong RAM và hủy ngay lập tức, đồng thời giảm phụ thuộc vào các đặc trưng ngoại cảnh**.
 - [x] Đồng bộ wording giữa Abstract / Introduction / Discussion / Conclusion / README / Cover Letter.
 
 ---
