@@ -99,7 +99,7 @@ Script mới đã kiểm tra khá kỹ, nhưng paper cần biến kết quả th
 - [x] Chốt số warm-up runs chính thức: 50 runs.
 - [x] Chốt số timing iterations chính thức: 500 timed runs (với per-pass timestamping).
 - [x] Đồng bộ checklist với code: 50 warm-up, 500 timed runs.
-- [x] Chốt device chính thức báo cáo trong paper: Host CPU (0.42--4.33 ms), CUDA (0.08--0.54 ms), Apple Silicon MPS (1.11--9.91 ms).
+- [x] Chốt device chính thức báo cáo trong paper: Host CPU (0.42--4.33 ms), CUDA (0.08--0.54 ms), Apple Silicon MPS (1.11--8.77 ms).
 - [x] Chốt batch size: batch size = 1.
 - [x] Chốt input shape chuẩn $T=32$ frames.
 - [x] Chốt precision/dtype: `torch.float32`.
@@ -108,23 +108,23 @@ Script mới đã kiểm tra khá kỹ, nhưng paper cần biến kết quả th
 - [x] Loại bỏ hoàn toàn giai đoạn warm-up khỏi thống kê.
 - [x] Báo cáo đầy đủ: Mean, Median, P95 percentile latency.
 - [x] Phân biệt rõ ràng 3 cấp độ trễ:
-  - [x] Model latency (chỉ riêng forward pass của classifier: CPU individual 0.42--1.16 ms / ensemble 4.33 ms, CUDA 0.08--0.54 ms, MPS 1.11--9.91 ms)
+  - [x] Model latency (chỉ riêng forward pass của classifier: CPU individual 0.42--1.16 ms / ensemble 4.33 ms, CUDA 0.08--0.54 ms, MPS 1.11--8.77 ms)
   - [x] Feature extraction latency (~0.08 ms)
   - [x] End-to-end latency (MediaPipe Pose ~8--15 ms + Normalization + Classifier -> ~10--18 ms)
 - [x] Không gọi estimated latency là measured latency (đã ghi chú rõ ràng MediaPipe và End-to-End là reference estimates dựa trên hardware profile).
 - [x] Ghi rõ MediaPipe latency là edge reference / literature benchmark.
-- [x] Đồng bộ số liệu latency giữa Paper, README, Tables, Figures, Cover Letter (0.42--4.33 ms CPU, 0.08--0.54 ms CUDA, 1.11--9.91 ms MPS).
+- [x] Đồng bộ số liệu latency giữa Paper, README, Tables, Figures, Cover Letter (0.42--4.33 ms CPU, 0.08--0.54 ms CUDA, 1.11--8.77 ms MPS).
 - [x] Kiểm tra tính hợp lệ của claim real-time (tất cả đều dưới 33.3 ms budget, đạt 71--2,000+ FPS).
-- [x] Làm rõ con số `1.01 ms` (đo trên Apple Silicon MPS trong cấu hình un-synchronized/early baseline; đã bổ sung bảng đo đạc chính xác chi tiết cho từng thiết bị).
+- [x] Làm rõ con số `1.01 ms` (đã loại bỏ hoàn toàn các con số cũ un-synchronized như 0.14 ms và 1.01 ms, chỉ báo cáo benchmark chuẩn synchronized).
 
 **Output chuẩn đã cập nhật vào Table 12 của bài báo:**
 
 | Model | Params | FLOPs / MACs | CPU Mean (ms) | MPS Mean (ms) | CUDA Mean (ms) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Transformer Mix** | 399K | **12.50 MFLOPs** | 0.42 ms | 1.11 ms | 0.08 ms |
-| **AAGCN Single Stream** | 378K | **101.43 MFLOPs** | 0.96--1.16 ms | 1.82--1.93 ms | 0.11--0.12 ms |
-| **SkelGym-Lite (2 Models)** | 777K | **113.93 MFLOPs** | 1.37--1.40 ms | 3.18--3.42 ms | 0.19 ms |
-| **SkelGym-Full (5 Streams)** | 1.91M | **418.21 MFLOPs** | 4.28--4.33 ms | 8.77--9.91 ms | 0.54 ms |
+| **AAGCN Single Stream** | 378K | **101.43 MFLOPs** | 0.96--1.01 ms | 1.82--1.91 ms | 0.11--0.12 ms |
+| **SkelGym-Lite (2 Models)** | 777K | **113.93 MFLOPs** | 1.44 ms | 3.18 ms | 0.19 ms |
+| **SkelGym-Full (5 Streams)** | 1.91M | **418.21 MFLOPs** | 4.33 ms | 8.77 ms | 0.54 ms |
 
 ---
 
@@ -264,7 +264,7 @@ Hugging Face
 Đã tìm kiếm toàn repository và xác nhận:
 - [x] Không còn bootstrap CI cũ (đã cập nhật $[68.46\%, 71.75\%]$ và $[72.09\%, 83.26\%]$).
 - [x] Không còn `97.32%` (đã cập nhật chính thức Mean $90.36\% \pm 7.35\%$, peak $98.00\%$).
-- [x] Không còn số liệu latency cũ hay mâu thuẫn (đã phân tách rõ ràng classifier CPU 0.42--4.33 ms, CUDA 0.08--0.54 ms, MPS 1.11--9.91 ms).
+- [x] Không còn số liệu latency cũ hay mâu thuẫn (đã phân tách rõ ràng classifier CPU 0.42--4.33 ms, CUDA 0.08--0.54 ms, MPS 1.11--8.77 ms).
 - [x] Không còn statistical claim cũ overclaim (chỉ claim các cặp kiểm định đạt $p < 10^{-11}$ và $p < 0.005$ với Bonferroni correction).
 - [x] Không còn thuật ngữ `SOTA` tự xưng.
 - [x] Không còn `Grand 5-Stream SOTA`.
@@ -302,7 +302,7 @@ Toàn bộ các con số đã được đối soát chéo và khớp 100% giữa
 #### Efficiency
 - [x] FLOPs thống nhất: Transformer 12.50 MFLOPs, AAGCN Stream 101.43 MFLOPs, SkelGym-Lite 113.93 MFLOPs, SkelGym-Full 418.21 MFLOPs.
 - [x] Params thống nhất: Transformer 399K, AAGCN Stream 378K, Lite 777K, Full 1.91M.
-- [x] Latency thống nhất: CPU 0.42--4.33 ms, CUDA 0.08--0.54 ms, MPS 1.11--9.91 ms.
+- [x] Latency thống nhất: CPU 0.42--4.33 ms, CUDA 0.08--0.54 ms, MPS 1.11--8.77 ms.
 - [x] Hardware thống nhất: Apple Silicon M4 GPU (MPS) / CPU, NVIDIA RTX PRO 6000 (CUDA).
 
 #### Dataset Statistics

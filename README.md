@@ -40,15 +40,15 @@ By abstracting raw video frames into sparse 3D joint trajectories on edge hardwa
                                                │
                              ┌─────────────────┴─────────────────┐
                              ▼                                   ▼
-                  [Window-Level: 70.11%]               [Video Consensus: 77.68%]
-                  (Macro F1: 0.6858)                   (Macro F1: 0.7649)
+             [Window-Level: 70.03% ± 0.70%]      [Video Consensus: 77.68% ± 0.86%]
+               (Macro F1: 0.6877 ± 0.0051)         (Macro F1: 0.7689 ± 0.0090)
 ```
 
 ### 🔬 Core Innovations
 
 1. **117-dimensional Biomechanical Compound Representation:** Fuses 3D relative joint coordinates ($39$-d) with pairwise directional elevation angles ($78$-d), reducing dimensionality by $59.1\%$ compared to combinatorial $3$-joint triplets ($\binom{13}{3} = 286$-d) while resolving multicollinearity and retaining scale-invariant directional orientation.
 2. **Physiologically Grounded Augmentation (SkelGym-Aug):** Restricts data transformations to physically valid human postures through bilateral sagittal reflection ($\mathbb{Z}_2$ symmetry with exact joint permutations) and gravitational yaw rotation ($\mathrm{SO}(2)$ invariance about the vertical axis). Applied strictly on-the-fly during training forward passes (zero test-time corruption).
-3. **Ultra-Lightweight Scratch-Trained Backbones:** All models ($\approx 350\text{K} \pm 15\%$ parameters per stream) are trained entirely from scratch without external pre-training weights, achieving an edge classifier latency of **$0.42\text{--}4.33\text{ ms}$** on host CPU ($0.08\text{--}0.54\text{ ms}$ on CUDA, $1.11\text{--}9.91\text{ ms}$ on MPS; where individual backbones require $0.42\text{--}1.16\text{ ms}$ on CPU and the full 5-stream ensemble executes in $4.33\text{ ms}$).
+3. **Ultra-Lightweight Scratch-Trained Backbones:** All models ($\approx 350\text{K} \pm 15\%$ parameters per stream) are trained entirely from scratch without external pre-training weights, achieving an edge classifier latency of **$0.42\text{--}4.33\text{ ms}$** on host CPU ($0.08\text{--}0.54\text{ ms}$ on CUDA, $1.11\text{--}8.77\text{ ms}$ on MPS; where individual backbones require $0.42\text{--}1.16\text{ ms}$ on CPU and the full 5-stream ensemble executes in $4.33\text{ ms}$).
 4. **Validation-Calibrated Ensemble (SLSQP):** Formulates soft voting stream weights via Sequential Least Squares Programming minimizing Negative Log-Likelihood strictly on validation partitions (leakage-free), combined with temporal video consensus aggregation.
 
 ---
@@ -74,8 +74,8 @@ Evaluated on **$2,743$ held-out test windows** across **$233$ out-of-sample test
 *Note:* For the four final configurations, metrics are reported as $\text{Mean} \pm \text{SD}$ across 3 independent random seeds (42, 123, 3407) under fixed splits and identical protocols.
 
 * **Training Stability Across 3 Seeds:** Across three independent random seeds (42, 123, 3407), SkelGym-Full and SkelGym-Lite exhibited relatively low variation across the three runs (SkelGym-Full: Video Acc $77.68\% \pm 0.86\%$, Macro F1 $0.7689 \pm 0.0090$; SkelGym-Lite: $76.68\% \pm 0.25\%$, Macro F1 $0.7582 \pm 0.0036$), while standalone backbones showed higher run-to-run sensitivity (Transformer Mix: $\pm 2.59\%$), illustrating the variance-dampening advantage of cross-paradigm late fusion.
-* **Statistical Significance:** Key architectural improvements confirmed statistically significant via McNemar's test at window level ($N=2,743, p < 10^{-11}$) and Wilcoxon signed-rank test at video level ($N=233, p < 0.005$) against a Bonferroni-adjusted threshold $\alpha_{\text{adj}} = 0.01$.
-* **Bootstrap Reliability:** Non-parametric bootstrap ($B=1,000$) establishes a 95% Confidence Interval for Window Accuracy of **$[68.46\%, 71.75\%]$** (mean: $70.14\% \pm 0.84\%$) and Video Accuracy of **$[72.09\%, 83.26\%]$** (mean: $77.65\% \pm 2.85\%$). Both point estimates lie centrally inside their respective 95% CIs.
+* **Statistical Significance:** Selected model comparisons were evaluated using paired statistical tests: McNemar's test at window level ($N=2,743, p < 10^{-11}$) and Wilcoxon signed-rank test at video level ($N=233, p < 0.005$) against a Bonferroni-adjusted threshold $\alpha_{\text{adj}} = 0.01$.
+* **Bootstrap Reliability:** Non-parametric bootstrap ($B=1,000$, computed on baseline seed-42 test predictions) provides 95% confidence intervals: Window Accuracy **$[68.46\%, 71.75\%]$** (mean: $70.14\% \pm 0.84\%$) and Video Accuracy **$[72.09\%, 83.26\%]$** (mean: $77.65\% \pm 2.85\%$). Both point estimates lie centrally inside their respective 95% CIs.
 * **External Benchmark:** Mitigates the Squat--Deadlift confusion observed in the Deyzel et al. (CVPRW 2023) benchmark, elevating Deadlift video recall from **$40.0\%$** on baseline ST-GCN to **$80.0\%$** on Transformer Mix and **$90.0\%$** on SkelGym-Full (under closed-set consensus; 80.0% under open-set), and achieving a mean of **$90.36\% \pm 7.35\%$** (peak trial: **$98.00\%$**, 95% CI: $[68.95\%, 98.00\%]$) in 1-shot classification simulations across 100 trials.
 
 ---
