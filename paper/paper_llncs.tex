@@ -707,7 +707,7 @@ Table~\ref{tab:table5} and Table~\ref{tab:table7} evaluate cross-paradigm ensemb
 \multicolumn{7}{l}{\textit{Standalone Component Baselines (No Ensemble)}} \\
 Transformer Mix (T2.2)      & Single Sequence Backbone (117-d)            & 75.57\% & 79.40\% & 68.65\% & 0.6654 & 72.10\% \\
 AAGCN Bone Stream (T4.2)    & Single Graph Backbone (Bone 3D)             & 77.98\% & 80.26\% & 65.84\% & 0.6504 & 72.96\% \\
-Four-Stream AAGCN (T4.7)    & Unified Graph (Joint+Bone+J-Mot+B-Mot)      & 78.89\% & 81.97\% & 67.34\% & 0.6662 & 75.54\% \\
+Four-Stream AAGCN (T4.7)    & Unified Graph (Joint+Bone+J-Mot+B-Mot)      & 78.89\% & 81.97\% & 68.78\% $\pm$ 1.35\% & 0.6782 $\pm$ 0.0106 & 77.25\% $\pm$ 1.55\% \\
 \midrule
 \multicolumn{7}{l}{\textit{Cross-Paradigm Voting Strategies (Transformer + 4 Graph Streams)}} \\
 Hard Majority Voting        & Discrete mode of predicted class labels     & 77.40\% & 80.69\% & 68.14\% & 0.6610 & 75.97\% \\
@@ -715,11 +715,13 @@ Uniform Average Soft Voting & Equal stream weights: $w_i = 1/5 = 0.20$    & 79.6
 Accuracy-Weighted Voting    & Heuristic weights: $w_i \propto \text{Acc}_i^{\text{val}}$ & 79.52\% & 82.40\% & 72.07\% & 0.7041 & 78.97\% \\
 \midrule
 \multicolumn{7}{l}{\textit{Proposed Calibrated Ensembles (SLSQP Minimizing Validation NLL, Eqs.~\eqref{eq:ensemble_opt}--\eqref{eq:simplex})}} \\
-\textbf{SkelGym-Lite} (T5.2)& 2 models (Trans + Bone): $w = [0.33, 0.67]$ & 78.52\% & 81.12\% & 69.27\% & 0.6771 & 76.82\% \\
-\textbf{SkelGym-Full} (T5.1)& 5 streams: $w = [0.33, 0.00, 0.50, 0.03, 0.14]$ & \textbf{80.10\%} & \textbf{83.09\%} & \textbf{70.11\%} & \textbf{0.6858} & \textbf{77.68\%} \\
+\textbf{SkelGym-Lite} (T5.2)& 2 models (Trans + Bone): $w = [0.33, 0.67]$ & 78.52\% & 81.12\% & 69.66\% $\pm$ 0.71\% & 0.6852 $\pm$ 0.0087 & 76.68\% $\pm$ 0.25\% \\
+\textbf{SkelGym-Full} (T5.1)& 5 streams: $w = [0.33, 0.00, 0.50, 0.03, 0.14]$ & \textbf{80.10\%} & \textbf{83.09\%} & \textbf{70.03\% $\pm$ 0.70\%} & \textbf{0.6877 $\pm$ 0.0051} & \textbf{77.68\% $\pm$ 0.86\%} \\
 \bottomrule
 \end{tabular}
 }
+\vspace{1mm}
+\footnotesize{\textit{Note:} Final configurations (Transformer Mix, Four-Stream AAGCN, SkelGym-Lite, and SkelGym-Full) are reported as $\text{Mean} \pm \text{SD}$ across 3 independent random seeds (42, 123, 3407) under fixed splits and identical protocols.}
 \end{table}
 
 \paragraph{Why SLSQP Is Scientifically Preferred for Real-World Deployment.} While simple uniform averaging achieves slightly higher raw test accuracy on this specific test partition, SLSQP offers several crucial advantages for practical deployment in automated virtual training systems:
@@ -744,15 +746,20 @@ Transformer (Mix 117d, Clean)         & 63.40\%          & 0.6218          & 74.
 Baseline ST-GCN (Rel 3D)              & 43.57\%          & 0.4595          & 58.47\%          & 0.5817          & +14.90\% \\
 Clean Baseline AAGCN (Bone 3D)        & 52.27\%          & 0.5338          & 69.53\%          & 0.6904          & +17.26\% \\
 SkelGym-Aug AAGCN (Bone 3D)           & 65.84\%          & 0.6504          & 72.96\%          & 0.7295          & +7.12\% \\
-SkelGym-Aug Transformer (Mix)         & 68.65\%          & 0.6654          & 72.10\%          & 0.6983          & +3.46\% \\
+SkelGym-Aug Transformer (Mix)         & 66.39\% $\pm$ 1.94\% & 0.6492 $\pm$ 0.0137 & 72.39\% $\pm$ 2.59\% & 0.7089 $\pm$ 0.0211 & +6.00\% \\
 Two-Stream AAGCN (Aug)                & 66.61\%          & 0.6586          & 73.82\%          & 0.7348          & +7.21\% \\
-Four-Stream AAGCN (Aug)               & 67.34\%          & 0.6662          & 75.54\%          & 0.7500          & +8.20\% \\
-SkelGym-Lite (Transformer + Bone AAGCN) & 69.27\%        & 0.6771          & 76.82\%          & 0.7550          & +7.56\% \\
-\textbf{SkelGym-Full (Transformer + 4-Stream AAGCN)} & \textbf{70.11\%} & \textbf{0.6858} & \textbf{77.68\%} & \textbf{0.7649} & \textbf{+7.58\%} \\
+Four-Stream AAGCN (Aug)               & 68.78\% $\pm$ 1.35\% & 0.6782 $\pm$ 0.0106 & 77.25\% $\pm$ 1.55\% & 0.7678 $\pm$ 0.0155 & +8.47\% \\
+SkelGym-Lite (Transformer + Bone AAGCN) & 69.66\% $\pm$ 0.71\% & 0.6852 $\pm$ 0.0087 & 76.68\% $\pm$ 0.25\% & 0.7582 $\pm$ 0.0036 & +7.02\% \\
+\textbf{SkelGym-Full (Transformer + 4-Stream AAGCN)} & \textbf{70.03\% $\pm$ 0.70\%} & \textbf{0.6877 $\pm$ 0.0051} & \textbf{77.68\% $\pm$ 0.86\%} & \textbf{0.7689 $\pm$ 0.0090} & \textbf{+7.65\%} \\
 \bottomrule
 \end{tabular}
 }
+\vspace{1mm}
+\footnotesize{\textit{Note:} For the four final configurations, metrics are reported as $\text{Mean} \pm \text{SD}$ across 3 independent random seeds (42, 123, 3407) under fixed splits and identical protocols.}
 \end{table}
+
+\paragraph{Training Stability across Independent Random Seeds.}
+To evaluate training stability under stochastic optimization, weight initialization, and dynamic augmentations, the four final model configurations were evaluated across three independent random seeds ($\text{seed} \in \{42, 123, 3407\}$) under an identical video-level partition, preprocessing pipeline, hyperparameter set, and evaluation protocol. Across the three runs, standalone Transformer Mix achieves a video accuracy of $72.39\% \pm 2.59\%$ (Macro F1: $0.7089 \pm 0.0211$), and Four-Stream AAGCN achieves $77.25\% \pm 1.55\%$ (Macro F1: $0.7678 \pm 0.0155$). For the cross-paradigm ensembles, SkelGym-Lite demonstrates a video accuracy of $76.68\% \pm 0.25\%$ (Macro F1: $0.7582 \pm 0.0036$), while SkelGym-Full reaches a mean video consensus accuracy of \textbf{77.68\% $\pm$ 0.86\%} (with constituent seed accuracies of 77.68\%, 76.82\%, and 78.54\%) and a mean Video Macro F1 of \textbf{0.7689 $\pm$ 0.0090} (constituent seed F1 scores: 0.7649, 0.7627, and 0.7792; Window Accuracy: $70.03\% \pm 0.70\%$, Window Macro F1: $0.6877 \pm 0.0051$). These empirical standard deviations confirm that the cross-paradigm late-fusion architecture exhibits high training stability across disparate random seeds, with video accuracy variation constrained to under $\pm 0.86\%$ and Macro F1 standard deviation under $\pm 0.0090$ for SkelGym-Full. We emphasize that three seeds serve exclusively to assess optimization variance and reproducibility under a fixed split, and are not intended as an alternative to non-parametric statistical significance testing.
 
 \paragraph{Statistical Significance and Bootstrap Confidence Intervals.} To quantify the statistical robustness of our held-out test evaluation, we conducted non-parametric bootstrap resampling ($B=1,000$ iterations) across both the 2,743 test windows and the 233 video clusters, reported in Table~\ref{tab:bootstrap_ci}. At the temporal window level, SkelGym-Full establishes a 95\% confidence interval of $[68.46\%, 71.75\%]$ for accuracy (mean: $70.14\% \pm 0.84\%$) and $[0.6682, 0.7015]$ for Macro F1 (mean: $0.6854 \pm 0.0085$), significantly outperforming individual sequence baselines such as LSTM ($57.61\%$, 95\% CI: $[55.63\%, 59.53\%]$) and ST-GCN ($24.46\%$, 95\% CI: $[22.79\%, 26.18\%]$). We note that because individual temporal windows originating from the same recording session may share residual intra-video correlation, window-level bootstrap intervals should be interpreted as conditional resampling variance across segmented frames rather than strictly independent subject trials. Crucially, at the full-video consensus level where video clusters represent completely independent recordings, cluster bootstrap establishes an unbiased 95\% confidence interval of $[72.09\%, 83.26\%]$ for video accuracy (mean: $77.65\% \pm 2.85\%$) and $[0.6892, 0.8141]$ for Macro F1 (mean: $0.7543 \pm 0.0319$), compared to SkelGym-Lite ($[71.67\%, 82.41\%]$), AAGCN Bone ($[67.37\%, 78.97\%]$), and Transformer Mix ($[65.67\%, 77.69\%]$). Both test point estimates ($70.11\%$ window accuracy, $77.68\%$ video accuracy) fall squarely within their respective empirical 95\% confidence intervals. This confirms that the observed cross-paradigm ensemble gains are statistically sound and generalizable across unseen athletes and capture environments.
 

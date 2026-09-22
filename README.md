@@ -65,12 +65,15 @@ Evaluated on **$2,743$ held-out test windows** across **$233$ out-of-sample test
 | **AAGCN Baseline** (Bone 3D) | 378K | 101.43 MFLOPs | 52.27% | 0.5338 | 69.53% | 0.6904 |
 | **SkelGym-Aug AAGCN** (Bone 3D) | 378K | 101.43 MFLOPs | 65.84% | 0.6504 | 72.96% | 0.7295 |
 | **Transformer Mix** (Clean) | 399K | 12.50 MFLOPs | 63.40% | 0.6218 | 74.25% | 0.7304 |
-| **SkelGym-Aug Transformer** (Mix) | 399K | 12.50 MFLOPs | 68.65% | 0.6654 | 72.10% | 0.6983 |
+| **SkelGym-Aug Transformer** (Mix) | 399K | 12.50 MFLOPs | 66.39% $\pm$ 1.94% | 0.6492 $\pm$ 0.0137 | 72.39% $\pm$ 2.59% | 0.7089 $\pm$ 0.0211 |
 | **Two-Stream AAGCN** (Aug) | 756K | 202.86 MFLOPs | 66.61% | 0.6586 | 73.82% | 0.7348 |
-| **Four-Stream AAGCN** (Aug) | 1.51M | 405.71 MFLOPs | 67.34% | 0.6662 | 75.54% | 0.7500 |
-| **SkelGym-Lite** (Transformer + Bone) | **777K** | **113.93 MFLOPs** | **69.27%** | **0.6771** | **76.82%** | **0.7550** |
-| **SkelGym-Full** (Cross-Paradigm Ensemble) | **1.91M** | **418.21 MFLOPs** | **70.11%** | **0.6858** | **77.68%** | **0.7649** |
+| **Four-Stream AAGCN** (Aug) | 1.51M | 405.71 MFLOPs | 68.78% $\pm$ 1.35% | 0.6782 $\pm$ 0.0106 | 77.25% $\pm$ 1.55% | 0.7678 $\pm$ 0.0155 |
+| **SkelGym-Lite** (Transformer + Bone) | **777K** | **113.93 MFLOPs** | **69.66% $\pm$ 0.71%** | **0.6852 $\pm$ 0.0087** | **76.68% $\pm$ 0.25%** | **0.7582 $\pm$ 0.0036** |
+| **SkelGym-Full** (Cross-Paradigm Ensemble) | **1.91M** | **418.21 MFLOPs** | **70.03% $\pm$ 0.70%** | **0.6877 $\pm$ 0.0051** | **77.68% $\pm$ 0.86%** | **0.7689 $\pm$ 0.0090** |
 
+*Note:* For the four final configurations, metrics are reported as $\text{Mean} \pm \text{SD}$ across 3 independent random seeds (42, 123, 3407) under fixed splits and identical protocols.
+
+* **Training Stability Across 3 Seeds:** Across independent random seeds (42, 123, 3407), SkelGym-Full achieves a mean video consensus accuracy of **$77.68\% \pm 0.86\%$** and Macro F1 of **$0.7689 \pm 0.0090$**, with SkelGym-Lite demonstrating even lower variance ($76.68\% \pm 0.25\%$, Macro F1: $0.7582 \pm 0.0036$), confirming high training stability and optimization robustness.
 * **Statistical Significance:** Key architectural improvements confirmed statistically significant via McNemar's test at window level ($N=2,743, p < 10^{-11}$) and Wilcoxon signed-rank test at video level ($N=233, p < 0.005$) against a Bonferroni-adjusted threshold $\alpha_{\text{adj}} = 0.01$.
 * **Bootstrap Reliability:** Non-parametric bootstrap ($B=1,000$) establishes a 95% Confidence Interval for Window Accuracy of **$[68.46\%, 71.75\%]$** (mean: $70.14\% \pm 0.84\%$) and Video Accuracy of **$[72.09\%, 83.26\%]$** (mean: $77.65\% \pm 2.85\%$). Both point estimates lie centrally inside their respective 95% CIs.
 * **External Benchmark:** Mitigates the Squat--Deadlift confusion observed in the Deyzel et al. (CVPRW 2023) benchmark, elevating Deadlift video recall from **$40.0\%$** on baseline ST-GCN to **$80.0\%$** on Transformer Mix and **$90.0\%$** on SkelGym-Full (under closed-set consensus; 80.0% under open-set), and achieving a mean of **$90.36\% \pm 7.35\%$** (peak trial: **$98.00\%$**, 95% CI: $[68.95\%, 98.00\%]$) in 1-shot classification simulations across 100 trials.
@@ -150,6 +153,9 @@ python scripts/benchmark_hardware_latency.py --device auto
 
 # 4. Run statistical hypothesis testing & bootstrap confidence intervals (Table 11)
 python scripts/compute_statistical_tests.py
+
+# 5. Run multi-seed evaluation across seeds 42, 123, 3407 (Training Stability)
+python scripts/run_multi_seed_experiments.py --evaluate_only
 ```
 
 ### 3. Training Backbones from Scratch
