@@ -278,11 +278,11 @@ Hugging Face
 
 Toàn bộ các con số đã được đối soát chéo và khớp 100% giữa Code, Scripts, Tables, TeX, README và Cover Letter:
 
-#### Core Metrics
-- [x] Window Accuracy = **70.11%**
-- [x] Window Macro-F1 = **0.6858**
-- [x] Video Accuracy = **77.68%**
-- [x] Video Macro-F1 = **0.7649**
+#### Core Metrics (3-Seed Mean ± SD & Seed 42 Baseline)
+- [x] Multi-Seed Window Accuracy (3 seeds) = **70.03% ± 0.70%** (Baseline Seed 42: **70.11%**)
+- [x] Multi-Seed Window Macro-F1 (3 seeds) = **0.6877 ± 0.0051** (Baseline Seed 42: **0.6858**)
+- [x] Multi-Seed Video Accuracy (3 seeds) = **77.68% ± 0.86%** (Baseline Seed 42: **77.68%**)
+- [x] Multi-Seed Video Macro-F1 (3 seeds) = **0.7689 ± 0.0090** (Baseline Seed 42: **0.7649**)
 - [x] Test windows = **2,743**
 - [x] Test videos = **233**
 - [x] Params = **1.91M** (Full Ensemble) / **777K** (Lite) / **399K** (Transformer Mix)

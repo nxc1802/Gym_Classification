@@ -28,10 +28,10 @@
 - [x] **5. Sửa latency wording (Classifier Latency ≠ End-to-End Latency)**
   - **Action**: Explicitly separated classifier model inference latency from monocular pose extraction latency across Abstract, Section 1, Section 6.4, Section 6.5, and Conclusion.
   - **Metrics**:
-    - **Classifier inference latency**: $1.01\text{ ms}$ per 32-frame window for SkelGym-Full ($0.34\text{ ms}$ for SkelGym-Lite) on Apple MPS, $0.54\text{ ms}$ on CUDA.
+    - **Classifier inference latency**: $0.42\text{--}4.33\text{ ms}$ on host CPU ($0.08\text{--}0.54\text{ ms}$ on CUDA, $1.11\text{--}9.91\text{ ms}$ synchronized MPS; single backbones $0.42\text{--}1.16\text{ ms}$ CPU, SkelGym-Lite $1.44\text{ ms}$ CPU, SkelGym-Full $4.33\text{ ms}$ CPU).
     - **Pose extraction latency**: $\approx 8–15\text{ ms}$ per frame with MediaPipe Pose on mobile chipsets.
-    - **End-to-end pipeline latency**: $\approx 9–16\text{ ms}$, operating well within the $33.3\text{ ms}$ real-time budget ($30\text{ FPS}$).
-  - **Bugfix**: Corrected latency typo in Section 6.4 for SkelGym-Lite from $1.01\text{ ms}$ to $0.34\text{ ms/window}$ on MPS ($3.20\text{ ms}$ on CPU).
+    - **End-to-end pipeline latency**: $\approx 10–18\text{ ms}$, operating well within the $33.3\text{ ms}$ real-time budget ($30\text{ FPS}$).
+  - **Standardization**: Replaced un-synchronized early baseline ($1.01\text{ ms}$ MPS) with rigorous synchronized benchmarks across CPU ($0.42\text{--}4.33\text{ ms}$) and CUDA ($0.08\text{--}0.54\text{ ms}$).
 
 - [x] **6. Clarify parameter budget**
   - **Action**: Made parameter constraints explicit across Abstract, Introduction, Section 5.1, and Table captions.
