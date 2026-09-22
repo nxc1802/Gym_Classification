@@ -60,7 +60,7 @@ def plot_confusion_matrix(
     title: str = "Confusion Matrix"
 ) -> None:
     """
-    Plots and saves confusion matrix figure.
+    Plots and saves publication-quality confusion matrix in both high-res PNG and vector PDF.
     """
     if target_names is None:
         target_names = ACTIONS
@@ -69,28 +69,56 @@ def plot_confusion_matrix(
     if normalize:
         cm = cm.astype("float") / (cm.sum(axis=1)[:, np.newaxis] + 1e-7)
 
-    plt.figure(figsize=(14, 12))
-    sns.set_theme(font_scale=0.9)
-    fmt = ".2f" if normalize else "d"
+    # Format annotations: display values >= 0.01 in bold, suppress 0.00 clutter for visual clarity
+    annot_data = np.empty_like(cm, dtype=object)
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            val = cm[i, j]
+            if normalize:
+                annot_data[i, j] = f"{val:.2f}" if val >= 0.005 else ""
+            else:
+                annot_data[i, j] = f"{int(val)}" if val > 0 else ""
+
+    fig, ax = plt.subplots(figsize=(15, 13))
+    sns.set_theme(style="white", font_scale=0.95)
+    
     sns.heatmap(
         cm,
-        annot=True,
-        fmt=fmt,
+        annot=annot_data,
+        fmt="",
         cmap="Blues",
         xticklabels=target_names,
         yticklabels=target_names,
-        cbar=True
+        cbar=True,
+        cbar_kws={
+            "label": "Normalized Recall / Accuracy" if normalize else "Sample Count",
+            "shrink": 0.82,
+            "pad": 0.02
+        },
+        linewidths=0.6,
+        linecolor="#dbeafe",
+        annot_kws={"size": 9.5, "weight": "bold", "va": "center", "ha": "center"},
+        ax=ax
     )
-    plt.title(title, fontsize=14, pad=12)
-    plt.xlabel("Predicted Class", fontsize=12)
-    plt.ylabel("True Class", fontsize=12)
-    plt.xticks(rotation=45, ha="right")
-    plt.yticks(rotation=0)
+
+    ax.set_title(title, fontsize=15, fontweight="bold", pad=16)
+    ax.set_xlabel("Predicted Exercise Class", fontsize=13, fontweight="bold", labelpad=12)
+    ax.set_ylabel("True Exercise Class", fontsize=13, fontweight="bold", labelpad=12)
+    ax.set_xticklabels(target_names, rotation=45, ha="right", fontsize=11, fontweight="semibold")
+    ax.set_yticklabels(target_names, rotation=0, fontsize=11, fontweight="semibold")
+
     plt.tight_layout()
 
     out_p = Path(output_path)
     out_p.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(str(out_p), dpi=300)
+    
+    # Save high-res PNG (400 DPI, tight bounding box)
+    plt.savefig(str(out_p), dpi=400, bbox_inches="tight")
+    
+    # Save crisp Vector PDF for publication
+    pdf_p = out_p.with_suffix(".pdf")
+    plt.savefig(str(pdf_p), format="pdf", bbox_inches="tight")
+    
     plt.close()
 
 def export_latex_table7(report_dict: Dict[str, Any], output_tex_path: str) -> str:

@@ -11,7 +11,7 @@ Tài liệu này hướng dẫn nộp bản Preprint của công trình **SkelGy
 | **`main.pdf`** (hoặc `SkelGym_Preprint.pdf`) | Bản PDF hoàn chỉnh (34 trang, đã biên dịch sạch 100%, 0 warning, 0 error). |
 | **`main.tex`** | Mã nguồn LaTeX chính thức cho preprint (đã sửa toàn bộ lỗi vi mô). |
 | **`arxiv_submission.zip`** | **Gói nộp hoàn chỉnh cho arXiv** (chứa `main.tex`, `llncs.cls`, `loadpkg_lncs.sty`, `splncs04.bst`, và thư mục `images/`). Sẵn sàng upload 1 chạm. |
-| **`images/`** | Toàn bộ 4 ảnh vector / raster chất lượng cao (`Dataset.png`, `Mediapipe.png`, `Mediapipe_2.png`, `cm_ensemble_T5.1_weighted_soft.png`). |
+| **`images/`** | Toàn bộ ảnh vector / raster chất lượng cao (`Dataset.png`, `Mediapipe.png`, `Mediapipe_2.png`, `cm_ensemble_T5.1_weighted_soft.pdf` & `.png`). |
 
 ---
 

@@ -181,11 +181,19 @@ def run_local_evaluation():
     logger.info(f"🌟 HELD-OUT TEST Window Accuracy: {ens_test_win_acc:.2f}% | Macro F1: {ens_test_win_f1:.4f}")
     logger.info(f"🌟 HELD-OUT TEST Video Accuracy : {ens_test_vid_acc:.2f}% | Macro F1: {ens_test_vid_f1:.4f}")
 
-    # Save final ensemble confusion matrix
+    # Save final ensemble confusion matrix & predictions
     cm_path = "outputs/ensemble/cm_ensemble_T5.1_weighted_soft.png"
+    paper_cm_path = "paper/images/cm_ensemble_T5.1_weighted_soft.png"
+    preprint_cm_path = "preprint/images/cm_ensemble_T5.1_weighted_soft.png"
     os.makedirs("outputs/ensemble", exist_ok=True)
-    plot_confusion_matrix(y_test_true, ens_test_win_preds, cm_path, title="SkelGym-Full Ensemble (Weighted Soft)")
-    logger.info(f"Verified & Saved final ensemble confusion matrix: {cm_path}")
+    os.makedirs("paper/images", exist_ok=True)
+    os.makedirs("preprint/images", exist_ok=True)
+    
+    np.savez("outputs/ensemble/test_predictions.npz", y_true=y_test_true, y_pred=ens_test_win_preds)
+    plot_confusion_matrix(y_test_true, ens_test_win_preds, cm_path, normalize=True, title="SkelGym-Full (Cross-Paradigm Ensemble)")
+    plot_confusion_matrix(y_test_true, ens_test_win_preds, paper_cm_path, normalize=True, title="SkelGym-Full (Cross-Paradigm Ensemble)")
+    plot_confusion_matrix(y_test_true, ens_test_win_preds, preprint_cm_path, normalize=True, title="SkelGym-Full (Cross-Paradigm Ensemble)")
+    logger.info(f"Verified & Saved final ensemble confusion matrix (PNG & Vector PDF): {cm_path}, {paper_cm_path}, {preprint_cm_path}")
 
     # Summary comparison table
     logger.info("\n" + "=" * 70)
