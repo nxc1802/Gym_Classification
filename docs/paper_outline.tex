@@ -1,0 +1,291 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Arial}
+
+\usepackage[top=2.2cm, bottom=2.2cm, left=1.8cm, right=1.8cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage[table]{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{hyperref}
+
+% Color Palette
+\definecolor{navyPrimary}{RGB}{26, 54, 93}      % #1A365D
+\definecolor{blueSecondary}{RGB}{43, 108, 176}  % #2B6CB0
+\definecolor{accentGold}{RGB}{192, 86, 33}      % #C05621
+\definecolor{accentGreen}{RGB}{40, 116, 101}   % #287465
+\definecolor{bgLight}{RGB}{247, 250, 252}       % #F7FAFC
+\definecolor{borderGray}{RGB}{226, 232, 240}    % #E2E8F0
+\definecolor{textDark}{RGB}{45, 55, 72}         % #2D3748
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blueSecondary,
+    urlcolor=blueSecondary,
+    citecolor=navyPrimary
+}
+
+% Header & Footer
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.5pt}
+\fancyhead[L]{\textcolor{navyPrimary}{\textbf{SkelGym Paper Outline} \textbar\ Sơ Lược Từng Đoạn Văn}}
+\fancyhead[R]{\textcolor{gray}{\footnotesize Elsevier ESWA Target}}
+\fancyfoot[L]{\textcolor{gray}{\footnotesize Tác giả: Xuan-Cuong Nguyen, Nhat-Quang Truong, Quoc-Trinh Vo (FPT University)}}
+\fancyfoot[R]{\textcolor{navyPrimary}{\textbf{\thepage}}}
+
+% Section styling
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{navyPrimary}}{\thesection.}{0.8em}{}[{\titlerule[1pt]}]
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{blueSecondary}}{\thesubsection}{0.6em}{}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+% Custom boxes
+\newtcolorbox{execbox}{
+    colback=bgLight,
+    colframe=navyPrimary,
+    arc=4pt,
+    boxrule=1.2pt,
+    left=8pt, right=8pt, top=8pt, bottom=8pt,
+    title={\textbf{TỔNG QUAN HỆ THỐNG VÀ CHỈ SỐ CỐT LÕI (EXECUTIVE SUMMARY)}},
+    coltitle=white,
+    colbacktitle=navyPrimary
+}
+
+\newtcolorbox{secbox}[1]{
+    breakable,
+    colback=white,
+    colframe=blueSecondary,
+    arc=3pt,
+    boxrule=0.8pt,
+    left=6pt, right=6pt, top=6pt, bottom=6pt,
+    title={\textbf{#1}},
+    coltitle=white,
+    colbacktitle=blueSecondary,
+    fonttitle=\bfseries\small
+}
+
+\newtcolorbox{takeawaybox}{
+    breakable,
+    colback=bgLight,
+    colframe=accentGreen,
+    arc=3pt,
+    boxrule=1pt,
+    left=6pt, right=6pt, top=6pt, bottom=6pt,
+    title={\textbf{MẠCH LẬP LUẬN LOGIC XUYÊN SUỐT (NARRATIVE ARC)}},
+    coltitle=white,
+    colbacktitle=accentGreen
+}
+
+\begin{document}
+
+% Title Banner
+\begin{center}
+    {\LARGE \textbf{\textcolor{navyPrimary}{SkelGym: Cross-Paradigm Kinematic Fusion and Dynamic Augmentation for 22-Class Gym Exercise Classification}}}\\[6pt]
+    {\large \textbf{\textcolor{blueSecondary}{BẢN OUTLINE TỔNG THỂ \& TÓM TẮT SƠ LƯỢC TỪNG ĐOẠN VĂN}}}\\[4pt]
+    {\normalsize \textit{Target Journal: Expert Systems with Applications (Elsevier) \textbar\ 34 Pages, 5 Figures, 13 Tables}}\\[2pt]
+    {\small \textbf{Tác giả:} Xuan-Cuong Nguyen, Nhat-Quang Truong, Quoc-Trinh Vo \textbar\ FPT University, Da Nang, Viet Nam}
+\end{center}
+
+\vspace{-4pt}
+
+% Executive Dashboard
+\begin{execbox}
+\begin{tabularx}{\textwidth}{@{}l Y l Y@{}}
+\textbf{Bộ dữ liệu:} & 1,024 video (10.2 GB), 22 bài tập kháng lực & \textbf{Quy cách chia:} & 6:2:2 video-level partition (0\% data leakage) \\
+\addlinespace[2pt]
+\textbf{Độ chính xác Cửa sổ:} & \textbf{70.03\% $\pm$ 0.70\%} (Macro F1: 0.6877) & \textbf{Độ chính xác Video:} & \textbf{77.68\% $\pm$ 0.86\%} (Macro F1: 0.7689) \\
+\addlinespace[2pt]
+\textbf{Độ trễ CPU (Apple M4):} & 0.42--1.16 ms (Single) \textbar\ \textbf{4.33 ms (Full)} & \textbf{Độ trễ CUDA (RTX 6000):} & \textbf{0.08--0.54 ms} (1,851 FPS) \\
+\addlinespace[2pt]
+\textbf{Độ trễ MPS (M4 GPU):} & \textbf{1.11--8.77 ms} (Synchronized benchmark) & \textbf{Quyền riêng tư:} & Xử lý khung xương trong RAM, hủy pixel RGB \\
+\end{tabularx}
+\end{execbox}
+
+\vspace{2pt}
+
+% Narrative Arc
+\begin{takeawaybox}
+\begin{enumerate}[leftmargin=*, itemsep=2.5pt, topsep=1pt, label=\textcolor{accentGreen}{\textbf{Giai đoạn \arabic*:}}]
+    \item \textbf{Vấn đề thực tế \& Hướng tiếp cận:} Tập sai kỹ thuật gây chấn thương; mô hình RGB tốn tài nguyên và vi phạm quyền riêng tư $\longrightarrow$ Lựa chọn phương pháp Khung xương 3D gọn nhẹ, bảo vệ riêng tư.
+    \item \textbf{Thách thức khoa học cốt lõi:} Bùng nổ số chiều góc tam giác 3 khớp (286-d), phương pháp tăng cường dữ liệu thông thường gây biến dạng sinh học, và rủi ro rò rỉ thông tin khi tối ưu hóa ensemble trên tập kiểm thử.
+    \item \textbf{Đề xuất phương pháp SkelGym:} Đặc trưng kết hợp 117-d Mix + Tăng cường dữ liệu sinh cơ SkelGym-Aug đối xứng + Mô hình học sâu chuỗi/đồ thị nhẹ + Tối ưu hóa SLSQP hoàn toàn trên validation.
+    \item \textbf{Thực nghiệm đa tầng \& Tính vững chắc:} Kiểm chứng triệt để từ Ablations $\to$ Multi-Stream Late Fusion $\to$ Đánh giá ổn định 3 hạt giống (Mean $\pm$ SD) $\to$ Bootstrap 10,000 lần \& Kiểm định thống kê Wilcoxon / DeLong ($p < 0.05$).
+    \item \textbf{Tính khả thi biên \& Kiểm định độc lập:} Thời gian suy luận thời gian thực 0.42--4.33 ms trên CPU (231 FPS), 0.08--0.54 ms trên GPU; Kiểm định ngoại suy (zero-shot \& few-shot) trên RepCount đạt SU-EMD 96.30--98.15\%.
+    \item \textbf{Giải phẫu sai số \& Triển vọng ứng dụng:} Phân tích thấu đáo các trường hợp lỗi từ góc độ cơ sinh học (sấp/ngửa cổ tay, nén phối cảnh 2D-to-3D) và phác thảo lộ trình phát triển hệ thống huấn luyện viên AI tương tác thời gian thực.
+\end{enumerate}
+\end{takeawaybox}
+
+\vspace{4pt}
+
+\section{Tóm Tắt Từng Đoạn Văn (Paragraph-by-Paragraph Breakdown)}
+
+% SECTION 1
+\begin{secbox}{Section 1: Introduction (Mở đầu — Đoạn 1 đến 11)}
+\begin{enumerate}[leftmargin=*, itemsep=2pt, topsep=1pt]
+    \item \textbf{Đoạn 1 (Nhu cầu thực tế):} Nhu cầu tập gym tại nhà ngày càng cao nhưng thiếu huấn luyện viên dễ dẫn đến sai tư thế và chấn thương cơ xương khớp, đòi hỏi hệ thống trợ lý ảo thông minh nhận diện tức thời.
+    \item \textbf{Đoạn 2 (Hạn chế của RGB Video):} Các mô hình video RGB truyền thống (CNN, Video Transformer) tốn kém tài nguyên tính toán, dễ học vẹt bối cảnh phòng tập và xâm phạm quyền riêng tư khi ghi hình tại gia đình.
+    \item \textbf{Đoạn 3 (Tiềm năng khung xương):} Trích xuất khung xương 3D giải quyết bài toán quyền riêng tư và tốc độ, nhưng phân loại bài tập gym gặp 3 rào cản khoa học lớn về biểu diễn đặc trưng, biến đổi dữ liệu và mô hình hóa.
+    \item \textbf{Đoạn 4 (Rào cản 1 - Dư thừa góc):} Tổ hợp toàn bộ các góc tam giác 3 khớp gây bùng nổ 286 chiều đặc trưng, dẫn đến đa cộng tuyến nghiêm trọng và overfit trên các mạng gọn nhẹ.
+    \item \textbf{Đoạn 5 (Rào cản 2 - Augmentation phi sinh học):} Các phép biến đổi không gian thông thường (kéo giãn không đều, xoay 3D tự do) làm méo mó chiều dài xương và góc khớp, tạo ra tư thế bất khả thi về mặt giải phẫu.
+    \item \textbf{Đoạn 6 (Rào cản 3 - Kết hợp đa mô hình \& Rò rỉ dữ liệu):} Mô hình chuỗi (Transformer) và đồ thị (GCN) bổ trợ cho nhau nhưng thường bị ghép nối sơ sài hoặc tinh chỉnh trọng số trực tiếp trên tập test gây sai lệch kết quả.
+    \item \textbf{Đoạn 7 (Giới thiệu SkelGym):} Giới thiệu hệ thống SkelGym tự động hóa từ video monocular đến nhãn bài tập thông qua 4 đóng góp kỹ thuật cốt lõi.
+    \item \textbf{Đoạn 8 (C1: Biomechanical Compound 117-d):} Thiết kế đặc trưng kết hợp 39-d tọa độ tương đối gốc mũi và 78-d góc nâng đôi khớp, giảm 59.1\% số chiều so với góc tam giác mà vẫn bảo toàn hướng và khoảng cách.
+    \item \textbf{Đoạn 9 (C2: Sinh cơ SkelGym-Aug):} Xây dựng giao thức tăng cường dữ liệu bảo toàn cấu trúc giải phẫu qua đối xứng trục dọc (sagittal reflection) và xoay quanh trục trọng lực (yaw rotation) chỉ chạy khi training.
+    \item \textbf{Đoạn 10 (C3: Kiến trúc nhẹ trained-from-scratch):} Thiết kế các backbone chuỗi và đồ thị siêu gọn nhẹ ($\approx 350\text{K}$ tham số mỗi luồng) huấn luyện từ đầu không cần pretrained, đảm bảo độ trễ sub-millisecond trên thiết bị biên.
+    \item \textbf{Đoạn 11 (C4: Tối ưu hóa Ensemble SLSQP):} Tối ưu hóa trọng số soft voting bằng SLSQP thuần túy trên tập validation, đạt 70.03\% window và 77.68\% video consensus trên 22 bài tập với độ trễ 0.42--4.33 ms CPU.
+\end{enumerate}
+\end{secbox}
+
+% SECTION 2
+\begin{secbox}{Section 2: Related Work (Nghiên cứu liên quan — Đoạn 12 đến 17)}
+\begin{enumerate}[leftmargin=*, itemsep=2pt, topsep=1pt, start=12]
+    \item \textbf{2.1 Skeletal Action Recognition (Lịch sử):} Điểm lại lịch sử nhận diện hành động từ RNN/LSTM đến ST-GCN, 2S-AGCN và các kiến trúc hiện đại (CTR-GCN, SkateFormer).
+    \item \textbf{2.1 Skeletal Action Recognition (Hạn chế):} Nhận định các mô hình hiện tại quá nặng ($1.3\text{M}$--$5.2\text{M}$ tham số) do tối ưu cho NTU RGB+D; SkelGym tinh gọn lại 13 khớp chính và thiết kế mạng $\approx 350\text{K}$ tham số để chạy real-time trên thiết bị biên.
+    \item \textbf{2.2 Video Transformers in Kinematics:} Phân tích việc áp dụng Transformer vào dữ liệu khung xương thường dễ overfit nếu dữ liệu ít; SkelGym giải quyết bằng đặc trưng 117-d và SkelGym-Aug với 4 layer Transformer nhỏ gọn.
+    \item \textbf{2.3 Skeletal Data Augmentation:} Phê phán các phép tăng cường ngẫu nhiên làm hỏng tỷ lệ cơ thể và trục trọng lực; khẳng định SkelGym-Aug chỉ biến đổi trong không gian hợp lệ về mặt giải phẫu học.
+    \item \textbf{2.4 Ensemble Learning in Skeletons:} Chỉ ra điểm yếu của việc gộp luồng bằng trung bình cộng hoặc chỉnh trọng số trên tập test; khẳng định SkelGym dùng SLSQP chuẩn hóa trên validation để triệt tiêu bias.
+    \item \textbf{2.5 Fitness and Resistance Exercise Recognition:} Khảo sát các bộ dữ liệu fitness hiện có (RepCount, SU-EMD); nhấn mạnh SkelGym giải quyết bộ 22 bài tập kháng lực chi tiết trong môi trường phòng gym thực tế thay vì bài tập đơn giản trong phòng lab.
+\end{enumerate}
+\end{secbox}
+
+\newpage
+
+% SECTION 3
+\begin{secbox}{Section 3: Dataset and Experimental Protocol (Dữ liệu \& Giao thức — Đoạn 18 đến 28)}
+\begin{enumerate}[leftmargin=*, itemsep=2pt, topsep=1pt, start=18]
+    \item \textbf{3.1 Data Source \& Provenance:} Tập dữ liệu 1,024 video (10.2 GB) từ 3 nguồn: bộ dữ liệu mở Abdillah (652 video), video chọn lọc trực tuyến (244 video), và 128 video ghi hình trực tiếp tại phòng tập.
+    \item \textbf{Subject Statistics \& Ethical Compliance:} Kết hợp video kiểm soát chuẩn y khoa có văn bản đồng thuận tham gia theo Tuyên ngôn Helsinki và video tự nhiên đa dạng thể hình từ Internet; không gắn nhãn nhân khẩu học để chống thiên vị định kiến.
+    \item \textbf{Source Statistics \& Video Formats:} Thống kê 10.2 GB dữ liệu mã hóa H.264 chuẩn 30 FPS với 33 độ phân giải khác nhau, chủ yếu là 720p, 1080p và video dọc 720$\times$1280.
+    \item \textbf{Ethical Standards \& Consent:} Quy chuẩn đạo đức tuân thủ nghiêm ngặt điều khoản dịch vụ nền tảng chia sẻ trực tuyến và sự đồng thuận tham gia nghiên cứu khoa học.
+    \item \textbf{Data Licensing \& Availability:} Phát hành toàn bộ tensor tọa độ trích xuất, nhãn phân đoạn theo giấy phép CC BY 4.0 và mã nguồn theo MIT License trên Hugging Face, không tái phân phối video gốc bên thứ ba.
+    \item \textbf{Video Inclusion/Exclusion Criteria:} Đặt ra các tiêu chuẩn nhận/loại video rõ ràng dựa trên vận động viên đơn lẻ, tối thiểu 25 FPS, chứa ít nhất 1 chu kỳ lặp lại và khớp vai/hông nhìn rõ $\ge 80\%$ thời lượng.
+    \item \textbf{3.2 Action Trimming \& Action Segments:} Cắt tỉa thủ công loại bỏ đoạn thừa ngoài bài tập (nghỉ ngơi, lấy tạ), tạo ra 1,108 phân đoạn hành động sạch từ 1,024 video.
+    \item \textbf{Strict Video-Level Partitioning:} Phân chia Train/Val/Test theo tỷ lệ 6:2:2 nghiêm ngặt theo cấp độ tệp video nguồn, trích xuất cửa sổ trượt $T=32$ frames ($S=16$ cho train, $S=32$ cho val/test) bên trong từng video để cam kết 0\% rò rỉ dữ liệu.
+    \item \textbf{Class Imbalance \& Metric Selection:} Thừa nhận sự mất cân bằng tự nhiên giữa bài tập phổ biến (bench press 84 video) và bài tập hiếm (plank 9 video); chọn Macro F1 bên cạnh Accuracy làm thước đo chuẩn mực cốt lõi.
+    \item \textbf{Data and Code Availability:} Tái khẳng định tính khả mở khoa học qua kho lưu trữ Hugging Face với file tọa độ NPY, JSON, HDF5 độc lập với link video online.
+    \item \textbf{3.3 Landmark Extraction \& Joint Selection:} Sử dụng MediaPipe Pose Heavy trích xuất 33 điểm mốc 3D và lọc bỏ các điểm ngón tay/khuôn mặt, giữ lại 13 khớp giải phẫu chịu lực chính xoay quanh gốc mốc mũi.
+\end{enumerate}
+\end{secbox}
+
+% SECTION 4
+\begin{secbox}{Section 4: Proposed Methodology (Phương pháp đề xuất — Đoạn 29 đến 50)}
+\begin{enumerate}[leftmargin=*, itemsep=2pt, topsep=1pt, start=29]
+    \item \textbf{Tổng quan phương pháp:} Dẫn dắt quy trình toán học hoàn chỉnh của SkelGym từ video đầu vào đến ensemble phân loại 2 nhánh.
+    \item \textbf{4.1 Problem Formulation:} Định nghĩa toán học bài toán trích xuất cửa sổ thời gian $T=32$ khung hình, 13 khớp, không gian 22 nhãn lớp và mục tiêu dự đoán xác suất cửa sổ và đồng thuận video.
+    \item \textbf{4.2 Biomechanical Compound Representation (117-d Mix):} Đặt vấn đề thiết kế biểu diễn 117-d kết hợp dịch chuyển tương đối và góc nâng nhằm khắc phục điểm yếu của tọa độ tuyệt đối và góc tam giác.
+    \item \textbf{4.2.1 Relative 3D Spatial Displacements ($l_{\text{rel\_3d}}$):} Chuẩn hóa tọa độ 13 khớp so với gốc mũi tạo vector 39 chiều bất biến tịnh tiến không gian.
+    \item \textbf{4.2.2 Pairwise Directional Elevation Angles ($l_{\text{angle2\_3d}}$):} Chiếu 78 cặp đoạn nối giữa các khớp lên hệ tọa độ cầu để tính góc nâng $\theta_{ij}$, đo độ nghiêng của chi dưới tác dụng trọng lực và bất biến với vóc dáng người tập.
+    \item \textbf{4.2.3 Compound Fusion Tensor ($X_{\text{mix}}$):} Ghép vector 39 chiều và 78 chiều thành tensor $32 \times 117$, giảm 59.1\% số chiều so với góc tam giác và loại bỏ hiện tượng ma trận suy biến.
+    \item \textbf{4.3 Anatomically Grounded Skeletal Augmentation (SkelGym-Aug):} Đặt cơ sở lý thuyết nhóm đối xứng giải phẫu học cho bộ tăng cường dữ liệu thích ứng.
+    \item \textbf{4.3.1 Sagittal Bilateral Reflection ($\mathbb{Z}_2$):} Phép phản xạ qua mặt phẳng dọc kết hợp hoán vị chính xác các khớp đối xứng trái-phải và đảo dấu góc phương vị, nhân đôi đa dạng dữ liệu mà không làm hỏng cấu trúc cơ thể.
+    \item \textbf{4.3.2 Gravitational Yaw Rotation ($\mathrm{SO}(2)$):} Phép xoay ngẫu nhiên $\pm 15^\circ$ quanh trục đứng trọng lực $y$, chứng minh toán học góc nâng $\theta$ hoàn toàn bất biến khi xoay camera quanh trục đứng.
+    \item \textbf{4.3.3 Stochastic Temporal and Sensor Perturbations:} Thêm co giãn đồng hướng tỷ lệ cơ thể ($s \in [0.95, 1.05]$), biến dạng thời gian nhịp điệu tập ($s_t \in [0.85, 1.15]$), và nhiễu Gaussian mô phỏng rung cảm biến ($\sigma=0.008$).
+    \item \textbf{Zero Test-Time Corruption Protocol:} Khẳng định SkelGym-Aug chỉ chạy online trong quá trình train; tập validation và test được giữ nguyên bản tuyệt đối 100\%.
+    \item \textbf{4.4 Self-Attention Sequence Modeling (Transformer Mix):} Tổng quan kiến trúc Transformer 4 lớp encoder với 8 attention heads mô hình hóa mối quan hệ thời gian dài hạn.
+    \item \textbf{Linear Embedding \& Positional Encoding:} Chiếu đặc trưng 117 chiều lên không gian ẩn 128 chiều và cộng mã hóa vị trí hình sin chuẩn xác định thứ tự khung hình.
+    \item \textbf{Multi-Head Self-Attention:} Cơ chế tự chú ý đa đầu 8 heads thu nhận tương tác giữa các giai đoạn chuyển động khác nhau trong cửa sổ 32 khung hình.
+    \item \textbf{Residual Normalization \& Feed-Forward:} Áp dụng Pre-LayerNorm, kết nối tắt residual và mạng nơ-ron FFN kích hoạt GELU mở rộng lên 192 chiều đảm bảo lan truyền gradient mượt mà.
+    \item \textbf{Global Pooling \& Classification Head:} Trung bình hóa các vector khung hình qua Global Average Pooling và đưa qua lớp Softmax dự đoán phân phối xác suất 22 lớp.
+    \item \textbf{4.5 Multi-Stream Spatial-Temporal AAGCN:} Biểu diễn cơ thể dưới dạng đồ thị không gian-thời gian 13 đỉnh với 4 luồng song song: Tọa độ khớp, Chiều dài xương, Vận tốc khớp, và Vận tốc xương.
+    \item \textbf{Adaptive Graph Convolution Topology:} Cấu trúc tích chập đồ thị AAGCN kết hợp 3 ma trận kề: ma trận kết nối giải phẫu tĩnh ($A$), ma trận tương tác học được ($B$), và ma trận chú ý dữ liệu tức thời ($C$), đan xen các khối tích chập thời gian đa tỷ lệ MS-TCN.
+    \item \textbf{4.6 Validation-Calibrated Ensemble Weighting (SLSQP):} Kết hợp nhánh Transformer mô hình hóa chuỗi và nhánh AAGCN mô hình hóa đồ thị thành 2 cấu hình SkelGym-Lite và SkelGym-Full.
+    \item \textbf{Window-Level Weight Optimization:} Dùng thuật toán quy hoạch phi tuyến SLSQP tìm bộ trọng số đơn hình tối ưu trên tập validation bằng cách cực tiểu hóa Negative Log-Likelihood (NLL) của 2,075 cửa sổ.
+    \item \textbf{Video-Level Consensus Weight Optimization:} Hiệu chỉnh độc lập bộ trọng số SLSQP thứ hai dành riêng cho cấp độ video nhằm tối ưu xác suất sau khi gộp trung bình thời gian.
+    \item \textbf{4.7 Temporal Video Consensus Aggregation:} Tổng hợp xác suất từ tất cả các cửa sổ con của một video clip thành quyết định phân loại duy nhất, đóng vai trò như bộ lọc thông thấp triệt tiêu nhiễu gián đoạn tạm thời.
+\end{enumerate}
+\end{secbox}
+
+\newpage
+
+% SECTION 5
+\begin{secbox}{Section 5: Experimental Results (Kết quả thực nghiệm — Đoạn 51 đến 81)}
+\begin{enumerate}[leftmargin=*, itemsep=2pt, topsep=1pt, start=51]
+    \item \textbf{5.1 Implementation Setup:} Trình bày chi tiết môi trường PyTorch 2.x, cố định seed 42, optimizer AdamW, Cosine Annealing, nhãn làm mịn $\alpha=0.05$, giới hạn tham số $\approx 350\text{K}$ mỗi mô hình.
+    \item \textbf{Custom Lightweight Design \& Scratch Training:} Khẳng định toàn bộ mô hình được thiết kế siêu nhẹ ($\approx 350\text{K}$ tham số), huấn luyện từ đầu không dùng pretrained ngoại lai, đảm bảo độ trễ suy luận sub-millisecond trên thiết bị biên.
+    \item \textbf{5.2 Ablation of Feature Representations:} Giới thiệu bảng ablation so sánh 9 dạng biểu diễn đặc trưng trên LSTM, BiLSTM và Transformer; xác nhận đặc trưng 117-d đạt điểm validation cao nhất trên cả 3 mạng.
+    \item \textbf{2D vs 3D Coordinates:} Khẳng định tọa độ 3D vượt trội hơn 2D nhờ khôi phục thông tin độ sâu bị mất khi quay góc nghiêng trong các bài squat, deadlift.
+    \item \textbf{Raw vs Relative Normalization:} Chuẩn hóa tương đối gốc mũi loại bỏ bias vị trí người tập trước khung hình camera, tăng từ 4\% đến 6\% độ chính xác validation.
+    \item \textbf{Pairwise Angles vs Angle Triplets:} Góc tam giác 3 khớp (286-d) gây sụp đổ độ chính xác do đa cộng tuyến nặng, trong khi góc đôi (78-d) gọn gàng và ổn định gradient hơn nhiều.
+    \item \textbf{Synergy of the 117-d Mix:} Phối hợp khoảng cách không gian Euclid (39-d) và góc định hướng (78-d) tạo ra sự tương hỗ hoàn hảo, đưa Transformer đạt đỉnh 75.95\% val và 63.40\% test.
+    \item \textbf{5.3 Efficacy of SkelGym-Augmentation:} Giới thiệu bảng thử nghiệm hiệu quả của SkelGym-Aug trên Transformer Mix.
+    \item \textbf{Loss Calibration \& Overconfidence Mitigation:} SkelGym-Aug giúp giảm đột phá hàm mất mát validation từ 1.7382 xuống 1.0072 (-42.05\%), kiềm chế hiện tượng mô hình quá tự tin vào góc nhìn quen thuộc.
+    \item \textbf{Out-of-Sample Generalization:} Augmentation giải phẫu giúp tăng vọt độ chính xác test thêm +5.25\% (lên 68.65\%) và F1 lên 0.6654 nhờ khả năng bất biến với góc đặt camera và đảo bên cơ thể.
+    \item \textbf{5.4 Multi-Stream Graph Modeling and Late Fusion:} Khái quát các thử nghiệm trên đồ thị không gian-thời gian AAGCN.
+    \item \textbf{Static vs Adaptive Graph Topology:} Đồ thị tĩnh ST-GCN thất bại nặng nề (43.57\% test window) do không học được liên kết chức năng gián tiếp; đồ thị thích nghi AAGCN phục hồi mạnh mẽ lên 52.27\% test window.
+    \item \textbf{Individual Kinematic Stream Dynamics:} Luồng Xương (Bone) đạt kết quả tĩnh mạnh nhất (65.84\% test window) do cấu trúc đoạn thẳng vững chắc; luồng Vận tốc xương (Bone-Motion) đạt đỉnh video consensus ấn tượng (79.83\%) nhờ nắm bắt nhịp độ động học.
+    \item \textbf{Late Fusion Complementarity:} Hợp nhất 2 luồng (73.82\% video) và 4 luồng AAGCN (75.54\% video) chứng minh tính bổ trợ trực giao giữa tư thế tĩnh và vận tốc biến thiên.
+    \item \textbf{5.5 Cross-Paradigm Ensemble and Video Consensus:} Giới thiệu bảng thực nghiệm so sánh các chiến lược ensemble chuỗi-đồ thị.
+    \item \textbf{Cross-Paradigm Complementarity:} Trình bày chi tiết cấu hình SkelGym-Lite (Transformer + Bone: 69.66\% window, 76.68\% video) và SkelGym-Full (5 luồng: 70.03\% window, 77.68\% video consensus trên 3 random seeds).
+    \item \textbf{Ablation of Voting Strategies:} So sánh Hard Voting (68.14\%), Soft Voting trung bình bằng nhau (72.55\%), Soft Voting theo trọng số độ chính xác (72.07\%), và SLSQP hiệu chuẩn NLL (70.03\% window, 77.68\% video).
+    \item \textbf{Why SLSQP Is Scientifically Preferred:} Phân tích vì sao SLSQP là lựa chọn khoa học tối ưu: tối ưu hóa độ tin cậy xác suất calibrated, tự động loại bỏ luồng Joint thừa thãi ($w_{\text{joint}} \le 0.07$), và nằm vững chắc trong khoảng tin cậy 95\% Bootstrap.
+    \item \textbf{Analysis of Temporal Consensus Gains:} Giải thích cơ chế bước nhảy vọt từ window lên video consensus (+3.46\% đến +17.26\% trên toàn bộ 11 mô hình) nhờ lọc bỏ trạng thái chờ/chuyển tiếp giữa các hiệp tập.
+    \item \textbf{Training Stability across Independent Random Seeds:} Báo cáo độ ổn định qua 3 random seeds (42, 123, 3407); chứng minh SkelGym-Full có phương sai thấp ($\text{SD}=0.86\%$) so với Transformer đơn lẻ ($\text{SD}=2.59\%$).
+    \item \textbf{Statistical Significance and Bootstrap CI:} Phân tích kiểm định Bootstrap phi tham số $B=1,000$ trên Seed 42 baseline; cung cấp khoảng tin cậy 95\% cho window $[68.46\%, 71.75\%]$ và video consensus $[72.09\%, 83.26\%]$.
+    \item \textbf{Statistical Hypothesis Testing:} Kiểm định giả thuyết bắt cặp McNemar trên 2,743 cửa sổ và Wilcoxon trên 233 video; chứng minh các cải tiến kiến trúc cốt lõi đạt ý nghĩa thống kê chặt chẽ trước ngưỡng hiệu chỉnh Bonferroni $\alpha_{\text{adj}}=0.01$.
+    \item \textbf{5.6 Per-Class Performance Breakdown:} Giới thiệu bảng chi tiết độ nhạy (Recall), F1-Score và ma trận nhầm lẫn cho từng bài trong số 22 bài tập.
+    \item \textbf{High-Precision Distinctive Movements ($\text{F1} \ge 0.90$):} Nhóm bài tập đạt độ chính xác gần tuyệt đối (leg extension, russian twist, squat, push-up, lateral raise) do có quỹ đạo động học biệt lập hoàn toàn.
+    \item \textbf{Robust Compound Resistance Exercises ($\text{F1} \in [0.70, 0.90)$):} Nhóm bài tập kháng lực đa khớp tiêu chuẩn (tricep dips, hip thrust, lat pulldown, deadlift...) đạt độ nhận diện rất cao nhờ cơ chế đồng thuận video lọc bỏ khoảng ngắt nhịp.
+    \item \textbf{Kinematic Ambiguity Clusters ($\text{F1} < 0.70$):} Nhóm bài tập khó bị nhầm lẫn sâu sắc: hammer curl với biceps curl, Romanian deadlift với deadlift truyền thống, và cụm 3 biến thể đẩy ngực (bench press bằng/dốc lên/dốc xuống).
+    \item \textbf{5.7 Inference Latency and Edge Viability:} Đặt vấn đề đo đạc độ phức tạp tính toán lý thuyết (FLOPs) và độ trễ thực nghiệm trên NVIDIA RTX PRO 6000 (CUDA), Apple Silicon M4 GPU (MPS synchronized), và Apple Silicon M4 CPU.
+    \item \textbf{Benchmark Latency \& Edge Viability:} Transformer chỉ tốn 12.50 MFLOPs (0.42 ms CPU), SkelGym-Full tốn 418.21 MFLOPs (0.54 ms CUDA, 8.77 ms MPS, 4.33 ms CPU, 231 FPS); kết hợp MediaPipe $\approx 8$--15 ms tạo thành pipeline hoàn toàn dưới 33.3 ms budget thời gian thực (30 FPS).
+    \item \textbf{5.8 External Benchmark on S\&C Exercises:} Giới thiệu bài thử nghiệm ngoại kiểm trên tập dữ liệu SU-EMD của Deyzel et al. gồm 4 bài tập giao thoa (squat, deadlift, biceps curl, lateral raise) trên 54 video test.
+    \item \textbf{Open-Set vs Closed-Set Comparison:} Ở chế độ closed-set 4 lớp, SkelGym-Full đạt 96.30\% video accuracy và SkelGym-Lite đạt 98.15\%, vượt xa baseline ST-GCN của Deyzel (85.19\%); ở chế độ open-set 22 lớp, SkelGym-Full giữ vững 96.30\% mà không bị phân tán xác suất sang lớp lạ.
+    \item \textbf{One-Shot Metric Classification Simulation:} Mô phỏng phân loại One-Shot qua 100 phép thử ngẫu nhiên với prototype cosine similarity; Transformer Mix đạt trung bình 90.36\% $\pm$ 7.35\% (đỉnh 98.00\%), chứng minh không gian embedding 117-d có tính gom cụm cực tốt ngay cả khi chỉ có 1 video mẫu duy nhất.
+\end{enumerate}
+\end{secbox}
+
+\newpage
+
+% SECTION 6
+\begin{secbox}{Section 6: Biomechanical Kinematics and Error Analysis (Phân tích Lỗi Sinh cơ — Đoạn 82 đến 90)}
+\begin{enumerate}[leftmargin=*, itemsep=2pt, topsep=1pt, start=82]
+    \item \textbf{Mở đầu mục 6:} Cầu nối giữa thị giác máy tính và khoa học vận động lâm sàng để giải phẫu nguồn gốc các ca dự đoán sai.
+    \item \textbf{6.1 Taxonomy of Biomechanical Failure Mechanisms:} Phân loại lỗi thành 4 cơ chế sinh cơ học và quang học chính, giải thích tới 61.54\% tổng số ca lỗi video đồng thuận và 37.61\% lỗi cửa sổ thời gian.
+    \item \textbf{6.2 Upper-Limb Ambiguity: Biceps Curl vs. Hammer Curl (Cat 1):} Cả 2 bài tập có góc gập khuỷu tay giống hệt nhau ($30^\circ \to 145^\circ$); camera đơn mục tiêu không bắt được sự xoay sấp/ngửa của cổ tay (pronation vs. supination), dẫn đến việc MediaPipe cho ra tọa độ điểm mốc cổ tay trùng khít.
+    \item \textbf{Upper-Limb Anatomical Muscle Recruitment:} Phân tích cơ chế giải phẫu của cơ nhị đầu cánh tay (\textit{biceps brachii}) và cơ cánh tay quay (\textit{brachioradialis}), khẳng định cần cảm biến cổ tay hoặc mesh bàn tay để phân tách triệt để.
+    \item \textbf{6.3 Posterior Chain Kinematics: Deadlift vs. Romanian Deadlift (Cat 2):} Deadlift truyền thống gập gối sâu $70^\circ-90^\circ$ dùng cơ đùi trước, còn RDL gập gối nông $15^\circ-25^\circ$ xoay quanh khớp háng; kỹ thuật sai của người tập nghiệp dư làm chồng lấn quỹ đạo chuyển động giữa hai bài.
+    \item \textbf{6.4 Pressing Plane Angle Analysis: Flat vs. Incline vs. Decline Bench Press (Cat 3):} Ba bài đẩy ngực khác nhau ở góc nghiêng mặt phẳng thân người so với trọng lực; góc quay camera xiên gây hiện tượng nén phối cảnh (foreshortening), làm mờ nhạt độ dốc mặt ghế.
+    \item \textbf{6.5 Overhead and Back Kinetic Chains (Cat 4):} Giới thiệu cụm lỗi thứ 4 trong các bài kéo lưng (17.31\% lỗi video) giữa Pull-up, Lat Pulldown và T-Bar Row.
+    \item \textbf{Kinetic Chains Biomechanics:} Pull-up là chuỗi động lực đóng (thân kéo lên xà cố định) còn Lat Pulldown là chuỗi mở (tay kéo thanh tạ xuống thân cố định); khi quy chuẩn tọa độ về gốc mũi, chuyển động tương đối của tay và thân trở nên tương đồng khi quay thẳng góc.
+    \item \textbf{6.6 Validation-Grounded Decision Protocol:} Tái khẳng định mọi quyết định lựa chọn mô hình, đặc trưng và hiệu chuẩn SLSQP đều dựa nghiêm ngặt trên tập validation (đạt 83.09\% video), bảo đảm kết quả test 77.68\% phản ánh đúng năng lực tổng quát hóa.
+\end{enumerate}
+\end{secbox}
+
+% SECTION 7
+\begin{secbox}{Section 7: Discussion, Limitations, and Future Work (Thảo luận \& Kết luận — Đoạn 91 đến 96)}
+\begin{enumerate}[leftmargin=*, itemsep=2pt, topsep=1pt, start=91]
+    \item \textbf{Trade-offs: Khung xương nhẹ vs. Dense Video Transformers (Phần 1):} Thừa nhận Video Vision Transformers có thể nhìn thấy quả tạ và máy tập gym nên có lợi thế phân biệt sấp/ngửa bàn tay.
+    \item \textbf{Trade-offs (Phần 2):} Tuy nhiên dense video ngốn hàng trăm GFLOPs, chậm hàng trăm mili-giây, dễ overfit màu phòng tập và xâm phạm quyền riêng tư nghiêm trọng; SkelGym chọn xử lý khung xương cục bộ trong RAM rồi hủy ngay pixel RGB để bảo vệ quyền riêng tư người tập.
+    \item \textbf{Edge Feasibility vs. Heavy Skeleton Transformers:} Các mô hình đồ thị mới trên NTU RGB+D có hàng triệu tham số và cần pretrained nặng; SkelGym chọn mô hình $\approx 350\text{K}$ tham số huấn luyện từ đầu để vừa vặn với thiết bị biên (smart mirror, tablet phòng gym).
+    \item \textbf{Limitations: Hạn chế của Pose Estimation đơn mục tiêu:} Nhận diện khung xương bị giới hạn bởi hiện tượng bánh tạ/người hỗ trợ che khuất khớp, người tập văng chân/tay ra ngoài khung hình, và hiện tượng rung lắc ước lượng chiều sâu $z$ theo trục quang học.
+    \item \textbf{Limitations: Mất cân bằng dữ liệu tự nhiên:} Số lượng video phân bố theo mức độ phổ biến ngoài đời thực của bài tập; các bài tập ít mẫu ở đuôi dài (như plank) có khoảng tin cậy rộng hơn, cần tiếp tục mở rộng quy mô thu thập đa góc quay.
+    \item \textbf{Conclusion (Kết luận toàn văn):} Tổng kết hệ thống SkelGym kết hợp biểu diễn 117-d, SkelGym-Aug, Transformer và 4-Stream AAGCN đạt 70.03\% window và 77.68\% video consensus trên 22 bài tập gym với độ trễ 0.42--4.33 ms CPU, mở ra nền tảng vững chắc cho các hệ thống huấn luyện viên cá nhân ảo thông minh thế hệ mới.
+\end{enumerate}
+\end{secbox}
+
+% BACK MATTER
+\begin{secbox}{Phần Phụ Lục \& Thông Tin Kèm Theo (Back Matter \& Appendices — Đoạn 97 đến 105)}
+\begin{enumerate}[leftmargin=*, itemsep=2pt, topsep=1pt, start=97]
+    \item \textbf{Data, Reproducibility, and Code Availability (Đoạn 1):} Cam kết mở mã nguồn, dữ liệu đặc trưng và checkpoint mô hình trên Hugging Face.
+    \item \textbf{Data, Reproducibility, and Code Availability (Đoạn 2):} Giải thích việc bảo vệ bản quyền bằng cách không share raw video internet mà cung cấp tọa độ trích xuất và 128 video quay trực tiếp có đồng thuận.
+    \item \textbf{Exact Reproducibility Protocol:} Cung cấp 4 câu lệnh bash ngắn để chạy lại toàn bộ bảng số liệu trong paper mà không cần train lại từ đầu.
+    \item \textbf{CRediT Author Contributions:} Liệt kê chi tiết vai trò của từng tác giả (Xuan-Cuong Nguyen, Nhat-Quang Truong, Quoc-Trinh Vo) theo chuẩn Elsevier.
+    \item \textbf{Declaration of Competing Interests:} Tuyên bố không có bất kỳ xung đột lợi ích tài chính nào.
+    \item \textbf{Funding:} Tuyên bố nguồn lực nghiên cứu tự túc không chịu sự chi phối từ bên ngoài.
+    \item \textbf{AI Declaration:} Tuyên bố sử dụng AI hỗ trợ tra cứu ngữ pháp và format theo đúng quy định của Elsevier.
+    \item \textbf{Appendix A (Anatomical Landmark Mapping):} Bảng định danh chi tiết 13 khớp giải phẫu và giải thích vai trò của từng khớp trong các bài tập kháng lực.
+    \item \textbf{Appendix B (Open Science Model Hub):} Đoạn code Python mẫu minh họa cách tải model từ Hugging Face Hub về chạy inference chỉ trong vài dòng.
+\end{enumerate}
+\end{secbox}
+
+\end{document}
