@@ -212,9 +212,13 @@ class TestGymPipeline(unittest.TestCase):
 
         # LaTeX Table 7 export
         out_tex = "outputs/test_table7.tex"
-        tex_code = export_latex_table7(metrics["report_dict"], out_tex)
-        self.assertIn("Classification report for the stacking ensemble", tex_code)
-        self.assertIn("barbell biceps curl", tex_code)
+        try:
+            tex_code = export_latex_table7(metrics["report_dict"], out_tex)
+            self.assertIn("Classification report for the stacking ensemble", tex_code)
+            self.assertIn("barbell biceps curl", tex_code)
+        finally:
+            if Path(out_tex).exists():
+                Path(out_tex).unlink()
 
     def test_07_data_report_and_smoke_dataset(self):
         from src.data.report import generate_dataset_report

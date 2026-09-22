@@ -251,7 +251,7 @@ def main():
     parser.add_argument("--landmark_dir", type=str, default="data/landmarks")
     parser.add_argument("--checkpoint_dir", type=str, default="checkpoints")
     parser.add_argument("--output_file", type=str, default="outputs/multi_seed_evaluation_results.json")
-    parser.add_argument("--skip_train", action="store_true", help="Skip training and only evaluate")
+    parser.add_argument("--skip_train", "--evaluate_only", dest="skip_train", action="store_true", help="Skip training and only evaluate")
     args = parser.parse_args()
 
     device = torch.device(args.device if torch.cuda.is_available() and args.device == "cuda" else ("mps" if torch.backends.mps.is_available() else "cpu"))
