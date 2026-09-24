@@ -443,17 +443,17 @@ class LandmarkAugmenter:
         disable_mirror: bool = False,
         disable_yaw: bool = False,
         disable_scale: bool = False,
-        disable_timewarp: bool = False,
+        disable_timewarp: bool = True,
         disable_jitter: bool = False
     ) -> torch.Tensor:
         """
-        Proposed SkelGym-Aug Pipeline:
+        Proposed SkelGym-Aug Pipeline (4-Operator Physiologically Grounded Protocol):
         1. Bilateral Mirroring (p=0.5)
         2. 3D Yaw Rotation (+-15 deg)
         3. Body / Scale adjustment (0.9 - 1.1)
-        4. Temporal Time Warping (+-15%)
-        5. Mild Sensor Jitter (sigma=0.008)
-        Supports disabling individual components for systematic Leave-One-Out ablation.
+        4. Mild Sensor Jitter (sigma=0.008)
+        Note: Temporal TimeWarping is permanently removed per empirical findings (+1.41% accuracy gain
+        and retention of discriminative exercise repetition tempo/velocity).
         """
         out = x.clone()
         if not disable_mirror and torch.rand(1).item() < 0.5:
@@ -489,16 +489,16 @@ class LandmarkAugmenter:
             return self.mirror(x)
         elif method == "speed_perturb":
             return self.speed_perturb(x)
-        elif method in ("skel_gym_aug", "combined"):
-            return self.skel_gym_aug(x)
+        elif method in ("skel_gym_aug", "combined", "skel_gym_aug_no_timewarp"):
+            return self.skel_gym_aug(x, disable_timewarp=True)
+        elif method == "skel_gym_aug_legacy_5op":
+            return self.skel_gym_aug(x, disable_timewarp=False)
         elif method == "skel_gym_aug_no_mirror":
             return self.skel_gym_aug(x, disable_mirror=True)
         elif method == "skel_gym_aug_no_yaw":
             return self.skel_gym_aug(x, disable_yaw=True)
         elif method == "skel_gym_aug_no_scale":
             return self.skel_gym_aug(x, disable_scale=True)
-        elif method == "skel_gym_aug_no_timewarp":
-            return self.skel_gym_aug(x, disable_timewarp=True)
         elif method == "skel_gym_aug_no_jitter":
             return self.skel_gym_aug(x, disable_jitter=True)
         elif method == "none" or not method:
@@ -509,10 +509,10 @@ class LandmarkAugmenter:
     def generate_augmented_variants(self, x: torch.Tensor, method: str = "skel_gym_aug") -> List[torch.Tensor]:
         """
         Generates 3 augmented variants from a single sample for dataset expansion (1->4 total).
-        For 'skel_gym_aug':
+        For 'skel_gym_aug' (4-operator protocol without TimeWarp):
           Variant 1: Bilateral Mirror (100% physically valid left-right symmetry)
           Variant 2: Spatial 3D Yaw Rotation + Body Scale + Mild Jitter
-          Variant 3: Bilateral Mirror + Temporal Time-Warp + 3D Yaw Rotation
+          Variant 3: Bilateral Mirror + 3D Yaw Rotation + Body Scale
         """
         variants = []
         if method.lower() == "skel_gym_aug":
@@ -525,10 +525,10 @@ class LandmarkAugmenter:
             v2 = self.jitter(v2)
             variants.append(v2)
 
-            # Variant 3: Bilateral mirror combined with temporal time-warp and yaw
+            # Variant 3: Bilateral mirror combined with 3D yaw rotation and scale
             v3 = self.mirror(x.clone())
-            v3 = self.time_warp(v3)
             v3 = self.yaw_rotate_3d(v3, max_yaw_degrees=self.max_yaw_degrees)
+            v3 = self.scale(v3, scale_min=0.9, scale_max=1.1)
             variants.append(v3)
         else:
             # Fallback single method variants

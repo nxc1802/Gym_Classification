@@ -35,7 +35,7 @@ checkpoints/
 models_cache/
 
 # Datasets & Heavy Artifacts
-data/
+/data/
 mm-fit/
 *.npy
 *.zip
