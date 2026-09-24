@@ -1,6 +1,13 @@
 # Master Experiment Results: Deep Learning for Gym Exercise Classification
 
-This document serves as the primary tracking log and benchmark sheet for the research paper. All experimental results are systematically categorized into structured tables corresponding directly to the paper's narrative and evaluation phases.
+> [!NOTE]
+> **Official Multi-Seed & Finalized Benchmark Notice:**
+> The tables below document the original preliminary exploratory runs. For the final, definitive multi-seed benchmark results across seeds (42, 123, 3407) incorporating the approved **SkelGym-Aug** (Bilateral Sagittal Mirroring + 3D Gravitational Yaw Rotation + Spatial Scaling + Sensor Jitter, reaching **69.74% ± 1.04%** window accuracy and **79.11% ± 0.25%** video consensus accuracy), please refer directly to:
+> - [`outputs/new_aug_downstream_results.md`](file:///Volumes/WorkSpace/Project/Gym_Classification/outputs/new_aug_downstream_results.md)
+> - [`outputs/multi_seed_evaluation_results.md`](file:///Volumes/WorkSpace/Project/Gym_Classification/outputs/multi_seed_evaluation_results.md)
+> - [`outputs/bootstrap_confidence_intervals.md`](file:///Volumes/WorkSpace/Project/Gym_Classification/outputs/bootstrap_confidence_intervals.md)
+
+This document serves as the preliminary tracking log and exploratory benchmark sheet for the research paper. All experimental results are systematically categorized into structured tables corresponding directly to the paper's narrative and evaluation phases.
 
 ### Experimental Protocol & Standards (MediaPipe Pose Heavy SOTA Dataset)
 - **Dataset Source of Truth:** 1,024 clean, un-shuffled video recordings across 22 classes from Kaggle (`nguyenxuancuongk18dn/gym-exercise-classification-dataset`).

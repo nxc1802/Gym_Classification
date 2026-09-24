@@ -12,6 +12,8 @@ import argparse
 import urllib.request
 from typing import Optional, Tuple
 
+import time
+
 def get_session_id(base_url: str, token: str) -> str:
     api_url = f"{base_url.rstrip('/')}/api/sessions"
     req = urllib.request.Request(
@@ -21,12 +23,19 @@ def get_session_id(base_url: str, token: str) -> str:
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
         }
     )
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
-        if not data:
-            raise RuntimeError("No active session found on Marimo server!")
-        # Return first active session id
-        return list(data.keys())[0]
+    for attempt in range(1, 4):
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                if not data:
+                    raise RuntimeError("No active session found on Marimo server!")
+                # Return first active session id
+                return list(data.keys())[0]
+        except Exception as e:
+            if attempt < 3:
+                time.sleep(2 * attempt)
+            else:
+                raise
 
 def execute_remote(
     base_url: str,
@@ -35,58 +44,66 @@ def execute_remote(
     session_id: Optional[str] = None,
     timeout: int = 3600
 ) -> Tuple[bool, str]:
-    if not session_id:
-        session_id = get_session_id(base_url, token)
-    
-    api_url = f"{base_url.rstrip('/')}/api/kernel/execute"
-    payload = json.dumps({"code": code}).encode("utf-8")
-    
-    req = urllib.request.Request(
-        api_url,
-        data=payload,
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-            "Marimo-Session-Id": session_id,
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
-        },
-        method="POST"
-    )
-    
-    output_parts = []
-    current_event = None
-    success = True
-    
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        for raw_line in resp:
-            line = raw_line.decode("utf-8", errors="replace").rstrip("\r\n")
-            if line.startswith("event:"):
-                current_event = line[len("event:"):].strip()
-            elif line.startswith("data:"):
-                data_str = line[len("data:"):].strip()
-                try:
-                    payload_data = json.loads(data_str)
-                    if current_event in ("stdout", "stderr"):
-                        text = payload_data.get("data", "")
-                        if current_event == "stdout":
-                            sys.stdout.write(text)
-                            sys.stdout.flush()
-                        else:
-                            sys.stderr.write(text)
-                            sys.stderr.flush()
-                        output_parts.append(text)
-                    elif current_event == "done":
-                        success = payload_data.get("success", True)
-                        if not success:
-                            err = payload_data.get("error", {})
-                            msg = err.get("msg", "Unknown Marimo execution error")
-                            sys.stderr.write(f"\n[Marimo Execution Error]: {msg}\n")
-                            output_parts.append(f"\nError: {msg}\n")
-                        break
-                except json.JSONDecodeError:
-                    pass
+    for attempt in range(1, 4):
+        try:
+            if not session_id:
+                session_id = get_session_id(base_url, token)
+            
+            api_url = f"{base_url.rstrip('/')}/api/kernel/execute"
+            payload = json.dumps({"code": code}).encode("utf-8")
+            
+            req = urllib.request.Request(
+                api_url,
+                data=payload,
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json",
+                    "Marimo-Session-Id": session_id,
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
+                },
+                method="POST"
+            )
+            
+            output_parts = []
+            current_event = None
+            success = True
+            
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                for raw_line in resp:
+                    line = raw_line.decode("utf-8", errors="replace").rstrip("\r\n")
+                    if line.startswith("event:"):
+                        current_event = line[len("event:"):].strip()
+                    elif line.startswith("data:"):
+                        data_str = line[len("data:"):].strip()
+                        try:
+                            payload_data = json.loads(data_str)
+                            if current_event in ("stdout", "stderr"):
+                                text = payload_data.get("data", "")
+                                if current_event == "stdout":
+                                    sys.stdout.write(text)
+                                    sys.stdout.flush()
+                                else:
+                                    sys.stderr.write(text)
+                                    sys.stderr.flush()
+                                output_parts.append(text)
+                            elif current_event == "done":
+                                success = payload_data.get("success", True)
+                                if not success:
+                                    err = payload_data.get("error", {})
+                                    msg = err.get("msg", "Unknown Marimo execution error")
+                                    sys.stderr.write(f"\n[Marimo Execution Error]: {msg}\n")
+                                    output_parts.append(f"\nError: {msg}\n")
+                                break
+                        except json.JSONDecodeError:
+                            pass
 
-    return success, "".join(output_parts)
+            return success, "".join(output_parts)
+        except Exception as e:
+            if attempt < 3:
+                session_id = None
+                time.sleep(2 * attempt)
+            else:
+                raise
 
 def main():
     parser = argparse.ArgumentParser(description="Execute Python code inside remote Marimo kernel.")

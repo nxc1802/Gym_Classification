@@ -66,6 +66,7 @@ outputs/smoke_test/
 scratch/
 outputs/.results.lock
 outputs/logs/
+outputs/*_logs/
 
 # IDE & OS
 .vscode/

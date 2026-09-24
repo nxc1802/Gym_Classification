@@ -103,7 +103,7 @@
 \begin{tabularx}{\textwidth}{@{}l Y l Y@{}}
 \textbf{Bộ dữ liệu:} & 1,024 video (10.2 GB), 22 bài tập kháng lực & \textbf{Quy cách chia:} & 6:2:2 video-level partition (0\% data leakage) \\
 \addlinespace[2pt]
-\textbf{Độ chính xác Cửa sổ:} & \textbf{70.03\% $\pm$ 0.70\%} (Macro F1: 0.6877) & \textbf{Độ chính xác Video:} & \textbf{77.68\% $\pm$ 0.86\%} (Macro F1: 0.7689) \\
+\textbf{Độ chính xác Cửa sổ:} & \textbf{69.74\% $\pm$ 1.04\%} (Macro F1: 0.6882) & \textbf{Độ chính xác Video:} & \textbf{79.11\% $\pm$ 0.25\%} (Macro F1: 0.7834) \\
 \addlinespace[2pt]
 \textbf{Độ trễ CPU (Apple M4):} & 0.42--1.16 ms (Single) \textbar\ \textbf{4.33 ms (Full)} & \textbf{Độ trễ CUDA (RTX 6000):} & \textbf{0.08--0.54 ms} (1,851 FPS) \\
 \addlinespace[2pt]
@@ -143,7 +143,7 @@
     \item \textbf{Đoạn 9 (C1: Benchmark Landmark 3D không rò rỉ):} Xây dựng kho dữ liệu 1,024 video thuộc 22 bài tập kháng lực từ 3 nguồn (bao gồm 128 video gym thực tế tự quay có chuẩn mực đạo đức), trích xuất 13 khớp 3D và chia video-level 6:2:2 chặt chẽ, phát hành CC BY 4.0 / MIT.
     \item \textbf{Đoạn 10 (C2: Biomechanical Compound 117-d):} Thiết kế đặc trưng kết hợp 39-d tọa độ tương đối gốc mũi và 78-d góc nâng đôi khớp ($\arctan2$ triệt tiêu điểm kỳ dị gradient ở lockout, giảm 33.3\% độ nhạy nhiễu so với góc tam giác 3 khớp, và tích hợp các đoạn nối ảo ghi nhận độ nghiêng thân người và khoảng cách cầm tạ đòn).
     \item \textbf{Đoạn 11 (C3: Sinh cơ SkelGym-Aug):} Xây dựng giao thức tăng cường dữ liệu bảo toàn cấu trúc giải phẫu qua đối xứng trục dọc (sagittal reflection) và xoay quanh trục trọng lực (yaw rotation) chỉ chạy khi training.
-    \item \textbf{Đoạn 12 (C4: Kết hợp Cross-Paradigm, Benchmark thực nghiệm \& Triển khai thời gian thực):} Kết hợp Transformer và Four-Stream AAGCN ($\approx 350\text{K}$ params) qua tối ưu hóa SLSQP không rò rỉ trên validation; thực nghiệm toàn diện đa seed, kiểm định McNemar/Wilcoxon đạt 70.03\% window và 77.68\% video consensus; đạt độ trễ 0.42--4.33 ms CPU phục vụ triển khai thời gian thực trên thiết bị biên.
+    \item \textbf{Đoạn 12 (C4: Kết hợp Cross-Paradigm, Benchmark thực nghiệm \& Triển khai thời gian thực):} Kết hợp Transformer và Four-Stream AAGCN ($\approx 350\text{K}$ params) qua tối ưu hóa SLSQP không rò rỉ trên validation; thực nghiệm toàn diện đa seed, kiểm định McNemar/Wilcoxon đạt 69.74\% window và 79.11\% video consensus; đạt độ trễ 0.42--4.33 ms CPU phục vụ triển khai thời gian thực trên thiết bị biên.
 \end{enumerate}
 \end{secbox}
 
@@ -226,12 +226,12 @@
     \item \textbf{Individual Kinematic Stream Dynamics:} Luồng Xương (Bone) đạt kết quả tĩnh mạnh nhất (65.84\% test window) do cấu trúc đoạn thẳng vững chắc; luồng Vận tốc xương (Bone-Motion) đạt đỉnh video consensus ấn tượng (79.83\%) nhờ nắm bắt nhịp độ động học.
     \item \textbf{Late Fusion Complementarity:} Hợp nhất 2 luồng (73.82\% video) và 4 luồng AAGCN (75.54\% video) chứng minh tính bổ trợ trực giao giữa tư thế tĩnh và vận tốc biến thiên.
     \item \textbf{5.5 Cross-Paradigm Ensemble and Video Consensus:} Giới thiệu bảng thực nghiệm so sánh các chiến lược ensemble chuỗi-đồ thị.
-    \item \textbf{Cross-Paradigm Complementarity:} Trình bày chi tiết cấu hình SkelGym-Lite (Transformer + Bone: 69.66\% window, 76.68\% video) và SkelGym-Full (5 luồng: 70.03\% window, 77.68\% video consensus trên 3 random seeds).
-    \item \textbf{Ablation of Voting Strategies:} So sánh Hard Voting (68.14\%), Soft Voting trung bình bằng nhau (72.55\%), Soft Voting theo trọng số độ chính xác (72.07\%), và SLSQP hiệu chuẩn NLL (70.03\% window, 77.68\% video).
+    \item \textbf{Cross-Paradigm Complementarity:} Trình bày chi tiết cấu hình SkelGym-Lite (Transformer + Bone: 68.26\% window, 77.83\% video) và SkelGym-Full (5 luồng: 69.74\% window, 79.11\% video consensus trên 3 random seeds).
+    \item \textbf{Ablation of Voting Strategies:} So sánh Hard Voting (68.14\%), Soft Voting trung bình bằng nhau (72.55\%), Soft Voting theo trọng số độ chính xác (72.07\%), và SLSQP hiệu chuẩn NLL (69.74\% window, 79.11\% video).
     \item \textbf{Why SLSQP Is Scientifically Preferred:} Phân tích vì sao SLSQP là lựa chọn khoa học tối ưu: tối ưu hóa độ tin cậy xác suất calibrated, tự động loại bỏ luồng Joint thừa thãi ($w_{\text{joint}} \le 0.07$), và nằm vững chắc trong khoảng tin cậy 95\% Bootstrap.
     \item \textbf{Analysis of Temporal Consensus Gains \& Model Footprints:} Giải thích cơ chế bước nhảy vọt từ window lên video consensus (+3.46\% đến +17.26\%) đồng thời chỉ rõ dung lượng mô hình siêu nhỏ gọn (350K--402K tham số cho backbone đơn, 778K cho Lite, 1.91M cho Full).
-    \item \textbf{Training Stability across Independent Random Seeds:} Báo cáo độ ổn định qua 3 random seeds (42, 123, 3407); chứng minh SkelGym-Full có phương sai thấp ($\text{SD}=0.86\%$) so với Transformer đơn lẻ ($\text{SD}=2.59\%$).
-    \item \textbf{Statistical Significance and Bootstrap CI:} Phân tích kiểm định Bootstrap phi tham số $B=1,000$ trên Seed 42 baseline; cung cấp khoảng tin cậy 95\% cho window $[68.46\%, 71.75\%]$ và video consensus $[72.09\%, 83.26\%]$.
+    \item \textbf{Training Stability across Independent Random Seeds:} Báo cáo độ ổn định qua 3 random seeds (42, 123, 3407); chứng minh SkelGym-Full có phương sai thấp ($\text{SD}=0.25\%$) so với Transformer đơn lẻ ($\text{SD}=4.06\%$).
+    \item \textbf{Statistical Significance and Bootstrap CI:} Phân tích kiểm định Bootstrap phi tham số $B=1,000$ trên Seed 42 baseline; cung cấp khoảng tin cậy 95\% cho window $[68.36\%, 71.75\%]$ và video consensus $[73.82\%, 84.12\%]$.
     \item \textbf{Statistical Hypothesis Testing:} Kiểm định giả thuyết bắt cặp McNemar trên 2,743 cửa sổ và Wilcoxon trên 233 video; chứng minh các cải tiến kiến trúc cốt lõi đạt ý nghĩa thống kê chặt chẽ trước ngưỡng hiệu chỉnh Bonferroni $\alpha_{\text{adj}}=0.01$.
     \item \textbf{5.6 Per-Class Performance Breakdown:} Giới thiệu bảng chi tiết độ nhạy (Recall), F1-Score và ma trận nhầm lẫn cho từng bài trong số 22 bài tập.
     \item \textbf{High-Precision Distinctive Movements ($\text{F1} \ge 0.90$):} Nhóm bài tập đạt độ chính xác gần tuyệt đối (leg extension, russian twist, squat, push-up, lateral raise) do có quỹ đạo động học biệt lập hoàn toàn.
@@ -258,7 +258,7 @@
     \item \textbf{6.4 Pressing Plane Angle Analysis: Flat vs. Incline vs. Decline Bench Press (Cat 3):} Ba bài đẩy ngực khác nhau ở góc nghiêng mặt phẳng thân người so với trọng lực; góc quay camera xiên gây hiện tượng nén phối cảnh (foreshortening), làm mờ nhạt độ dốc mặt ghế.
     \item \textbf{6.5 Overhead and Back Kinetic Chains (Cat 4):} Giới thiệu cụm lỗi thứ 4 trong các bài kéo lưng (17.31\% lỗi video) giữa Pull-up, Lat Pulldown và T-Bar Row.
     \item \textbf{Kinetic Chains Biomechanics:} Pull-up là chuỗi động lực đóng (thân kéo lên xà cố định) còn Lat Pulldown là chuỗi mở (tay kéo thanh tạ xuống thân cố định); khi quy chuẩn tọa độ về gốc mũi, chuyển động tương đối của tay và thân trở nên tương đồng khi quay thẳng góc.
-    \item \textbf{6.6 Validation-Grounded Decision Protocol:} Tái khẳng định mọi quyết định lựa chọn mô hình, đặc trưng và hiệu chuẩn SLSQP đều dựa nghiêm ngặt trên tập validation (đạt 83.09\% video), bảo đảm kết quả test 77.68\% phản ánh đúng năng lực tổng quát hóa.
+    \item \textbf{6.6 Validation-Grounded Decision Protocol:} Tái khẳng định mọi quyết định lựa chọn mô hình, đặc trưng và hiệu chuẩn SLSQP đều dựa nghiêm ngặt trên tập validation (đạt 83.09\% video), bảo đảm kết quả test 79.11\% phản ánh đúng năng lực tổng quát hóa.
 \end{enumerate}
 \end{secbox}
 
@@ -270,7 +270,7 @@
     \item \textbf{Edge Feasibility vs. Heavy Skeleton Transformers:} Các mô hình đồ thị mới trên NTU RGB+D có hàng triệu tham số và cần pretrained nặng; SkelGym chọn mô hình $\approx 350\text{K}$ tham số huấn luyện từ đầu để vừa vặn với thiết bị biên (smart mirror, tablet phòng gym).
     \item \textbf{Limitations: Hạn chế của Pose Estimation đơn mục tiêu:} Nhận diện khung xương bị giới hạn bởi hiện tượng bánh tạ/người hỗ trợ che khuất khớp, người tập văng chân/tay ra ngoài khung hình, và hiện tượng rung lắc ước lượng chiều sâu $z$ theo trục quang học.
     \item \textbf{Limitations: Mất cân bằng dữ liệu tự nhiên:} Số lượng video phân bố theo mức độ phổ biến ngoài đời thực của bài tập; các bài tập ít mẫu ở đuôi dài (như plank) có khoảng tin cậy rộng hơn, cần tiếp tục mở rộng quy mô thu thập đa góc quay.
-    \item \textbf{Conclusion (Kết luận toàn văn):} Tổng kết hệ thống SkelGym kết hợp biểu diễn 117-d, SkelGym-Aug, Transformer và 4-Stream AAGCN đạt 70.03\% window và 77.68\% video consensus trên 22 bài tập gym với độ trễ 0.42--4.33 ms CPU, mở ra nền tảng vững chắc cho các hệ thống huấn luyện viên cá nhân ảo thông minh thế hệ mới.
+    \item \textbf{Conclusion (Kết luận toàn văn):} Tổng kết hệ thống SkelGym kết hợp biểu diễn 117-d, SkelGym-Aug, Transformer và 4-Stream AAGCN đạt 69.74\% window và 79.11\% video consensus trên 22 bài tập gym với độ trễ 0.42--4.33 ms CPU, mở ra nền tảng vững chắc cho các hệ thống huấn luyện viên cá nhân ảo thông minh thế hệ mới.
 \end{enumerate}
 \end{secbox}
 

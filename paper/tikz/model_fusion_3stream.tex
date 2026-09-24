@@ -1,0 +1,104 @@
+\documentclass[tikz,border=10pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit, backgrounds}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+
+% Unified Academic Color Palette
+\definecolor{cInput}{RGB}{235, 248, 255}
+\definecolor{bInput}{RGB}{49, 130, 206}
+
+\definecolor{cTrans}{RGB}{240, 249, 255}
+\definecolor{bTrans}{RGB}{43, 108, 176}
+
+\definecolor{cGCN}{RGB}{230, 255, 250}
+\definecolor{bGCN}{RGB}{49, 151, 149}
+
+\definecolor{cRecurr}{RGB}{250, 245, 255}
+\definecolor{bRecurr}{RGB}{128, 90, 213}
+
+\definecolor{cHead}{RGB}{255, 245, 245}
+\definecolor{bHead}{RGB}{229, 62, 62}
+
+\definecolor{cFusion}{RGB}{254, 252, 191}
+\definecolor{bFusion}{RGB}{214, 158, 46}
+
+\definecolor{cGray}{RGB}{247, 250, 252}
+\definecolor{bGray}{RGB}{160, 174, 192}
+
+\definecolor{tDark}{RGB}{26, 32, 44}
+\definecolor{tMuted}{RGB}{74, 85, 104}
+
+\begin{document}
+\begin{tikzpicture}[
+    font=\sffamily\small,
+    >=Stealth,
+    node distance=0.65cm,
+    block/.style={
+        draw=#1,
+        line width=1.1pt,
+        rounded corners=4pt,
+        align=center,
+        inner sep=5pt
+    },
+    arrow/.style={->, line width=1.1pt, color=tDark!80}
+]
+
+\node[font=\bfseries\large, text=tDark] (title) at (4.8, 1.25) {Three-Stream AAGCN (Joint + Bone + Motion Fusion)};
+
+% Stream 1: Joint Position
+\node[block=bInput, fill=cInput, text width=2.8cm] (in1) at (1.0, 0) {
+    \textbf{Joint Stream (3D)}\\
+    {\footnotesize $T=32, V=13$}
+};
+\node[block=bGCN, fill=cGCN, text width=2.8cm, below=of in1] (back1) {
+    \textbf{AAGCN Joint}\\
+    {\footnotesize 3 Stages $[48, 96, 150]$}\\
+    {\footnotesize $P_{\text{joint}} \in \Delta^{21}$}
+};
+
+% Stream 2: Bone Vector
+\node[block=bInput, fill=cInput, text width=2.8cm] (in2) at (4.8, 0) {
+    \textbf{Bone Stream (3D)}\\
+    {\footnotesize $T=32, V=13$}
+};
+\node[block=bGCN, fill=cGCN, text width=2.8cm, below=of in2] (back2) {
+    \textbf{AAGCN Bone}\\
+    {\footnotesize 3 Stages $[48, 96, 150]$}\\
+    {\footnotesize $P_{\text{bone}} \in \Delta^{21}$}
+};
+
+% Stream 3: Motion Vector
+\node[block=bInput, fill=cInput, text width=2.8cm] (in3) at (8.6, 0) {
+    \textbf{Motion Stream (3D)}\\
+    {\footnotesize $T=31, V=13$}
+};
+\node[block=bGCN, fill=cGCN, text width=2.8cm, below=of in3] (back3) {
+    \textbf{AAGCN Motion}\\
+    {\footnotesize 3 Stages $[48, 96, 150]$}\\
+    {\footnotesize $P_{\text{motion}} \in \Delta^{21}$}
+};
+
+\draw[arrow] (in1) -- (back1);
+\draw[arrow] (in2) -- (back2);
+\draw[arrow] (in3) -- (back3);
+
+% Late Fusion
+\node[block=bFusion, fill=cFusion, text width=6.2cm, below=0.8cm of back2] (fuse) {
+    \textbf{Weighted Soft Late Fusion}\\
+    {\footnotesize $P_{\text{final}} = w_1 \cdot P_{\text{joint}} + w_2 \cdot P_{\text{bone}} + w_3 \cdot P_{\text{motion}}$}\\
+    {\footnotesize $(\sum_{i=1}^3 w_i = 1, \ w_i \ge 0)$}
+};
+
+\node[block=bHead, fill=cHead, text width=5.0cm, below=of fuse] (pred) {
+    \textbf{Final Exercise Prediction}\\
+    {\footnotesize $\hat{y} = \arg\max(P_{\text{final}}) \in \{1, \dots, 22\}$}
+};
+
+\draw[arrow] (back1.south) -- (fuse.north -| back1.south);
+\draw[arrow] (back2) -- (fuse);
+\draw[arrow] (back3.south) -- (fuse.north -| back3.south);
+\draw[arrow] (fuse) -- (pred);
+
+\end{tikzpicture}
+\end{document}

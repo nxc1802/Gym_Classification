@@ -38,10 +38,10 @@ By abstracting raw video frames into sparse 3D joint trajectories on edge hardwa
                                                ▼
                             [Validation-Calibrated SLSQP Soft Voting]
                                                │
-                             ┌─────────────────┴─────────────────┐
-                             ▼                                   ▼
-             [Window-Level: 70.03% ± 0.70%]      [Video Consensus: 77.68% ± 0.86%]
-               (Macro F1: 0.6877 ± 0.0051)         (Macro F1: 0.7689 ± 0.0090)
+                              ┌─────────────────┴─────────────────┐
+                              ▼                                   ▼
+              [Window-Level: 69.74% ± 1.04%]      [Video Consensus: 79.11% ± 0.25%]
+                (Macro F1: 0.6882 ± 0.0068)         (Macro F1: 0.7834 ± 0.0082)
 ```
 
 ### 🔬 Core Innovations
@@ -49,7 +49,7 @@ By abstracting raw video frames into sparse 3D joint trajectories on edge hardwa
 1. **Curated Multi-Source Landmark Benchmark:** Curates and releases 1,024 multi-camera in-the-wild videos spanning 22 resistance exercises across three provenance streams with strict 6:2:2 video-level partitioning (zero source-video overlap), eliminating temporal data leakage prevalent in prior benchmarks.
 2. **117-dimensional Biomechanical Compound Representation:** Fuses 3D relative joint coordinates ($39$-d) with pairwise directional elevation angles ($78$-d), reducing dimensionality by $59.1\%$ compared to combinatorial $3$-joint triplets ($\binom{13}{3} = 286$-d) while resolving multicollinearity, eliminating gradient singularities at joint lockouts, and retaining scale-invariant directional orientation.
 3. **Physiologically Grounded Augmentation (SkelGym-Aug):** Restricts data transformations to physically valid human postures through bilateral sagittal reflection ($\mathbb{Z}_2$ symmetry with exact joint permutations) and gravitational yaw rotation ($\mathrm{SO}(2)$ invariance about the vertical axis). Applied strictly on-the-fly during training forward passes (zero test-time corruption).
-4. **Cross-Paradigm Fusion, Rigorous Benchmarking, and Real-Time Edge Deployment:** Couples custom lightweight backbones ($\approx 350\text{K}$ parameters per stream, trained from scratch) spanning self-attention Transformers and 4-Stream AAGCNs via validation-calibrated SLSQP soft voting, achieving **$70.03\% \pm 0.70\%$** window accuracy, **$77.68\% \pm 0.86\%$** video consensus accuracy, and ultra-low edge latency (**$0.42\text{--}4.33\text{ ms}$** on host CPU, **$0.08\text{--}0.54\text{ ms}$** on CUDA) for privacy-preserving deployment.
+4. **Cross-Paradigm Fusion, Rigorous Benchmarking, and Real-Time Edge Deployment:** Couples custom lightweight backbones ($\approx 350\text{K}$ parameters per stream, trained from scratch) spanning self-attention Transformers and 4-Stream AAGCNs via validation-calibrated SLSQP soft voting, achieving **$69.74\% \pm 1.04\%$** window accuracy, **$79.11\% \pm 0.25\%$** video consensus accuracy (Video Macro F1: **$0.7834 \pm 0.0082$**, Window Macro F1: **$0.6882 \pm 0.0068$**), and ultra-low edge latency (**$0.42\text{--}4.33\text{ ms}$** on host CPU, **$0.08\text{--}0.54\text{ ms}$** on CUDA) for privacy-preserving deployment.
 
 ---
 
@@ -63,19 +63,19 @@ Evaluated on **$2,743$ held-out test windows** across **$233$ out-of-sample test
 | **LSTM Baseline** (Mix 117-d) | 362K | 7.42 MFLOPs | 57.67% | 0.5681 | 67.81% | 0.6618 |
 | **BiLSTM Baseline** (Mix 117-d) | 384K | 14.84 MFLOPs | 61.17% | 0.6008 | 68.24% | 0.6802 |
 | **AAGCN Baseline** (Bone 3D) | 378K | 101.43 MFLOPs | 52.27% | 0.5338 | 69.53% | 0.6904 |
-| **SkelGym-Aug AAGCN** (Bone 3D) | 378K | 101.43 MFLOPs | 65.84% | 0.6504 | 72.96% | 0.7295 |
+| **SkelGym-Aug AAGCN** (Bone 3D) | 378K | 101.43 MFLOPs | 66.68% $\pm$ 1.33% | 0.6597 $\pm$ 0.0170 | 76.39% $\pm$ 2.39% | 0.7596 $\pm$ 0.0283 |
 | **Transformer Mix** (Clean) | 399K | 12.50 MFLOPs | 63.40% | 0.6218 | 74.25% | 0.7304 |
-| **SkelGym-Aug Transformer** (Mix) | 399K | 12.50 MFLOPs | 66.39% $\pm$ 1.94% | 0.6492 $\pm$ 0.0137 | 72.39% $\pm$ 2.59% | 0.7089 $\pm$ 0.0211 |
-| **Two-Stream AAGCN** (Aug) | 756K | 202.86 MFLOPs | 66.61% | 0.6586 | 73.82% | 0.7348 |
-| **Four-Stream AAGCN** (Aug) | 1.51M | 405.71 MFLOPs | 68.78% $\pm$ 1.35% | 0.6782 $\pm$ 0.0106 | 77.25% $\pm$ 1.55% | 0.7678 $\pm$ 0.0155 |
-| **SkelGym-Lite** (Transformer + Bone) | **777K** | **113.93 MFLOPs** | **69.66% $\pm$ 0.71%** | **0.6852 $\pm$ 0.0087** | **76.68% $\pm$ 0.25%** | **0.7582 $\pm$ 0.0036** |
-| **SkelGym-Full** (Cross-Paradigm Ensemble) | **1.91M** | **418.21 MFLOPs** | **70.03% $\pm$ 0.70%** | **0.6877 $\pm$ 0.0051** | **77.68% $\pm$ 0.86%** | **0.7689 $\pm$ 0.0090** |
+| **SkelGym-Aug Transformer** (Mix) | 399K | 12.50 MFLOPs | 66.25% $\pm$ 2.86% | 0.6548 $\pm$ 0.0279 | 75.68% $\pm$ 4.06% | 0.7455 $\pm$ 0.0472 |
+| **Two-Stream AAGCN** (Aug) | 756K | 202.86 MFLOPs | 67.36% $\pm$ 1.50% | 0.6660 $\pm$ 0.0205 | 77.25% $\pm$ 3.09% | 0.7593 $\pm$ 0.0412 |
+| **Four-Stream AAGCN** (Aug) | 1.51M | 405.71 MFLOPs | 67.69% $\pm$ 1.37% | 0.6690 $\pm$ 0.0195 | 77.54% $\pm$ 2.92% | 0.7636 $\pm$ 0.0346 |
+| **SkelGym-Lite** (Transformer + Bone) | **777K** | **113.93 MFLOPs** | **68.26% $\pm$ 0.69%** | **0.6733 $\pm$ 0.0072** | **77.83% $\pm$ 1.31%** | **0.7708 $\pm$ 0.0080** |
+| **SkelGym-Full** (Cross-Paradigm Ensemble) | **1.91M** | **418.21 MFLOPs** | **69.74% $\pm$ 1.04%** | **0.6882 $\pm$ 0.0068** | **79.11% $\pm$ 0.25%** | **0.7834 $\pm$ 0.0082** |
 
 *Note:* For the four final configurations, metrics are reported as $\text{Mean} \pm \text{SD}$ across 3 independent random seeds (42, 123, 3407) under fixed splits and identical protocols.
 
-* **Training Stability Across 3 Seeds:** Across three independent random seeds (42, 123, 3407), SkelGym-Full and SkelGym-Lite exhibited relatively low variation across the three runs (SkelGym-Full: Video Acc $77.68\% \pm 0.86\%$, Macro F1 $0.7689 \pm 0.0090$; SkelGym-Lite: $76.68\% \pm 0.25\%$, Macro F1 $0.7582 \pm 0.0036$), while standalone backbones showed higher run-to-run sensitivity (Transformer Mix: $\pm 2.59\%$), illustrating the variance-dampening advantage of cross-paradigm late fusion.
-* **Statistical Significance:** Selected model comparisons were evaluated using paired statistical tests: McNemar's test at window level ($N=2,743, p < 10^{-11}$) and Wilcoxon signed-rank test at video level ($N=233, p < 0.005$) against a Bonferroni-adjusted threshold $\alpha_{\text{adj}} = 0.01$.
-* **Bootstrap Reliability:** Non-parametric bootstrap ($B=1,000$, computed on baseline seed-42 test predictions) provides 95% confidence intervals: Window Accuracy **$[68.46\%, 71.75\%]$** (mean: $70.14\% \pm 0.84\%$) and Video Accuracy **$[72.09\%, 83.26\%]$** (mean: $77.65\% \pm 2.85\%$). Both point estimates lie centrally inside their respective 95% CIs.
+* **Training Stability Across 3 Seeds:** Across three independent random seeds (42, 123, 3407), SkelGym-Full exhibited an unprecedented low variation across the three runs (Video Acc $79.11\% \pm 0.25\%$, constituent runs: 78.97%, 78.97%, 79.40%; Macro F1 $0.7834 \pm 0.0082$; SkelGym-Lite: $77.83\% \pm 1.31\%$, Macro F1 $0.7708 \pm 0.0080$), while standalone backbones showed higher run-to-run sensitivity (Transformer Mix: $\pm 4.06\%$), illustrating the profound variance-dampening advantage of cross-paradigm late fusion.
+* **Statistical Significance:** Selected model comparisons were evaluated using paired statistical tests: McNemar's test at window level ($N=2,743, p < 10^{-12}$) and Wilcoxon signed-rank test at video level ($N=233, p < 0.005$) against a Bonferroni-adjusted threshold $\alpha_{\text{adj}} = 0.01$.
+* **Bootstrap Reliability:** Non-parametric bootstrap ($B=1,000$, computed on baseline seed-42 test predictions) provides 95% confidence intervals: Window Accuracy **$[68.36\%, 71.75\%]$** (mean: $70.06\%$) and Video Accuracy **$[73.82\%, 84.12\%]$** (mean: $79.02\%$). Both point estimates lie centrally inside their respective 95% CIs.
 * **External Benchmark:** Mitigates the Squat--Deadlift confusion observed in the Deyzel et al. (CVPRW 2023) benchmark, elevating Deadlift video recall from **$40.0\%$** on baseline ST-GCN to **$80.0\%$** on Transformer Mix and **$90.0\%$** on SkelGym-Full (under closed-set consensus; 80.0% under open-set), and achieving a mean of **$90.36\% \pm 7.35\%$** (peak trial: **$98.00\%$**, 95% CI: $[68.95\%, 98.00\%]$) in 1-shot classification simulations across 100 trials.
 
 ---
