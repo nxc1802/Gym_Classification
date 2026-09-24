@@ -32,7 +32,8 @@ def execute_remote(
     base_url: str,
     token: str,
     code: str,
-    session_id: Optional[str] = None
+    session_id: Optional[str] = None,
+    timeout: int = 3600
 ) -> Tuple[bool, str]:
     if not session_id:
         session_id = get_session_id(base_url, token)
@@ -56,7 +57,7 @@ def execute_remote(
     current_event = None
     success = True
     
-    with urllib.request.urlopen(req, timeout=300) as resp:
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
         for raw_line in resp:
             line = raw_line.decode("utf-8", errors="replace").rstrip("\r\n")
             if line.startswith("event:"):
@@ -94,6 +95,7 @@ def main():
     parser.add_argument("--session_id", type=str, default=None, help="Marimo session ID (auto-detected if omitted)")
     parser.add_argument("--code", type=str, default=None, help="Inline code to execute")
     parser.add_argument("--file", type=str, default=None, help="File containing code to execute")
+    parser.add_argument("--timeout", type=int, default=3600, help="Execution timeout in seconds (default: 3600)")
     
     args = parser.parse_args()
     
@@ -108,7 +110,7 @@ def main():
         # Default ping
         code_str = 'import sys; print(f"Marimo Connected! Python {sys.version}")'
         
-    ok, out = execute_remote(args.url, args.token, code_str, args.session_id)
+    ok, out = execute_remote(args.url, args.token, code_str, args.session_id, timeout=args.timeout)
     if not ok:
         sys.exit(1)
 
