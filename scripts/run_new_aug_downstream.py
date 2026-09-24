@@ -70,7 +70,7 @@ def build_training_tasks(seeds: List[int], checkpoint_base: Path) -> List[Dict[s
             })
     return tasks
 
-def run_parallel_training(tasks: List[Dict[str, Any]], max_concurrent: int, device: str, progress_file: Path, log_dir: Path):
+def run_parallel_training(tasks: List[Dict[str, Any]], max_concurrent: int, device: str, progress_file: Path, log_dir: Path, force_retrain: bool = False):
     log_dir.mkdir(parents=True, exist_ok=True)
     progress_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -107,8 +107,8 @@ def run_parallel_training(tasks: List[Dict[str, Any]], max_concurrent: int, devi
             m = t["model_cfg"]
             seed = t["seed"]
 
-            # If checkpoint exists and valid size (>100KB), mark done
-            if ckpt_path.exists() and ckpt_path.stat().st_size > 100000:
+            # If checkpoint exists and valid size (>100KB), mark done unless force_retrain
+            if not force_retrain and ckpt_path.exists() and ckpt_path.stat().st_size > 100000:
                 print(f"[REUSE] {t_id} checkpoint already exists: {ckpt_path.name}")
                 t["status"] = "completed"
                 completed += 1
@@ -363,7 +363,7 @@ def main():
     parser = argparse.ArgumentParser(description="Downstream Experiments with New SkelGym-Aug")
     parser.add_argument("--max_concurrent", type=int, default=6, help="Maximum concurrent training processes")
     parser.add_argument("--device", type=str, default="cuda", help="Execution device (cuda/mps/cpu)")
-    parser.add_argument("--skip_train", action="store_true", help="Skip training and perform evaluation only")
+    parser.add_argument("--force_retrain", action="store_true", help="Force retraining even if checkpoints exist")
     parser.add_argument("--metadata", type=str, default="data/Final_dataset_metadata.csv")
     parser.add_argument("--landmark_dir", type=str, default="data/landmarks")
     parser.add_argument("--checkpoint_dir", type=str, default="checkpoints")
@@ -378,7 +378,7 @@ def main():
     tasks = build_training_tasks(SEEDS, checkpoint_base)
 
     if not args.skip_train:
-        run_parallel_training(tasks, args.max_concurrent, args.device, progress_file, log_dir)
+        run_parallel_training(tasks, args.max_concurrent, args.device, progress_file, log_dir, force_retrain=args.force_retrain)
 
     eval_device = torch.device(args.device if torch.cuda.is_available() and args.device == "cuda" else ("mps" if torch.backends.mps.is_available() else "cpu"))
     results = evaluate_all(SEEDS, eval_device, checkpoint_base, args.metadata, args.landmark_dir)
