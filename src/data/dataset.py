@@ -455,9 +455,9 @@ def build_dataset_from_csvs(
     # 2. For single methods (jitter, rotate, etc.): Offline Dataset Expansion (1→4 total)
     dataset_aug = None
     if split == "train" and augment_method and augment_method != "none":
-        if augment_method == "skel_gym_aug":
+        if augment_method.startswith("skel_gym_aug"):
             # Dynamic On-the-Fly Augmentation: keep clean base samples in RAM, apply random pipeline on every fetch
-            dataset_aug = "skel_gym_aug"
+            dataset_aug = augment_method
         else:
             # Single-method offline dataset expansion: Preserve clean samples and append variants (1→4 total)
             augmenter = LandmarkAugmenter()

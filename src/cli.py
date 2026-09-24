@@ -1224,7 +1224,15 @@ def create_parser() -> argparse.ArgumentParser:
         "--feature", type=str, default="mix",
         help="Feature representation method (supports single features or dynamic mix like 'rel_3d+angle2_3d', 'mix')"
     )
-    p_train.add_argument("--augment", type=str, default="none", choices=["none", "jitter", "rotate", "joint_dropout", "time_warp", "mirror", "speed_perturb", "skel_gym_aug"], help="Augmentation method")
+    p_train.add_argument(
+        "--augment", type=str, default="none",
+        choices=[
+            "none", "jitter", "rotate", "joint_dropout", "time_warp", "mirror", "speed_perturb",
+            "skel_gym_aug", "skel_gym_aug_no_mirror", "skel_gym_aug_no_yaw",
+            "skel_gym_aug_no_scale", "skel_gym_aug_no_timewarp", "skel_gym_aug_no_jitter"
+        ],
+        help="Augmentation method"
+    )
     p_train.add_argument("--zero_frame", type=str, default="interpolate", choices=["zero", "ffill", "linear", "interpolate"], help="Missing/zero-frame handling strategy")
     p_train.add_argument("--loss", type=str, default="ce", choices=["ce", "focal", "cb_focal"], help="Loss function: ce (CrossEntropy), focal (FocalLoss), cb_focal (Class-Balanced FocalLoss)")
     p_train.add_argument("--focal_gamma", type=float, default=2.0, help="Focal loss focusing parameter gamma (e.g. 2.0)")

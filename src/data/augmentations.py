@@ -437,7 +437,15 @@ class LandmarkAugmenter:
         out = x_out.permute(0, 2, 1)
         return out if is_batched else out.squeeze(0)
 
-    def skel_gym_aug(self, x: torch.Tensor) -> torch.Tensor:
+    def skel_gym_aug(
+        self,
+        x: torch.Tensor,
+        disable_mirror: bool = False,
+        disable_yaw: bool = False,
+        disable_scale: bool = False,
+        disable_timewarp: bool = False,
+        disable_jitter: bool = False
+    ) -> torch.Tensor:
         """
         Proposed SkelGym-Aug Pipeline:
         1. Bilateral Mirroring (p=0.5)
@@ -445,14 +453,19 @@ class LandmarkAugmenter:
         3. Body / Scale adjustment (0.9 - 1.1)
         4. Temporal Time Warping (+-15%)
         5. Mild Sensor Jitter (sigma=0.008)
+        Supports disabling individual components for systematic Leave-One-Out ablation.
         """
         out = x.clone()
-        if torch.rand(1).item() < 0.5:
+        if not disable_mirror and torch.rand(1).item() < 0.5:
             out = self.mirror(out)
-        out = self.yaw_rotate_3d(out, max_yaw_degrees=self.max_yaw_degrees)
-        out = self.scale(out, scale_min=0.9, scale_max=1.1)
-        out = self.time_warp(out)
-        out = self.jitter(out)
+        if not disable_yaw:
+            out = self.yaw_rotate_3d(out, max_yaw_degrees=self.max_yaw_degrees)
+        if not disable_scale:
+            out = self.scale(out, scale_min=0.9, scale_max=1.1)
+        if not disable_timewarp:
+            out = self.time_warp(out)
+        if not disable_jitter:
+            out = self.jitter(out)
         return out
 
     def apply(self, x: torch.Tensor, method: str) -> torch.Tensor:
@@ -478,6 +491,16 @@ class LandmarkAugmenter:
             return self.speed_perturb(x)
         elif method in ("skel_gym_aug", "combined"):
             return self.skel_gym_aug(x)
+        elif method == "skel_gym_aug_no_mirror":
+            return self.skel_gym_aug(x, disable_mirror=True)
+        elif method == "skel_gym_aug_no_yaw":
+            return self.skel_gym_aug(x, disable_yaw=True)
+        elif method == "skel_gym_aug_no_scale":
+            return self.skel_gym_aug(x, disable_scale=True)
+        elif method == "skel_gym_aug_no_timewarp":
+            return self.skel_gym_aug(x, disable_timewarp=True)
+        elif method == "skel_gym_aug_no_jitter":
+            return self.skel_gym_aug(x, disable_jitter=True)
         elif method == "none" or not method:
             return x
         else:
