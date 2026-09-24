@@ -70,6 +70,7 @@ def find_existing_checkpoint(task: Dict[str, Any], checkpoint_base: Path) -> Opt
             candidates.append(checkpoint_base / "best_Transformer_T2.2_mix.pt")
         elif model == "AAGCN" and feature == "bone_3d" and aug == "none":
             candidates.append(checkpoint_base / "best_AAGCN_T4.1_bone_3d.pt")
+            candidates.append(checkpoint_base / "best_AAGCN_T3.6_bone_3d.pt")
         elif model == "AAGCN" and feature == "bone_3d" and aug == "skel_gym_aug":
             candidates.append(checkpoint_base / "best_AAGCN_T4.2_bone_3d.pt")
         elif model == "BiLSTM" and feature == "mix" and aug == "none":
@@ -281,6 +282,21 @@ def main():
     print(f"Tasks to train: {len(tasks_to_train)}, Tasks reusing checkpoints: {len(task_ckpts) - len(tasks_to_train)}")
 
     # 2. Parallel Training Execution
+    progress_file = Path("outputs/ablation_progress.json")
+    progress_data = {
+        "status": "training",
+        "start_time": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "total_tasks": len(tasks),
+        "reused_tasks": len(task_ckpts) - len(tasks_to_train),
+        "tasks_to_train": len(tasks_to_train),
+        "train_completed": 0,
+        "train_failed": 0,
+        "eval_completed": 0,
+        "last_update": time.strftime("%Y-%m-%d %H:%M:%S")
+    }
+    with open(progress_file, "w", encoding="utf-8") as pf:
+        json.dump(progress_data, pf, indent=2)
+
     if tasks_to_train:
         print(f"\n>>> Launching {len(tasks_to_train)} training tasks with {args.workers} parallel workers on {args.device} <<<\n")
         with ProcessPoolExecutor(max_workers=args.workers) as executor:
@@ -292,24 +308,36 @@ def main():
                 t_id = futures[fut]
                 try:
                     success = fut.result()
-                    if not success:
+                    if success:
+                        progress_data["train_completed"] += 1
+                    else:
+                        progress_data["train_failed"] += 1
                         print(f"[WARNING] Task {t_id} did not finish successfully.")
                 except Exception as e:
+                    progress_data["train_failed"] += 1
                     print(f"[EXCEPTION] Task {t_id} raised: {e}")
+                
+                progress_data["last_update"] = time.strftime("%Y-%m-%d %H:%M:%S")
+                with open(progress_file, "w", encoding="utf-8") as pf:
+                    json.dump(progress_data, pf, indent=2)
 
     # 3. Comprehensive Evaluation Phase
     print("\n>>> Evaluating all checkpoints on held-out test partition <<<\n")
+    progress_data["status"] = "evaluating"
+    with open(progress_file, "w", encoding="utf-8") as pf:
+        json.dump(progress_data, pf, indent=2)
+
     eval_device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     all_results = {}
 
-    for t in tasks:
+    for idx_eval, t in enumerate(tasks, 1):
         t_id = t["id"]
         ckpt = task_ckpts.get(t_id)
         if not ckpt or not ckpt.exists():
             print(f"[SKIP] Checkpoint missing for {t_id}: {ckpt}")
             continue
 
-        print(f"[EVAL] Evaluating {t_id} ({ckpt.name})...")
+        print(f"[EVAL {idx_eval}/{len(tasks)}] Evaluating {t_id} ({ckpt.name})...")
         metrics = evaluate_checkpoint(
             ckpt_path=ckpt,
             model_type=t["model"],
@@ -322,6 +350,15 @@ def main():
         t_record["metrics"] = metrics
         t_record["checkpoint"] = str(ckpt)
         all_results[t_id] = t_record
+
+        progress_data["eval_completed"] += 1
+        progress_data["last_update"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        with open(progress_file, "w", encoding="utf-8") as pf:
+            json.dump(progress_data, pf, indent=2)
+
+    progress_data["status"] = "finished"
+    with open(progress_file, "w", encoding="utf-8") as pf:
+        json.dump(progress_data, pf, indent=2)
 
     # 4. Aggregate Mean ± Std across seeds
     summary_loo = {}
