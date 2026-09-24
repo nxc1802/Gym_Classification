@@ -364,6 +364,7 @@ def main():
     parser.add_argument("--max_concurrent", type=int, default=6, help="Maximum concurrent training processes")
     parser.add_argument("--device", type=str, default="cuda", help="Execution device (cuda/mps/cpu)")
     parser.add_argument("--force_retrain", action="store_true", help="Force retraining even if checkpoints exist")
+    parser.add_argument("--skip_train", action="store_true", help="Skip training and perform evaluation only")
     parser.add_argument("--metadata", type=str, default="data/Final_dataset_metadata.csv")
     parser.add_argument("--landmark_dir", type=str, default="data/landmarks")
     parser.add_argument("--checkpoint_dir", type=str, default="checkpoints")
