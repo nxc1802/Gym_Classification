@@ -33,7 +33,7 @@ The manuscript introduces three core innovations:
 \begin{enumerate}
     \item \textbf{117-dimensional Biomechanical Compound Representation:} A compact kinematic descriptor unifying 3D relative joint displacements with pairwise elevation and azimuth angles, resolving the multicollinearity of combinatorial 3-joint angle triplets while remaining computationally lightweight.
 
-    \item \textbf{SkelGym-Aug:} An anatomically valid skeletal data augmentation protocol that preserves musculoskeletal constraints via bilateral sagittal reflection and gravitational yaw rotation, unlike conventional augmentations that violate biological joint limits.
+    \item \textbf{SkelGym-Aug:} An empirically selected, task-oriented skeletal data augmentation configuration specifically tailored for resistance exercise biomechanics, determined via systematic Leave-One-Out ablation to enforce geometric invariance while preserving exercise cadence.
 
     \item \textbf{Validation-Calibrated Cross-Paradigm Ensemble:} A principled SLSQP-optimized soft voting formulation coupling self-attention Transformers with four-stream Adaptive Graph Convolutional Networks, with calibration performed strictly on validation partitions to prevent test-set contamination.
 \end{enumerate}
