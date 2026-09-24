@@ -39,7 +39,7 @@ import pandas as pd
 
 from src.constants import NUM_CLASSES
 from src.data.dataset import get_dataloaders
-from src.models import build_model
+from src.cli import build_model
 from src.training.trainer import Trainer
 from src.training.metrics import compute_metrics
 from src.models.ensemble import aggregate_video_level_predictions
