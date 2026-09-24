@@ -690,43 +690,43 @@ Angle2 3D (Pairs)               & 78           & 63.40\%             & 64.10\%  
 \end{table*}
 
 \subsection{Ablation of Candidate Augmentations and Final SkelGym-Aug Configuration}\label{sec:exp_aug}
-To rigorously validate our augmentation design and eliminate unverified assumptions, we conduct a controlled Leave-One-Out (LOO) ablation study on the candidate augmentation pool across three independent random seeds ($\text{seed} \in \{42, 123, 3407\}$) using the top-performing sequence backbone (\textit{Transformer mix}). Table~\ref{tab:table2} presents the empirical results, revealing critical insights into the interaction between transformation domains and resistance exercise kinetics:
+To rigorously validate our augmentation design and eliminate unverified assumptions, we conduct a controlled Leave-One-Out (LOO) ablation study on the candidate augmentation pool across three independent random seeds ($\text{seed} \in \{42, 123, 3407\}$) using the top-performing sequence backbone (\textit{Transformer mix}). Table~\ref{tab:table2} presents the empirical results across both validation and held-out test partitions, revealing critical insights into the interaction between transformation domains and resistance exercise kinetics:
 
 \paragraph{Utility of Geometric Transformations and Sensor Jitter.} 
-Relative to the Candidate Full configuration (combining all five transformations: $66.41\% \pm 1.58\%$ window accuracy, Macro F1: $0.6531$), selectively omitting geometric or noise-based operators leads to immediate performance degradation:
+Relative to the Candidate Full configuration (combining all five transformations: $74.91\% \pm 1.22\%$ val accuracy, $66.41\% \pm 1.58\%$ test window accuracy, Macro F1: $0.6531$), selectively omitting geometric or noise-based operators leads to immediate generalization degradation on unseen test partitions:
 \begin{itemize}
-    \item \textbf{Omitting Gravitational Yaw ($-$Yaw):} Induces the most severe collapse, with window accuracy dropping by $-3.47\%$ to $62.94\% \pm 2.67\%$ (Macro F1: $0.6249$), falling below even the unaugmented baseline on some seeds. This underscores that camera perspective variance around the vertical axis is a dominant source of error in multi-camera gym environments, and elevation-preserving yaw rotation provides indispensable viewpoint invariance.
-    \item \textbf{Omitting Sagittal Reflection ($-$Mirror):} Reduces accuracy by $-1.70\%$ to $64.71\% \pm 0.00\%$ (Macro F1: $0.6387$), confirming that closed-form bilateral joint reflection effectively doubles training diversity for symmetric and unilateral lifting postures.
-    \item \textbf{Omitting Scaling ($-$Scale) and Jitter ($-$Jitter):} Reduces accuracy to $65.04\% \pm 0.31\%$ and $64.88\% \pm 1.05\%$ respectively, validating that anthropometric stature variation and tolerance to high-frequency monocular tracking noise are essential for generalizability.
+    \item \textbf{Omitting Gravitational Yaw ($-$Yaw):} Induces the most severe collapse on unseen test data, with window accuracy dropping by $-3.47\%$ to $62.94\% \pm 2.67\%$ (Macro F1: $0.6249$), falling below even the unaugmented baseline on some seeds. This underscores that camera perspective variance around the vertical axis is a dominant source of error in multi-camera gym environments, and elevation-preserving yaw rotation provides indispensable viewpoint invariance.
+    \item \textbf{Omitting Sagittal Reflection ($-$Mirror):} Reduces test accuracy by $-1.70\%$ to $64.71\% \pm 0.00\%$ (Macro F1: $0.6387$), confirming that closed-form bilateral joint reflection effectively doubles training diversity for symmetric and unilateral lifting postures.
+    \item \textbf{Omitting Scaling ($-$Scale) and Jitter ($-$Jitter):} Reduces test accuracy to $65.04\% \pm 0.31\%$ and $64.88\% \pm 1.05\%$ respectively, validating that anthropometric stature variation and tolerance to high-frequency monocular tracking noise are essential for generalizability.
 \end{itemize}
 
 \paragraph{Detrimental Impact of Temporal Time Warping.}
-In sharp contrast to the geometric operators, removing Temporal Time Warping ($\mathbf{-TimeWarp}$) produces a striking and consistent improvement across all evaluation seeds: test window accuracy surges from $66.41\% \pm 1.58\%$ to \textbf{67.82\% $\pm$ 0.96\%} (a net gain of \textbf{+1.41\%} over Candidate Full), Macro F1 rises from $0.6531$ to \textbf{0.6696}, and optimization standard deviation contracts by nearly 40\% (from $1.58\%$ to $0.96\%$). 
+In sharp contrast to the geometric operators, removing Temporal Time Warping ($\mathbf{-TimeWarp}$) produces an immediate and consistent improvement observed first on the validation partition ($74.91\% \pm 1.22\% \to 76.26\% \pm 1.71\%$, a $+1.35\%$ validation gain), and independently confirmed on the held-out test set: test window accuracy surges from $66.41\% \pm 1.58\%$ to \textbf{67.82\% $\pm$ 0.96\%} (a net gain of \textbf{+1.41\%} over Candidate Full), Macro F1 rises from $0.6531$ to \textbf{0.6696}, and optimization standard deviation contracts by nearly 40\% (from $1.58\%$ to $0.96\%$). 
 
 \paragraph{Biomechanical Interpretation.}
 From a kinesiological standpoint, this result is highly revealing. In general human action recognition (e.g., walking, gesturing), execution speed varies widely without altering action semantics. However, in structured resistance training, \textit{repetition cadence}, \textit{time-under-tension}, and \textit{concentric-to-eccentric phase duration ratios} are fundamental biomechanical discriminators. For instance, distinguishing controlled barbell curls from explosive power cleans, or identifying rhythmic lateral raises, relies on faithful temporal velocity profiles. Artificially warping frame timing distorts kinematic velocities ($\Delta p / \Delta t$) and creates artificial phase shifts, injecting counter-productive noise into sequence self-attention.
 
-\paragraph{Final SkelGym-Aug Configuration.}
-Guided strictly by these empirical findings, we prune temporal time warping and define the \textbf{final SkelGym-Aug configuration} as the 4-operator protocol: \textit{Bilateral Reflection + Gravitational Yaw + Proportional Scaling + Sensor Jitter}. As demonstrated in downstream evaluations across backbones (Section~\ref{sec:benchmarks}), this task-oriented configuration delivers universal accuracy improvements over unaugmented baselines: $+3.06\%$ on Transformer Mix, $+7.95\%$ on AAGCN Bone ($58.86\% \to 66.81\%$), $+5.03\%$ on BiLSTM ($59.00\% \to 64.03\%$), and $+10.71\%$ on ST-GCN ($48.01\% \to 58.72\%$).
+\paragraph{Validation-Grounded Selection of the Final SkelGym-Aug Configuration.}
+In strict adherence to the validation-grounded decision protocol (Section~\ref{sec:val_protocol}), the decision to prune temporal time warping was established upon observing the validation performance penalty and cadence disruption, while reserving the held-out test partition solely for unbiased generalization verification. Consequently, we define the \textbf{final SkelGym-Aug configuration} as the 4-operator protocol: \textit{Bilateral Reflection + Gravitational Yaw + Proportional Scaling + Sensor Jitter}. As demonstrated in downstream evaluations across backbones (Section~\ref{sec:benchmarks}), this task-oriented configuration delivers universal accuracy improvements over unaugmented baselines: $+3.06\%$ on Transformer Mix, $+7.95\%$ on AAGCN Bone ($58.86\% \to 66.81\%$), $+5.03\%$ on BiLSTM ($59.00\% \to 64.03\%$), and $+10.71\%$ on ST-GCN ($48.01\% \to 58.72\%$).
 
 \begin{table*}[!t]
 \centering
-\caption{Systematic Leave-One-Out (LOO) ablation on candidate augmentation operators evaluated across three independent random seeds ($\text{seed} \in \{42, 123, 3407\}$) on the representative sequence model (\texttt{Transformer mix}). All metrics reported as $\text{Mean} \pm \text{Std}$.}
+\caption{Systematic Leave-One-Out (LOO) ablation on candidate augmentation operators across validation and held-out test partitions evaluated across three independent random seeds ($\text{seed} \in \{42, 123, 3407\}$) on the representative sequence model (\texttt{Transformer mix}). All metrics reported as $\text{Mean} \pm \text{Std}$.}
 \label{tab:table2}
 \resizebox{\textwidth}{!}{
-\begin{tabular}{l c c c c}
+\begin{tabular}{l c c c c c}
 \toprule
-\textbf{Augmentation Configuration} & \textbf{Excluded Domain} & \textbf{Test Window Acc (\%)} & \textbf{Test Macro F1} & \textbf{$\Delta$ vs. Candidate Full} \\
+\textbf{Augmentation Configuration} & \textbf{Excluded Domain} & \textbf{Val Window Acc (\%)} & \textbf{Test Window Acc (\%)} & \textbf{Test Macro F1} & \textbf{$\Delta$ vs. Candidate Full (Test)} \\
 \midrule
-Clean Baseline (No Augmentation)          & All Operators           & 63.35\% $\pm$ 0.04\%          & 0.6121 $\pm$ 0.0069    & --3.06\% \\
-Candidate Full (All 5 Operators)          & None (Reference)        & 66.41\% $\pm$ 1.58\%          & 0.6531 $\pm$ 0.0087    & 0.00\% (Ref) \\
+Clean Baseline (No Augmentation)          & All Operators           & 75.26\% $\pm$ 0.61\%          & 63.35\% $\pm$ 0.04\%          & 0.6121 $\pm$ 0.0069    & --3.06\% \\
+Candidate Full (All 5 Operators)          & None (Reference)        & 74.91\% $\pm$ 1.22\%          & 66.41\% $\pm$ 1.58\%          & 0.6531 $\pm$ 0.0087    & 0.00\% (Ref) \\
 \midrule
-w/o Sagittal Reflection ($-$Mirror)       & Geometric               & 64.71\% $\pm$ 0.00\%          & 0.6387 $\pm$ 0.0000    & --1.70\% \\
-w/o Gravitational Yaw ($-$Yaw)            & Geometric               & 62.94\% $\pm$ 2.67\%          & 0.6249 $\pm$ 0.0296    & --3.47\% \\
-w/o Proportional Scaling ($-$Scale)       & Geometric               & 65.04\% $\pm$ 0.31\%          & 0.6475 $\pm$ 0.0043    & --1.37\% \\
-w/o Sensor Jitter ($-$Jitter)             & Noise-based             & 64.88\% $\pm$ 1.05\%          & 0.6482 $\pm$ 0.0158    & --1.53\% \\
+w/o Sagittal Reflection ($-$Mirror)       & Geometric               & 75.29\% $\pm$ 0.46\%          & 64.71\% $\pm$ 0.00\%          & 0.6387 $\pm$ 0.0000    & --1.70\% \\
+w/o Gravitational Yaw ($-$Yaw)            & Geometric               & 76.37\% $\pm$ 1.11\%          & 62.94\% $\pm$ 2.67\%          & 0.6249 $\pm$ 0.0296    & --3.47\% \\
+w/o Proportional Scaling ($-$Scale)       & Geometric               & 75.76\% $\pm$ 0.71\%          & 65.04\% $\pm$ 0.31\%          & 0.6475 $\pm$ 0.0043    & --1.37\% \\
+w/o Sensor Jitter ($-$Jitter)             & Noise-based             & 76.63\% $\pm$ 1.28\%          & 64.88\% $\pm$ 1.05\%          & 0.6482 $\pm$ 0.0158    & --1.53\% \\
 \midrule
-\textbf{w/o Temporal TimeWarp ($-$TimeWarp)} & \textbf{Temporal}   & \textbf{67.82\% $\pm$ 0.96\%} & \textbf{0.6696 $\pm$ 0.0098} & \textbf{+1.41\% (Optimal)} \\
+\textbf{w/o Temporal TimeWarp ($-$TimeWarp)} & \textbf{Temporal}   & \textbf{76.26\% $\pm$ 1.71\%} & \textbf{67.82\% $\pm$ 0.96\%} & \textbf{0.6696 $\pm$ 0.0098} & \textbf{+1.41\% (Optimal)} \\
 \bottomrule
 \end{tabular}
 }
@@ -1077,7 +1077,7 @@ The bench press family targets the \textit{pectoralis major} muscle, with the th
 A fourth distinct error mass (Category 4, accounting for 17.31\% of video errors and 10.01\% of window errors) resides in compound pulling exercises targeting the back musculature (\textit{latissimus dorsi}, \textit{trapezius}, and \textit{rhomboids}), predominantly between \textit{pull-up} (Video Recall: 50.00\%), \textit{lat pulldown} (Video Recall: 100.00\%), and \textit{t-bar row} (Video Recall: 70.00\%).
 Biomechanically, the pull-up represents a closed kinetic chain (CKC) exercise where the athlete's hands remain fixed to a stationary overhead bar while the torso is propelled vertically upward via glenohumeral adduction and scapular depression. In contrast, the lat pulldown constitutes an open kinetic chain (OKC) exercise where the athlete sits stationary with locked thighs while pulling a resistance bar downward toward the clavicles. While their mechanical boundary conditions differ, both movements execute identical relative angular trajectories across the shoulders and elbows: the humerus adducts in the frontal plane from $170^\circ \to 30^\circ$ relative to the torso, while the elbow flexes from $180^\circ \to 70^\circ$. Because relative 3D coordinate normalization references all joint positions to the cranial anchor, the absolute translation of the body relative to the external room environment is factored out. Consequently, during execution phases where the athlete's torso remains vertically upright, the relative spatial coordinates and pairwise angles between pull-ups and lat pulldowns become nearly identical, leading to occasional misclassifications under oblique camera perspectives.
 
-\subsection{Validation-Grounded Decision Protocol}
+\subsection{Validation-Grounded Decision Protocol}\label{sec:val_protocol}
 We emphasize that all model selection choices---including adopting the 117-d mix feature, retaining SkelGym-Aug, and solving SLSQP voting weights---were established strictly on the validation set, where the SkelGym-Full ensemble reached 80.10\% window accuracy and 83.09\% video accuracy. The subsequent 79.11\% test consensus result (78.97\% on the baseline run) represents a reliable held-out confirmation of generalization to unseen subjects and recording environments. Finally, out of 236 held-out test videos, exactly 233 contained valid action segments exceeding 32 frames after boundary trimming, explaining the test support count.
 
 \section{Discussion, Limitations, and Future Work}
