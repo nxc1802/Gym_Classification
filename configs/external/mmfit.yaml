@@ -1,0 +1,52 @@
+# MM-Fit External Benchmark Configuration
+dataset: mmfit
+mode: external
+
+class_set: core4 # 'core4' or 'extended5'
+
+workout_split:
+  split_group: unseen_test # 'unseen_test' (primary) or 'seen_test' (secondary)
+  primary:
+    - "w00"
+    - "w05"
+    - "w12"
+    - "w13"
+    - "w20"
+  secondary:
+    - "w09"
+    - "w10"
+    - "w11"
+
+pose_protocol:
+  source: native # 'native' or 'mediapipe'
+  geometric_norm: true
+  align_orientation: false
+
+fps:
+  source: 30
+  target: 30
+
+window:
+  seq_len: 32
+  stride: 32
+
+normalization:
+  geometric: true
+  feature_stats: skelgym_train # 'skelgym_train' strictly enforces train stats (no leakage)
+
+evaluation:
+  open_set: true
+  closed_set: true
+  one_shot: true
+  trials: 100
+  seed: 42
+
+aggregation:
+  window: true
+  segment: true
+  recording: true
+
+paths:
+  data_dir: "mm-fit"
+  output_dir: "outputs/external/mmfit"
+  reference_dir: "artifacts/reference"

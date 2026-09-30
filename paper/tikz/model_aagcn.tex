@@ -1,157 +1,114 @@
-\documentclass[tikz,border=10pt]{standalone}
+\documentclass[tikz,border=6pt]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit, backgrounds}
+\usetikzlibrary{arrows.meta, positioning, calc, shapes.geometric, fit, backgrounds}
 \usepackage{amsmath,amssymb}
 \usepackage{xcolor}
 
-% Unified Academic Color Palette
-\definecolor{cInput}{RGB}{235, 248, 255}
-\definecolor{bInput}{RGB}{49, 130, 206}
+% Academic Color Palette
+\definecolor{cInput}{RGB}{237, 242, 247}
+\definecolor{bInput}{RGB}{74, 85, 104}
 
-\definecolor{cTrans}{RGB}{240, 249, 255}
-\definecolor{bTrans}{RGB}{43, 108, 176}
-
-\definecolor{cGCN}{RGB}{230, 255, 250}
-\definecolor{bGCN}{RGB}{49, 151, 149}
+\definecolor{cProj}{RGB}{235, 248, 255}
+\definecolor{bProj}{RGB}{49, 130, 206}
 
 \definecolor{cRecurr}{RGB}{250, 245, 255}
 \definecolor{bRecurr}{RGB}{128, 90, 213}
 
-\definecolor{cHead}{RGB}{255, 245, 245}
-\definecolor{bHead}{RGB}{229, 62, 62}
+\definecolor{cTrans}{RGB}{238, 242, 255}
+\definecolor{bTrans}{RGB}{79, 70, 229}
 
-\definecolor{cFusion}{RGB}{254, 252, 191}
-\definecolor{bFusion}{RGB}{214, 158, 46}
+\definecolor{cGCN}{RGB}{230, 255, 250}
+\definecolor{bGCN}{RGB}{13, 148, 136}
 
-\definecolor{cGray}{RGB}{247, 250, 252}
-\definecolor{bGray}{RGB}{160, 174, 192}
+\definecolor{cPool}{RGB}{241, 245, 249}
+\definecolor{bPool}{RGB}{100, 116, 139}
 
-\definecolor{tDark}{RGB}{26, 32, 44}
-\definecolor{tMuted}{RGB}{74, 85, 104}
+\definecolor{cHead}{RGB}{254, 242, 242}
+\definecolor{bHead}{RGB}{225, 29, 72}
+
+\definecolor{cFusion}{RGB}{254, 252, 232}
+\definecolor{bFusion}{RGB}{202, 138, 4}
+
+\definecolor{cOut}{RGB}{240, 253, 244}
+\definecolor{bOut}{RGB}{22, 163, 74}
+
+\definecolor{tDark}{RGB}{30, 41, 59}
+\definecolor{tMuted}{RGB}{100, 116, 139}
 
 \begin{document}
 \begin{tikzpicture}[
     font=\sffamily\small,
     >=Stealth,
-    node distance=0.55cm,
-    block/.style={
+    node distance=0.42cm,
+    box/.style={
         draw=#1,
         line width=1.1pt,
-        rounded corners=4pt,
+        rounded corners=3.5pt,
         align=center,
-        inner sep=5pt
+        inner sep=4pt,
+        minimum height=1.35cm
     },
-    arrow/.style={->, line width=1.1pt, color=tDark!80}
+    arr/.style={->, line width=1.1pt, color=tDark!80}
 ]
 
-\node[font=\bfseries\large, text=tDark] (title) at (6.0, 1.5) {Adaptive Spatial-Temporal Graph Convolutional Network (AAGCN)};
-
-% Sub-headers
-\node[font=\bfseries\footnotesize, text=tDark] (sub1) at (0, 0.6) {AAGCN Macro Backbone};
-\node[font=\bfseries\footnotesize, text=bGCN] (sub2) at (9.0, 0.6) {Adaptive Graph Conv (Spatial-Temporal Block)};
-
-% Left Column: Macro Backbone
-\node[block=bInput, fill=cInput, text width=5.0cm, below=0.35cm of sub1] (m_input) {
-    \textbf{Input Kinematic Stream}\\
-    {\footnotesize $[B, C=3, T=32, V=13]$}
+% Macro pipeline
+\node[box=bInput, fill=cInput, minimum width=2.0cm] (inp) {
+    \textbf{Skeletal Stream}\\[2pt]
+    {\scriptsize $[B, 3, 32, 13]$}
 };
 
-\node[block=bGray, fill=white, text width=5.0cm, below=of m_input] (m_bn) {
-    \textbf{Data BatchNorm2d(3)}\\
-    {\footnotesize Joint-level normalisation}
+\node[box=bProj, fill=cProj, minimum width=1.5cm, right=of inp] (bn) {
+    \textbf{DataBN}\\[2pt]
+    {\scriptsize $C=3$}
 };
 
-\node[block=bGCN, fill=cGCN, text width=5.0cm, below=of m_bn] (m_s1) {
-    \textbf{AAGCN Stage 1}\\
-    {\footnotesize Channels: $3 \to 48$, Stride: 1}
+\node[box=bGCN, fill=cGCN, minimum width=2.5cm, right=of bn] (stage1) {
+    \textbf{Stage 1 (3 Blocks)}\\[2pt]
+    {\scriptsize $C_{\text{out}}=48$, stride=1}\\[1pt]
+    {\scriptsize Adaptive GCN + TCN}
 };
 
-\node[block=bGCN, fill=cGCN, text width=5.0cm, below=of m_s1] (m_s2) {
-    \textbf{AAGCN Stage 2}\\
-    {\footnotesize Channels: $48 \to 96$, Stride: 2 ($T: 32 \to 16$)}
+\node[box=bGCN, fill=cGCN, minimum width=2.5cm, right=of stage1] (stage2) {
+    \textbf{Stage 2 (3 Blocks)}\\[2pt]
+    {\scriptsize $C_{\text{out}}=96$, stride=2}\\[1pt]
+    {\scriptsize Adaptive GCN + TCN}
 };
 
-\node[block=bGCN, fill=cGCN, text width=5.0cm, below=of m_s2] (m_s3) {
-    \textbf{AAGCN Stage 3}\\
-    {\footnotesize Channels: $96 \to 150$, Stride: 2 ($T: 16 \to 8$)}
+\node[box=bGCN, fill=cGCN, minimum width=2.5cm, right=of stage2] (stage3) {
+    \textbf{Stage 3 (3 Blocks)}\\[2pt]
+    {\scriptsize $C_{\text{out}}=150$, stride=2}\\[1pt]
+    {\scriptsize Adaptive GCN + TCN}
 };
 
-\node[block=bInput, fill=cInput, text width=5.0cm, below=of m_s3] (m_gap) {
-    \textbf{GAP over $(V, T)$}\\
-    {\footnotesize Output: $[B, 150]$}
+\node[box=bPool, fill=cPool, minimum width=1.9cm, right=of stage3] (gap) {
+    \textbf{Global GAP}\\[2pt]
+    {\scriptsize $V, T \to 1$}\\[1pt]
+    {\scriptsize $[B, 150]$}
 };
 
-\node[block=bHead, fill=cHead, text width=5.0cm, below=of m_gap] (m_head) {
-    \textbf{Linear Classifier Head}\\
-    {\footnotesize $\text{Linear}(150 \to 22) \to \text{Softmax}$}\\
-    {\footnotesize Yields $P_m \in \Delta^{21}$}
+\node[box=bHead, fill=cHead, minimum width=1.8cm, right=of gap] (fc) {
+    \textbf{Classifier}\\[2pt]
+    {\scriptsize $150 \to 21$}
 };
 
-\draw[arrow] (m_input) -- (m_bn);
-\draw[arrow] (m_bn) -- (m_s1);
-\draw[arrow] (m_s1) -- (m_s2);
-\draw[arrow] (m_s2) -- (m_s3);
-\draw[arrow] (m_s3) -- (m_gap);
-\draw[arrow] (m_gap) -- (m_head);
-
-% Macro background container
-\begin{scope}[on background layer]
-    \node[draw=tDark!60, line width=1.1pt, rounded corners=6pt, fill=cGray!40,
-          fit=(sub1)(m_input)(m_head), inner sep=8pt] (macro_cont) {};
-\end{scope}
-
-% Right Column: Zoom into Adaptive Block
-\node[block=bGray, fill=white, text width=1.7cm] (b1) at (7.0, -0.6) {
-    \textbf{Branch 1}\\
-    {\scriptsize $A_{\text{topo}}\odot M$\\(Anatomy)}
-};
-\node[block=bInput, fill=cInput, text width=1.7cm] (b2) at (9.0, -0.6) {
-    \textbf{Branch 2}\\
-    {\scriptsize Matrix $B$\\(Global)}
-};
-\node[block=bFusion, fill=cFusion, text width=1.7cm] (b3) at (11.0, -0.6) {
-    \textbf{Branch 3}\\
-    {\scriptsize $C(X)$ Attention\\(Dynamic)}
+\node[box=bOut, fill=cOut, minimum width=1.9cm, right=of fc] (out) {
+    \textbf{Softmax $\hat{y}$}\\[2pt]
+    {\scriptsize $\mathbf{p} \in \Delta^{21}$}
 };
 
-\node[block=bGCN, fill=cGCN, text width=5.8cm, below=0.8cm of b2] (sumA) {
-    \textbf{Unified Adaptive Adjacency Matrix}\\
-    {\footnotesize $A_{\text{total}} = (A_{\text{topo}} \odot M) + B + C(X)$}
+\draw[arr] (inp) -- (bn);
+\draw[arr] (bn) -- (stage1);
+\draw[arr] (stage1) -- (stage2);
+\draw[arr] (stage2) -- (stage3);
+\draw[arr] (stage3) -- (gap);
+\draw[arr] (gap) -- (fc);
+\draw[arr] (fc) -- (out);
+
+% Inset badge explaining the Adaptive Topology rule: A_k = A_k \odot M_k + B_k + C_k
+\node[draw=bGCN, fill=white, line width=0.8pt, rounded corners=2pt, font=\scriptsize, align=center, inner sep=3pt, below=0.35cm of stage2] (badge) {
+    \textbf{Adaptive Graph Formulation:} $\mathbf{A}_k = A_k \odot M_k + B_k + C_k(\mathbf{X})$ \textbar{} TCN Kernel $K_t=9\times 1$
 };
-
-\node[block=bGCN, fill=white, text width=5.8cm, below=of sumA] (msg) {
-    \textbf{Spatial Graph Message Passing}\\
-    {\footnotesize $X_g = A_{\text{total}} \cdot X \longrightarrow \text{Conv2d}(1\times 1) \to \text{BN} \to \text{GELU}$}
-};
-
-\node[block=bTrans, fill=white, text width=5.8cm, below=of msg] (tcn_blk) {
-    \textbf{Multi-Scale Temporal Conv (MS-TCN)}\\
-    {\footnotesize $\text{Conv2d}(9\times 1, \text{stride}=s) \to \text{BN} \to \text{Dropout}(0.2)$}
-};
-
-\node[block=bFusion, fill=cFusion, text width=5.8cm, below=of tcn_blk] (res) {
-    \textbf{Residual Shortcut Connection (+)}\\
-    {\footnotesize Shortcut: $\text{Conv2d}(1\times 1, \text{stride}=s) + \text{BN} \to (+)$ Add $\to \text{GELU}$}
-};
-
-\node[block=bInput, fill=cInput, text width=5.8cm, below=of res] (blk_out) {
-    \textbf{Block Output Feature Map}\\
-    {\footnotesize Passed to next stage or GAP}
-};
-
-\draw[arrow] (b1.south) -- (sumA.north -| b1.south);
-\draw[arrow] (b2.south) -- (sumA.north);
-\draw[arrow] (b3.south) -- (sumA.north -| b3.south);
-\draw[arrow] (sumA) -- (msg);
-\draw[arrow] (msg) -- (tcn_blk);
-\draw[arrow] (tcn_blk) -- (res);
-\draw[arrow] (res) -- (blk_out);
-
-% Block background container
-\begin{scope}[on background layer]
-    \node[draw=bGCN, line width=1.3pt, rounded corners=6pt, fill=white,
-          fit=(sub2)(b1)(b3)(blk_out), inner sep=10pt] (block_cont) {};
-\end{scope}
+\draw[-, line width=0.6pt, dashed, color=bGCN] (stage2.south) -- (badge.north);
 
 \end{tikzpicture}
 \end{document}

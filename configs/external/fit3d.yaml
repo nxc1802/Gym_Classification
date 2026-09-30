@@ -1,0 +1,39 @@
+# Fit3D External Benchmark Configuration
+dataset: fit3d
+mode: external
+
+class_set: core6 # 'core6' or 'extended7'
+
+pose_protocol:
+  source: native # 'native' or 'mediapipe'
+  geometric_norm: true
+  align_orientation: false
+
+fps:
+  source: 50
+  target: 30 # Resample 50 Hz -> 30 Hz
+
+window:
+  seq_len: 32
+  stride: 32
+
+normalization:
+  geometric: true
+  feature_stats: skelgym_train # Frozen SkelGym train statistics only
+
+evaluation:
+  open_set: true
+  closed_set: true
+  one_shot: true
+  trials: 100
+  seed: 42
+
+aggregation:
+  window: true
+  repetition: true
+  recording: true
+
+paths:
+  data_dir: "data_external/fit3d"
+  output_dir: "outputs/external/fit3d"
+  reference_dir: "artifacts/reference"

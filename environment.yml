@@ -1,0 +1,25 @@
+name: skelgym
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.10,<3.12
+  - pip
+  - numpy>=1.23.0
+  - scipy>=1.10.0
+  - pandas>=2.0.0
+  - scikit-learn>=1.2.0
+  - pyyaml>=6.0.0
+  - matplotlib>=3.7.0
+  - seaborn>=0.12.0
+  - tqdm>=4.65.0
+  - pytorch>=2.0.0
+  - torchvision>=0.15.0
+  - pip:
+    - opencv-python>=4.7.0.72
+    - mediapipe>=0.10.0
+    - thop>=0.1.1.post2209072238
+    - huggingface_hub>=0.19.0
+    - kagglehub>=0.2.0
+    - pytest>=7.3.0

@@ -38,6 +38,7 @@ from src.data.dataset import get_dataloaders
 from src.training.trainer import Trainer
 from src.training.metrics import compute_metrics, plot_confusion_matrix
 from src.models.ensemble import WeightedSoftVotingEnsemble, aggregate_video_level_predictions
+from src.utils.reproducibility import load_checkpoint_weights
 
 SEEDS = [42, 123, 3407]
 
@@ -198,9 +199,7 @@ def evaluate_all(seeds: List[int], device: torch.device, checkpoint_base: Path, 
             if not p.exists():
                 raise FileNotFoundError(f"Checkpoint not found for seed {seed}: {p}")
 
-            state_dict = torch.load(p, map_location="cpu", weights_only=False)
-            if "model_state_dict" in state_dict:
-                state_dict = state_dict["model_state_dict"]
+            state_dict, _ = load_checkpoint_weights(p, device="cpu")
 
             model = build_model(m["model"], feat, num_classes=NUM_CLASSES)
             model.load_state_dict(state_dict)

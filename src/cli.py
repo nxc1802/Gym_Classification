@@ -36,7 +36,7 @@ from src.constants import (
     DEFAULT_TRAIN_STRIDE,
     DEFAULT_VAL_TEST_STRIDE
 )
-from src.utils.reproducibility import seed_everything
+from src.utils.reproducibility import seed_everything, load_checkpoint_weights
 from src.utils.logger import setup_logger
 from src.utils.config import load_config
 from src.utils.hf_hub import (
@@ -548,9 +548,45 @@ def cmd_train(args):
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     logger.info(f"Initialized {args.model} model. Trainable parameters: {num_params:,}")
 
-    model_name = f"{args.model}_{args.feature}_aug_{args.augment}"
-    if getattr(args, "exp_id", None):
-        model_name = f"{args.model}_{args.exp_id}_{args.feature}"
+    checkpoint_name = getattr(args, "checkpoint_name", None)
+    if checkpoint_name:
+        model_name = checkpoint_name
+        if model_name.startswith("best_"):
+            model_name = model_name[5:]
+        if model_name.endswith(".pt"):
+            model_name = model_name[:-3]
+    elif getattr(args, "exp_id", None):
+        if getattr(args, "seed", 42) != 42:
+            model_name = f"{args.model}_{args.exp_id}_{args.feature}_seed{args.seed}"
+        else:
+            model_name = f"{args.model}_{args.exp_id}_{args.feature}"
+    else:
+        model_name = f"{args.model}_{args.feature}_aug_{args.augment}_seed{args.seed}"
+
+    # Extract normalization statistics from training dataset
+    norm_stats = None
+    if hasattr(train_loader.dataset, "mean") and train_loader.dataset.mean is not None:
+        norm_stats = {
+            "mean_shape": list(train_loader.dataset.mean.shape),
+            "mean_norm": float(np.linalg.norm(train_loader.dataset.mean)),
+            "std_norm": float(np.linalg.norm(train_loader.dataset.std)),
+            "is_normalized": True
+        }
+
+    provenance_metadata = {
+        "cmd_args": {k: v for k, v in vars(args).items() if k not in ("hf_token",)},
+        "dataset_info": {
+            "metadata_path": args.metadata,
+            "landmark_dir": args.landmark_dir,
+            "train_windows": len(train_loader.dataset),
+            "val_windows": len(val_loader.dataset),
+            "test_windows": len(test_loader.dataset),
+            "seq_len": args.seq_len,
+            "train_stride": args.train_stride,
+            "val_test_stride": args.val_test_stride,
+            "zero_frame_strategy": args.zero_frame
+        }
+    }
 
     use_amp = getattr(args, "use_amp", True)
     amp_dtype = getattr(args, "amp_dtype", "bfloat16")
@@ -581,11 +617,24 @@ def cmd_train(args):
         scheduler_type=getattr(args, "scheduler", "cosine_warmup"),
         warmup_epochs=getattr(args, "warmup_epochs", 5),
         max_epochs=args.epochs,
-        early_stopping_metric=getattr(args, "early_stopping_metric", "val_acc")
+        early_stopping_metric=getattr(args, "early_stopping_metric", "val_acc"),
+        provenance_metadata=provenance_metadata,
+        feature_method=args.feature,
+        augment_method=args.augment,
+        seed=args.seed,
+        normalization_stats=norm_stats
     )
 
-    logger.info(f"Starting training for {args.epochs} epochs (Loss={getattr(args, 'loss', 'ce')}, Gamma={getattr(args, 'focal_gamma', 2.0)}, EarlyStopping patience={args.patience}, Optimizer={getattr(args, 'optimizer', 'adamw')}, Scheduler={getattr(args, 'scheduler', 'cosine_warmup')}, AMP={use_amp} [{amp_dtype}], LabelSmoothing={label_smoothing})...")
-    history = trainer.fit(train_loader, val_loader, epochs=args.epochs, verbose=True)
+    ckpt_path = Path(args.checkpoint_dir) / f"best_{model_name}.pt"
+    force_retrain = getattr(args, "force_retrain", True)
+    if not force_retrain and ckpt_path.exists() and ckpt_path.stat().st_size > 1000:
+        logger.info(f"Checkpoint {ckpt_path.name} already exists and --no_force_retrain specified. Skipping training, reloading weights.")
+        weights, _ = load_checkpoint_weights(ckpt_path, device=device)
+        model.load_state_dict(weights)
+        history = {}
+    else:
+        logger.info(f"Starting training for {args.epochs} epochs (Loss={getattr(args, 'loss', 'ce')}, Gamma={getattr(args, 'focal_gamma', 2.0)}, EarlyStopping patience={args.patience}, Optimizer={getattr(args, 'optimizer', 'adamw')}, Scheduler={getattr(args, 'scheduler', 'cosine_warmup')}, AMP={use_amp} [{amp_dtype}], LabelSmoothing={label_smoothing})...")
+        history = trainer.fit(train_loader, val_loader, epochs=args.epochs, verbose=True)
 
     # Evaluate on test set
     logger.info("Evaluating best checkpoint on Test set...")
@@ -716,7 +765,8 @@ def cmd_evaluate(args):
         num_layers=args.num_layers,
         nhead=args.nhead
     )
-    model.load_state_dict(torch.load(ckpt_path, map_location=device))
+    weights, _ = load_checkpoint_weights(ckpt_path, device=device)
+    model.load_state_dict(weights)
     model.to(device)
 
     _, val_loader, test_loader = get_dataloaders(
@@ -823,7 +873,7 @@ def cmd_ensemble(args):
         if not p.exists():
             raise FileNotFoundError(f"Checkpoint file not found: {p}")
 
-        state_dict = torch.load(p, map_location="cpu")
+        state_dict, _ = load_checkpoint_weights(p, device="cpu")
 
         # Identify model architecture
         if "AAGCN" in p.name or any("conv_theta" in k for k in state_dict.keys()):
@@ -1229,7 +1279,8 @@ def create_parser() -> argparse.ArgumentParser:
         choices=[
             "none", "jitter", "rotate", "joint_dropout", "time_warp", "mirror", "speed_perturb",
             "skel_gym_aug", "skel_gym_aug_no_mirror", "skel_gym_aug_no_yaw",
-            "skel_gym_aug_no_scale", "skel_gym_aug_no_timewarp", "skel_gym_aug_no_jitter"
+            "skel_gym_aug_no_scale", "skel_gym_aug_no_timewarp", "skel_gym_aug_no_jitter",
+            "single_mirror", "single_yaw", "single_scale", "single_timewarp", "single_jitter"
         ],
         help="Augmentation method"
     )
@@ -1275,6 +1326,9 @@ def create_parser() -> argparse.ArgumentParser:
     p_train.add_argument("--hf_token", type=str, default=None, help="Hugging Face authentication token")
     p_train.add_argument("--report_file", type=str, default="outputs/EXPERIMENT_RESULTS.md", help="Single consolidated results file")
     p_train.add_argument("--video_level", action="store_true", default=False, help="Also evaluate and log Video-Level aggregation on Test set")
+    p_train.add_argument("--checkpoint_name", type=str, default=None, help="Explicit base name for saved checkpoints (overrides auto-generated name)")
+    p_train.add_argument("--force_retrain", action="store_true", default=True, help="Force full retraining from scratch (default: True)")
+    p_train.add_argument("--no_force_retrain", dest="force_retrain", action="store_false", help="Skip training if matching checkpoint already exists")
 
     # Evaluate
     p_eval = subparsers.add_parser("evaluate", help="Evaluate a model checkpoint")

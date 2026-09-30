@@ -1,4 +1,4 @@
-# Default Configuration for Gym Exercise Classification
+# Default Verified Configuration for SkelGym Exercise Classification
 
 # Dataset & Paths
 metadata_path: "Final_dataset_metadata.csv"
@@ -7,26 +7,28 @@ output_dir: "outputs"
 checkpoint_dir: "checkpoints"
 
 # Feature & Model Settings
-feature_method: "12rel_4"   # Choices: full_4, full_rel_4, 13_4, 12rel_4, angle3, angle2, direct_concat, branch_concat
-model_type: "Transformer"   # Choices: LSTM, BiLSTM, Transformer, STGCN, BranchConcat
+feature_method: "mix"           # Default: 117-d compound representation (39-d relative 3D + 78-d elevation angles)
+                                # Choices: mix, rel_3d, bone_3d, joint_motion_3d, bone_motion_3d, 12rel_4, full_4, angle2, angle3
+model_type: "Transformer"       # Primary choices: Transformer, AAGCN, STGCN, LSTM, BiLSTM
 
-# Augmentation (primarily used for Transformer)
-augmentation: "none"        # Choices: none, jitter, rotate, joint_dropout, time_warp
+# Augmentation Protocol
+augmentation: "skelgym_aug"     # Default task-oriented protocol: Bilateral Sagittal Reflection + Gravitational Yaw + Anatomical Scale
+                                # Choices: skelgym_aug, none, mirror, yaw, scale, jitter, dropout
 
-# Hyperparameters
+# Training Hyperparameters
 seed: 42
-device: "cuda"              # "cuda" or "cpu"
-batch_size: 16
+device: "auto"                  # Choices: auto (cuda -> mps -> cpu), cuda, mps, cpu
+batch_size: 32
 epochs: 100
 learning_rate: 0.0001
 weight_decay: 0.0001
 patience: 20
-seq_len: 32
-train_stride: 16
-val_test_stride: 32
+seq_len: 32                     # 1.07 seconds observation horizon at 30 FPS
+train_stride: 16                # 50% temporal window overlap for dense training coverage
+val_test_stride: 32             # Non-overlapping windows for strict validation and evaluation
 num_workers: 0
 
-# Model Specific Dimensions
+# Architecture Dimensions
 hidden_dim: 128
 num_layers: 4
 nhead: 8

@@ -76,7 +76,7 @@ Evaluated on **$2,743$ held-out test windows** across **$233$ out-of-sample test
 * **Training Stability Across 3 Seeds:** Across three independent random seeds (42, 123, 3407), SkelGym-Full exhibited an unprecedented low variation across the three runs (Video Acc $79.11\% \pm 0.25\%$, constituent runs: 78.97%, 78.97%, 79.40%; Macro F1 $0.7834 \pm 0.0082$; SkelGym-Lite: $77.83\% \pm 1.31\%$, Macro F1 $0.7708 \pm 0.0080$), while standalone backbones showed higher run-to-run sensitivity (Transformer Mix: $\pm 4.06\%$), illustrating the profound variance-dampening advantage of cross-paradigm late fusion.
 * **Statistical Significance:** Selected model comparisons were evaluated using paired statistical tests: McNemar's test at window level ($N=2,743, p < 10^{-12}$) and Wilcoxon signed-rank test at video level ($N=233, p < 0.005$) against a Bonferroni-adjusted threshold $\alpha_{\text{adj}} = 0.01$.
 * **Bootstrap Reliability:** Non-parametric bootstrap ($B=1,000$, computed on baseline seed-42 test predictions) provides 95% confidence intervals: Window Accuracy **$[68.36\%, 71.75\%]$** (mean: $70.06\%$) and Video Accuracy **$[73.82\%, 84.12\%]$** (mean: $79.02\%$). Both point estimates lie centrally inside their respective 95% CIs.
-* **External Benchmark:** Mitigates the Squat--Deadlift confusion observed in the Deyzel et al. (CVPRW 2023) benchmark, elevating Deadlift video recall from **$40.0\%$** on baseline ST-GCN to **$80.0\%$** on Transformer Mix and **$90.0\%$** on SkelGym-Full (under closed-set consensus; 80.0% under open-set), and achieving a mean of **$90.36\% \pm 7.35\%$** (peak trial: **$98.00\%$**, 95% CI: $[68.95\%, 98.00\%]$) in 1-shot classification simulations across 100 trials.
+* **Comparative Analysis on S&C Subset (Deyzel et al. Overlap):** Mitigates the Squat--Deadlift confusion observed in the Deyzel et al. (CVPRW 2023) benchmark, elevating Deadlift video recall from **$40.0\%$** on baseline ST-GCN to **$80.0\%$** on Transformer Mix and **$90.0\%$** on SkelGym-Full (under closed-set consensus; 80.0% under open-set), and achieving a mean of **$90.36\% \pm 7.35\%$** (peak trial: **$98.00\%$**, 95% CI: $[68.95\%, 98.00\%]$) in 1-shot classification simulations across 100 trials on the 54 held-out test videos.
 
 ---
 
@@ -117,7 +117,7 @@ Gym_Classification/
 │       └── config.py                  # YAML config reader
 ├── scripts/
 │   ├── evaluate_local_ensemble.py     # Re-evaluates local checkpoints (Tables 1-7)
-│   ├── evaluate_external_benchmark.py # External Deyzel S&C benchmark & 1-shot simulation (Table 8)
+│   ├── evaluate_external_benchmark.py # S&C subset benchmark (Deyzel et al. protocol) & 1-shot simulation (Table 8)
 │   ├── benchmark_hardware_latency.py  # Standardized latency (Mean/Median/p95) & FLOPs complexity
 │   └── compute_statistical_tests.py   # Computes McNemar, Wilcoxon, and Bootstrap CI (Tables 11-12)
 ├── tests/
@@ -156,18 +156,26 @@ python scripts/compute_statistical_tests.py
 
 # 5. Run multi-seed evaluation across seeds 42, 123, 3407 (Training Stability)
 python scripts/run_multi_seed_experiments.py --skip_train
+
+# 6. Run augmentation ablation studies (LOO & Single Component: Tables 2 & 3)
+python scripts/run_augmentation_experiments.py --mode all --device mps
 ```
 
 ### 3. Training Backbones from Scratch
 ```bash
 # Train Transformer with 117-d Biomechanical Mix + SkelGym-Aug
-python run.py train --model Transformer --feature mix_117 --augment skelgym_aug --epochs 100 --batch_size 16 --lr 1e-4
+python run.py train --model Transformer --feature mix --augment skel_gym_aug --epochs 100 --batch_size 16 --lr 1e-4
 
 # Train 4-Stream AAGCN Bone Model
-python run.py train --model AAGCN --stream bone --augment skelgym_aug --epochs 100 --batch_size 32 --lr 1e-3
+python run.py train --model AAGCN --feature bone_3d --augment skel_gym_aug --epochs 100 --batch_size 32 --lr 1e-3
 
-# Run SLSQP validation calibration across trained checkpoints
-python run.py ensemble --method slsqp --val_calibration
+# Run SLSQP validation-calibrated soft voting ensemble across trained checkpoints
+python run.py ensemble --method weighted_soft --video_level \
+  --checkpoints checkpoints/best_Transformer_T2.2_mix.pt \
+                checkpoints/best_AAGCN_T4.2_bone_3d.pt \
+                checkpoints/best_AAGCN_T4.3_rel_3d.pt \
+                checkpoints/best_AAGCN_T4.4_joint_motion_3d.pt \
+                checkpoints/best_AAGCN_T4.5_bone_motion_3d.pt
 ```
 
 ---

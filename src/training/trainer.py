@@ -20,6 +20,13 @@ from sklearn.utils.class_weight import compute_class_weight
 
 from src.training.metrics import compute_metrics
 from src.utils.hf_hub import upload_checkpoints_to_hf, DEFAULT_MODEL_REPO
+from src.utils.reproducibility import (
+    get_git_commit_hash,
+    is_git_repo_dirty,
+    compute_file_sha256,
+    save_provenance_metadata,
+    load_checkpoint_weights,
+)
 
 class FocalLoss(nn.Module):
     """
@@ -96,7 +103,12 @@ class Trainer:
         scheduler_type: str = "cosine_warmup",
         warmup_epochs: int = 5,
         max_epochs: int = 60,
-        early_stopping_metric: str = "val_acc"
+        early_stopping_metric: str = "val_acc",
+        provenance_metadata: Optional[Dict[str, Any]] = None,
+        feature_method: Optional[str] = None,
+        augment_method: Optional[str] = None,
+        seed: Optional[int] = None,
+        normalization_stats: Optional[Dict[str, Any]] = None
     ):
         self.model = model.to(device)
         self.device = device
@@ -113,8 +125,15 @@ class Trainer:
         self.label_smoothing = label_smoothing
         self.loss_type = loss_type.lower()
         self.focal_gamma = focal_gamma
+        self.optimizer_type = optimizer_type
         self.scheduler_type = scheduler_type
         self.early_stopping_metric = early_stopping_metric
+
+        self.provenance_metadata = provenance_metadata or {}
+        self.feature_method = feature_method
+        self.augment_method = augment_method
+        self.seed = seed
+        self.normalization_stats = normalization_stats
 
         # AMP Configuration
         self.use_amp = use_amp and (device.type == "cuda")
@@ -320,17 +339,73 @@ class Trainer:
                     f"lr: {current_lr:.1e}"
                 )
 
-            # Save last checkpoint every epoch
-            torch.save(self.model.state_dict(), self.last_checkpoint_path)
+            # Save last checkpoint every epoch with state dict and training history
+            last_payload = {
+                "model_state_dict": self.model.state_dict(),
+                "optimizer_state_dict": self.optimizer.state_dict(),
+                "epoch": epoch,
+                "history": history,
+            }
+            torch.save(last_payload, self.last_checkpoint_path)
 
             is_better = (v_acc > best_metric) if self.early_stopping_metric == "val_acc" else (v_loss < best_metric)
             if is_better:
                 best_metric = v_acc if self.early_stopping_metric == "val_acc" else v_loss
                 patience_counter = 0
-                torch.save(self.model.state_dict(), self.best_checkpoint_path)
+
+                provenance = {
+                    "model_name": self.model_name,
+                    "model_class": self.model.__class__.__name__,
+                    "feature_method": self.feature_method,
+                    "augment_method": self.augment_method,
+                    "seed": self.seed,
+                    "git_sha": get_git_commit_hash(),
+                    "git_dirty": is_git_repo_dirty(),
+                    "saved_timestamp": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+                    "epoch": epoch,
+                    "total_epochs": epochs,
+                    "early_stopping_metric": self.early_stopping_metric,
+                    "best_metric_value": float(best_metric),
+                    "val_loss": float(v_loss),
+                    "val_acc": float(v_acc),
+                    "train_loss": float(tr_loss),
+                    "train_acc": float(tr_acc),
+                    "hyperparameters": {
+                        "lr": self.lr,
+                        "weight_decay": self.weight_decay,
+                        "optimizer": self.optimizer.__class__.__name__,
+                        "scheduler": self.scheduler.__class__.__name__ if self.scheduler else None,
+                        "loss_type": self.loss_type,
+                        "focal_gamma": self.focal_gamma,
+                        "label_smoothing": self.label_smoothing,
+                        "patience": self.patience,
+                        "use_amp": self.use_amp,
+                        "amp_dtype": str(self.amp_dtype)
+                    },
+                    "normalization_stats": self.normalization_stats,
+                    **self.provenance_metadata
+                }
+
+                best_payload = {
+                    "model_state_dict": self.model.state_dict(),
+                    "optimizer_state_dict": self.optimizer.state_dict(),
+                    "epoch": epoch,
+                    "best_metric": float(best_metric),
+                    "history": history,
+                    "provenance": provenance
+                }
+                torch.save(best_payload, self.best_checkpoint_path)
+
+                # Compute SHA-256 and write provenance sidecar JSON
+                sha256_hash = compute_file_sha256(self.best_checkpoint_path)
+                provenance["checkpoint_file"] = self.best_checkpoint_path.name
+                provenance["checkpoint_sha256"] = sha256_hash
+                sidecar_path = self.best_checkpoint_path.with_suffix(".provenance.json")
+                save_provenance_metadata(provenance, sidecar_path)
+
                 if verbose:
                     val_str = f"val_acc: {v_acc * 100:.2f}%" if self.early_stopping_metric == "val_acc" else f"val_loss: {v_loss:.4f}"
-                    print(f"  --> Best checkpoint saved ({val_str}): {self.best_checkpoint_path.name}")
+                    print(f"  --> Best checkpoint saved ({val_str}): {self.best_checkpoint_path.name} (SHA-256: {sha256_hash[:12]}...)")
             else:
                 patience_counter += 1
                 if patience_counter >= self.patience:
@@ -338,9 +413,10 @@ class Trainer:
                         print(f"Early stopping triggered at epoch {epoch} (No improvement in {self.early_stopping_metric} for {self.patience} epochs).")
                     break
 
-        # Reload best weights
+        # Reload best weights safely (supporting both wrapped and legacy formats)
         if self.best_checkpoint_path.exists():
-            self.model.load_state_dict(torch.load(self.best_checkpoint_path, map_location=self.device))
+            state_dict, _ = load_checkpoint_weights(self.best_checkpoint_path, device=self.device)
+            self.model.load_state_dict(state_dict)
 
         # Push to Hugging Face Hub if requested
         if self.push_to_hf:

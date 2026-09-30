@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Reproducible evaluation script for the external S&C benchmark (Deyzel et al. CVPRW 2023 protocol).
+Comparative evaluation script on the Strength & Conditioning (S&C) overlapping subset
+inspired by the Deyzel et al. (CVPRW 2023) taxonomy and evaluation protocol.
 Covers:
 1. Closed-set & Open-set evaluation across the 4 shared S&C exercises
    (squat, deadlift, barbell biceps curl, lateral raise) across 54 held-out test videos (N=529 windows).
@@ -167,9 +168,9 @@ def main():
     # =========================================================================
     # 1. Closed-Set vs Open-Set Evaluation
     # =========================================================================
-    print("\n" + "="*80)
-    print("TABLE 8: EXTERNAL S&C BENCHMARK (DEYZEL ET AL. PROTOCOL)")
-    print("="*80)
+    print("\n" + "="*85)
+    print("TABLE 8: S&C OVERLAPPING SUBSET BENCHMARK (INSPIRED BY DEYZEL ET AL. PROTOCOL)")
+    print("="*85)
     print(f"{'Model':<25} | {'Open Win':<10} | {'Open Vid':<10} | {'Closed Win':<10} | {'Closed Vid':<10} | {'Closed F1':<10}")
     print("-" * 85)
 

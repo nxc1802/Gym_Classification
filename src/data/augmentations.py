@@ -41,12 +41,46 @@ class LandmarkAugmenter:
         SWAP_MAP = {0: 0, 1: 2, 2: 1, 3: 4, 4: 3, 5: 6, 6: 5, 7: 8, 8: 7, 9: 10, 10: 9, 11: 12, 12: 11}
         pairs = list(combinations(range(13), 2))
         pair_to_idx = {p: i for i, p in enumerate(pairs)}
-        pair_sym = [pair_to_idx[(min(SWAP_MAP[a], SWAP_MAP[b]), max(SWAP_MAP[a], SWAP_MAP[b]))] for a, b in pairs]
+        self.pair_a = torch.tensor([p[0] for p in pairs], dtype=torch.long)
+        self.pair_b = torch.tensor([p[1] for p in pairs], dtype=torch.long)
+
+        pair_sym = []
+        pair_signs = []
+        for a, b in pairs:
+            ma, mb = SWAP_MAP[a], SWAP_MAP[b]
+            pair_sym.append(pair_to_idx[(min(ma, mb), max(ma, mb))])
+            # If the joint order swapped (ma > mb), the displacement vector reverses (p_b - p_a) -> -(p_mb - p_ma),
+            # flipping the sign of dy and thus negating the elevation angle.
+            pair_signs.append(-1.0 if ma > mb else 1.0)
+
         self.pair_sym_indices = torch.tensor(pair_sym, dtype=torch.long)
+        self.pair_sym_signs = torch.tensor(pair_signs, dtype=torch.float32)
 
         triplet_to_idx = {t: i for i, t in enumerate(triplets)}
         triplet_sym = [triplet_to_idx[tuple(sorted([SWAP_MAP[a], SWAP_MAP[b], SWAP_MAP[c]]))] for a, b, c in triplets]
         self.triplet_sym_indices = torch.tensor(triplet_sym, dtype=torch.long)
+
+    def recompute_pair_angles_3d(self, rel_3d: torch.Tensor) -> torch.Tensor:
+        """
+        Vectorized recomputation of 78 pairwise 3D elevation angles in [-pi/2, pi/2] from rel_3d coordinates.
+        rel_3d shape: (..., 39) representing 13 joints x 3 (x, y, z).
+        Returns: (..., 78)
+        """
+        orig_shape = rel_3d.shape
+        flat_rel = rel_3d.reshape(-1, 13, 3)
+        device = rel_3d.device
+
+        a_idx = self.pair_a.to(device)
+        b_idx = self.pair_b.to(device)
+
+        diff = flat_rel[:, b_idx, :] - flat_rel[:, a_idx, :]  # (N, 78, 3)
+        dx = diff[..., 0]
+        dy = diff[..., 1]
+        dz = diff[..., 2]
+        ground_dist = torch.sqrt(dx * dx + dz * dz)
+        angles = torch.atan2(dy, ground_dist)
+
+        return angles.reshape(*orig_shape[:-1], 78)
 
     def recompute_mix_angles(self, rel_3d: torch.Tensor) -> torch.Tensor:
         """
@@ -80,17 +114,22 @@ class LandmarkAugmenter:
         - 4-channel coordinates (52, 53, 132, 133): noise applied only to (x, y, z), visibility preserved.
         """
         dim = x.shape[-1]
-        if dim in (117, 325):
+        if dim == 117:
             noise_rel = torch.randn_like(x[..., :39]) * self.jitter_sigma
             noise_ang = torch.randn_like(x[..., 39:]) * (self.jitter_sigma * 0.5)
-            ang_jittered = torch.clamp(x[..., 39:] + noise_ang, -math.pi, math.pi)
+            ang_jittered = torch.clamp(x[..., 39:] + noise_ang, -math.pi * 0.5, math.pi * 0.5)
+            return torch.cat([x[..., :39] + noise_rel, ang_jittered], dim=-1)
+        elif dim == 325:
+            noise_rel = torch.randn_like(x[..., :39]) * self.jitter_sigma
+            noise_ang = torch.randn_like(x[..., 39:]) * (self.jitter_sigma * 0.5)
+            ang_jittered = torch.clamp(x[..., 39:] + noise_ang, 0.0, math.pi)
             return torch.cat([x[..., :39] + noise_rel, ang_jittered], dim=-1)
         elif dim == 286:
             noise = torch.randn_like(x) * (self.jitter_sigma * 0.5)
             return torch.clamp(x + noise, 0.0, math.pi)
         elif dim == 78:
             noise = torch.randn_like(x) * (self.jitter_sigma * 0.5)
-            return torch.clamp(x + noise, -math.pi, math.pi)
+            return torch.clamp(x + noise, -math.pi * 0.5, math.pi * 0.5)
         elif dim in (52, 53, 132, 133) or (dim % 4 == 0 or (dim - 1) % 4 == 0):
             # Coordinates with visibility: apply jitter only to (x, y, z), skip visibility
             x_jit = x.clone()
@@ -331,9 +370,11 @@ class LandmarkAugmenter:
             sym_idx = self.triplet_sym_indices.to(device)
             return x[..., sym_idx]
         elif dim == 78:
-            # Pair angles: swap symmetric pair indices
+            # Pair angles: swap symmetric pair indices and multiply by pair_sym_signs
+            # for pairs whose joint order reversed in canonical sorting (reversing dy)
             sym_idx = self.pair_sym_indices.to(device)
-            return x[..., sym_idx]
+            signs = self.pair_sym_signs.to(device)
+            return x[..., sym_idx] * signs
 
         swap_pairs = [(1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12)]
 
@@ -355,9 +396,9 @@ class LandmarkAugmenter:
             for j in range(num_joints):
                 rel[..., j * stride] = -rel[..., j * stride]
 
-            # Mirror pair angles: swap symmetric pair indices
-            sym_idx = self.pair_sym_indices.to(device)
-            mirrored_angles = x[..., 39:][..., sym_idx]
+            # Recompute 78 pairwise elevation angles dynamically from mirrored 3D coordinates
+            # to guarantee 100% geometric and sign consistency with the mirrored coordinates
+            mirrored_angles = self.recompute_pair_angles_3d(rel)
             return torch.cat([rel, mirrored_angles], dim=-1)
 
         elif dim == 325:
@@ -501,6 +542,16 @@ class LandmarkAugmenter:
             return self.skel_gym_aug(x, disable_scale=True)
         elif method == "skel_gym_aug_no_jitter":
             return self.skel_gym_aug(x, disable_jitter=True)
+        elif method in ("single_mirror", "only_mirror"):
+            return self.mirror(x) if torch.rand(1).item() < 0.5 else x
+        elif method in ("single_yaw", "only_yaw"):
+            return self.yaw_rotate_3d(x, max_yaw_degrees=self.max_yaw_degrees)
+        elif method in ("single_scale", "only_scale"):
+            return self.scale(x, scale_min=0.9, scale_max=1.1)
+        elif method in ("single_timewarp", "only_timewarp"):
+            return self.time_warp(x)
+        elif method in ("single_jitter", "only_jitter"):
+            return self.jitter(x)
         elif method == "none" or not method:
             return x
         else:

@@ -1,109 +1,90 @@
-\documentclass[tikz,border=10pt]{standalone}
+\documentclass[tikz,border=6pt]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit, backgrounds}
+\usetikzlibrary{arrows.meta, positioning, calc, shapes.geometric, fit, backgrounds}
 \usepackage{amsmath,amssymb}
 \usepackage{xcolor}
 
-% Unified Academic Color Palette
-\definecolor{cInput}{RGB}{235, 248, 255}
-\definecolor{bInput}{RGB}{49, 130, 206}
+% Academic Color Palette
+\definecolor{cInput}{RGB}{237, 242, 247}
+\definecolor{bInput}{RGB}{74, 85, 104}
 
-\definecolor{cTrans}{RGB}{240, 249, 255}
-\definecolor{bTrans}{RGB}{43, 108, 176}
-
-\definecolor{cGCN}{RGB}{230, 255, 250}
-\definecolor{bGCN}{RGB}{49, 151, 149}
+\definecolor{cProj}{RGB}{235, 248, 255}
+\definecolor{bProj}{RGB}{49, 130, 206}
 
 \definecolor{cRecurr}{RGB}{250, 245, 255}
 \definecolor{bRecurr}{RGB}{128, 90, 213}
 
-\definecolor{cHead}{RGB}{255, 245, 245}
-\definecolor{bHead}{RGB}{229, 62, 62}
+\definecolor{cTrans}{RGB}{238, 242, 255}
+\definecolor{bTrans}{RGB}{79, 70, 229}
 
-\definecolor{cFusion}{RGB}{254, 252, 191}
-\definecolor{bFusion}{RGB}{214, 158, 46}
+\definecolor{cGCN}{RGB}{230, 255, 250}
+\definecolor{bGCN}{RGB}{13, 148, 136}
 
-\definecolor{cGray}{RGB}{247, 250, 252}
-\definecolor{bGray}{RGB}{160, 174, 192}
+\definecolor{cPool}{RGB}{241, 245, 249}
+\definecolor{bPool}{RGB}{100, 116, 139}
 
-\definecolor{tDark}{RGB}{26, 32, 44}
-\definecolor{tMuted}{RGB}{74, 85, 104}
+\definecolor{cHead}{RGB}{254, 242, 242}
+\definecolor{bHead}{RGB}{225, 29, 72}
+
+\definecolor{cFusion}{RGB}{254, 252, 232}
+\definecolor{bFusion}{RGB}{202, 138, 4}
+
+\definecolor{cOut}{RGB}{240, 253, 244}
+\definecolor{bOut}{RGB}{22, 163, 74}
+
+\definecolor{tDark}{RGB}{30, 41, 59}
+\definecolor{tMuted}{RGB}{100, 116, 139}
 
 \begin{document}
 \begin{tikzpicture}[
     font=\sffamily\small,
     >=Stealth,
-    node distance=0.65cm,
-    block/.style={
+    box/.style={
         draw=#1,
         line width=1.1pt,
-        rounded corners=4pt,
+        rounded corners=3.5pt,
         align=center,
-        inner sep=5pt
+        inner sep=4pt
     },
-    arrow/.style={->, line width=1.1pt, color=tDark!80}
+    arr/.style={->, line width=1.1pt, color=tDark!80}
 ]
 
-\node[font=\bfseries\large, text=tDark] (title) at (6.0, 1.35) {Stacking Meta-Classifier Architecture (Level-0 \& Level-1)};
+% Level-0 Box
+\node[box=bInput, fill=cInput, minimum width=4.4cm, minimum height=3.6cm] (l0) at (0, 0) {};
+\node[font=\bfseries, text=bInput, anchor=north] at (l0.north) {Level-0 Base Classifiers};
 
-\node[block=bTrans, fill=cTrans, text width=2.0cm] (m1) at (0.8, 0) {
-    \textbf{Transformer}\\
-    {\scriptsize Seq Mix (117-d)}\\
-    {\scriptsize $P_1 \in \Delta^{21}$}
-};
-\node[block=bRecurr, fill=cRecurr, text width=2.0cm] (m2) at (3.4, 0) {
-    \textbf{BiLSTM}\\
-    {\scriptsize Seq Mix (117-d)}\\
-    {\scriptsize $P_2 \in \Delta^{21}$}
-};
-\node[block=bGCN, fill=cGCN, text width=2.0cm] (m3) at (6.0, 0) {
-    \textbf{AAGCN Joint}\\
-    {\scriptsize Graph Coords}\\
-    {\scriptsize $P_3 \in \Delta^{21}$}
-};
-\node[block=bGCN, fill=cGCN, text width=2.0cm] (m4) at (8.6, 0) {
-    \textbf{AAGCN Bone}\\
-    {\scriptsize Graph Limb}\\
-    {\scriptsize $P_4 \in \Delta^{21}$}
-};
-\node[block=bGCN, fill=cGCN, text width=2.0cm] (m5) at (11.2, 0) {
-    \textbf{AAGCN Mot}\\
-    {\scriptsize Graph Velocity}\\
-    {\scriptsize $P_5 \in \Delta^{21}$}
+\node[box=bTrans, fill=cTrans, minimum width=3.8cm, minimum height=0.55cm, font=\scriptsize] (m1) at (0, 0.95) {Transformer ($d=128$, 4L)};
+\node[box=bRecurr, fill=cRecurr, minimum width=3.8cm, minimum height=0.55cm, font=\scriptsize] (m2) at (0, 0.35) {LSTM ($h=160$, 2L)};
+\node[box=bRecurr, fill=cRecurr, minimum width=3.8cm, minimum height=0.55cm, font=\scriptsize] (m3) at (0, -0.25) {BiLSTM ($h=192$, 2L)};
+\node[box=bGCN, fill=cGCN, minimum width=3.8cm, minimum height=0.55cm, font=\scriptsize] (m4) at (0, -0.85) {ST-GCN (3 Stages)};
+\node[box=bGCN, fill=cGCN, minimum width=3.8cm, minimum height=0.55cm, font=\scriptsize] (m5) at (0, -1.45) {AAGCN (9 Blocks)};
+
+% Meta-Feature Generator
+\node[box=bFusion, fill=cFusion, minimum width=3.6cm, minimum height=2.2cm, right=1.4cm of l0] (meta_feat) {
+    \textbf{Meta-Features $\mathbf{z}$}\\[3pt]
+    {\scriptsize OOF Probabilities: $5 \times 21 = 105$}\\[2pt]
+    {\scriptsize Entropy Metrics: $5$}\\[2pt]
+    {\scriptsize $\mathbf{z}_{\text{meta}} \in \mathbb{R}^{110}$}
 };
 
-% Meta-Features Formation
-\node[block=bFusion, fill=cFusion, text width=9.2cm, below=0.8cm of m3] (meta) {
-    \textbf{Level-0 Meta-Feature Construction}\\
-    {\footnotesize Concatenate base model probability vectors:}\\
-    {\footnotesize $X_{\text{meta}} = [P_1 \,\|\, P_2 \,\|\, P_3 \,\|\, P_4 \,\|\, P_5] \in \mathbb{R}^{B \times 110}$}\\
-    {\scriptsize ($5 \text{ models} \times 22 \text{ class probabilities} = 110 \text{ meta-features}$)}
+% Level-1 Meta-Classifier
+\node[box=bHead, fill=cHead, minimum width=3.8cm, minimum height=2.2cm, right=1.2cm of meta_feat] (l1) {
+    \textbf{Level-1 Meta-Learner}\\[3pt]
+    {\scriptsize Multinomial Logistic Reg.}\\[2pt]
+    {\scriptsize $L_2$ Regularization ($C=1.0$)}\\[2pt]
+    {\scriptsize Input: $\mathbb{R}^{110} \to \Delta^{21}$}
 };
 
-\draw[arrow] (m1.south) -- (meta.north -| m1.south);
-\draw[arrow] (m2.south) -- (meta.north -| m2.south);
-\draw[arrow] (m3) -- (meta);
-\draw[arrow] (m4.south) -- (meta.north -| m4.south);
-\draw[arrow] (m5.south) -- (meta.north -| m5.south);
-
-% Level-1 Meta-Learner
-\node[block=bInput, fill=cInput, text width=9.2cm, below=0.7cm of meta] (lr) {
-    \textbf{Level-1 Meta-Classifier: Multinomial Logistic Regression}\\
-    {\footnotesize L-BFGS solver \textbar{} $L_2$ Regularization ($C=1.0$)}\\
-    {\footnotesize Learns optimal cross-paradigm correlation \& decision boundaries}\\
-    {\scriptsize Fitted strictly on out-of-fold validation set predictions}
+% Output
+\node[box=bOut, fill=cOut, minimum width=2.2cm, minimum height=2.2cm, right=0.9cm of l1] (out) {
+    \textbf{Final $\hat{y}$}\\[3pt]
+    {\scriptsize Calibrated}\\[2pt]
+    {\scriptsize Prediction}
 };
 
-\draw[arrow] (meta) -- (lr);
-
-% Final Output
-\node[block=bHead, fill=cHead, text width=7.2cm, below=0.7cm of lr] (pred) {
-    \textbf{Final Meta-Ensemble Class Decision}\\
-    {\footnotesize $\hat{y} = \arg\max P_{\text{meta}}(c) \in \{1, \dots, 22\}$}\\
-    {\scriptsize Captures non-linear cross-paradigm consensus}
-};
-
-\draw[arrow] (lr) -- (pred);
+\draw[arr] (l0.east) -- node[above=2pt, font=\scriptsize] {OOF $\mathbf{p}^{(k)}$} (meta_feat.west);
+\draw[arr] (meta_feat.east) -- node[above=2pt, font=\scriptsize] {$\mathbf{z}_{\text{meta}}$} (l1.west);
+\draw[arr] (l1.east) -- node[above=2pt, font=\scriptsize] {$\mathbf{p}_{\text{final}}$} (out.west);
 
 \end{tikzpicture}
 \end{document}

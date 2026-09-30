@@ -28,10 +28,11 @@ from src.data.features import (
     extract_relative_features,
     compute_triplet_angles,
     compute_pair_angles,
+    compute_pair_angles_3d,
     extract_features_by_method
 )
 from src.data.augmentations import LandmarkAugmenter
-from src.data.dataset import sliding_windows, GymDataset
+from src.data.dataset import sliding_windows, GymDataset, build_dataset_from_csvs
 from src.models import (
     LSTMModel,
     BiLSTMModel,
@@ -297,6 +298,109 @@ class TestGymPipeline(unittest.TestCase):
         self.assertEqual(len(y_vid_true), N_test // 2)
         self.assertEqual(len(y_vid_pred), N_test // 2)
         self.assertIn("accuracy", metrics)
+
+    def test_08_mirror_angle_geometry_consistency(self):
+        """
+        Validates:
+          1. recompute_pair_angles_3d matches compute_pair_angles_3d exactly.
+          2. LandmarkAugmenter.mirror on 78-d angles reproduces angles extracted from mirrored skeleton.
+          3. LandmarkAugmenter.mirror on 117-d mix matches mirrored coordinates and recomputed angles.
+        """
+        aug = LandmarkAugmenter()
+
+        # 1. Test that recompute_pair_angles_3d matches compute_pair_angles_3d on DataFrame
+        coords_3d = np.random.randn(self.n_frames, 13 * 3).astype(np.float32)
+        df_13 = pd.DataFrame()
+        for idx, pt in enumerate(RAW_POINTS_13):
+            df_13[f"{pt}_x"] = coords_3d[:, idx * 3]
+            df_13[f"{pt}_y"] = coords_3d[:, idx * 3 + 1]
+            df_13[f"{pt}_z"] = coords_3d[:, idx * 3 + 2]
+
+        true_angles = compute_pair_angles_3d(df_13, RAW_POINTS_13)
+        t_coords = torch.from_numpy(coords_3d).float()
+        recomputed_angles = aug.recompute_pair_angles_3d(t_coords).numpy()
+        np.testing.assert_allclose(true_angles, recomputed_angles, rtol=1e-5, atol=1e-5)
+
+        # 2. Test that mirror on 78-d angles matches angles extracted from mirrored skeleton
+        coords_mir = coords_3d.copy()
+        swap_pairs = [(1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12)]
+        for l, r in swap_pairs:
+            coords_mir[:, l * 3:(l + 1) * 3], coords_mir[:, r * 3:(r + 1) * 3] = (
+                coords_3d[:, r * 3:(r + 1) * 3].copy(), coords_3d[:, l * 3:(l + 1) * 3].copy()
+            )
+        for j in range(13):
+            coords_mir[:, j * 3] = -coords_mir[:, j * 3]
+
+        df_mir = pd.DataFrame()
+        for idx, pt in enumerate(RAW_POINTS_13):
+            df_mir[f"{pt}_x"] = coords_mir[:, idx * 3]
+            df_mir[f"{pt}_y"] = coords_mir[:, idx * 3 + 1]
+            df_mir[f"{pt}_z"] = coords_mir[:, idx * 3 + 2]
+        true_mir_angles = compute_pair_angles_3d(df_mir, RAW_POINTS_13)
+
+        # Apply mirror directly on original angles via LandmarkAugmenter
+        t_orig_angles = torch.from_numpy(true_angles).float()
+        pred_mir_angles = aug.apply(t_orig_angles, "mirror").numpy()
+        np.testing.assert_allclose(true_mir_angles, pred_mir_angles, rtol=1e-5, atol=1e-5)
+
+        # 3. Test on 117-d mix feature (rel_3d + angle2_3d)
+        mix_feat = np.concatenate([coords_3d, true_angles], axis=-1)
+        t_mix = torch.from_numpy(mix_feat).float()
+        t_mix_mir = aug.apply(t_mix, "mirror")
+
+        np.testing.assert_allclose(coords_mir, t_mix_mir[:, :39].numpy(), rtol=1e-5, atol=1e-5)
+        np.testing.assert_allclose(true_mir_angles, t_mix_mir[:, 39:].numpy(), rtol=1e-5, atol=1e-5)
+
+    def test_09_augmentation_normalization_order(self):
+        """
+        Validates that dynamic augmentation in GymDataset occurs on physical coordinates
+        PRIOR to z-score standardization, preserving physical geometric validity.
+        """
+        raw_samples = [np.ones((32, 117), dtype=np.float32) * 5.0 for _ in range(4)]
+        labels = [0, 1, 0, 1]
+        ds = GymDataset(raw_samples, labels, augment_method="mirror", in_memory=True)
+
+        norm_mean = torch.ones(1, 117) * 2.0
+        norm_std = torch.ones(1, 117) * 3.0
+        ds.set_normalization(norm_mean, norm_std)
+
+        # Physical x = 5.0 -> mirror inverts x -> -5.0 -> standardized: (-5.0 - 2.0) / 3.0 = -2.3333
+        sample, lbl = ds[0]
+        expected_nose_x = (-5.0 - 2.0) / 3.0
+        self.assertAlmostEqual(sample[0, 0].item(), expected_nose_x, places=4)
+        expected_nose_y = (5.0 - 2.0) / 3.0
+        self.assertAlmostEqual(sample[0, 1].item(), expected_nose_y, places=4)
+
+    def test_10_missing_landmark_error_handling(self):
+        """
+        Validates that missing landmark CSVs raise FileNotFoundError when smoke_test=False,
+        and synthesize valid mock data when smoke_test=True.
+        """
+        fake_meta = pd.DataFrame([{
+            "filepath": "nonexistent_dir/nonexistent_vid.mp4",
+            "class": "barbell biceps curl",
+            "split": "train",
+            "num_frames": 50,
+            "label_content": "frame_000000 frame_000049"
+        }])
+
+        with self.assertRaises(FileNotFoundError):
+            build_dataset_from_csvs(
+                metadata_df=fake_meta,
+                split="train",
+                feature_method="rel_3d",
+                landmark_dir="definitely_nonexistent_landmark_dir_xyz",
+                smoke_test=False
+            )
+
+        ds_smoke = build_dataset_from_csvs(
+            metadata_df=fake_meta,
+            split="train",
+            feature_method="rel_3d",
+            landmark_dir="definitely_nonexistent_landmark_dir_xyz",
+            smoke_test=True
+        )
+        self.assertGreater(len(ds_smoke), 0)
 
 if __name__ == "__main__":
     unittest.main()

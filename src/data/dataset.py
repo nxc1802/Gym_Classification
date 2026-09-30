@@ -183,6 +183,8 @@ class GymDataset(Dataset):
         self.augmenter = LandmarkAugmenter() if augment_method and augment_method != "none" else None
         self.in_memory = in_memory
         self.video_ids = video_ids
+        self.norm_mean = None
+        self.norm_std = None
 
         if in_memory and len(samples) > 0:
             self.tensor_labels = torch.tensor(labels, dtype=torch.long)
@@ -201,6 +203,29 @@ class GymDataset(Dataset):
             self.tensor_labels = None
             self.tensor_samples = None
 
+    def set_normalization(self, mean: Union[torch.Tensor, np.ndarray], std: Union[torch.Tensor, np.ndarray]) -> None:
+        """
+        Stores training mean and standard deviation for on-the-fly z-score normalization.
+        Ensures physical augmentations occur in physical coordinate space prior to standardization.
+        """
+        if isinstance(mean, np.ndarray):
+            self.norm_mean = torch.from_numpy(mean).float()
+        else:
+            self.norm_mean = mean.clone().detach().float()
+
+        if isinstance(std, np.ndarray):
+            self.norm_std = torch.from_numpy(std).float()
+        else:
+            self.norm_std = std.clone().detach().float()
+
+        if self.norm_mean.ndim == 1:
+            self.norm_mean = self.norm_mean.unsqueeze(0)
+        if self.norm_std.ndim == 1:
+            self.norm_std = self.norm_std.unsqueeze(0)
+
+        self.train_mean = self.norm_mean
+        self.train_std = self.norm_std
+
     def __len__(self) -> int:
         return len(self.labels)
 
@@ -208,15 +233,20 @@ class GymDataset(Dataset):
         if self.in_memory and self.tensor_labels is not None:
             label = self.tensor_labels[idx]
             if self.is_branch:
-                t1 = self.t1_list[idx]
-                t2 = self.t2_list[idx]
+                t1 = self.t1_list[idx].clone()
+                t2 = self.t2_list[idx].clone()
                 if self.augmenter and self.augment_method:
                     t1 = self.augmenter.apply(t1, self.augment_method)
+                if self.norm_mean is not None and self.norm_std is not None:
+                    if self.norm_mean.shape[-1] == t1.shape[-1]:
+                        t1 = (t1 - self.norm_mean) / self.norm_std
                 return (t1, t2), label
             else:
-                t = self.tensor_samples[idx]
+                t = self.tensor_samples[idx].clone()
                 if self.augmenter and self.augment_method:
                     t = self.augmenter.apply(t, self.augment_method)
+                if self.norm_mean is not None and self.norm_std is not None:
+                    t = (t - self.norm_mean) / self.norm_std
                 return t, label
         else:
             sample = self.samples[idx]
@@ -228,11 +258,16 @@ class GymDataset(Dataset):
                 t2 = torch.from_numpy(x2).float()
                 if self.augmenter and self.augment_method:
                     t1 = self.augmenter.apply(t1, self.augment_method)
+                if self.norm_mean is not None and self.norm_std is not None:
+                    if self.norm_mean.shape[-1] == t1.shape[-1]:
+                        t1 = (t1 - self.norm_mean) / self.norm_std
                 return (t1, t2), label
             else:
                 t = torch.from_numpy(sample).float()
                 if self.augmenter and self.augment_method:
                     t = self.augmenter.apply(t, self.augment_method)
+                if self.norm_mean is not None and self.norm_std is not None:
+                    t = (t - self.norm_mean) / self.norm_std
                 return t, label
 
 def mirror_dataframe_horizontally(df: pd.DataFrame) -> pd.DataFrame:
@@ -409,27 +444,49 @@ def build_dataset_from_csvs(
 
         vid_name = Path(row.get("filepath", f"video_{class_idx}")).stem
         csv_path = None
+        cand_paths = []
         if landmark_dir:
-            cand1 = Path(landmark_dir) / split / action_name / f"{vid_name}.csv"
-            cand2 = Path(landmark_dir) / f"{vid_name}.csv"
-            for c in [cand1, cand2]:
-                if c.exists():
-                    csv_path = c
-                    break
+            cand_paths.append(Path(landmark_dir) / split / action_name / f"{vid_name}.csv")
+            cand_paths.append(Path(landmark_dir) / f"{vid_name}.csv")
+        # Standard repository search locations
+        default_dir = Path("data/landmarks")
+        cand_paths.append(default_dir / split / action_name / f"{vid_name}.csv")
+        cand_paths.append(default_dir / f"{vid_name}.csv")
+        root_default = Path(__file__).resolve().parent.parent.parent / "data" / "landmarks"
+        cand_paths.append(root_default / split / action_name / f"{vid_name}.csv")
+        cand_paths.append(root_default / f"{vid_name}.csv")
+
+        for c in cand_paths:
+            if c.exists():
+                csv_path = c
+                break
 
         if csv_path and csv_path.exists():
             try:
                 df = pd.read_csv(csv_path)
-            except Exception:
+            except Exception as err:
+                if not smoke_test:
+                    raise IOError(f"Corrupted landmark CSV file at '{csv_path}': {err}")
                 continue
             if len(df) == 0:
+                if not smoke_test:
+                    raise ValueError(f"Empty landmark CSV file at '{csv_path}'")
                 continue
             segments = parse_segment_ranges(row.get("label_content", ""), len(df))
         else:
-            n_frames = int(row.get("num_frames", 75))
-            dummy_cols = ["Frame"] + [f"{pt}_{d}" for pt in ["NOSE", "LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_ELBOW", "RIGHT_ELBOW", "LEFT_WRIST", "RIGHT_WRIST", "LEFT_HIP", "RIGHT_HIP", "LEFT_KNEE", "RIGHT_KNEE", "LEFT_ANKLE", "RIGHT_ANKLE"] for d in ["x", "y", "z", "visibility"]]
-            df = pd.DataFrame(np.random.randn(n_frames, len(dummy_cols)), columns=dummy_cols)
-            segments = parse_segment_ranges(row.get("label_content", ""), n_frames)
+            if smoke_test:
+                n_frames = int(row.get("num_frames", 75))
+                dummy_cols = ["Frame"] + [f"{pt}_{d}" for pt in ["NOSE", "LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_ELBOW", "RIGHT_ELBOW", "LEFT_WRIST", "RIGHT_WRIST", "LEFT_HIP", "RIGHT_HIP", "LEFT_KNEE", "RIGHT_KNEE", "LEFT_ANKLE", "RIGHT_ANKLE"] for d in ["x", "y", "z", "visibility"]]
+                # Deterministic valid landmark data for smoke testing
+                df = pd.DataFrame(np.random.uniform(0.2, 0.8, size=(n_frames, len(dummy_cols))), columns=dummy_cols)
+                segments = parse_segment_ranges(row.get("label_content", ""), n_frames)
+            else:
+                checked_str = "\n  - " + "\n  - ".join(str(p) for p in cand_paths[:4])
+                raise FileNotFoundError(
+                    f"Landmark CSV not found for video '{vid_name}' (class: '{action_name}', split: '{split}').\n"
+                    f"Searched candidate paths:{checked_str}\n"
+                    f"Please ensure landmark CSV files are present in 'data/landmarks' or provide '--landmark_dir'."
+                )
 
         for s, e in segments:
             df_seg = df.iloc[s:e].reset_index(drop=True)
@@ -449,13 +506,22 @@ def build_dataset_from_csvs(
                 all_labels.append(class_idx)
                 all_video_ids.append(vid_name)
 
+    if len(all_samples) == 0:
+        if smoke_test:
+            import logging
+            logging.getLogger(__name__).warning(f"No samples extracted for split '{split}' in smoke_test mode.")
+        else:
+            raise RuntimeError(
+                f"No valid windows were extracted for split '{split}' (feature: '{feature_method}'). "
+                f"Ensure the dataset metadata has valid rows and landmark CSVs are populated."
+            )
 
     # Augmentation Strategy:
     # 1. For 'skel_gym_aug': True Dynamic On-the-Fly Augmentation per epoch in DataLoader (__getitem__)
     # 2. For single methods (jitter, rotate, etc.): Offline Dataset Expansion (1→4 total)
     dataset_aug = None
     if split == "train" and augment_method and augment_method != "none":
-        if augment_method.startswith("skel_gym_aug"):
+        if augment_method.startswith("skel_gym_aug") or augment_method.startswith("single_") or augment_method.startswith("only_"):
             # Dynamic On-the-Fly Augmentation: keep clean base samples in RAM, apply random pipeline on every fetch
             dataset_aug = augment_method
         else:
@@ -598,7 +664,23 @@ def get_dataloaders(
     is_branch = (feature_method == "branch_concat")
     if not is_branch and len(train_ds) > 0:
         train_mean, train_std = _compute_train_stats(train_ds)
-        _apply_normalization(train_ds, train_mean, train_std)
+        # Store train stats on all datasets for evaluation/reproducibility
+        train_ds.train_mean = train_mean
+        train_ds.train_std = train_std
+        val_ds.train_mean = train_mean
+        val_ds.train_std = train_std
+        test_ds.train_mean = train_mean
+        test_ds.train_std = train_std
+
+        if train_ds.augment_method and train_ds.augment_method != "none":
+            # For dynamic on-the-fly augmentation:
+            # DO NOT normalize in-place! Let GymDataset.__getitem__ apply physical augmentations
+            # in physical space first, followed by z-score standardization.
+            train_ds.set_normalization(train_mean, train_std)
+        else:
+            # When no dynamic augmentation is active, normalize in-place for fast retrieval
+            _apply_normalization(train_ds, train_mean, train_std)
+
         _apply_normalization(val_ds, train_mean, train_std)
         _apply_normalization(test_ds, train_mean, train_std)
 

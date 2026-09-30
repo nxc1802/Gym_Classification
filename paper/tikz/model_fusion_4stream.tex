@@ -1,113 +1,132 @@
-\documentclass[tikz,border=10pt]{standalone}
+\documentclass[tikz,border=6pt]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit, backgrounds}
+\usetikzlibrary{arrows.meta, positioning, calc, shapes.geometric, fit, backgrounds}
 \usepackage{amsmath,amssymb}
 \usepackage{xcolor}
 
-% Unified Academic Color Palette
-\definecolor{cInput}{RGB}{235, 248, 255}
-\definecolor{bInput}{RGB}{49, 130, 206}
+% Academic Color Palette
+\definecolor{cInput}{RGB}{237, 242, 247}
+\definecolor{bInput}{RGB}{74, 85, 104}
 
-\definecolor{cTrans}{RGB}{240, 249, 255}
-\definecolor{bTrans}{RGB}{43, 108, 176}
-
-\definecolor{cGCN}{RGB}{230, 255, 250}
-\definecolor{bGCN}{RGB}{49, 151, 149}
+\definecolor{cProj}{RGB}{235, 248, 255}
+\definecolor{bProj}{RGB}{49, 130, 206}
 
 \definecolor{cRecurr}{RGB}{250, 245, 255}
 \definecolor{bRecurr}{RGB}{128, 90, 213}
 
-\definecolor{cHead}{RGB}{255, 245, 245}
-\definecolor{bHead}{RGB}{229, 62, 62}
+\definecolor{cTrans}{RGB}{238, 242, 255}
+\definecolor{bTrans}{RGB}{79, 70, 229}
 
-\definecolor{cFusion}{RGB}{254, 252, 191}
-\definecolor{bFusion}{RGB}{214, 158, 46}
+\definecolor{cGCN}{RGB}{230, 255, 250}
+\definecolor{bGCN}{RGB}{13, 148, 136}
 
-\definecolor{cGray}{RGB}{247, 250, 252}
-\definecolor{bGray}{RGB}{160, 174, 192}
+\definecolor{cPool}{RGB}{241, 245, 249}
+\definecolor{bPool}{RGB}{100, 116, 139}
 
-\definecolor{tDark}{RGB}{26, 32, 44}
-\definecolor{tMuted}{RGB}{74, 85, 104}
+\definecolor{cHead}{RGB}{254, 242, 242}
+\definecolor{bHead}{RGB}{225, 29, 72}
+
+\definecolor{cFusion}{RGB}{254, 252, 232}
+\definecolor{bFusion}{RGB}{202, 138, 4}
+
+\definecolor{cOut}{RGB}{240, 253, 244}
+\definecolor{bOut}{RGB}{22, 163, 74}
+
+\definecolor{tDark}{RGB}{30, 41, 59}
+\definecolor{tMuted}{RGB}{100, 116, 139}
 
 \begin{document}
 \begin{tikzpicture}[
     font=\sffamily\small,
     >=Stealth,
-    node distance=0.6cm,
-    block/.style={
+    box/.style={
         draw=#1,
-        line width=1.1pt,
-        rounded corners=4pt,
+        line width=1.05pt,
+        rounded corners=3pt,
         align=center,
-        inner sep=5pt
+        inner sep=3pt,
+        minimum height=0.92cm
     },
-    arrow/.style={->, line width=1.1pt, color=tDark!80}
+    arr/.style={->, line width=1.05pt, color=tDark!80}
 ]
 
-\node[font=\bfseries\large, text=tDark] (title) at (5.7, 1.25) {Four-Stream AAGCN (Unified Graph Paradigm)};
-
-\node[block=bInput, fill=cInput, text width=2.4cm] (in1) at (0.9, 0) {
-    \textbf{Joint Stream}\\
-    {\footnotesize Rel 3D $[B,3,32,13]$}
+% 4 Compact Streams
+\node[box=bInput, fill=cInput, minimum width=2.1cm] (s1_in) at (0, 1.45) {
+    \textbf{Joint $\mathbf{X}_J$}\\[1pt]
+    {\scriptsize $[B, 3, 32, 13]$}
 };
-\node[block=bGCN, fill=cGCN, text width=2.4cm, below=of in1] (back1) {
-    \textbf{AAGCN Joint}\\
-    {\footnotesize $[48, 96, 150]$}\\
-    {\footnotesize $P_{\text{joint}} \in \Delta^{21}$}
+\node[box=bGCN, fill=cGCN, minimum width=3.0cm, right=0.45cm of s1_in] (s1_net) {
+    \textbf{AAGCN Backbone}\\[1pt]
+    {\scriptsize $48\to 96\to 150$}
 };
-
-\node[block=bInput, fill=cInput, text width=2.4cm] (in2) at (4.1, 0) {
-    \textbf{Bone Stream}\\
-    {\footnotesize Limb 3D $[B,3,32,13]$}
-};
-\node[block=bGCN, fill=cGCN, text width=2.4cm, below=of in2] (back2) {
-    \textbf{AAGCN Bone}\\
-    {\footnotesize $[48, 96, 150]$}\\
-    {\footnotesize $P_{\text{bone}} \in \Delta^{21}$}
+\node[box=bHead, fill=cHead, minimum width=1.7cm, right=0.45cm of s1_net] (s1_p) {
+    \textbf{Softmax}\\[1pt]
+    {\scriptsize $\mathbf{p}_1 \in \Delta^{21}$}
 };
 
-\node[block=bInput, fill=cInput, text width=2.4cm] (in3) at (7.3, 0) {
-    \textbf{Joint Motion}\\
-    {\footnotesize Vel 3D $[B,3,31,13]$}
+\node[box=bInput, fill=cInput, minimum width=2.1cm] (s2_in) at (0, 0.48) {
+    \textbf{Bone $\mathbf{X}_B$}\\[1pt]
+    {\scriptsize $[B, 3, 32, 13]$}
 };
-\node[block=bGCN, fill=cGCN, text width=2.4cm, below=of in3] (back3) {
-    \textbf{AAGCN J-Mot}\\
-    {\footnotesize $[48, 96, 150]$}\\
-    {\footnotesize $P_{\text{jmot}} \in \Delta^{21}$}
+\node[box=bGCN, fill=cGCN, minimum width=3.0cm, right=0.45cm of s2_in] (s2_net) {
+    \textbf{AAGCN Backbone}\\[1pt]
+    {\scriptsize $48\to 96\to 150$}
 };
-
-\node[block=bInput, fill=cInput, text width=2.4cm] (in4) at (10.5, 0) {
-    \textbf{Bone Motion}\\
-    {\footnotesize B-Vel 3D $[B,3,31,13]$}
-};
-\node[block=bGCN, fill=cGCN, text width=2.4cm, below=of in4] (back4) {
-    \textbf{AAGCN B-Mot}\\
-    {\footnotesize $[48, 96, 150]$}\\
-    {\footnotesize $P_{\text{bmot}} \in \Delta^{21}$}
+\node[box=bHead, fill=cHead, minimum width=1.7cm, right=0.45cm of s2_net] (s2_p) {
+    \textbf{Softmax}\\[1pt]
+    {\scriptsize $\mathbf{p}_2 \in \Delta^{21}$}
 };
 
-\draw[arrow] (in1) -- (back1);
-\draw[arrow] (in2) -- (back2);
-\draw[arrow] (in3) -- (back3);
-\draw[arrow] (in4) -- (back4);
-
-% Fusion
-\node[block=bFusion, fill=cFusion, text width=6.8cm, below=0.8cm of $(back2.south)!0.5!(back3.south)$] (fuse) {
-    \textbf{Four-Stream Softmax Late Fusion}\\
-    {\footnotesize $P_{\text{fused}} = \frac{1}{4}(P_{\text{joint}} + P_{\text{bone}} + P_{\text{jmot}} + P_{\text{bmot}})$}\\
-    {\footnotesize (Graph Unified Consensus)}
+\node[box=bInput, fill=cInput, minimum width=2.1cm] (s3_in) at (0, -0.48) {
+    \textbf{J-Motion $\Delta\mathbf{X}_J$}\\[1pt]
+    {\scriptsize $[B, 3, 32, 13]$}
+};
+\node[box=bGCN, fill=cGCN, minimum width=3.0cm, right=0.45cm of s3_in] (s3_net) {
+    \textbf{AAGCN Backbone}\\[1pt]
+    {\scriptsize $48\to 96\to 150$}
+};
+\node[box=bHead, fill=cHead, minimum width=1.7cm, right=0.45cm of s3_net] (s3_p) {
+    \textbf{Softmax}\\[1pt]
+    {\scriptsize $\mathbf{p}_3 \in \Delta^{21}$}
 };
 
-\node[block=bHead, fill=cHead, text width=5.0cm, below=of fuse] (pred) {
-    \textbf{Final Exercise Prediction}\\
-    {\footnotesize $\hat{y} = \arg\max(P_{\text{fused}}) \in \{1, \dots, 22\}$}
+\node[box=bInput, fill=cInput, minimum width=2.1cm] (s4_in) at (0, -1.45) {
+    \textbf{B-Motion $\Delta\mathbf{X}_B$}\\[1pt]
+    {\scriptsize $[B, 3, 32, 13]$}
+};
+\node[box=bGCN, fill=cGCN, minimum width=3.0cm, right=0.45cm of s4_in] (s4_net) {
+    \textbf{AAGCN Backbone}\\[1pt]
+    {\scriptsize $48\to 96\to 150$}
+};
+\node[box=bHead, fill=cHead, minimum width=1.7cm, right=0.45cm of s4_net] (s4_p) {
+    \textbf{Softmax}\\[1pt]
+    {\scriptsize $\mathbf{p}_4 \in \Delta^{21}$}
 };
 
-\draw[arrow] (back1.south) -- (fuse.north -| back1.south);
-\draw[arrow] (back2.south) -- (fuse.north -| back2.south);
-\draw[arrow] (back3.south) -- (fuse.north -| back3.south);
-\draw[arrow] (back4.south) -- (fuse.north -| back4.south);
-\draw[arrow] (fuse) -- (pred);
+% Fusion Node
+\coordinate (mid_p) at ($(s2_p.east)!0.5!(s3_p.east)$);
+\node[box=bFusion, fill=cFusion, minimum width=3.2cm, right=0.7cm of mid_p] (fuse) {
+    \textbf{Late Average Fusion}\\[2pt]
+    {\scriptsize $\mathbf{p} = \frac{1}{4}\sum_{i=1}^4 \mathbf{p}_i$}
+};
+
+% Output
+\node[box=bOut, fill=cOut, minimum width=2.0cm, right=0.5cm of fuse] (out) {
+    \textbf{Prediction $\hat{y}$}\\[1pt]
+    {\scriptsize $\arg\max \mathbf{p}$}
+};
+
+% Arrows
+\draw[arr] (s1_in) -- (s1_net); \draw[arr] (s1_net) -- (s1_p);
+\draw[arr] (s2_in) -- (s2_net); \draw[arr] (s2_net) -- (s2_p);
+\draw[arr] (s3_in) -- (s3_net); \draw[arr] (s3_net) -- (s3_p);
+\draw[arr] (s4_in) -- (s4_net); \draw[arr] (s4_net) -- (s4_p);
+
+\draw[arr] (s1_p.east) -| (fuse.north);
+\draw[arr] (s2_p.east) -- ([yshift=3pt]fuse.west);
+\draw[arr] (s3_p.east) -- ([yshift=-3pt]fuse.west);
+\draw[arr] (s4_p.east) -| (fuse.south);
+\draw[arr] (fuse) -- (out);
 
 \end{tikzpicture}
 \end{document}

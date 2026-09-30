@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """
-Multi-Seed Experiment Runner and Evaluator for SkelGym.
-Evaluates 3 independent random seeds (42, 123, 3407) across the 4 Final Experiments:
-1. Transformer Mix + Aug (T2.2)
-2. Four-Stream AAGCN (T4.7)
-3. SkelGym-Lite (T5.2)
-4. SkelGym-Full (T5.1)
-
-Maintains strictly identical dataset splits, preprocessing, augmentation, architectures,
-and training/evaluation protocols across all seeds.
-Reports Mean ± SD for Window Accuracy, Window Macro-F1, Video Accuracy, and Video Macro-F1.
+Comprehensive Multi-Seed Experiment Runner and Evaluator for SkelGym.
+Supports:
+1. Training & Evaluation of Baselines (ST-GCN, LSTM, BiLSTM, clean Transformer, clean AAGCN).
+2. Training & Evaluation of 5 Augmented Constituent Models across 3 Seeds (42, 123, 3407).
+3. Evaluation of 5 Systematic Fusion Methods across Multi-Seed:
+   - Hard Voting
+   - Uniform Soft Voting
+   - Accuracy-Weighted Soft Voting
+   - Stacking Meta-Classifier
+   - SLSQP Soft Voting (Dual-Target Window & Video)
+4. Comprehensive Mean ± SD aggregation and structured publication-ready Markdown/JSON export.
 """
 
 import os
@@ -19,7 +20,7 @@ import json
 import argparse
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 import numpy as np
 import torch
 
@@ -30,42 +31,59 @@ from src.cli import build_model, NUM_CLASSES
 from src.data.dataset import get_dataloaders
 from src.training.trainer import Trainer
 from src.training.metrics import compute_metrics
-from src.models.ensemble import WeightedSoftVotingEnsemble, aggregate_video_level_predictions
+from src.models.ensemble import (
+    HardVotingEnsemble,
+    SoftVotingEnsemble,
+    StackingEnsemble,
+    WeightedSoftVotingEnsemble,
+    aggregate_video_level_predictions
+)
 from src.utils.hf_hub import ensure_checkpoint_available, pull_landmarks_from_hf
+from src.utils.reproducibility import load_checkpoint_weights
 
 SEEDS = [42, 123, 3407]
 
+BASELINE_MODELS = [
+    {"name": "ST-GCN Baseline", "model": "STGCN", "feature": "rel_3d", "augment": "none", "exp_id": "T3.2"},
+    {"name": "LSTM Baseline", "model": "LSTM", "feature": "mix", "augment": "none", "exp_id": "T1.9"},
+    {"name": "BiLSTM Baseline", "model": "BiLSTM", "feature": "mix", "augment": "none", "exp_id": "T1.18"},
+    {"name": "Transformer Clean", "model": "Transformer", "feature": "mix", "augment": "none", "exp_id": "T1.27"},
+    {"name": "AAGCN Clean", "model": "AAGCN", "feature": "bone_3d", "augment": "none", "exp_id": "T3.6"},
+]
+
 CONSTITUENT_MODELS = [
-    {"name": "Transformer_mix", "model": "Transformer", "feature": "mix", "exp_id": "T2.2"},
-    {"name": "AAGCN_bone_3d", "model": "AAGCN", "feature": "bone_3d", "exp_id": "T4.2"},
-    {"name": "AAGCN_rel_3d", "model": "AAGCN", "feature": "rel_3d", "exp_id": "T4.3"},
-    {"name": "AAGCN_joint_motion_3d", "model": "AAGCN", "feature": "joint_motion_3d", "exp_id": "T4.4"},
-    {"name": "AAGCN_bone_motion_3d", "model": "AAGCN", "feature": "bone_motion_3d", "exp_id": "T4.5"},
+    {"name": "Transformer_mix", "model": "Transformer", "feature": "mix", "augment": "skel_gym_aug", "exp_id": "T2.2"},
+    {"name": "AAGCN_bone_3d", "model": "AAGCN", "feature": "bone_3d", "augment": "skel_gym_aug", "exp_id": "T4.2"},
+    {"name": "AAGCN_rel_3d", "model": "AAGCN", "feature": "rel_3d", "augment": "skel_gym_aug", "exp_id": "T4.3"},
+    {"name": "AAGCN_joint_motion_3d", "model": "AAGCN", "feature": "joint_motion_3d", "augment": "skel_gym_aug", "exp_id": "T4.4"},
+    {"name": "AAGCN_bone_motion_3d", "model": "AAGCN", "feature": "bone_motion_3d", "augment": "skel_gym_aug", "exp_id": "T4.5"},
 ]
 
 def get_checkpoint_path(seed: int, model_cfg: Dict[str, str], checkpoint_base: Path) -> Path:
+    base_name = f"best_{model_cfg['model']}_{model_cfg['exp_id']}_{model_cfg['feature']}.pt"
     if seed == 42:
-        return checkpoint_base / f"best_{model_cfg['model']}_{model_cfg['exp_id']}_{model_cfg['feature']}.pt"
+        return checkpoint_base / base_name
     else:
-        return checkpoint_base / f"seed{seed}" / f"best_{model_cfg['model']}_{model_cfg['exp_id']}_{model_cfg['feature']}.pt"
+        return checkpoint_base / f"seed{seed}" / base_name
 
-def train_model(seed: int, model_cfg: Dict[str, str], device_str: str, checkpoint_base: Path):
+def train_model(seed: int, model_cfg: Dict[str, str], device_str: str, checkpoint_base: Path, epochs: int = 100, force_retrain: bool = False):
     ckpt_path = get_checkpoint_path(seed, model_cfg, checkpoint_base)
-    if ckpt_path.exists():
-        print(f"[Seed {seed}] Checkpoint already exists: {ckpt_path}, skipping training.")
+    if not force_retrain and ckpt_path.exists():
+        print(f"[Seed {seed}] Checkpoint already exists: {ckpt_path.name}, skipping training.")
         return ckpt_path
 
     ckpt_path.parent.mkdir(parents=True, exist_ok=True)
     ckpt_dir = str(ckpt_path.parent)
+    aug = model_cfg.get("augment", "skel_gym_aug")
 
     cmd = [
         sys.executable, "run.py", "train",
         "--model", model_cfg["model"],
         "--feature", model_cfg["feature"],
-        "--augment", "skel_gym_aug",
+        "--augment", aug,
         "--exp_id", model_cfg["exp_id"],
         "--seed", str(seed),
-        "--epochs", "100",
+        "--epochs", str(epochs),
         "--patience", "10",
         "--checkpoint_dir", ckpt_dir,
         "--video_level",
@@ -75,7 +93,7 @@ def train_model(seed: int, model_cfg: Dict[str, str], device_str: str, checkpoin
     ]
 
     print(f"\n========================================================")
-    print(f"[Seed {seed}] Training {model_cfg['name']} -> {ckpt_path.name}")
+    print(f"[Seed {seed}] Training {model_cfg['name']} ({aug}) -> {ckpt_path.name}")
     print(f"Command: {' '.join(cmd)}")
     print(f"========================================================")
 
@@ -83,21 +101,21 @@ def train_model(seed: int, model_cfg: Dict[str, str], device_str: str, checkpoin
     res = subprocess.run(cmd, cwd=str(PROJECT_ROOT))
     if res.returncode != 0:
         raise RuntimeError(f"Training failed for {model_cfg['name']} seed {seed} (code {res.returncode})")
-    
+
     elapsed = time.time() - t0
     print(f"[Seed {seed}] Completed training {model_cfg['name']} in {elapsed:.1f}s")
     return ckpt_path
 
-def evaluate_seed(seed: int, device: torch.device, checkpoint_base: Path, metadata_path: str, landmark_dir: str):
-    print(f"\n>>> Evaluating 4 Final Configurations for Seed {seed} <<<")
-    
-    # Checkpoints for this seed
-    ckpts = {
-        m["feature"]: get_checkpoint_path(seed, m, checkpoint_base)
-        for m in CONSTITUENT_MODELS
-    }
-    
-    # Load loaders and models
+def evaluate_seed(
+    seed: int,
+    device: torch.device,
+    checkpoint_base: Path,
+    metadata_path: str,
+    landmark_dir: str,
+    include_baselines: bool = False
+) -> Dict[str, Any]:
+    print(f"\n>>> Evaluating Models & 5 Fusion Methods for Seed {seed} <<<")
+
     val_probs = {}
     test_probs = {}
     y_val_true = None
@@ -105,16 +123,51 @@ def evaluate_seed(seed: int, device: torch.device, checkpoint_base: Path, metada
     val_video_ids = None
     test_video_ids = None
 
+    # Evaluate Baselines if requested and present
+    baseline_results = {}
+    if include_baselines:
+        for m in BASELINE_MODELS:
+            p = get_checkpoint_path(seed, m, checkpoint_base)
+            if not p.exists():
+                continue
+            state_dict, _ = load_checkpoint_weights(p, device="cpu")
+            model = build_model(m["model"], m["feature"], num_classes=NUM_CLASSES)
+            model.load_state_dict(state_dict)
+            model.to(device)
+            model.eval()
+
+            _, v_l, te_l = get_dataloaders(
+                metadata_path=metadata_path,
+                feature_method=m["feature"],
+                batch_size=32,
+                seq_len=32,
+                stride=32,
+                val_test_stride=32,
+                landmark_dir=landmark_dir,
+                num_workers=0,
+                in_memory=True
+            )
+            trainer = Trainer(model=model, device=device)
+            _, _, b_tprob = trainer.predict(te_l)
+            b_win_pred = np.argmax(b_tprob, axis=1)
+            b_win_m = compute_metrics(np.array(te_l.dataset.labels), b_win_pred)
+            _, _, _, b_vid_m = aggregate_video_level_predictions(b_tprob, np.array(te_l.dataset.labels), te_l.dataset.video_ids)
+
+            baseline_results[m["name"]] = {
+                "win_acc": float(b_win_m["accuracy"] * 100.0),
+                "win_f1": float(b_win_m["macro_f1"]),
+                "vid_acc": float(b_vid_m["accuracy"] * 100.0),
+                "vid_f1": float(b_vid_m["macro_f1"])
+            }
+
+    # Evaluate the 5 Constituent Models
     for m in CONSTITUENT_MODELS:
         feat = m["feature"]
-        p = ckpts[feat]
+        p = get_checkpoint_path(seed, m, checkpoint_base)
         if not p.exists():
             raise FileNotFoundError(f"Checkpoint not found for seed {seed}: {p}")
 
-        state_dict = torch.load(p, map_location="cpu", weights_only=False)
-        if "model_state_dict" in state_dict:
-            state_dict = state_dict["model_state_dict"]
-
+        state_dict, _ = load_checkpoint_weights(p, device="cpu")
         model = build_model(m["model"], feat, num_classes=NUM_CLASSES)
         model.load_state_dict(state_dict)
         model.to(device)
@@ -133,9 +186,9 @@ def evaluate_seed(seed: int, device: torch.device, checkpoint_base: Path, metada
         )
 
         if val_video_ids is None:
-            val_video_ids = val_loader.dataset.video_ids
+            val_video_ids = list(val_loader.dataset.video_ids)
         if test_video_ids is None:
-            test_video_ids = test_loader.dataset.video_ids
+            test_video_ids = list(test_loader.dataset.video_ids)
 
         trainer = Trainer(model=model, device=device)
         y_vt, _, y_vp = trainer.predict(val_loader)
@@ -149,217 +202,237 @@ def evaluate_seed(seed: int, device: torch.device, checkpoint_base: Path, metada
         val_probs[feat] = y_vp
         test_probs[feat] = y_tp
 
-    seed_results = {}
+    # Pre-compute true video labels
+    unique_vids = []
+    vid_to_label = {}
+    for vid, lbl in zip(test_video_ids, y_test_true):
+        if vid not in vid_to_label:
+            vid_to_label[vid] = lbl
+            unique_vids.append(vid)
+    y_test_vid_true = np.array([vid_to_label[v] for v in unique_vids])
 
-    # ----------------------------------------------------
-    # Config 1: Transformer Mix + Aug (T2.2)
-    # ----------------------------------------------------
+    # Standalone Augmented Transformer
     t_test_prob = test_probs["mix"]
     t_win_pred = np.argmax(t_test_prob, axis=1)
     t_win_metrics = compute_metrics(y_test_true, t_win_pred)
     _, _, _, t_vid_metrics = aggregate_video_level_predictions(t_test_prob, y_test_true, test_video_ids)
 
-    seed_results["Transformer Mix + Aug"] = {
-        "win_acc": float(t_win_metrics["accuracy"] * 100.0),
-        "win_f1": float(t_win_metrics["macro_f1"]),
-        "vid_acc": float(t_vid_metrics["accuracy"] * 100.0),
-        "vid_f1": float(t_vid_metrics["macro_f1"])
+    individual_runs = {
+        "Transformer Mix (Aug)": {
+            "win_acc": float(t_win_metrics["accuracy"] * 100.0),
+            "win_f1": float(t_win_metrics["macro_f1"]),
+            "vid_acc": float(t_vid_metrics["accuracy"] * 100.0),
+            "vid_f1": float(t_vid_metrics["macro_f1"])
+        }
+    }
+    individual_runs.update(baseline_results)
+
+    # 4 Ensemble Configurations
+    ensemble_configs = {
+        "Two-Stream AAGCN (Aug)": ["rel_3d", "bone_3d"],
+        "Four-Stream AAGCN (Aug)": ["bone_3d", "rel_3d", "joint_motion_3d", "bone_motion_3d"],
+        "SkelGym-Lite": ["mix", "bone_3d"],
+        "SkelGym-Full": ["mix", "bone_3d", "rel_3d", "joint_motion_3d", "bone_motion_3d"]
     }
 
-    # ----------------------------------------------------
-    # Config 2: Four-Stream AAGCN (T4.7)
-    # ----------------------------------------------------
-    four_feats = ["bone_3d", "rel_3d", "joint_motion_3d", "bone_motion_3d"]
-    four_val = [val_probs[f] for f in four_feats]
-    four_test = [test_probs[f] for f in four_feats]
+    fusion_evals = {}
 
-    ens_four = WeightedSoftVotingEnsemble()
-    ens_four.fit_window(four_val, y_val_true)
-    ens_four_win_pred = ens_four.predict_window(four_test)
-    four_win_metrics = compute_metrics(y_test_true, ens_four_win_pred)
+    for ens_name, feats in ensemble_configs.items():
+        v_sub = [val_probs[f] for f in feats]
+        t_sub = [test_probs[f] for f in feats]
 
-    ens_four.fit_video(four_val, y_val_true, val_video_ids)
-    _, _, _, four_vid_metrics = ens_four.predict_video(four_test, y_test_true, test_video_ids)
+        fusion_evals[ens_name] = {}
 
-    seed_results["Four-Stream AAGCN"] = {
-        "win_acc": float(four_win_metrics["accuracy"] * 100.0),
-        "win_f1": float(four_win_metrics["macro_f1"]),
-        "vid_acc": float(four_vid_metrics["accuracy"] * 100.0),
-        "vid_f1": float(four_vid_metrics["macro_f1"]),
-        "weights_window": [round(float(w), 4) for w in ens_four.weights_window],
-        "weights_video": [round(float(w), 4) for w in ens_four.weights_video]
+        # 1. Hard Voting
+        hard_ens = HardVotingEnsemble()
+        w_preds = hard_ens.predict([np.argmax(p, axis=1) for p in t_sub])
+        w_m = compute_metrics(y_test_true, w_preds)
+        vid_p_list = []
+        for p in t_sub:
+            _, _, vid_p, _ = aggregate_video_level_predictions(p, y_test_true, test_video_ids)
+            vid_p_list.append(vid_p)
+        v_preds = hard_ens.predict(vid_p_list)
+        v_m = compute_metrics(y_test_vid_true, v_preds)
+        fusion_evals[ens_name]["Hard Voting"] = {
+            "win_acc": float(w_m["accuracy"] * 100.0), "win_f1": float(w_m["macro_f1"]),
+            "vid_acc": float(v_m["accuracy"] * 100.0), "vid_f1": float(v_m["macro_f1"])
+        }
+
+        # 2. Uniform Soft Voting
+        u_ens = SoftVotingEnsemble(weights=None)
+        u_prob = u_ens.predict_proba(t_sub)
+        u_w_m = compute_metrics(y_test_true, np.argmax(u_prob, axis=1))
+        _, _, _, u_v_m = aggregate_video_level_predictions(u_prob, y_test_true, test_video_ids)
+        fusion_evals[ens_name]["Uniform Soft Voting"] = {
+            "win_acc": float(u_w_m["accuracy"] * 100.0), "win_f1": float(u_w_m["macro_f1"]),
+            "vid_acc": float(u_v_m["accuracy"] * 100.0), "vid_f1": float(u_v_m["macro_f1"])
+        }
+
+        # 3. Accuracy-Weighted Soft Voting
+        val_accs = [np.mean(y_val_true == np.argmax(vp, axis=1)) for vp in v_sub]
+        acc_ens = SoftVotingEnsemble(weights=val_accs)
+        acc_prob = acc_ens.predict_proba(t_sub)
+        acc_w_m = compute_metrics(y_test_true, np.argmax(acc_prob, axis=1))
+        _, _, _, acc_v_m = aggregate_video_level_predictions(acc_prob, y_test_true, test_video_ids)
+        fusion_evals[ens_name]["Accuracy-Weighted Soft"] = {
+            "win_acc": float(acc_w_m["accuracy"] * 100.0), "win_f1": float(acc_w_m["macro_f1"]),
+            "vid_acc": float(acc_v_m["accuracy"] * 100.0), "vid_f1": float(acc_v_m["macro_f1"])
+        }
+
+        # 4. Stacking Meta-Classifier
+        stk_ens = StackingEnsemble(c_param=1.0)
+        stk_ens.fit(v_sub, y_val_true)
+        stk_preds = stk_ens.predict(t_sub)
+        stk_prob = stk_ens.predict_proba(t_sub)
+        stk_w_m = compute_metrics(y_test_true, stk_preds)
+        _, _, _, stk_v_m = aggregate_video_level_predictions(stk_prob, y_test_true, test_video_ids)
+        fusion_evals[ens_name]["Stacking Meta-Classifier"] = {
+            "win_acc": float(stk_w_m["accuracy"] * 100.0), "win_f1": float(stk_w_m["macro_f1"]),
+            "vid_acc": float(stk_v_m["accuracy"] * 100.0), "vid_f1": float(stk_v_m["macro_f1"])
+        }
+
+        # 5. SLSQP Dual-Target Soft Voting
+        sls_ens = WeightedSoftVotingEnsemble()
+        sls_ens.fit_window(v_sub, y_val_true)
+        sls_w_preds = sls_ens.predict_window(t_sub)
+        sls_w_m = compute_metrics(y_test_true, sls_w_preds)
+
+        sls_ens.fit_video(v_sub, y_val_true, val_video_ids)
+        _, _, _, sls_v_m = sls_ens.predict_video(t_sub, y_test_true, test_video_ids)
+        fusion_evals[ens_name]["SLSQP Soft Voting"] = {
+            "win_acc": float(sls_w_m["accuracy"] * 100.0), "win_f1": float(sls_w_m["macro_f1"]),
+            "vid_acc": float(sls_v_m["accuracy"] * 100.0), "vid_f1": float(sls_v_m["macro_f1"]),
+            "weights_window": [round(float(w), 4) for w in sls_ens.weights_window],
+            "weights_video": [round(float(w), 4) for w in sls_ens.weights_video]
+        }
+
+    return {
+        "individual": individual_runs,
+        "fusion_methods": fusion_evals
     }
 
-    # ----------------------------------------------------
-    # Config 3: SkelGym-Lite (T5.2: Transformer Mix + AAGCN Bone)
-    # ----------------------------------------------------
-    lite_feats = ["mix", "bone_3d"]
-    lite_val = [val_probs[f] for f in lite_feats]
-    lite_test = [test_probs[f] for f in lite_feats]
+def aggregate_stats(results_per_seed: Dict[str, Any], seeds: List[int]) -> Dict[str, Any]:
+    summary = {"individual": {}, "fusion_methods": {}}
 
-    ens_lite = WeightedSoftVotingEnsemble()
-    ens_lite.fit_window(lite_val, y_val_true)
-    ens_lite_win_pred = ens_lite.predict_window(lite_test)
-    lite_win_metrics = compute_metrics(y_test_true, ens_lite_win_pred)
+    # Individual models
+    sample_seed = str(seeds[0])
+    ind_keys = list(results_per_seed[sample_seed]["individual"].keys())
+    for k in ind_keys:
+        w_accs = [results_per_seed[str(s)]["individual"][k]["win_acc"] for s in seeds]
+        w_f1s = [results_per_seed[str(s)]["individual"][k]["win_f1"] for s in seeds]
+        v_accs = [results_per_seed[str(s)]["individual"][k]["vid_acc"] for s in seeds]
+        v_f1s = [results_per_seed[str(s)]["individual"][k]["vid_f1"] for s in seeds]
 
-    ens_lite.fit_video(lite_val, y_val_true, val_video_ids)
-    _, _, _, lite_vid_metrics = ens_lite.predict_video(lite_test, y_test_true, test_video_ids)
+        summary["individual"][k] = {
+            "win_acc_mean": float(np.mean(w_accs)), "win_acc_sd": float(np.std(w_accs, ddof=1)),
+            "win_f1_mean": float(np.mean(w_f1s)), "win_f1_sd": float(np.std(w_f1s, ddof=1)),
+            "vid_acc_mean": float(np.mean(v_accs)), "vid_acc_sd": float(np.std(v_accs, ddof=1)),
+            "vid_f1_mean": float(np.mean(v_f1s)), "vid_f1_sd": float(np.std(v_f1s, ddof=1)),
+        }
 
-    seed_results["SkelGym-Lite"] = {
-        "win_acc": float(lite_win_metrics["accuracy"] * 100.0),
-        "win_f1": float(lite_win_metrics["macro_f1"]),
-        "vid_acc": float(lite_vid_metrics["accuracy"] * 100.0),
-        "vid_f1": float(lite_vid_metrics["macro_f1"]),
-        "weights_window": [round(float(w), 4) for w in ens_lite.weights_window],
-        "weights_video": [round(float(w), 4) for w in ens_lite.weights_video]
-    }
+    # Fusion methods
+    ens_keys = list(results_per_seed[sample_seed]["fusion_methods"].keys())
+    for e_k in ens_keys:
+        summary["fusion_methods"][e_k] = {}
+        m_keys = list(results_per_seed[sample_seed]["fusion_methods"][e_k].keys())
+        for m_k in m_keys:
+            w_accs = [results_per_seed[str(s)]["fusion_methods"][e_k][m_k]["win_acc"] for s in seeds]
+            w_f1s = [results_per_seed[str(s)]["fusion_methods"][e_k][m_k]["win_f1"] for s in seeds]
+            v_accs = [results_per_seed[str(s)]["fusion_methods"][e_k][m_k]["vid_acc"] for s in seeds]
+            v_f1s = [results_per_seed[str(s)]["fusion_methods"][e_k][m_k]["vid_f1"] for s in seeds]
 
-    # ----------------------------------------------------
-    # Config 4: SkelGym-Full (T5.1: Transformer Mix + 4-Stream AAGCN)
-    # ----------------------------------------------------
-    full_feats = ["mix", "bone_3d", "rel_3d", "joint_motion_3d", "bone_motion_3d"]
-    full_val = [val_probs[f] for f in full_feats]
-    full_test = [test_probs[f] for f in full_feats]
-
-    ens_full = WeightedSoftVotingEnsemble()
-    ens_full.fit_window(full_val, y_val_true)
-    ens_full_win_pred = ens_full.predict_window(full_test)
-    full_win_metrics = compute_metrics(y_test_true, ens_full_win_pred)
-
-    ens_full.fit_video(full_val, y_val_true, val_video_ids)
-    _, _, _, full_vid_metrics = ens_full.predict_video(full_test, y_test_true, test_video_ids)
-
-    seed_results["SkelGym-Full"] = {
-        "win_acc": float(full_win_metrics["accuracy"] * 100.0),
-        "win_f1": float(full_win_metrics["macro_f1"]),
-        "vid_acc": float(full_vid_metrics["accuracy"] * 100.0),
-        "vid_f1": float(full_vid_metrics["macro_f1"]),
-        "weights_window": [round(float(w), 4) for w in ens_full.weights_window],
-        "weights_video": [round(float(w), 4) for w in ens_full.weights_video]
-    }
-
-    print(f"\nResults for Seed {seed}:")
-    for cfg_name, res in seed_results.items():
-        print(f"  {cfg_name:<25}: Win Acc: {res['win_acc']:.2f}% | Win F1: {res['win_f1']:.4f} | Vid Acc: {res['vid_acc']:.2f}% | Vid F1: {res['vid_f1']:.4f}")
-
-    return seed_results
+            summary["fusion_methods"][e_k][m_k] = {
+                "win_acc_mean": float(np.mean(w_accs)), "win_acc_sd": float(np.std(w_accs, ddof=1)),
+                "win_f1_mean": float(np.mean(w_f1s)), "win_f1_sd": float(np.std(w_f1s, ddof=1)),
+                "vid_acc_mean": float(np.mean(v_accs)), "vid_acc_sd": float(np.std(v_accs, ddof=1)),
+                "vid_f1_mean": float(np.mean(v_f1s)), "vid_f1_sd": float(np.std(v_f1s, ddof=1)),
+            }
+    return summary
 
 def main():
-    parser = argparse.ArgumentParser(description="Multi-Seed Experiment Runner (Seeds 42, 123, 3407)")
+    parser = argparse.ArgumentParser(description="Multi-Seed Experiment Runner & 5 Fusion Methods Evaluator")
     parser.add_argument("--device", type=str, default="cuda", help="Computation device (cuda/mps/cpu)")
+    parser.add_argument("--seeds", nargs="+", type=int, default=SEEDS, help="Random seeds to evaluate")
     parser.add_argument("--metadata", type=str, default="data/Final_dataset_metadata.csv")
     parser.add_argument("--landmark_dir", type=str, default="data/landmarks")
     parser.add_argument("--checkpoint_dir", type=str, default="checkpoints")
+    parser.add_argument("--epochs", type=int, default=100)
+    parser.add_argument("--include_baselines", action="store_true", default=False, help="Also train/evaluate baseline models")
     parser.add_argument("--output_file", type=str, default="outputs/multi_seed_evaluation_results.json")
-    parser.add_argument("--skip_train", "--evaluate_only", dest="skip_train", action="store_true", help="Skip training and only evaluate")
+    parser.add_argument("--skip_train", action="store_true", default=False, help="Skip training and only evaluate")
+    parser.add_argument("--force_retrain", action="store_true", default=False, help="Force complete retraining even if checkpoints exist")
     args = parser.parse_args()
 
     device = torch.device(args.device if torch.cuda.is_available() and args.device == "cuda" else ("mps" if torch.backends.mps.is_available() else "cpu"))
-    print(f"Running Multi-Seed Evaluation on device: {device}")
-
-    # Ensure landmarks exist
-    if not os.path.exists(args.landmark_dir) or not os.path.exists(args.metadata):
-        print("Dataset not found locally, pulling from HF...")
-        pull_landmarks_from_hf(dest_dir=args.landmark_dir)
+    print(f"Running Multi-Seed Evaluation on device: {device} | Seeds: {args.seeds}")
 
     checkpoint_base = Path(args.checkpoint_dir)
     checkpoint_base.mkdir(parents=True, exist_ok=True)
 
-    # Ensure Seed 42 checkpoints are available
-    print("\nEnsuring Seed 42 checkpoints are available...")
-    for m in CONSTITUENT_MODELS:
-        ckpt = get_checkpoint_path(42, m, checkpoint_base)
-        if not ckpt.exists():
-            print(f"Downloading {ckpt} from HF...")
-            ensure_checkpoint_available(str(ckpt))
-
-    # Train Seed 123 and Seed 3407 if needed
+    # 1. Training Phase
     if not args.skip_train:
-        for seed in [123, 3407]:
+        for seed in args.seeds:
             print(f"\n========================================================")
             print(f"TRAINING PHASE FOR SEED {seed}")
             print(f"========================================================")
+            if args.include_baselines:
+                for b in BASELINE_MODELS:
+                    train_model(seed, b, args.device, checkpoint_base, epochs=args.epochs, force_retrain=args.force_retrain)
+
             for m in CONSTITUENT_MODELS:
-                train_model(seed, m, args.device, checkpoint_base)
+                train_model(seed, m, args.device, checkpoint_base, epochs=args.epochs, force_retrain=args.force_retrain)
 
-    # Evaluate all 3 seeds
-    all_seed_results = {}
-    for seed in SEEDS:
-        all_seed_results[str(seed)] = evaluate_seed(seed, device, checkpoint_base, args.metadata, args.landmark_dir)
-
-    # Compute Mean ± SD across seeds
-    configs = ["Transformer Mix + Aug", "Four-Stream AAGCN", "SkelGym-Lite", "SkelGym-Full"]
-    summary_stats = {}
-
-    print("\n" + "=" * 95)
-    print("MAIN TABLE: MULTI-SEED SUMMARY (MEAN ± SD ACROSS SEEDS 42, 123, 3407)")
-    print("=" * 95)
-    print(f"{'Model Architecture':<30} | {'Window Accuracy':<18} | {'Window Macro-F1':<18} | {'Video Accuracy':<18} | {'Video Macro-F1':<18}")
-    print("-" * 110)
-
-    for cfg in configs:
-        win_accs = [all_seed_results[str(s)][cfg]["win_acc"] for s in SEEDS]
-        win_f1s = [all_seed_results[str(s)][cfg]["win_f1"] for s in SEEDS]
-        vid_accs = [all_seed_results[str(s)][cfg]["vid_acc"] for s in SEEDS]
-        vid_f1s = [all_seed_results[str(s)][cfg]["vid_f1"] for s in SEEDS]
-
-        summary_stats[cfg] = {
-            "win_acc_mean": float(np.mean(win_accs)),
-            "win_acc_sd": float(np.std(win_accs, ddof=1)),
-            "win_f1_mean": float(np.mean(win_f1s)),
-            "win_f1_sd": float(np.std(win_f1s, ddof=1)),
-            "vid_acc_mean": float(np.mean(vid_accs)),
-            "vid_acc_sd": float(np.std(vid_accs, ddof=1)),
-            "vid_f1_mean": float(np.mean(vid_f1s)),
-            "vid_f1_sd": float(np.std(vid_f1s, ddof=1)),
-            "raw_seeds": {
-                str(s): all_seed_results[str(s)][cfg] for s in SEEDS
-            }
-        }
-
-        s_str = (
-            f"{cfg:<30} | "
-            f"{summary_stats[cfg]['win_acc_mean']:>5.2f}% ± {summary_stats[cfg]['win_acc_sd']:>4.2f}%    | "
-            f"{summary_stats[cfg]['win_f1_mean']:>6.4f} ± {summary_stats[cfg]['win_f1_sd']:>6.4f}   | "
-            f"{summary_stats[cfg]['vid_acc_mean']:>5.2f}% ± {summary_stats[cfg]['vid_acc_sd']:>4.2f}%    | "
-            f"{summary_stats[cfg]['vid_f1_mean']:>6.4f} ± {summary_stats[cfg]['vid_f1_sd']:>6.4f}"
+    # 2. Evaluation Phase
+    results_per_seed = {}
+    for seed in args.seeds:
+        results_per_seed[str(seed)] = evaluate_seed(
+            seed, device, checkpoint_base, args.metadata, args.landmark_dir, include_baselines=args.include_baselines
         )
-        print(s_str)
-    print("=" * 110)
+
+    # 3. Aggregation Phase
+    summary = aggregate_stats(results_per_seed, args.seeds)
+
+    # Print to console
+    print("\n" + "=" * 105)
+    print("MAIN MULTI-SEED SUMMARY (MEAN ± SD ACROSS EVALUATED SEEDS)")
+    print("=" * 105)
+    for ens_name, methods in summary["fusion_methods"].items():
+        print(f"\n>>> Target: {ens_name} <<<")
+        print(f"{'Fusion Method':<30} | {'Window Accuracy':<18} | {'Window Macro-F1':<18} | {'Video Accuracy':<18} | {'Video Macro-F1':<18}")
+        print("-" * 110)
+        for m_name, st in methods.items():
+            print(f"{m_name:<30} | {st['win_acc_mean']:>5.2f}% ± {st['win_acc_sd']:>4.2f}%    | {st['win_f1_mean']:>6.4f} ± {st['win_f1_sd']:>6.4f}   | {st['vid_acc_mean']:>5.2f}% ± {st['vid_acc_sd']:>4.2f}%    | {st['vid_f1_mean']:>6.4f} ± {st['vid_f1_sd']:>6.4f}")
 
     # Save to JSON
     out_path = Path(args.output_file)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w") as f:
         json.dump({
-            "seeds": SEEDS,
-            "models": configs,
-            "summary": summary_stats,
-            "individual_runs": all_seed_results
+            "seeds": args.seeds,
+            "summary": summary,
+            "individual_runs": results_per_seed
         }, f, indent=2)
     print(f"\nSaved detailed multi-seed results to: {out_path}")
 
     # Generate Markdown
     md_path = out_path.with_suffix(".md")
     with open(md_path, "w") as f:
-        f.write("# SkelGym Multi-Seed Evaluation Benchmark\n\n")
-        f.write("Evaluation across 3 independent random seeds (`42`, `123`, `3407`) under strictly fixed splits and hyperparameter settings.\n\n")
-        f.write("## Main Results Table (Mean ± SD)\n\n")
-        f.write("| Model Architecture | Window Accuracy | Window Macro-F1 | Video Accuracy | Video Macro-F1 |\n")
-        f.write("| :--- | :---: | :---: | :---: | :---: |\n")
-        for cfg in configs:
-            st = summary_stats[cfg]
-            f.write(f"| **{cfg}** | {st['win_acc_mean']:.2f}% ± {st['win_acc_sd']:.2f}% | {st['win_f1_mean']:.4f} ± {st['win_f1_sd']:.4f} | {st['vid_acc_mean']:.2f}% ± {st['vid_acc_sd']:.2f}% | {st['vid_f1_mean']:.4f} ± {st['vid_f1_sd']:.4f} |\n")
-        
-        f.write("\n## Per-Seed Detailed Breakdown\n\n")
-        for cfg in configs:
-            f.write(f"### {cfg}\n\n")
-            f.write("| Seed | Window Accuracy | Window Macro-F1 | Video Accuracy | Video Macro-F1 |\n")
-            f.write("| :---: | :---: | :---: | :---: | :---: |\n")
-            for s in SEEDS:
-                r = all_seed_results[str(s)][cfg]
-                f.write(f"| {s} | {r['win_acc']:.2f}% | {r['win_f1']:.4f} | {r['vid_acc']:.2f}% | {r['vid_f1']:.4f} |\n")
+        f.write("# SkelGym Multi-Seed Benchmark & 5 Fusion Methods Results\n\n")
+        f.write(f"Evaluated across random seeds: `{args.seeds}`.\n\n")
+        f.write("## 1. 5 Fusion Methods Comparison across Multi-Stream Targets (Mean ± SD)\n\n")
+        for ens_name, methods in summary["fusion_methods"].items():
+            f.write(f"### {ens_name}\n\n")
+            f.write("| Fusion Method | Window Accuracy | Window Macro-F1 | Video Accuracy | Video Macro-F1 |\n")
+            f.write("| :--- | :---: | :---: | :---: | :---: |\n")
+            for m_name, st in methods.items():
+                f.write(f"| **{m_name}** | {st['win_acc_mean']:.2f}% ± {st['win_acc_sd']:.2f}% | {st['win_f1_mean']:.4f} ± {st['win_f1_sd']:.4f} | {st['vid_acc_mean']:.2f}% ± {st['vid_acc_sd']:.2f}% | {st['vid_f1_mean']:.4f} ± {st['vid_f1_sd']:.4f} |\n")
             f.write("\n")
+
+        f.write("## 2. Individual Model Backbones (Mean ± SD)\n\n")
+        f.write("| Model Name | Window Accuracy | Window Macro-F1 | Video Accuracy | Video Macro-F1 |\n")
+        f.write("| :--- | :---: | :---: | :---: | :---: |\n")
+        for k, st in summary["individual"].items():
+            f.write(f"| **{k}** | {st['win_acc_mean']:.2f}% ± {st['win_acc_sd']:.2f}% | {st['win_f1_mean']:.4f} ± {st['win_f1_sd']:.4f} | {st['vid_acc_mean']:.2f}% ± {st['vid_acc_sd']:.2f}% | {st['vid_f1_mean']:.4f} ± {st['vid_f1_sd']:.4f} |\n")
     print(f"Saved Markdown report to: {md_path}")
 
 if __name__ == "__main__":
