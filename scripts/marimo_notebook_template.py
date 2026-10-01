@@ -96,6 +96,71 @@ def __(GYM_ROOT, mo, pd):
 
 
 @app.cell
+def __(GYM_ROOT, json, mo, pd):
+    # Auto-refreshing Live Parallel Training & Event-Trigger Monitor
+    refresh = mo.ui.refresh(default_interval="5s")
+
+    status_file = GYM_ROOT / "outputs" / "training_status.json"
+    trigger_file = GYM_ROOT / "outputs" / "training_triggers.jsonl"
+
+    if status_file.exists():
+        try:
+            with open(status_file, "r") as f:
+                st = json.load(f)
+        except Exception:
+            st = {}
+    else:
+        st = {}
+
+    total_tasks = st.get("total_models", 30)
+    completed_cnt = st.get("completed_count", 0)
+    running_list = st.get("running_models", [])
+    completed_list = st.get("completed_models", [])
+    overall_status = st.get("status", "IDLE")
+
+    pct = round((completed_cnt / total_tasks) * 100, 1) if total_tasks > 0 else 0.0
+
+    df_completed = pd.DataFrame(completed_list) if completed_list else pd.DataFrame()
+
+    monitor_ui = mo.vstack([
+        mo.md("### ⚡ Live Parallel Training & Event-Trigger Monitor"),
+        mo.hstack([
+            refresh,
+            mo.md(f"**Trạng Thái Huấn Luyện:** `{overall_status}` | **Tiến Độ Tổng:** `{completed_cnt}/{total_tasks} Models ({pct}%)`")
+        ], align="center"),
+        mo.hstack([
+            mo.stat(value=f"{completed_cnt}/{total_tasks}", label="Completed Models", caption=f"{pct}% Complete"),
+            mo.stat(value=f"{len(running_list)}", label="Active Parallel Streams", caption="GPU AMP Concurrency"),
+            mo.stat(value=f"{len(st.get('failed_models', []))}", label="Failures", caption="Zero Tolerance"),
+            mo.stat(value=f"{st.get('device', 'CUDA').upper()}", label="Compute Device", caption="Blackwell Accelerator"),
+        ], justify="space-between"),
+        mo.accordion({
+            "🔄 Các Luồng Đang Huấn Luyện Song Song (Live Streams)": mo.md(
+                "\n".join([f"- ⏳ **{m}**" for m in running_list]) if running_list else "*Tất cả các luồng đang ở trạng thái rảnh hoặc đã hoàn thành.*"
+            ),
+            "📋 Bảng Tổng Hợp Các Model Đã Huấn Luyện Thành Công": mo.ui.table(
+                df_completed[["name", "seed", "val_f1", "val_acc", "elapsed_s"]]
+            ) if not df_completed.empty and "val_f1" in df_completed.columns else mo.md("*Chưa có model nào hoàn thành.*")
+        })
+    ])
+    monitor_ui
+    return (
+        completed_cnt,
+        completed_list,
+        df_completed,
+        monitor_ui,
+        overall_status,
+        pct,
+        refresh,
+        running_list,
+        st,
+        status_file,
+        total_tasks,
+        trigger_file,
+    )
+
+
+@app.cell
 def __(GYM_ROOT, mo):
     # Interactive Smoke Pipeline Runner Definition
     run_btn = mo.ui.run_button(label="🚀 Chạy Lại Smoke Test Pipeline E2E", kind="success")
