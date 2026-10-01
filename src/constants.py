@@ -3,7 +3,7 @@ Core constants for Gym Exercise Classification.
 Includes 22 action classes, keypoint definitions, skeleton graph connections, and feature dimensions.
 """
 
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict, Optional, Any
 
 # Canonical 22 Action Classes (sorted as in metadata / publication)
 ACTIONS: List[str] = [
@@ -122,7 +122,7 @@ EDGES_13: List[Tuple[int, int]] = [
 # - rel_3d: 13 * 3 (hip-midpoint-relative x, y, z) = 39
 # - angle_2d: C(13, 3) = 286 planar triplet angles
 # - angle_3d: C(13, 3) = 286 3D spatial vector angles
-# - mix: 39 (rel_3d) + 286 (angle_3d) = 325
+# - mix: 39 (rel_3d) + 78 (angle2_3d) = 117
 # - Legacy:
 #   - full_4: 33 * 4 = 132
 #   - full_rel_4: 33 * 4 + 1 = 133 (hip-midpoint-relative, all 33 joints)

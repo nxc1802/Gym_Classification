@@ -383,7 +383,7 @@ def aggregate_stats(results_per_seed: Dict[str, Any], seeds: List[int]) -> Dict[
 
 def main():
     parser = argparse.ArgumentParser(description="Multi-Seed Experiment Runner & 5 Fusion Methods Evaluator")
-    parser.add_argument("--device", type=str, default="cuda", help="Computation device (cuda/mps/cpu)")
+    parser.add_argument("--device", type=str, default="auto", help="Computation device (cuda/mps/cpu/auto)")
     parser.add_argument("--seeds", nargs="+", type=int, default=SEEDS, help="Random seeds to evaluate")
     parser.add_argument("--metadata", type=str, default="data/Final_dataset_metadata.csv")
     parser.add_argument("--landmark_dir", type=str, default="data/landmarks")
@@ -397,7 +397,11 @@ def main():
     parser.add_argument("--allow_test_eval", action="store_false", dest="no_test_eval", help="Allow test evaluation during training")
     args = parser.parse_args()
 
-    device = torch.device(args.device if torch.cuda.is_available() and args.device == "cuda" else ("mps" if torch.backends.mps.is_available() else "cpu"))
+    if args.device == "auto":
+        device_str = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")
+    else:
+        device_str = args.device
+    device = torch.device(device_str)
     print(f"Running Multi-Seed Evaluation on device: {device} | Seeds: {args.seeds}")
 
     checkpoint_base = Path(args.checkpoint_dir)
@@ -411,10 +415,10 @@ def main():
             print(f"========================================================")
             if args.include_baselines:
                 for b in BASELINE_MODELS:
-                    train_model(seed, b, args.device, checkpoint_base, epochs=args.epochs, force_retrain=args.force_retrain, no_test_eval=args.no_test_eval)
+                    train_model(seed, b, device_str, checkpoint_base, epochs=args.epochs, force_retrain=args.force_retrain, no_test_eval=args.no_test_eval)
 
             for m in CONSTITUENT_MODELS:
-                train_model(seed, m, args.device, checkpoint_base, epochs=args.epochs, force_retrain=args.force_retrain, no_test_eval=args.no_test_eval)
+                train_model(seed, m, device_str, checkpoint_base, epochs=args.epochs, force_retrain=args.force_retrain, no_test_eval=args.no_test_eval)
 
     # 2. Evaluation Phase
     results_per_seed = {}

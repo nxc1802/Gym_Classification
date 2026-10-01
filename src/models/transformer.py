@@ -1,6 +1,6 @@
 """
 Transformer Encoder architecture for temporal sequence modeling of gym exercise landmarks.
-Uses Positional Encoding + Multi-Head Self-Attention layers (4 layers, 8 heads).
+Uses Positional Encoding + Multi-Head Self-Attention layers (3 layers, 8 heads).
 """
 
 import math

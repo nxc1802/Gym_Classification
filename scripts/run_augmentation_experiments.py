@@ -194,6 +194,8 @@ def get_validation_metrics(ckpt_path: Optional[Path], log_path: Path) -> Dict[st
     """Extracts validation metrics directly from checkpoint provenance sidecar if available, falling back to log parsing."""
     if ckpt_path and ckpt_path.exists():
         prov_candidates = [
+            ckpt_path.with_suffix(".provenance.json"),
+            ckpt_path.parent / f"{ckpt_path.stem}.provenance.json",
             ckpt_path.with_suffix(ckpt_path.suffix + ".provenance.json"),
             ckpt_path.parent / f"{ckpt_path.name}.provenance.json"
         ]
@@ -271,6 +273,9 @@ def train_task_subprocess(task: Dict[str, Any], ckpt_path: Path, device: str = "
         best_produced = task_ckpt_dir / f"best_{task['id']}.pt"
         if best_produced.exists():
             shutil.copy2(best_produced, ckpt_path)
+            best_prov = task_ckpt_dir / f"best_{task['id']}.provenance.json"
+            if best_prov.exists():
+                shutil.copy2(best_prov, ckpt_path.with_suffix(".provenance.json"))
         return True
     else:
         print(f"[ERROR] {task['id']} failed with code {res.returncode}. See {log_file}", flush=True)
@@ -420,15 +425,9 @@ def generate_loo_latex_table(summary_loo: Dict[str, Any]) -> str:
         diff = s['win_acc_mean'] - ref_acc
         diff_str = f"+{diff:.2f}\\%" if diff > 0 else (f"{diff:.2f}\\%" if diff < 0 else "0.00\\% (Ref)")
 
-        if var_name == "Minus_TimeWarp":
-            lines.append(f"\\textbf{{{disp_name}}} & \\textbf{{{domain}}} & \\textbf{{{va}}} & \\textbf{{{vl}}} & \\textbf{{{ta}}} & \\textbf{{{tf}}} & \\textbf{{{diff_str}}} \\\\")
-        elif var_name in ("Candidate_Full_5op", "Clean_Baseline_NoAug"):
-            lines.append(r"\midrule" if var_name == "Minus_Mirror" else "")
-            lines.append(f"{disp_name} & {domain} & {va} & {vl} & {ta} & {tf} & {diff_str} \\\\")
-            if var_name == "Candidate_Full_5op":
-                lines.append(r"\midrule")
-        else:
-            lines.append(f"{disp_name} & {domain} & {va} & {vl} & {ta} & {tf} & {diff_str} \\\\")
+        lines.append(f"{disp_name} & {domain} & {va} & {vl} & {ta} & {tf} & {diff_str} \\\\")
+        if var_name == "Candidate_Full_5op":
+            lines.append(r"\midrule")
 
     lines.extend([
         r"\bottomrule",
@@ -466,7 +465,7 @@ def generate_single_component_latex_table(summary_single: Dict[str, Any]) -> str
 
         if var_name == "SkelGym_Aug_4op":
             lines.append(r"\midrule")
-            lines.append(f"\\textbf{{{disp_name}}} & \\textbf{{{domain}}} & \\textbf{{{va}}} & \\textbf{{{vl}}} & \\textbf{{{ta}}} & \\textbf{{{tf}}} & \\textbf{{{diff_str}}} \\\\")
+            lines.append(f"{disp_name} & {domain} & {va} & {vl} & {ta} & {tf} & {diff_str} \\\\")
         elif var_name == "Clean_Baseline_NoAug":
             lines.append(f"{disp_name} & {domain} & {va} & {vl} & {ta} & {tf} & {diff_str} \\\\")
             lines.append(r"\midrule")
@@ -683,9 +682,7 @@ def main():
                 diff = s["win_acc_mean"] - ref_loo
                 diff_str = f"+{diff:.2f}%" if diff > 0 else (f"{diff:.2f}%" if diff < 0 else "Ref (0.00%)")
                 va = f"{s['val_acc_mean']:.2f}% ± {s['val_acc_std']:.2f}%" if s.get("val_acc_mean") else "--"
-                vl = f"{s['val_loss_mean']:.4f}" if s.get("val_loss_mean") else "--"
-                bold = "**" if var_name == "Minus_TimeWarp" else ""
-                mf.write(f"| {bold}{disp_name}{bold} | {domain} | {va} | {vl} | {s['win_acc_mean']:.2f}% ± {s['win_acc_std']:.2f}% | {s['win_f1_mean']:.4f} ± {s['win_f1_std']:.4f} | {diff_str} |\n")
+                mf.write(f"| {disp_name} | {domain} | {va} | {vl} | {s['win_acc_mean']:.2f}% ± {s['win_acc_std']:.2f}% | {s['win_f1_mean']:.4f} ± {s['win_f1_std']:.4f} | {diff_str} |\n")
 
         # Table 2: Single Component
         mf.write("\n## Table 2: Systematic Single-Component (Individual) Augmentation Study\n\n")
@@ -699,9 +696,7 @@ def main():
                 diff = s["win_acc_mean"] - base_single
                 diff_str = f"+{diff:.2f}%" if diff > 0 else (f"{diff:.2f}%" if diff < 0 else "Ref (0.00%)")
                 va = f"{s['val_acc_mean']:.2f}% ± {s['val_acc_std']:.2f}%" if s.get("val_acc_mean") else "--"
-                vl = f"{s['val_loss_mean']:.4f}" if s.get("val_loss_mean") else "--"
-                bold = "**" if var_name in ("SkelGym_Aug_4op", "Single_Mirror") else ""
-                mf.write(f"| {bold}{disp_name}{bold} | {domain} | {va} | {vl} | {s['win_acc_mean']:.2f}% ± {s['win_acc_std']:.2f}% | {s['win_f1_mean']:.4f} ± {s['win_f1_std']:.4f} | {diff_str} |\n")
+                mf.write(f"| {disp_name} | {domain} | {va} | {vl} | {s['win_acc_mean']:.2f}% ± {s['win_acc_std']:.2f}% | {s['win_f1_mean']:.4f} ± {s['win_f1_std']:.4f} | {diff_str} |\n")
 
         # Table 3: Cross-Backbones
         if summary_backbones:
