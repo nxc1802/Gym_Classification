@@ -120,16 +120,15 @@ def simulate_one_shot_transfer(
             support_subjects.add(record_to_subject.get(chosen_rec, chosen_rec))
 
         # Query records: all remaining records from valid classes
+        # Strict global workout-disjoint isolation: any workout present in support is completely excluded from query
         query_records = []
         query_labels = []
         for c in valid_classes:
             for r in records_by_class[c]:
                 if r == support_records[c]:
                     continue
-                # Group isolation: exclude if same subject/workout as support of that class
                 subj = record_to_subject.get(r, r)
-                sup_subj = record_to_subject.get(support_records[c], support_records[c])
-                if subj == sup_subj and len(records_by_class[c]) > 2:
+                if subj in support_subjects:
                     continue
                 query_records.append(r)
                 query_labels.append(c)

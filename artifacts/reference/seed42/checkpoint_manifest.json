@@ -1,0 +1,88 @@
+{
+  "version": "1.0",
+  "dataset_name": "SkelGym",
+  "num_classes": 22,
+  "normalization_source": "skelgym_train_only",
+  "ensemble_calibration_source": "skelgym_validation_only",
+  "seq_len": 32,
+  "stride": 16,
+  "seed": 42,
+  "checkpoints": {
+    "Transformer (Mix)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/best_Transformer_T2.2_mix.pt",
+      "sha256": "7d3763a0d2a2201f1c2ea9ee45d0c36379fb5ad6e2f634e7f85fe782984fd0c3"
+    },
+    "AAGCN (Bone 3D)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/best_AAGCN_T4.2_bone_3d.pt",
+      "sha256": "0df9b3b650206b22e0058aa7b3a7f255f289fdbd7aa847c3fcd23c93243c456e"
+    },
+    "AAGCN (Rel 3D)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/best_AAGCN_T4.3_rel_3d.pt",
+      "sha256": "9f827041c6de03c03c492563d406522cb354208b0aa9fe2e1b540ebac535b978"
+    },
+    "AAGCN (Joint Mot)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/best_AAGCN_T4.4_joint_motion_3d.pt",
+      "sha256": "6588cf94171d550cb76f373b9ebf975fa2c35c380c736b48192a626ed5dc575b"
+    },
+    "AAGCN (Bone Mot)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/best_AAGCN_T4.5_bone_motion_3d.pt",
+      "sha256": "f5e63d33836c68daf7f890db03d25d2be4850143d638e8ccc1a5d4a4c638faed"
+    },
+    "ST-GCN (Rel 3D)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/best_STGCN_T3.2_rel_3d.pt",
+      "sha256": "271c497de1d241dcc74145e68c9d02c50778871d8def7702d5f8b588740cc773"
+    }
+  },
+  "normalization_stats": {
+    "mix": {
+      "mean_shape": [
+        1,
+        117
+      ],
+      "std_shape": [
+        1,
+        117
+      ]
+    },
+    "rel_3d": {
+      "mean_shape": [
+        1,
+        39
+      ],
+      "std_shape": [
+        1,
+        39
+      ]
+    },
+    "bone_3d": {
+      "mean_shape": [
+        1,
+        39
+      ],
+      "std_shape": [
+        1,
+        39
+      ]
+    },
+    "joint_motion_3d": {
+      "mean_shape": [
+        1,
+        39
+      ],
+      "std_shape": [
+        1,
+        39
+      ]
+    },
+    "bone_motion_3d": {
+      "mean_shape": [
+        1,
+        39
+      ],
+      "std_shape": [
+        1,
+        39
+      ]
+    }
+  }
+}

@@ -109,6 +109,7 @@ class MMFitExternalDataset(BaseExternalDataset):
             # Load full workout pose data
             full_pose_3d = None
             is_pre_extracted_13 = False
+            mp_frame_ids = None
 
             if self.pose_source == "native":
                 pose_file = w_dir / f"{w}_pose_3d.npy"
@@ -128,6 +129,8 @@ class MMFitExternalDataset(BaseExternalDataset):
                         if cp.suffix == ".csv":
                             df_mp = pd.read_csv(cp)
                             T_mp = len(df_mp)
+                            if "Frame" in df_mp.columns:
+                                mp_frame_ids = df_mp["Frame"].values.astype(int)
                             skel13 = np.zeros((T_mp, 13, 3), dtype=np.float32)
                             for i, pt in enumerate(RAW_POINTS_13):
                                 if f"{pt}_x" in df_mp.columns:
@@ -161,27 +164,35 @@ class MMFitExternalDataset(BaseExternalDataset):
                 canonical_act = self.class_mapping[raw_act]
                 skel_class_idx = ACTION_TO_IDX[canonical_act]
 
-                # Extract frames slice
-                T_total = full_pose_3d.shape[1] if (full_pose_3d.ndim == 3 and full_pose_3d.shape[0] == 3) else len(full_pose_3d)
-                s = max(0, min(s_frame, T_total - 1))
-                e = min(T_total, max(s + 1, e_frame))
-
-                if e - s < 16:
-                    continue
-
-                if self.pose_source == "native":
-                    # full_pose_3d shape is (3, T_total, 18)
-                    seg_pose = full_pose_3d[:, s:e, :]
-                    skel_13 = openpose18_to_skelgym13(seg_pose)  # (T_seg, 13, 3)
+                # Extract frames slice using exact Frame ID matching when available
+                if self.pose_source == "mediapipe" and mp_frame_ids is not None:
+                    mask = (mp_frame_ids >= s_frame) & (mp_frame_ids <= e_frame)
+                    skel_13 = full_pose_3d[mask]
+                    if len(skel_13) < 16:
+                        continue
+                    s = s_frame
+                    e = e_frame
                 else:
-                    if is_pre_extracted_13:
-                        skel_13 = full_pose_3d[s:e]  # (T_seg, 13, 3)
+                    T_total = full_pose_3d.shape[1] if (full_pose_3d.ndim == 3 and full_pose_3d.shape[0] == 3) else len(full_pose_3d)
+                    s = max(0, min(s_frame, T_total - 1))
+                    e = min(T_total, max(s + 1, e_frame))
+
+                    if e - s < 16:
+                        continue
+
+                    if self.pose_source == "native":
+                        # full_pose_3d shape is (3, T_total, 18)
+                        seg_pose = full_pose_3d[:, s:e, :]
+                        skel_13 = openpose18_to_skelgym13(seg_pose)  # (T_seg, 13, 3)
                     else:
-                        seg_pose = full_pose_3d[s:e]
-                        if seg_pose.shape[1] == 33:
-                            skel_13 = mediapipe33_to_skelgym13(seg_pose)
+                        if is_pre_extracted_13:
+                            skel_13 = full_pose_3d[s:e]  # (T_seg, 13, 3)
                         else:
-                            skel_13 = seg_pose[:, :13, :3]
+                            seg_pose = full_pose_3d[s:e]
+                            if seg_pose.shape[1] == 33:
+                                skel_13 = mediapipe33_to_skelgym13(seg_pose)
+                            else:
+                                skel_13 = seg_pose[:, :13, :3]
 
                 record = ExternalRecord(
                     record_id=f"mmfit_{w}_seg{seg_idx:02d}_{raw_act}",

@@ -1,9 +1,9 @@
 workout_id,split,rgb_video_exists,rgb_frames,rgb_fps,rgb_duration_s,native_pose3d_frames,mediapipe_csv_exists,mediapipe_frames,mediapipe_zero_ratio,label_count,first_label_frame,last_label_frame,frame_alignment_status
-w00,unseen_test,False,0,30.0,0.0,63918,False,0,1.0,30,4040,67650,CHECK_BOUNDS
-w05,unseen_test,False,0,30.0,0.0,57157,False,0,1.0,30,2830,59156,CHECK_BOUNDS
-w12,unseen_test,False,0,30.0,0.0,67787,False,0,1.0,22,5812,70467,CHECK_BOUNDS
-w13,unseen_test,False,0,30.0,0.0,68561,False,0,1.0,30,5487,73024,CHECK_BOUNDS
-w20,unseen_test,False,0,30.0,0.0,93282,False,0,1.0,27,2178,94869,CHECK_BOUNDS
+w00,unseen_test,True,69796,30.0,2326.53,63918,True,69796,0.0152,30,4040,67650,ALIGNED
+w05,unseen_test,True,61304,30.0,2043.47,57157,True,61304,0.0133,30,2830,59156,ALIGNED
+w12,unseen_test,True,102472,30.0,3415.73,67787,True,102472,0.0142,22,5812,70467,ALIGNED
+w13,unseen_test,True,75398,30.0,2513.27,68561,True,75398,0.0358,30,5487,73024,ALIGNED
+w20,unseen_test,True,96097,30.0,3203.23,93282,True,96097,0.0,27,2178,94869,ALIGNED
 w09,seen_test,False,0,30.0,0.0,104797,False,0,1.0,30,3755,107382,CHECK_BOUNDS
 w10,seen_test,False,0,30.0,0.0,76926,False,0,1.0,30,2704,79016,CHECK_BOUNDS
 w11,seen_test,False,0,30.0,0.0,61989,False,0,1.0,30,3062,64390,CHECK_BOUNDS

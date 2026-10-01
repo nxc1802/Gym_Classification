@@ -4,7 +4,7 @@ Provides ExternalRecord, BaseExternalDataset, and QualityControlGate for reprodu
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Tuple, Iterator
+from typing import List, Dict, Any, Optional, Tuple, Iterator, Union
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -13,6 +13,7 @@ import torch.nn.functional as F
 
 from src.external.canonical_pose import skeleton_13_to_dataframe, canonical_geometric_normalization
 from src.data.features import extract_features_by_method
+from src.data.dataset import extract_windows_from_segment
 from src.constants import DEFAULT_SEQ_LEN
 
 @dataclass
@@ -147,6 +148,10 @@ class BaseExternalDataset:
     ) -> Dict[str, Any]:
         """
         Extracts fixed-length feature windows segmented strictly within record boundaries.
+        Reuses SkelGym's extract_windows_from_segment for 100% preprocessing parity:
+        - Performs zero-frame interpolation ('interpolate') across segment
+        - Rejects corrupted windows if zero ratio > 20%
+        - Handles partial trailing windows via torch F.interpolate
         Returns:
           - 'features': np.ndarray of shape (N_windows, seq_len, D)
           - 'labels': np.ndarray of shape (N_windows,) - canonical SkelGym class indices
@@ -158,55 +163,26 @@ class BaseExternalDataset:
         all_rec_ids = []
         all_subj_ids = []
 
-        half_seq = seq_len // 2
-
         for rec in self.records:
             skel = rec.skeleton  # (T, 13, 3)
-            T = skel.shape[0]
-            if T < half_seq:
+            if skel is None or len(skel) == 0:
                 continue
 
             # Convert to DataFrame matching SkelGym feature format
             df_rec = skeleton_13_to_dataframe(skel)
-            feat = extract_features_by_method(df_rec, feature_method)
-            # feat shape: (T, D)
-
-            def _slice(s, e):
-                sub_feat = feat[s:e]
-                L = len(sub_feat)
-                if L < half_seq:
-                    return None
-                if L < seq_len:
-                    t = torch.from_numpy(sub_feat).float().unsqueeze(0).permute(0, 2, 1)
-                    t_stretched = F.interpolate(t, size=seq_len, mode="linear", align_corners=False)
-                    return t_stretched.squeeze(0).permute(1, 0).numpy()
-                return sub_feat
-
-            if T < seq_len:
-                w = _slice(0, T)
-                if w is not None:
-                    all_features.append(w)
-                    all_labels.append(rec.skelgym_class_idx)
-                    all_rec_ids.append(rec.record_id)
-                    all_subj_ids.append(rec.subject_id)
-            else:
-                for start in range(0, T, stride):
-                    end = start + seq_len
-                    if end <= T:
-                        w = _slice(start, end)
-                        if w is not None:
-                            all_features.append(w)
-                            all_labels.append(rec.skelgym_class_idx)
-                            all_rec_ids.append(rec.record_id)
-                            all_subj_ids.append(rec.subject_id)
-                    else:
-                        w = _slice(start, T)
-                        if w is not None:
-                            all_features.append(w)
-                            all_labels.append(rec.skelgym_class_idx)
-                            all_rec_ids.append(rec.record_id)
-                            all_subj_ids.append(rec.subject_id)
-                        break
+            wins = extract_windows_from_segment(
+                df_seg=df_rec,
+                feature_method=feature_method,
+                seq_len=seq_len,
+                stride=stride,
+                zero_frame_handling="interpolate",
+                max_zero_ratio=0.20
+            )
+            for w in wins:
+                all_features.append(w)
+                all_labels.append(rec.skelgym_class_idx)
+                all_rec_ids.append(rec.record_id)
+                all_subj_ids.append(rec.subject_id)
 
         if len(all_features) == 0:
             feat_arr = np.zeros((0, seq_len, 39), dtype=np.float32)

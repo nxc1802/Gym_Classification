@@ -11,6 +11,7 @@ import yaml
 import json
 import argparse
 from pathlib import Path
+from typing import Tuple, Dict, Any, List, Optional
 import numpy as np
 import pandas as pd
 import torch
@@ -39,34 +40,70 @@ def find_checkpoint_path(ckpt_rel: str, seed: int) -> Path:
     p = Path(ckpt_rel)
     stem = p.stem
     suffix = p.suffix
-    candidates = []
-    if seed != 42:
-        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}{suffix}")
-        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}_seed{seed}{suffix}")
-        candidates.append(PROJECT_ROOT / ckpt_rel)
+    if seed == 42:
+        candidates = [
+            PROJECT_ROOT / ckpt_rel,
+            PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}{suffix}",
+            PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}_seed{seed}{suffix}"
+        ]
     else:
-        candidates.append(PROJECT_ROOT / ckpt_rel)
-        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}{suffix}")
-        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}_seed{seed}{suffix}")
+        candidates = [
+            PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}{suffix}",
+            PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}_seed{seed}{suffix}"
+        ]
     for c in candidates:
         if c.exists():
             return c
-    return candidates[0]
+    raise FileNotFoundError(
+        f"Strict checkpoint lookup failed for seed {seed}: {ckpt_rel}. "
+        f"Checked candidates: {[str(c) for c in candidates]}. No silent fallback allowed."
+    )
 
 def load_norm_stats_for_seed(ref_dir: Path, feat: str, seed: int) -> Tuple[np.ndarray, np.ndarray]:
-    stat_file = ref_dir / f"seed{seed}" / f"normalization_{feat}.npz"
-    if not stat_file.exists():
-        stat_file = ref_dir / f"normalization_{feat}.npz"
-    if not stat_file.exists():
-        raise FileNotFoundError(f"Missing normalization artifact for {feat} (seed {seed}): {stat_file}. Run scripts/freeze_reference_artifacts.py first!")
-    data = np.load(stat_file)
-    return (data["mean"], data["std"])
+    if seed == 42:
+        candidates = [
+            ref_dir / f"seed{seed}" / f"normalization_{feat}.npz",
+            ref_dir / f"normalization_{feat}.npz"
+        ]
+    else:
+        candidates = [
+            ref_dir / f"seed{seed}" / f"normalization_{feat}.npz"
+        ]
+    for c in candidates:
+        if c.exists():
+            data = np.load(c)
+            return (data["mean"], data["std"])
+    raise FileNotFoundError(
+        f"Strict normalization artifact lookup failed for feature '{feat}' and seed {seed}. "
+        f"Expected: {candidates[0]}."
+    )
+
+def load_ensemble_weights_for_seed(ref_dir: Path, seed: int) -> Dict[str, Any]:
+    if seed == 42:
+        candidates = [
+            ref_dir / f"seed{seed}" / "ensemble_weights.json",
+            ref_dir / "ensemble_weights.json"
+        ]
+    else:
+        candidates = [
+            ref_dir / f"seed{seed}" / "ensemble_weights.json"
+        ]
+    for c in candidates:
+        if c.exists():
+            with open(c, "r") as f:
+                return json.load(f)
+    raise FileNotFoundError(
+        f"Strict ensemble weights lookup failed for seed {seed}. "
+        f"Expected: {candidates[0]}. Run freeze_reference_artifacts.py for seed {seed} first!"
+    )
 
 def main():
     parser = argparse.ArgumentParser(description="External Benchmark 1-Shot Transfer Simulation")
     parser.add_argument("--config", type=str, default="configs/external/mmfit.yaml", help="Path to config yaml")
     parser.add_argument("--trials", type=int, default=100, help="Number of random 1-shot trials")
     parser.add_argument("--seeds", type=int, nargs="+", default=None, help="Random seeds to evaluate across (e.g. --seeds 42 123 3407)")
+    parser.add_argument("--pose-source", type=str, default=None, choices=["native", "mediapipe"], help="Pose protocol source")
+    parser.add_argument("--split-group", type=str, default=None, help="Workout split group (e.g. unseen_test)")
     parser.add_argument("--seed", type=int, default=42, help="Random seed (fallback if --seeds not provided)")
     parser.add_argument("--out-dir", type=str, default=None, help="Output destination directory")
     args = parser.parse_args()
@@ -76,9 +113,9 @@ def main():
         cfg = yaml.safe_load(f)
 
     dataset_name = cfg.get("dataset", "mmfit")
-    pose_source = cfg.get("pose_protocol", {}).get("source", "native")
+    pose_source = args.pose_source or cfg.get("pose_protocol", {}).get("source", "native")
     class_set = cfg.get("class_set", "core4")
-    split_group = cfg.get("workout_split", {}).get("split_group", "unseen_test")
+    split_group = args.split_group or cfg.get("workout_split", {}).get("split_group", "unseen_test")
     out_dir = Path(args.out_dir or cfg.get("paths", {}).get("output_dir", f"outputs/external/{dataset_name}"))
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -100,7 +137,7 @@ def main():
             split_group=split_group,
             class_set=class_set,
             pose_source=pose_source,
-            apply_geometric_norm=True
+            apply_geometric_norm=cfg.get("normalization", {}).get("geometric", False)
         )
     elif dataset_name == "fit3d":
         ext_ds = Fit3DExternalDataset(
@@ -114,42 +151,46 @@ def main():
 
     target_class_indices = get_target_skelgym_indices(dataset_name, class_set)
 
-    # 2. Extract Raw Windows Once
-    mix_data = ext_ds.extract_windows("mix", seq_len=32, stride=32)
-    bone_data = ext_ds.extract_windows("bone_3d", seq_len=32, stride=32)
+    # 2. Extract Raw Windows for all 5 Feature Streams Once
+    stream_names = ["mix", "bone_3d", "rel_3d", "joint_motion_3d", "bone_motion_3d"]
+    raw_window_data = {feat: ext_ds.extract_windows(feat, seq_len=32, stride=32) for feat in stream_names}
 
-    raw_mix = mix_data["features"]
-    raw_bone = bone_data["features"]
-    record_ids = mix_data["record_ids"]
-    labels = mix_data["labels"]
-    subject_ids = mix_data["subject_ids"]
+    base_stream = raw_window_data["mix"]
+    record_ids = base_stream["record_ids"]
+    labels = base_stream["labels"]
+    subject_ids = base_stream["subject_ids"]
 
-    model_names = ["Transformer (Mix)", "AAGCN (Bone 3D)", "SkelGym-Full"]
+    model_names = ["Transformer (Mix)", "AAGCN (Bone 3D)", "SkelGym-Lite", "SkelGym-Full"]
     all_trials_by_model = {m: [] for m in model_names}
     seed_summaries = []
+
+    five_models_spec = [
+        ("Transformer (Mix)", "Transformer", "mix", "checkpoints/best_Transformer_T2.2_mix.pt"),
+        ("AAGCN (Bone 3D)", "AAGCN", "bone_3d", "checkpoints/best_AAGCN_T4.2_bone_3d.pt"),
+        ("AAGCN (Rel 3D)", "AAGCN", "rel_3d", "checkpoints/best_AAGCN_T4.3_rel_3d.pt"),
+        ("AAGCN (Joint Mot)", "AAGCN", "joint_motion_3d", "checkpoints/best_AAGCN_T4.4_joint_motion_3d.pt"),
+        ("AAGCN (Bone Mot)", "AAGCN", "bone_motion_3d", "checkpoints/best_AAGCN_T4.5_bone_motion_3d.pt"),
+    ]
 
     # 3. Multi-Seed Simulation Loop
     for s_idx, seed in enumerate(seeds, 1):
         print(f"\n[{s_idx}/{len(seeds)}] Evaluating 1-Shot Transfer on Seed {seed}...")
-        stat_mix = load_norm_stats_for_seed(ref_dir, "mix", seed)
-        stat_bone = load_norm_stats_for_seed(ref_dir, "bone_3d", seed)
+        
+        # Load norm stats and extract penultimate embeddings for all 5 streams
+        embs_by_model = {}
+        for (m_name, m_type, f_type, ckpt_p) in five_models_spec:
+            mean, std = load_norm_stats_for_seed(ref_dir, f_type, seed)
+            raw_feat = raw_window_data[f_type]["features"]
+            feat_norm = (raw_feat - mean[None, :, :]) / (std[None, :, :] + 1e-7)
 
-        feat_mix = (raw_mix - stat_mix[0][None, :, :]) / (stat_mix[1][None, :, :] + 1e-7)
-        feat_bone = (raw_bone - stat_bone[0][None, :, :]) / (stat_bone[1][None, :, :] + 1e-7)
+            ckpt_path = find_checkpoint_path(ckpt_p, seed)
+            model = load_checkpoint(m_type, f_type, str(ckpt_path), device)
+            embs = extract_penultimate_embeddings(model, feat_norm, m_type, device)
+            embs_by_model[m_name] = embs
 
-        ckpt_trans = find_checkpoint_path("checkpoints/best_Transformer_T2.2_mix.pt", seed)
-        ckpt_bone = find_checkpoint_path("checkpoints/best_AAGCN_T4.2_bone_3d.pt", seed)
-
-        if not ckpt_trans.exists():
-            raise FileNotFoundError(f"Transformer checkpoint not found for seed {seed}: {ckpt_trans}")
-        if not ckpt_bone.exists():
-            raise FileNotFoundError(f"AAGCN checkpoint not found for seed {seed}: {ckpt_bone}")
-
-        m_trans = load_checkpoint("Transformer", "mix", str(ckpt_trans), device)
-        m_bone = load_checkpoint("AAGCN", "bone_3d", str(ckpt_bone), device)
-
-        embs_trans = extract_penultimate_embeddings(m_trans, feat_mix, "Transformer", device)
-        embs_bone = extract_penultimate_embeddings(m_bone, feat_bone, "AAGCN", device)
+        ens_cfg = load_ensemble_weights_for_seed(ref_dir, seed)
+        w_lite = ens_cfg["lite"]["weights_window"]
+        w_full = ens_cfg["full"]["weights_window"]
 
         # Pool embeddings per record
         unique_recs = sorted(list(set(record_ids)))
@@ -157,6 +198,7 @@ def main():
         rec_to_subject = {}
         rec_embs_trans = {}
         rec_embs_bone = {}
+        rec_embs_lite = {}
         rec_embs_full = {}
 
         for r in unique_recs:
@@ -164,20 +206,36 @@ def main():
             rec_to_class[r] = labels[mask[0]]
             rec_to_subject[r] = subject_ids[mask[0]]
 
-            mean_trans = np.mean(embs_trans[mask], axis=0)
-            norm_t = mean_trans / (np.linalg.norm(mean_trans) + 1e-12)
-            rec_embs_trans[r] = norm_t
+            # Normalized mean pooled embeddings for each of the 5 streams
+            pooled_norms = []
+            for (m_name, _, _, _) in five_models_spec:
+                m_emb = np.mean(embs_by_model[m_name][mask], axis=0)
+                norm_m = m_emb / (np.linalg.norm(m_emb) + 1e-12)
+                pooled_norms.append(norm_m)
 
-            mean_bone = np.mean(embs_bone[mask], axis=0)
-            norm_b = mean_bone / (np.linalg.norm(mean_bone) + 1e-12)
-            rec_embs_bone[r] = norm_b
+            rec_embs_trans[r] = pooled_norms[0]
+            rec_embs_bone[r] = pooled_norms[1]
 
-            c_emb = np.concatenate([norm_t, norm_b])
-            rec_embs_full[r] = c_emb / (np.linalg.norm(c_emb) + 1e-12)
+            # Weighted SkelGym-Lite embedding (Transformer + Bone 3D with validation SLSQP weights)
+            lite_parts = [
+                np.sqrt(max(0.0, float(w_lite[0]))) * pooled_norms[0],
+                np.sqrt(max(0.0, float(w_lite[1]))) * pooled_norms[1]
+            ]
+            lite_concat = np.concatenate(lite_parts)
+            rec_embs_lite[r] = lite_concat / (np.linalg.norm(lite_concat) + 1e-12)
+
+            # Weighted SkelGym-Full embedding (All 5 streams with validation SLSQP weights)
+            full_parts = [
+                np.sqrt(max(0.0, float(w_full[i]))) * pooled_norms[i]
+                for i in range(5)
+            ]
+            full_concat = np.concatenate(full_parts)
+            rec_embs_full[r] = full_concat / (np.linalg.norm(full_concat) + 1e-12)
 
         eval_emb_models = {
             "Transformer (Mix)": rec_embs_trans,
             "AAGCN (Bone 3D)": rec_embs_bone,
+            "SkelGym-Lite": rec_embs_lite,
             "SkelGym-Full": rec_embs_full
         }
 

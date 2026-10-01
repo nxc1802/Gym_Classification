@@ -47,7 +47,7 @@ def main():
         class_set=args.class_set,
         pose_source=args.pose_source,
         qc_gate=qc,
-        apply_geometric_norm=True
+        apply_geometric_norm=(args.pose_source == "native")
     )
     audit_unseen_file = out_p / "audit_unseen_subjects.csv"
     df_audit_unseen = ds_unseen.export_audit_report(audit_unseen_file)
@@ -62,7 +62,7 @@ def main():
         class_set=args.class_set,
         pose_source=args.pose_source,
         qc_gate=qc,
-        apply_geometric_norm=True
+        apply_geometric_norm=(args.pose_source == "native")
     )
     audit_seen_file = out_p / "audit_seen_subjects.csv"
     df_audit_seen = ds_seen.export_audit_report(audit_seen_file)

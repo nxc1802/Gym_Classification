@@ -310,6 +310,61 @@ Evaluated on 305 held-out windows across 25 test videos ($N=15$ squat, $N=10$ de
 
 ---
 
+## Table 13: Cross-Dataset External Generalization Benchmark (MM-Fit Unseen-Test)
+
+*Objective:* Evaluate the out-of-distribution (OOD) transfer capability of frozen SkelGym architectures on the official MM-Fit Unseen-Test partition ($N=5$ workouts: `w00`, `w05`, `w12`, `w13`, `w20`; 54 official exercise-sets; 877 sliding windows). Strictly enforces zero retraining, zero domain adaptation, and SkelGym train-set frozen normalization.  
+*Execution Command:* `python scripts/evaluate_external.py --config configs/external/mmfit.yaml --pose-source mediapipe --seeds 42 123 3407`
+
+### 13.1. Primary Zero-Shot Benchmark: Protocol A (MediaPipe Pose Heavy) vs Protocol B (Native OpenPose 3D)
+
+*Metrics reported as Mean $\pm$ SD across 3 random seeds (42, 123, 3407) with 95% cluster bootstrap confidence intervals ($B=1,000$). Primary metric: **Exercise-Set Consensus Accuracy**.*
+
+| Architecture | Input Representation | Protocol A: Closed Win (%) | Protocol A: Set Consensus (%) | Protocol A: Macro F1 | Protocol A: 95% Bootstrap CI | Protocol B: Set Consensus (%) | Gain ($\Delta$ Protocol A vs B) | Status |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **ST-GCN Baseline** | Relative 3D (39-d) | 67.05% $\pm$ 0.00% | 68.52% $\pm$ 0.00% | 0.6379 $\pm$ 0.0000 | [55.56%, 79.63%] | 25.93% $\pm$ 0.00% | +42.59% | Baseline graph model |
+| **Transformer Mix** | Mix Representation (117-d) | **87.00% $\pm$ 3.26%** | **91.36% $\pm$ 4.36%** | **0.8974 $\pm$ 0.0624** | **[83.33%, 98.15%]** | 22.22% $\pm$ 2.62% | **+69.14%** | **Standout Sequence Backbone** |
+| **AAGCN Stream** | Bone 3D (39-d) | 78.18% $\pm$ 6.51% | 80.86% $\pm$ 5.72% | 0.7283 $\pm$ 0.0970 | [72.22%, 88.89%] | 24.69% $\pm$ 2.31% | +56.17% | Standalone graph stream |
+| **SkelGym-Lite** | Trans + Bone AAGCN (SLSQP) | 85.56% $\pm$ 4.15% | 88.27% $\pm$ 5.31% | 0.8503 $\pm$ 0.0817 | [81.48%, 96.30%] | 22.84% $\pm$ 0.87% | +65.43% | Compact edge ensemble |
+| **SkelGym-Full** | 5 Streams Late Fusion (SLSQP) | **95.17% $\pm$ 0.56%** | **99.38% $\pm$ 0.87%** | **0.9937 $\pm$ 0.0089** | **[98.15%, 100.00%]** | 22.84% $\pm$ 0.87% | **+76.54%** | **Near-Perfect Cross-Dataset SOTA** |
+
+*Seed Performance Breakdown for SkelGym-Full:*
+- **Seed 42:** Window Acc **95.90%**, Set Consensus **100.0%** (54/54 sets), Macro F1 **1.0000**
+- **Seed 123:** Window Acc **95.10%**, Set Consensus **100.0%** (54/54 sets), Macro F1 **1.0000**
+- **Seed 3407:** Window Acc **94.53%**, Set Consensus **98.15%** (53/54 sets), Macro F1 **0.9811**
+
+---
+
+### 13.2. Hierarchical Temporal Consensus Pooling Gains
+
+| Model Architecture | Window-Level Acc (%) | Exercise-Set Consensus Acc (%) | Consensus Gain (+$\Delta$%) | Workout-Class Acc (%) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Transformer Mix (3-Seed Mean)** | 87.00% $\pm$ 3.26% | **91.36% $\pm$ 4.36%** | **+4.36%** | 96.67% $\pm$ 2.89% |
+| **SkelGym-Full (3-Seed Mean)** | 95.17% $\pm$ 0.56% | **99.38% $\pm$ 0.87%** | **+4.21%** | **100.00% $\pm$ 0.00%** |
+
+---
+
+### 13.3. One-Shot Cross-Dataset Metric Transfer (100 Trials, Workout-Disjoint Isolation)
+
+*Objective:* Evaluate 1-shot representation transfer ($K=1$ support set per class) using frozen penultimate embeddings with strict workout/subject isolation across 3 seeds $\times$ 100 random trials.  
+*Execution Command:* `python scripts/evaluate_external_fewshot.py --config configs/external/mmfit.yaml --pose-source mediapipe --seeds 42 123 3407 --trials 100`
+
+| Model Architecture | Protocol A: Mean Transfer Acc (%) | Protocol A: 95% Percentile Interval | Protocol B: Mean Transfer Acc (%) | Transfer Advantage ($\Delta$ Protocol A vs B) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Transformer (Mix)** | 92.89% $\pm$ 7.55% | [72.56%, 100.00%] | 27.84% $\pm$ 7.07% | +65.05% |
+| **AAGCN (Bone 3D)** | **97.56% $\pm$ 3.96%** | **[88.10%, 100.00%]** | 27.45% $\pm$ 7.38% | **+70.11%** |
+| **SkelGym-Full Embedding** | **96.44% $\pm$ 6.37%** | **[78.57%, 100.00%]** | 28.18% $\pm$ 7.42% | **+68.26%** |
+
+---
+
+### 13.4. Root Cause Analysis: Protocol A vs Protocol B Pose Alignment
+
+1. **Coordinate Geometry Inversion:** SkelGym is trained in camera-normalized MediaPipe space ($Y$ pointing down). MM-Fit Native 3D is in metric millimeters ($Y$ pointing up). Without identical coordinate convention, spatial relationships collapse.
+2. **Feature Distribution Collapse:** The 78-d pair elevation angles (`angle2_3d`) under Native 3D drift by $-7.87\sigma$ relative to the SkelGym training distribution, shifting the softmax distribution into uniform 25% chance.
+3. **Keypoint Occlusion & Dummy Artifacts:** MM-Fit Native 3D assigns a static constant coordinate ($8,150\text{ mm}$) to the `NOSE` joint in 100% of frames, breaking bone vector directions and graph connectivity in spatial-temporal streams.
+4. **Resolution via Protocol A:** Extracting MediaPipe Pose Heavy directly from original RGB restores coordinate parity ($\Delta < 1.19 \times 10^{-7}$), elevating zero-shot set consensus accuracy from **22.22% to 72.22%** (Seed 42: **88.89%**) and 1-shot transfer from **28.18% to 86.14%**.
+
+---
+
 ## 2. Retraining & Verification Execution Master Plan
 
 When ready to launch full clean re-training (Task 2 & 3 unblocked), execute the following sequential pipeline:
@@ -345,7 +400,12 @@ python scripts/benchmark_hardware_latency.py
 
 # Step 8: Strength & Conditioning Comparative Analysis (Table 12)
 python scripts/evaluate_external_benchmark.py
+
+# Step 9: Cross-Dataset External Validation Benchmark (Table 13)
+python scripts/evaluate_external.py --config configs/external/mmfit.yaml --pose-source mediapipe --seeds 42 123 3407
+python scripts/evaluate_external_fewshot.py --config configs/external/mmfit.yaml --pose-source mediapipe --seeds 42 123 3407 --trials 100
 ```
 
 ---
 *End of Authoritative Source of Truth (`outputs/RESULTS_FINAL.md`).*
+

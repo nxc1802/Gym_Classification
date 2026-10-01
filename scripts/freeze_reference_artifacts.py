@@ -113,16 +113,22 @@ def main():
         if seed != 42:
             ckpt_base = ckpt_base / f"seed{seed}"
 
-        checkpoints = {
+        ensemble_models = {
             "Transformer (Mix)": ("Transformer", "mix", str(ckpt_base / "best_Transformer_T2.2_mix.pt")),
-            "ST-GCN (Rel 3D)": ("STGCN", "rel_3d", str(ckpt_base / "best_STGCN_T3.2_rel_3d.pt")),
             "AAGCN (Bone 3D)": ("AAGCN", "bone_3d", str(ckpt_base / "best_AAGCN_T4.2_bone_3d.pt")),
             "AAGCN (Rel 3D)": ("AAGCN", "rel_3d", str(ckpt_base / "best_AAGCN_T4.3_rel_3d.pt")),
             "AAGCN (Joint Mot)": ("AAGCN", "joint_motion_3d", str(ckpt_base / "best_AAGCN_T4.4_joint_motion_3d.pt")),
             "AAGCN (Bone Mot)": ("AAGCN", "bone_motion_3d", str(ckpt_base / "best_AAGCN_T4.5_bone_motion_3d.pt")),
         }
+        optional_checkpoints = {
+            "ST-GCN (Rel 3D)": ("STGCN", "rel_3d", str(ckpt_base / "best_STGCN_T3.2_rel_3d.pt")),
+        }
+        checkpoints = dict(ensemble_models)
+        for k, v in optional_checkpoints.items():
+            if os.path.exists(v[2]):
+                checkpoints[k] = v
 
-        all_exist = all(os.path.exists(cp) for _, _, cp in checkpoints.values())
+        all_exist = all(os.path.exists(cp) for _, _, cp in ensemble_models.values())
         if not all_exist:
             print(f"  Checkpoints for seed {seed} not yet fully trained. Saving normalization stats only.")
             continue

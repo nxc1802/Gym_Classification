@@ -1,0 +1,84 @@
+{
+  "version": "1.0",
+  "dataset_name": "SkelGym",
+  "num_classes": 22,
+  "normalization_source": "skelgym_train_only",
+  "ensemble_calibration_source": "skelgym_validation_only",
+  "seq_len": 32,
+  "stride": 16,
+  "seed": 123,
+  "checkpoints": {
+    "Transformer (Mix)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/seed123/best_Transformer_T2.2_mix.pt",
+      "sha256": "e4fb3866aa0d4da73b8af6771709e076156fbf89831cc844067de0fce094f7a2"
+    },
+    "AAGCN (Bone 3D)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/seed123/best_AAGCN_T4.2_bone_3d.pt",
+      "sha256": "813a1799baf93177c15e90f07854812644a0a58514a5ef239285160917b6e8a4"
+    },
+    "AAGCN (Rel 3D)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/seed123/best_AAGCN_T4.3_rel_3d.pt",
+      "sha256": "e99c9c13acf7a404453911352d4428abd22c7935334b6c04756b9277ea6c6b42"
+    },
+    "AAGCN (Joint Mot)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/seed123/best_AAGCN_T4.4_joint_motion_3d.pt",
+      "sha256": "c9982c9317eff315a7da2e654410df9cb02fbbf366bef2e138db3717deaa66bc"
+    },
+    "AAGCN (Bone Mot)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/seed123/best_AAGCN_T4.5_bone_motion_3d.pt",
+      "sha256": "e1947e7db6eb8f6416948b5da582305807f9735c53c1270b74a44b78f8af9c58"
+    }
+  },
+  "normalization_stats": {
+    "mix": {
+      "mean_shape": [
+        1,
+        117
+      ],
+      "std_shape": [
+        1,
+        117
+      ]
+    },
+    "rel_3d": {
+      "mean_shape": [
+        1,
+        39
+      ],
+      "std_shape": [
+        1,
+        39
+      ]
+    },
+    "bone_3d": {
+      "mean_shape": [
+        1,
+        39
+      ],
+      "std_shape": [
+        1,
+        39
+      ]
+    },
+    "joint_motion_3d": {
+      "mean_shape": [
+        1,
+        39
+      ],
+      "std_shape": [
+        1,
+        39
+      ]
+    },
+    "bone_motion_3d": {
+      "mean_shape": [
+        1,
+        39
+      ],
+      "std_shape": [
+        1,
+        39
+      ]
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "calibration_source": "skelgym_validation_only",
+  "seed": 3407,
+  "lite": {
+    "models": [
+      "Transformer (Mix)",
+      "AAGCN (Bone 3D)"
+    ],
+    "weights_window": [
+      0.8331426615756533,
+      0.16685733842434664
+    ],
+    "weights_video": [
+      0.7739042102171128,
+      0.22609578978288725
+    ]
+  },
+  "full": {
+    "models": [
+      "Transformer (Mix)",
+      "AAGCN (Bone 3D)",
+      "AAGCN (Rel 3D)",
+      "AAGCN (Joint Mot)",
+      "AAGCN (Bone Mot)"
+    ],
+    "weights_window": [
+      0.6597351104302888,
+      0.11495027813115416,
+      0.009972434319876763,
+      0.08517756217956068,
+      0.13016461493911985
+    ],
+    "weights_video": [
+      0.5834083888905737,
+      0.14992246760572142,
+      0.0,
+      0.06493413649505458,
+      0.2017350070086504
+    ]
+  }
+}

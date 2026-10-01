@@ -1,0 +1,55 @@
+record_id,dataset,subject,action_raw,action_canonical,status,reason,num_frames
+mmfit_w00_seg00_squats,mmfit,w00,squats,squat,ACCEPTED,Passed all QC gates,460
+mmfit_w00_seg01_squats,mmfit,w00,squats,squat,ACCEPTED,Passed all QC gates,493
+mmfit_w00_seg02_squats,mmfit,w00,squats,squat,ACCEPTED,Passed all QC gates,485
+mmfit_w00_seg03_pushups,mmfit,w00,pushups,push-up,ACCEPTED,Passed all QC gates,427
+mmfit_w00_seg04_pushups,mmfit,w00,pushups,push-up,ACCEPTED,Passed all QC gates,426
+mmfit_w00_seg05_pushups,mmfit,w00,pushups,push-up,ACCEPTED,Passed all QC gates,380
+mmfit_w00_seg06_dumbbell_shoulder_press,mmfit,w00,dumbbell_shoulder_press,shoulder press,ACCEPTED,Passed all QC gates,511
+mmfit_w00_seg07_dumbbell_shoulder_press,mmfit,w00,dumbbell_shoulder_press,shoulder press,ACCEPTED,Passed all QC gates,557
+mmfit_w00_seg08_dumbbell_shoulder_press,mmfit,w00,dumbbell_shoulder_press,shoulder press,ACCEPTED,Passed all QC gates,426
+mmfit_w00_seg24_lateral_shoulder_raises,mmfit,w00,lateral_shoulder_raises,lateral raise,ACCEPTED,Passed all QC gates,423
+mmfit_w00_seg25_lateral_shoulder_raises,mmfit,w00,lateral_shoulder_raises,lateral raise,ACCEPTED,Passed all QC gates,427
+mmfit_w00_seg26_lateral_shoulder_raises,mmfit,w00,lateral_shoulder_raises,lateral raise,ACCEPTED,Passed all QC gates,419
+mmfit_w05_seg00_squats,mmfit,w05,squats,squat,ACCEPTED,Passed all QC gates,525
+mmfit_w05_seg01_squats,mmfit,w05,squats,squat,ACCEPTED,Passed all QC gates,518
+mmfit_w05_seg02_squats,mmfit,w05,squats,squat,ACCEPTED,Passed all QC gates,599
+mmfit_w05_seg03_pushups,mmfit,w05,pushups,push-up,ACCEPTED,Passed all QC gates,427
+mmfit_w05_seg04_pushups,mmfit,w05,pushups,push-up,ACCEPTED,Passed all QC gates,463
+mmfit_w05_seg05_pushups,mmfit,w05,pushups,push-up,ACCEPTED,Passed all QC gates,396
+mmfit_w05_seg06_dumbbell_shoulder_press,mmfit,w05,dumbbell_shoulder_press,shoulder press,ACCEPTED,Passed all QC gates,453
+mmfit_w05_seg07_dumbbell_shoulder_press,mmfit,w05,dumbbell_shoulder_press,shoulder press,ACCEPTED,Passed all QC gates,439
+mmfit_w05_seg08_dumbbell_shoulder_press,mmfit,w05,dumbbell_shoulder_press,shoulder press,ACCEPTED,Passed all QC gates,430
+mmfit_w05_seg24_lateral_shoulder_raises,mmfit,w05,lateral_shoulder_raises,lateral raise,ACCEPTED,Passed all QC gates,415
+mmfit_w05_seg25_lateral_shoulder_raises,mmfit,w05,lateral_shoulder_raises,lateral raise,ACCEPTED,Passed all QC gates,437
+mmfit_w05_seg26_lateral_shoulder_raises,mmfit,w05,lateral_shoulder_raises,lateral raise,ACCEPTED,Passed all QC gates,423
+mmfit_w12_seg00_squats,mmfit,w12,squats,squat,ACCEPTED,Passed all QC gates,548
+mmfit_w12_seg01_squats,mmfit,w12,squats,squat,ACCEPTED,Passed all QC gates,522
+mmfit_w12_seg02_squats,mmfit,w12,squats,squat,ACCEPTED,Passed all QC gates,540
+mmfit_w12_seg03_pushups,mmfit,w12,pushups,push-up,ACCEPTED,Passed all QC gates,337
+mmfit_w12_seg04_pushups,mmfit,w12,pushups,push-up,ACCEPTED,Passed all QC gates,370
+mmfit_w12_seg05_pushups,mmfit,w12,pushups,push-up,ACCEPTED,Passed all QC gates,414
+mmfit_w12_seg06_dumbbell_shoulder_press,mmfit,w12,dumbbell_shoulder_press,shoulder press,ACCEPTED,Passed all QC gates,635
+mmfit_w12_seg07_dumbbell_shoulder_press,mmfit,w12,dumbbell_shoulder_press,shoulder press,ACCEPTED,Passed all QC gates,542
+mmfit_w12_seg08_dumbbell_shoulder_press,mmfit,w12,dumbbell_shoulder_press,shoulder press,ACCEPTED,Passed all QC gates,487
+mmfit_w13_seg00_squats,mmfit,w13,squats,squat,ACCEPTED,Passed all QC gates,547
+mmfit_w13_seg01_squats,mmfit,w13,squats,squat,ACCEPTED,Passed all QC gates,555
+mmfit_w13_seg02_squats,mmfit,w13,squats,squat,ACCEPTED,Passed all QC gates,505
+mmfit_w13_seg03_pushups,mmfit,w13,pushups,push-up,ACCEPTED,Passed all QC gates,389
+mmfit_w13_seg04_pushups,mmfit,w13,pushups,push-up,ACCEPTED,Passed all QC gates,375
+mmfit_w13_seg05_pushups,mmfit,w13,pushups,push-up,ACCEPTED,Passed all QC gates,351
+mmfit_w13_seg06_dumbbell_shoulder_press,mmfit,w13,dumbbell_shoulder_press,shoulder press,ACCEPTED,Passed all QC gates,534
+mmfit_w13_seg07_dumbbell_shoulder_press,mmfit,w13,dumbbell_shoulder_press,shoulder press,ACCEPTED,Passed all QC gates,511
+mmfit_w13_seg08_dumbbell_shoulder_press,mmfit,w13,dumbbell_shoulder_press,shoulder press,ACCEPTED,Passed all QC gates,475
+mmfit_w13_seg24_lateral_shoulder_raises,mmfit,w13,lateral_shoulder_raises,lateral raise,ACCEPTED,Passed all QC gates,473
+mmfit_w13_seg25_lateral_shoulder_raises,mmfit,w13,lateral_shoulder_raises,lateral raise,ACCEPTED,Passed all QC gates,487
+mmfit_w13_seg26_lateral_shoulder_raises,mmfit,w13,lateral_shoulder_raises,lateral raise,ACCEPTED,Passed all QC gates,520
+mmfit_w20_seg00_squats,mmfit,w20,squats,squat,ACCEPTED,Passed all QC gates,798
+mmfit_w20_seg01_squats,mmfit,w20,squats,squat,ACCEPTED,Passed all QC gates,792
+mmfit_w20_seg02_squats,mmfit,w20,squats,squat,ACCEPTED,Passed all QC gates,849
+mmfit_w20_seg03_pushups,mmfit,w20,pushups,push-up,ACCEPTED,Passed all QC gates,528
+mmfit_w20_seg04_pushups,mmfit,w20,pushups,push-up,ACCEPTED,Passed all QC gates,633
+mmfit_w20_seg05_pushups,mmfit,w20,pushups,push-up,ACCEPTED,Passed all QC gates,728
+mmfit_w20_seg21_lateral_shoulder_raises,mmfit,w20,lateral_shoulder_raises,lateral raise,ACCEPTED,Passed all QC gates,901
+mmfit_w20_seg22_lateral_shoulder_raises,mmfit,w20,lateral_shoulder_raises,lateral raise,ACCEPTED,Passed all QC gates,894
+mmfit_w20_seg23_lateral_shoulder_raises,mmfit,w20,lateral_shoulder_raises,lateral raise,ACCEPTED,Passed all QC gates,928

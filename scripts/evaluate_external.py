@@ -73,40 +73,62 @@ def find_checkpoint_path(ckpt_rel: str, seed: int) -> Path:
     p = Path(ckpt_rel)
     stem = p.stem
     suffix = p.suffix
-    candidates = []
-    if seed != 42:
-        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}{suffix}")
-        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}_seed{seed}{suffix}")
-        candidates.append(PROJECT_ROOT / ckpt_rel)
+    if seed == 42:
+        candidates = [
+            PROJECT_ROOT / ckpt_rel,
+            PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}{suffix}",
+            PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}_seed{seed}{suffix}"
+        ]
     else:
-        candidates.append(PROJECT_ROOT / ckpt_rel)
-        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}{suffix}")
-        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}_seed{seed}{suffix}")
+        candidates = [
+            PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}{suffix}",
+            PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}_seed{seed}{suffix}"
+        ]
     for c in candidates:
         if c.exists():
             return c
-    return candidates[0]
+    raise FileNotFoundError(
+        f"Strict checkpoint lookup failed for seed {seed}: {ckpt_rel}. "
+        f"Checked candidates: {[str(c) for c in candidates]}. No silent fallback permitted."
+    )
 
 def load_norm_stats_for_seed(ref_dir: Path, feat: str, seed: int) -> Tuple[np.ndarray, np.ndarray]:
-    stat_file = ref_dir / f"seed{seed}" / f"normalization_{feat}.npz"
-    if not stat_file.exists():
-        stat_file = ref_dir / f"normalization_{feat}.npz"
-    if not stat_file.exists():
-        raise FileNotFoundError(f"Missing normalization artifact for {feat} (seed {seed}): {stat_file}. Run scripts/freeze_reference_artifacts.py first!")
-    data = np.load(stat_file)
-    return (data["mean"], data["std"])
+    if seed == 42:
+        candidates = [
+            ref_dir / f"seed{seed}" / f"normalization_{feat}.npz",
+            ref_dir / f"normalization_{feat}.npz"
+        ]
+    else:
+        candidates = [
+            ref_dir / f"seed{seed}" / f"normalization_{feat}.npz"
+        ]
+    for c in candidates:
+        if c.exists():
+            data = np.load(c)
+            return (data["mean"], data["std"])
+    raise FileNotFoundError(
+        f"Strict normalization artifact lookup failed for feature '{feat}' and seed {seed}. "
+        f"Expected: {candidates[0]}."
+    )
 
 def load_ensemble_weights_for_seed(ref_dir: Path, seed: int) -> Dict[str, Any]:
-    ens_weights_file = ref_dir / f"seed{seed}" / "ensemble_weights.json"
-    if not ens_weights_file.exists():
-        ens_weights_file = ref_dir / "ensemble_weights.json"
-    if not ens_weights_file.exists():
-        return {
-            "lite": {"weights_window": [0.5, 0.5]},
-            "full": {"weights_window": [0.2, 0.2, 0.2, 0.2, 0.2]}
-        }
-    with open(ens_weights_file, "r") as f:
-        return json.load(f)
+    if seed == 42:
+        candidates = [
+            ref_dir / f"seed{seed}" / "ensemble_weights.json",
+            ref_dir / "ensemble_weights.json"
+        ]
+    else:
+        candidates = [
+            ref_dir / f"seed{seed}" / "ensemble_weights.json"
+        ]
+    for c in candidates:
+        if c.exists():
+            with open(c, "r") as f:
+                return json.load(f)
+    raise FileNotFoundError(
+        f"Strict ensemble weights lookup failed for seed {seed}. "
+        f"Expected: {candidates[0]}. Run freeze_reference_artifacts.py for seed {seed} first!"
+    )
 
 def main():
     parser = argparse.ArgumentParser(description="Unified External Benchmark Evaluation")
@@ -148,7 +170,7 @@ def main():
             split_group=split_group,
             class_set=class_set,
             pose_source=pose_source,
-            apply_geometric_norm=cfg.get("normalization", {}).get("geometric", True)
+            apply_geometric_norm=cfg.get("normalization", {}).get("geometric", False if pose_source == "mediapipe" else True)
         )
     elif dataset_name == "fit3d":
         ext_ds = Fit3DExternalDataset(
@@ -204,6 +226,7 @@ def main():
     all_seed_results_open = []
     all_seed_results_closed = []
     accum_probs = {m: np.zeros((N_windows, NUM_CLASSES), dtype=np.float64) for m in eval_models}
+    eval_counts = {m: 0 for m in eval_models}
     last_models_dict = {}
     last_feature_windows = {}
 
@@ -231,9 +254,10 @@ def main():
 
         test_probs = {}
         for name, (m_type, f_type, ckpt_p) in model_defs.items():
+            if name == "ST-GCN (Rel 3D)" and seed != 42:
+                # Baseline ST-GCN was trained exclusively on canonical seed 42
+                continue
             ckpt_full = find_checkpoint_path(ckpt_p, seed)
-            if not ckpt_full.exists():
-                raise FileNotFoundError(f"Checkpoint not found for {name} (seed {seed}): {ckpt_full}")
             model = load_checkpoint(m_type, f_type, str(ckpt_full), device)
             last_models_dict[name] = (model, m_type, f_type)
             feats = feature_windows[f_type]
@@ -243,22 +267,25 @@ def main():
         ens_cfg = load_ensemble_weights_for_seed(ref_dir, seed)
         w_lite = ens_cfg.get("lite", {}).get("weights_window", [0.5, 0.5])
         test_probs["SkelGym-Lite"] = (
-            w_lite[0] * test_probs["Transformer (Mix)"] +
-            w_lite[1] * test_probs["AAGCN (Bone 3D)"]
+            float(w_lite[0]) * test_probs["Transformer (Mix)"] +
+            float(w_lite[1]) * test_probs["AAGCN (Bone 3D)"]
         )
 
         w_full = ens_cfg.get("full", {}).get("weights_window", [0.2, 0.2, 0.2, 0.2, 0.2])
         test_probs["SkelGym-Full"] = (
-            w_full[0] * test_probs["Transformer (Mix)"] +
-            w_full[1] * test_probs["AAGCN (Bone 3D)"] +
-            w_full[2] * test_probs["AAGCN (Rel 3D)"] +
-            w_full[3] * test_probs["AAGCN (Joint Mot)"] +
-            w_full[4] * test_probs["AAGCN (Bone Mot)"]
+            float(w_full[0]) * test_probs["Transformer (Mix)"] +
+            float(w_full[1]) * test_probs["AAGCN (Bone 3D)"] +
+            float(w_full[2]) * test_probs["AAGCN (Rel 3D)"] +
+            float(w_full[3]) * test_probs["AAGCN (Joint Mot)"] +
+            float(w_full[4]) * test_probs["AAGCN (Bone Mot)"]
         )
 
         for m_name in eval_models:
+            if m_name not in test_probs:
+                continue
             prob = test_probs[m_name]
-            accum_probs[m_name] += prob / float(len(seeds))
+            accum_probs[m_name] += prob
+            eval_counts[m_name] += 1
 
             res_open_win = evaluate_window_level(prob, y_win_true, target_class_indices, mode="open_set")
             res_open_rec = aggregate_hierarchical_predictions(prob, y_win_true, win_rec_ids, target_class_indices, mode="open_set")
@@ -328,15 +355,20 @@ def main():
                 f"{closed_f1_mean:>6.4f}"
             )
 
-        avg_prob = accum_probs[m_name]
+        n_evals = max(1, eval_counts[m_name])
+        avg_prob = accum_probs[m_name] / float(n_evals)
         res_open_rec_avg = aggregate_hierarchical_predictions(avg_prob, y_win_true, win_rec_ids, target_class_indices, mode="open_set")
         res_closed_rec_avg = aggregate_hierarchical_predictions(avg_prob, y_win_true, win_rec_ids, target_class_indices, mode="closed_set")
 
+        # Map each action record to its workout cluster for workout-cluster bootstrap
+        rec_to_subj = {r: s for r, s in zip(win_rec_ids, win_subj_ids)}
+        cluster_ids = [rec_to_subj[g] for g in res_open_rec_avg["group_ids"]]
+
         ci_open = compute_recording_level_bootstrap_ci(
-            res_open_rec_avg["group_probs"], res_open_rec_avg["group_trues"], target_class_indices, mode="open_set"
+            res_open_rec_avg["group_probs"], res_open_rec_avg["group_trues"], target_class_indices, mode="open_set", cluster_ids=cluster_ids
         )
         ci_closed = compute_recording_level_bootstrap_ci(
-            res_closed_rec_avg["group_probs"], res_closed_rec_avg["group_trues"], target_class_indices, mode="closed_set"
+            res_closed_rec_avg["group_probs"], res_closed_rec_avg["group_trues"], target_class_indices, mode="closed_set", cluster_ids=cluster_ids
         )
         bootstrap_results[m_name] = {
             "open_set_recording": ci_open,

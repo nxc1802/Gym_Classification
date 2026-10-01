@@ -1,0 +1,27 @@
+{
+  "lateral raise": {
+    "cosine_similarity": -0.10352177917957306,
+    "cosine_distance": 1.103521779179573,
+    "n_skelgym": 155,
+    "n_external": 210
+  },
+  "push-up": {
+    "cosine_similarity": -0.20629706978797913,
+    "cosine_distance": 1.2062970697879791,
+    "n_skelgym": 87,
+    "n_external": 208
+  },
+  "shoulder press": {
+    "cosine_similarity": 0.35010653734207153,
+    "cosine_distance": 0.6498934626579285,
+    "n_skelgym": 152,
+    "n_external": 187
+  },
+  "squat": {
+    "cosine_similarity": 0.19953849911689758,
+    "cosine_distance": 0.8004615008831024,
+    "n_skelgym": 238,
+    "n_external": 272
+  },
+  "mean_cross_domain_similarity": 0.05995654687285423
+}

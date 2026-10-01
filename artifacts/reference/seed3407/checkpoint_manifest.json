@@ -1,0 +1,84 @@
+{
+  "version": "1.0",
+  "dataset_name": "SkelGym",
+  "num_classes": 22,
+  "normalization_source": "skelgym_train_only",
+  "ensemble_calibration_source": "skelgym_validation_only",
+  "seq_len": 32,
+  "stride": 16,
+  "seed": 3407,
+  "checkpoints": {
+    "Transformer (Mix)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/seed3407/best_Transformer_T2.2_mix.pt",
+      "sha256": "e45eb5a0a48a192af4fb6320caaa6317a2a3c56de18bf2d1d8e204bfbe42dda2"
+    },
+    "AAGCN (Bone 3D)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/seed3407/best_AAGCN_T4.2_bone_3d.pt",
+      "sha256": "5439e750a0dfcd4767ac403fa17ef2046a4bc2a3f24f1f8e4980b66fca41577d"
+    },
+    "AAGCN (Rel 3D)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/seed3407/best_AAGCN_T4.3_rel_3d.pt",
+      "sha256": "3ce5d5886610a006075790169a3591fcae6ae0d1fdd065115103bcefcbe3509a"
+    },
+    "AAGCN (Joint Mot)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/seed3407/best_AAGCN_T4.4_joint_motion_3d.pt",
+      "sha256": "d03f9fbc604619c806f938c37c55c374f985caa83de8393a8d51a08272260a27"
+    },
+    "AAGCN (Bone Mot)": {
+      "path": "/Volumes/WorkSpace/Project/Gym_Classification/checkpoints/seed3407/best_AAGCN_T4.5_bone_motion_3d.pt",
+      "sha256": "e5727ce65286caffa3a65206d89fb24ad61ad1897dc37555b4980343a5cae6ea"
+    }
+  },
+  "normalization_stats": {
+    "mix": {
+      "mean_shape": [
+        1,
+        117
+      ],
+      "std_shape": [
+        1,
+        117
+      ]
+    },
+    "rel_3d": {
+      "mean_shape": [
+        1,
+        39
+      ],
+      "std_shape": [
+        1,
+        39
+      ]
+    },
+    "bone_3d": {
+      "mean_shape": [
+        1,
+        39
+      ],
+      "std_shape": [
+        1,
+        39
+      ]
+    },
+    "joint_motion_3d": {
+      "mean_shape": [
+        1,
+        39
+      ],
+      "std_shape": [
+        1,
+        39
+      ]
+    },
+    "bone_motion_3d": {
+      "mean_shape": [
+        1,
+        39
+      ],
+      "std_shape": [
+        1,
+        39
+      ]
+    }
+  }
+}

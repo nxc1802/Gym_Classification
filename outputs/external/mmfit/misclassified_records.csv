@@ -1,0 +1,220 @@
+dataset,subject,record_id,true_class,pred_class,confidence,second_class,second_confidence,margin,pose_source
+mmfit,w00,mmfit_w00_seg07_dumbbell_shoulder_press,shoulder press,leg raises,0.9117921069264412,shoulder press,0.8340992629528046,0.07769284397363663,mediapipe
+mmfit,w00,mmfit_w00_seg24_lateral_shoulder_raises,lateral raise,chest fly machine,0.8615067563951015,lateral raise,0.8303558528423309,0.031150903552770615,mediapipe
+mmfit,w00,mmfit_w00_seg24_lateral_shoulder_raises,lateral raise,leg extension,1.215699315071106,lateral raise,0.4432138279080391,0.7724854871630669,mediapipe
+mmfit,w00,mmfit_w00_seg24_lateral_shoulder_raises,lateral raise,leg extension,1.033620297908783,lateral raise,0.5591455399990082,0.4744747579097748,mediapipe
+mmfit,w00,mmfit_w00_seg24_lateral_shoulder_raises,lateral raise,leg extension,0.9797739833593369,leg raises,0.5046949028619565,0.47507908049738035,mediapipe
+mmfit,w00,mmfit_w00_seg24_lateral_shoulder_raises,lateral raise,leg extension,1.0531940311193466,lateral raise,0.4474908113479614,0.6057032197713852,mediapipe
+mmfit,w00,mmfit_w00_seg24_lateral_shoulder_raises,lateral raise,leg extension,1.0127161294221878,leg raises,0.49685550160938874,0.5158606278127991,mediapipe
+mmfit,w00,mmfit_w00_seg24_lateral_shoulder_raises,lateral raise,leg extension,0.9912714809179306,leg raises,0.44582049874588847,0.5454509821720421,mediapipe
+mmfit,w00,mmfit_w00_seg24_lateral_shoulder_raises,lateral raise,hip thrust,0.4949901606887579,leg raises,0.4575696990941651,0.03742046159459278,mediapipe
+mmfit,w00,mmfit_w00_seg24_lateral_shoulder_raises,lateral raise,leg raises,0.5086098632309586,hip thrust,0.49096772260963917,0.017642140621319413,mediapipe
+mmfit,w00,mmfit_w00_seg25_lateral_shoulder_raises,lateral raise,leg extension,1.081803172826767,hip thrust,0.5519776977598667,0.5298254750669003,mediapipe
+mmfit,w00,mmfit_w00_seg25_lateral_shoulder_raises,lateral raise,leg extension,1.2278106212615967,hip thrust,0.5088932821527123,0.7189173391088843,mediapipe
+mmfit,w00,mmfit_w00_seg25_lateral_shoulder_raises,lateral raise,hip thrust,0.7003881558775902,leg extension,0.5478359684348106,0.15255218744277954,mediapipe
+mmfit,w00,mmfit_w00_seg25_lateral_shoulder_raises,lateral raise,hip thrust,0.7719265669584274,lateral raise,0.6525444686412811,0.1193820983171463,mediapipe
+mmfit,w00,mmfit_w00_seg25_lateral_shoulder_raises,lateral raise,leg extension,1.1089932471513748,hip thrust,0.5073926076292992,0.6016006395220757,mediapipe
+mmfit,w00,mmfit_w00_seg25_lateral_shoulder_raises,lateral raise,leg extension,0.8289346396923065,russian twist,0.48817646503448486,0.34075817465782166,mediapipe
+mmfit,w00,mmfit_w00_seg25_lateral_shoulder_raises,lateral raise,hip thrust,0.5979683324694633,lateral raise,0.46127044409513474,0.1366978883743286,mediapipe
+mmfit,w00,mmfit_w00_seg25_lateral_shoulder_raises,lateral raise,leg extension,0.9950678199529648,hip thrust,0.4906029812991619,0.5044648386538029,mediapipe
+mmfit,w00,mmfit_w00_seg25_lateral_shoulder_raises,lateral raise,leg extension,1.187071293592453,barbell biceps curl,0.42829475551843643,0.7587765380740166,mediapipe
+mmfit,w00,mmfit_w00_seg25_lateral_shoulder_raises,lateral raise,hip thrust,0.7193169109523296,russian twist,0.43480703607201576,0.2845098748803139,mediapipe
+mmfit,w00,mmfit_w00_seg25_lateral_shoulder_raises,lateral raise,hip thrust,0.682364534586668,chest fly machine,0.42611941136419773,0.2562451232224703,mediapipe
+mmfit,w00,mmfit_w00_seg26_lateral_shoulder_raises,lateral raise,hip thrust,0.6239422261714935,lateral raise,0.5576184540987015,0.06632377207279205,mediapipe
+mmfit,w00,mmfit_w00_seg26_lateral_shoulder_raises,lateral raise,leg extension,0.7724257558584213,russian twist,0.48411624878644943,0.2883095070719719,mediapipe
+mmfit,w00,mmfit_w00_seg26_lateral_shoulder_raises,lateral raise,leg extension,0.7410900443792343,russian twist,0.4817568212747574,0.25933322310447693,mediapipe
+mmfit,w00,mmfit_w00_seg26_lateral_shoulder_raises,lateral raise,leg extension,0.9339944422245026,hip thrust,0.4870994631201029,0.4468949791043997,mediapipe
+mmfit,w00,mmfit_w00_seg26_lateral_shoulder_raises,lateral raise,leg extension,1.0676393508911133,lateral raise,0.46696924418210983,0.6006701067090034,mediapipe
+mmfit,w00,mmfit_w00_seg26_lateral_shoulder_raises,lateral raise,leg extension,0.7939245402812958,leg raises,0.47694626258453354,0.31697827769676223,mediapipe
+mmfit,w00,mmfit_w00_seg26_lateral_shoulder_raises,lateral raise,leg extension,1.0188018381595612,hip thrust,0.47675527073442936,0.5420465674251318,mediapipe
+mmfit,w00,mmfit_w00_seg26_lateral_shoulder_raises,lateral raise,leg extension,0.701436959207058,hip thrust,0.504185862839222,0.197251096367836,mediapipe
+mmfit,w05,mmfit_w05_seg24_lateral_shoulder_raises,lateral raise,leg extension,0.9737420380115509,lateral raise,0.4465368911623955,0.5272051468491554,mediapipe
+mmfit,w05,mmfit_w05_seg24_lateral_shoulder_raises,lateral raise,leg extension,1.15844064950943,lateral raise,0.5768468827009201,0.5815937668085098,mediapipe
+mmfit,w05,mmfit_w05_seg24_lateral_shoulder_raises,lateral raise,leg extension,0.833895668387413,hip thrust,0.47856514155864716,0.35533052682876587,mediapipe
+mmfit,w05,mmfit_w05_seg24_lateral_shoulder_raises,lateral raise,leg extension,0.7646671757102013,leg raises,0.47057765896897763,0.29408951674122363,mediapipe
+mmfit,w05,mmfit_w05_seg24_lateral_shoulder_raises,lateral raise,leg extension,1.4513411819934845,lateral raise,0.35739925503730774,1.0939419269561768,mediapipe
+mmfit,w05,mmfit_w05_seg24_lateral_shoulder_raises,lateral raise,leg extension,0.693160355091095,leg raises,0.4450904096593149,0.24806994543178007,mediapipe
+mmfit,w05,mmfit_w05_seg24_lateral_shoulder_raises,lateral raise,leg raises,0.5306289102882147,leg extension,0.4331543557345867,0.09747455455362797,mediapipe
+mmfit,w05,mmfit_w05_seg24_lateral_shoulder_raises,lateral raise,leg extension,0.8021424412727356,lateral raise,0.478926420211792,0.3232160210609436,mediapipe
+mmfit,w05,mmfit_w05_seg24_lateral_shoulder_raises,lateral raise,leg extension,1.062251091003418,lateral raise,0.568364143371582,0.49388694763183594,mediapipe
+mmfit,w05,mmfit_w05_seg25_lateral_shoulder_raises,lateral raise,hip thrust,0.791817881166935,lateral raise,0.4927833378314972,0.2990345433354378,mediapipe
+mmfit,w05,mmfit_w05_seg25_lateral_shoulder_raises,lateral raise,leg extension,1.6320940554141998,lateral raise,0.402474969625473,1.2296190857887268,mediapipe
+mmfit,w05,mmfit_w05_seg25_lateral_shoulder_raises,lateral raise,leg extension,0.887800320982933,hip thrust,0.5852943733334541,0.3025059476494789,mediapipe
+mmfit,w05,mmfit_w05_seg25_lateral_shoulder_raises,lateral raise,leg extension,1.1621277332305908,hip thrust,0.5664569362998009,0.59567079693079,mediapipe
+mmfit,w05,mmfit_w05_seg25_lateral_shoulder_raises,lateral raise,leg extension,1.192812830209732,lateral raise,0.535719484090805,0.657093346118927,mediapipe
+mmfit,w05,mmfit_w05_seg25_lateral_shoulder_raises,lateral raise,hip thrust,0.6974883191287518,lateral raise,0.6226425170898438,0.074845802038908,mediapipe
+mmfit,w05,mmfit_w05_seg25_lateral_shoulder_raises,lateral raise,leg extension,1.2289454340934753,leg raises,0.42197181581286713,0.8069736182806082,mediapipe
+mmfit,w05,mmfit_w05_seg25_lateral_shoulder_raises,lateral raise,leg extension,0.8765220940113068,leg raises,0.4713945390540175,0.40512755495728925,mediapipe
+mmfit,w05,mmfit_w05_seg25_lateral_shoulder_raises,lateral raise,leg raises,0.5988390590064228,hip thrust,0.5256785149686038,0.07316054403781891,mediapipe
+mmfit,w05,mmfit_w05_seg25_lateral_shoulder_raises,lateral raise,leg extension,1.2154319286346436,lateral raise,0.40386124700307846,0.8115706816315651,mediapipe
+mmfit,w05,mmfit_w05_seg26_lateral_shoulder_raises,lateral raise,hip thrust,0.7089386768639088,leg extension,0.4094858467578888,0.29945283010602,mediapipe
+mmfit,w05,mmfit_w05_seg26_lateral_shoulder_raises,lateral raise,leg extension,1.3163259625434875,lateral raise,0.4141209051012993,0.9022050574421883,mediapipe
+mmfit,w05,mmfit_w05_seg26_lateral_shoulder_raises,lateral raise,leg extension,0.7404049932956696,lateral raise,0.4897625744342804,0.25064241886138916,mediapipe
+mmfit,w05,mmfit_w05_seg26_lateral_shoulder_raises,lateral raise,leg extension,1.037639006972313,leg raises,0.43969428312266245,0.5979447238496505,mediapipe
+mmfit,w05,mmfit_w05_seg26_lateral_shoulder_raises,lateral raise,leg extension,0.9862023666501045,lateral raise,0.6061806976795197,0.38002166897058487,mediapipe
+mmfit,w05,mmfit_w05_seg26_lateral_shoulder_raises,lateral raise,leg raises,0.4777080132625997,lateral raise,0.45146648585796356,0.026241527404636145,mediapipe
+mmfit,w05,mmfit_w05_seg26_lateral_shoulder_raises,lateral raise,leg extension,0.9009322971105576,hip thrust,0.4562360756099224,0.44469622150063515,mediapipe
+mmfit,w05,mmfit_w05_seg26_lateral_shoulder_raises,lateral raise,leg extension,1.042208343744278,lateral raise,0.49135713279247284,0.5508512109518051,mediapipe
+mmfit,w05,mmfit_w05_seg26_lateral_shoulder_raises,lateral raise,hip thrust,0.6576499715447426,russian twist,0.4711235761642456,0.18652639538049698,mediapipe
+mmfit,w12,mmfit_w12_seg00_squats,squat,chest fly machine,1.4069964289665222,squat,1.168385237455368,0.23861119151115417,mediapipe
+mmfit,w12,mmfit_w12_seg01_squats,squat,chest fly machine,1.8278052508831024,squat,0.8618420958518982,0.9659631550312042,mediapipe
+mmfit,w12,mmfit_w12_seg01_squats,squat,chest fly machine,1.5530411005020142,squat,0.9734702706336975,0.5795708298683167,mediapipe
+mmfit,w12,mmfit_w12_seg02_squats,squat,chest fly machine,1.72706139087677,squat,1.0116064101457596,0.7154549807310104,mediapipe
+mmfit,w13,mmfit_w13_seg00_squats,squat,decline bench press,1.256573349237442,squat,0.6236496716737747,0.6329236775636673,mediapipe
+mmfit,w13,mmfit_w13_seg00_squats,squat,chest fly machine,1.2678271979093552,squat,1.1026352047920227,0.16519199311733246,mediapipe
+mmfit,w13,mmfit_w13_seg00_squats,squat,chest fly machine,1.2141422033309937,squat,1.186538279056549,0.02760392427444458,mediapipe
+mmfit,w13,mmfit_w13_seg01_squats,squat,decline bench press,1.0478701442480087,squat,0.719026193022728,0.32884395122528076,mediapipe
+mmfit,w13,mmfit_w13_seg01_squats,squat,decline bench press,0.8456679359078407,squat,0.6664467751979828,0.17922116070985794,mediapipe
+mmfit,w13,mmfit_w13_seg01_squats,squat,t bar row,0.8544928506016731,decline bench press,0.769867293536663,0.08462555706501007,mediapipe
+mmfit,w13,mmfit_w13_seg01_squats,squat,t bar row,1.2053348422050476,squat,0.6266505494713783,0.5786842927336693,mediapipe
+mmfit,w13,mmfit_w13_seg01_squats,squat,chest fly machine,1.2257159799337387,squat,0.9194728881120682,0.30624309182167053,mediapipe
+mmfit,w13,mmfit_w13_seg01_squats,squat,chest fly machine,1.169292375445366,squat,0.9795635864138603,0.18972878903150558,mediapipe
+mmfit,w13,mmfit_w13_seg02_squats,squat,chest fly machine,1.3465801179409027,squat,0.9728394448757172,0.37374067306518555,mediapipe
+mmfit,w13,mmfit_w13_seg02_squats,squat,chest fly machine,1.6575057804584503,squat,0.6383049264550209,1.0192008540034294,mediapipe
+mmfit,w13,mmfit_w13_seg02_squats,squat,chest fly machine,1.5719746947288513,squat,0.8096207305788994,0.7623539641499519,mediapipe
+mmfit,w13,mmfit_w13_seg02_squats,squat,chest fly machine,1.8255273699760437,squat,0.5251839831471443,1.3003433868288994,mediapipe
+mmfit,w13,mmfit_w13_seg02_squats,squat,chest fly machine,1.2484851703047752,squat,1.1291418671607971,0.11934330314397812,mediapipe
+mmfit,w13,mmfit_w13_seg08_dumbbell_shoulder_press,shoulder press,leg raises,0.9588465094566345,shoulder press,0.8466207981109619,0.11222571134567261,mediapipe
+mmfit,w13,mmfit_w13_seg24_lateral_shoulder_raises,lateral raise,chest fly machine,1.7469878494739532,lateral raise,0.6717763096094131,1.07521153986454,mediapipe
+mmfit,w13,mmfit_w13_seg24_lateral_shoulder_raises,lateral raise,chest fly machine,0.7089134491980076,squat,0.6959524271078408,0.012961022090166807,mediapipe
+mmfit,w13,mmfit_w13_seg24_lateral_shoulder_raises,lateral raise,chest fly machine,1.236794668249786,lateral raise,0.6179497838020325,0.6188448844477534,mediapipe
+mmfit,w13,mmfit_w13_seg24_lateral_shoulder_raises,lateral raise,chest fly machine,0.6588145708083175,lateral raise,0.6152507066726685,0.043563864135649055,mediapipe
+mmfit,w13,mmfit_w13_seg24_lateral_shoulder_raises,lateral raise,chest fly machine,2.0974884629249573,lateral raise,0.6944525986909866,1.4030358642339706,mediapipe
+mmfit,w13,mmfit_w13_seg24_lateral_shoulder_raises,lateral raise,leg extension,0.8648364990949631,chest fly machine,0.7760065644979477,0.08882993459701538,mediapipe
+mmfit,w13,mmfit_w13_seg24_lateral_shoulder_raises,lateral raise,chest fly machine,2.068876326084137,lateral raise,0.7000803053379059,1.368796020746231,mediapipe
+mmfit,w13,mmfit_w13_seg24_lateral_shoulder_raises,lateral raise,chest fly machine,1.9670971930027008,lateral raise,0.7009193599224091,1.2661778330802917,mediapipe
+mmfit,w13,mmfit_w13_seg24_lateral_shoulder_raises,lateral raise,chest fly machine,1.9415363073349,lateral raise,0.5446607321500778,1.396875575184822,mediapipe
+mmfit,w13,mmfit_w13_seg24_lateral_shoulder_raises,lateral raise,leg extension,1.4615711569786072,lateral raise,0.5124583840370178,0.9491127729415894,mediapipe
+mmfit,w13,mmfit_w13_seg24_lateral_shoulder_raises,lateral raise,chest fly machine,2.1453306674957275,lateral raise,0.677957147359848,1.4673735201358795,mediapipe
+mmfit,w13,mmfit_w13_seg24_lateral_shoulder_raises,lateral raise,chest fly machine,1.0299932360649109,lateral raise,0.5750378370285034,0.45495539903640747,mediapipe
+mmfit,w13,mmfit_w13_seg24_lateral_shoulder_raises,lateral raise,chest fly machine,1.9563493132591248,lateral raise,0.6487966030836105,1.3075527101755142,mediapipe
+mmfit,w13,mmfit_w13_seg24_lateral_shoulder_raises,lateral raise,chest fly machine,1.1676682829856873,squat,0.4910077055392321,0.6766605774464551,mediapipe
+mmfit,w13,mmfit_w13_seg24_lateral_shoulder_raises,lateral raise,chest fly machine,1.3311442360281944,lateral raise,0.6990160197019577,0.6321282163262367,mediapipe
+mmfit,w13,mmfit_w13_seg25_lateral_shoulder_raises,lateral raise,chest fly machine,1.7235701382160187,lateral raise,0.7001806646585464,1.0233894735574722,mediapipe
+mmfit,w13,mmfit_w13_seg25_lateral_shoulder_raises,lateral raise,chest fly machine,1.034102514386177,squat,0.6516569014638662,0.38244561292231083,mediapipe
+mmfit,w13,mmfit_w13_seg25_lateral_shoulder_raises,lateral raise,chest fly machine,0.7259155111387372,squat,0.6236285483464599,0.10228696279227734,mediapipe
+mmfit,w13,mmfit_w13_seg25_lateral_shoulder_raises,lateral raise,chest fly machine,0.8202894409187138,lateral raise,0.6317624598741531,0.18852698104456067,mediapipe
+mmfit,w13,mmfit_w13_seg25_lateral_shoulder_raises,lateral raise,chest fly machine,1.79560124874115,lateral raise,0.6867627054452896,1.1088385432958603,mediapipe
+mmfit,w13,mmfit_w13_seg25_lateral_shoulder_raises,lateral raise,chest fly machine,1.3862496316432953,squat,0.5715247204061598,0.8147249112371355,mediapipe
+mmfit,w13,mmfit_w13_seg25_lateral_shoulder_raises,lateral raise,chest fly machine,0.7933393940329552,lateral raise,0.675540417432785,0.11779897660017014,mediapipe
+mmfit,w13,mmfit_w13_seg25_lateral_shoulder_raises,lateral raise,chest fly machine,1.6103299260139465,lateral raise,0.6791867911815643,0.9311431348323822,mediapipe
+mmfit,w13,mmfit_w13_seg25_lateral_shoulder_raises,lateral raise,leg extension,0.9972200803458691,t bar row,0.6703526899218559,0.32686739042401314,mediapipe
+mmfit,w13,mmfit_w13_seg25_lateral_shoulder_raises,lateral raise,chest fly machine,1.1857436895370483,squat,0.786118290387094,0.3996253991499543,mediapipe
+mmfit,w13,mmfit_w13_seg25_lateral_shoulder_raises,lateral raise,squat,1.0527763739228249,leg extension,0.7943114638328552,0.25846491008996964,mediapipe
+mmfit,w13,mmfit_w13_seg25_lateral_shoulder_raises,lateral raise,chest fly machine,1.9024397730827332,lateral raise,0.6805061846971512,1.221933588385582,mediapipe
+mmfit,w13,mmfit_w13_seg25_lateral_shoulder_raises,lateral raise,squat,1.4723795056343079,lateral raise,0.5322169214487076,0.9401625841856003,mediapipe
+mmfit,w13,mmfit_w13_seg25_lateral_shoulder_raises,lateral raise,chest fly machine,1.4570084810256958,lateral raise,0.6119344979524612,0.8450739830732346,mediapipe
+mmfit,w13,mmfit_w13_seg25_lateral_shoulder_raises,lateral raise,chest fly machine,0.9786362946033478,squat,0.6871498222462833,0.2914864723570645,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,chest fly machine,1.8410780727863312,lateral raise,0.6031524240970612,1.23792564868927,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,chest fly machine,0.8287312929751351,leg extension,0.46031247079372406,0.3684188221814111,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,chest fly machine,1.4266232401132584,lateral raise,0.6434239149093628,0.7831993252038956,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,chest fly machine,1.6660951972007751,lateral raise,0.5311688482761383,1.1349263489246368,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,leg extension,1.115165427327156,chest fly machine,0.6914083732990548,0.42375705402810127,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,chest fly machine,1.5742299258708954,lateral raise,0.6351529657840729,0.9390769600868225,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,squat,0.9453841149806976,chest fly machine,0.7683656066656113,0.17701850831508636,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,leg extension,1.2518367618322372,lateral raise,0.6371294260025024,0.6147073358297348,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,chest fly machine,1.018641136586666,lateral raise,0.690298855304718,0.3283422812819481,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,squat,1.074382422491908,lateral raise,0.6078635901212692,0.46651883237063885,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,chest fly machine,0.6562075039837509,squat,0.6456302989972755,0.010577204986475408,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,chest fly machine,1.2572923572733998,lateral raise,0.6913671493530273,0.5659252079203725,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,leg extension,0.8580699115991592,lateral raise,0.4775984436273575,0.38047146797180176,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,chest fly machine,0.9125075973570347,lateral raise,0.6825074404478073,0.23000015690922737,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,leg extension,2.091963052749634,lateral raise,0.28199298307299614,1.8099700696766376,mediapipe
+mmfit,w13,mmfit_w13_seg26_lateral_shoulder_raises,lateral raise,chest fly machine,1.945119172334671,lateral raise,0.6730003654956818,1.2721188068389893,mediapipe
+mmfit,w20,mmfit_w20_seg00_squats,squat,decline bench press,1.0994221568107605,barbell biceps curl,0.7152000814676285,0.384222075343132,mediapipe
+mmfit,w20,mmfit_w20_seg00_squats,squat,barbell biceps curl,0.8835813105106354,squat,0.6902720630168915,0.1933092474937439,mediapipe
+mmfit,w20,mmfit_w20_seg00_squats,squat,decline bench press,2.103362202644348,barbell biceps curl,0.4912605583667755,1.6121016442775726,mediapipe
+mmfit,w20,mmfit_w20_seg00_squats,squat,decline bench press,1.415668398141861,squat,0.9007747173309326,0.5148936808109283,mediapipe
+mmfit,w20,mmfit_w20_seg01_squats,squat,decline bench press,1.1342164874076843,barbell biceps curl,0.6667883694171906,0.4674281179904938,mediapipe
+mmfit,w20,mmfit_w20_seg01_squats,squat,decline bench press,1.0697525292634964,barbell biceps curl,0.4270108789205551,0.6427416503429413,mediapipe
+mmfit,w20,mmfit_w20_seg01_squats,squat,decline bench press,1.384722352027893,barbell biceps curl,0.520620584487915,0.864101767539978,mediapipe
+mmfit,w20,mmfit_w20_seg01_squats,squat,decline bench press,1.8518612682819366,squat,0.2694913372397423,1.5823699310421944,mediapipe
+mmfit,w20,mmfit_w20_seg01_squats,squat,decline bench press,1.1732446104288101,squat,0.47684720903635025,0.6963974013924599,mediapipe
+mmfit,w20,mmfit_w20_seg02_squats,squat,decline bench press,0.9675244837999344,barbell biceps curl,0.9510631561279297,0.0164613276720047,mediapipe
+mmfit,w20,mmfit_w20_seg02_squats,squat,decline bench press,1.8040038049221039,t bar row,0.20247682969784364,1.6015269752242602,mediapipe
+mmfit,w20,mmfit_w20_seg02_squats,squat,decline bench press,1.2048015594482422,barbell biceps curl,0.5548166334629059,0.6499849259853363,mediapipe
+mmfit,w20,mmfit_w20_seg02_squats,squat,decline bench press,2.174767255783081,barbell biceps curl,0.19070812687277794,1.9840591289103031,mediapipe
+mmfit,w20,mmfit_w20_seg02_squats,squat,decline bench press,1.7623200416564941,deadlift,0.4192657098174095,1.3430543318390846,mediapipe
+mmfit,w20,mmfit_w20_seg05_pushups,push-up,t bar row,1.1858880817890167,push-up,0.6123321503400803,0.5735559314489365,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,chest fly machine,2.0031643509864807,lateral raise,0.6736407279968262,1.3295236229896545,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,leg extension,2.2501609921455383,lateral raise,0.579842820763588,1.6703181713819504,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,chest fly machine,2.110130727291107,lateral raise,0.3813549876213074,1.7287757396697998,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,leg extension,1.056983858346939,chest fly machine,1.0057752281427383,0.051208630204200745,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,leg extension,1.680597946047783,lateral raise,0.6458088010549545,1.0347891449928284,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,chest fly machine,2.1241732835769653,lateral raise,0.5163252502679825,1.6078480333089828,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,leg extension,2.1306236386299133,lateral raise,0.6587139368057251,1.4719097018241882,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,leg extension,1.2305884808301926,lateral raise,0.9535511434078217,0.2770373374223709,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,chest fly machine,2.0519797801971436,lateral raise,0.5482490211725235,1.50373075902462,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,leg extension,2.2775097489356995,lateral raise,0.3555017337203026,1.9220080152153969,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,chest fly machine,1.3729922771453857,lateral raise,1.0786433219909668,0.29434895515441895,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,chest fly machine,2.2067317962646484,lateral raise,0.6618520319461823,1.5448797643184662,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,leg extension,2.319701313972473,romanian deadlift,0.12246586568653584,2.1972354482859373,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,chest fly machine,2.064710855484009,lateral raise,0.7828150391578674,1.2818958163261414,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,chest fly machine,2.1203205585479736,lateral raise,0.6614791750907898,1.4588413834571838,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,leg extension,2.326265573501587,deadlift,0.12812603637576103,2.198139537125826,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,chest fly machine,1.9950146079063416,lateral raise,0.7992376387119293,1.1957769691944122,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,chest fly machine,1.9775187969207764,lateral raise,0.8561721742153168,1.1213466227054596,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,leg extension,2.2956092953681946,shoulder press,0.16069689765572548,2.134912397712469,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,chest fly machine,2.0672820806503296,lateral raise,0.762153148651123,1.3051289319992065,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,chest fly machine,1.2973420023918152,lateral raise,0.875818133354187,0.4215238690376282,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,leg extension,2.2794524431228638,lateral raise,0.40709786117076874,1.872354581952095,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,chest fly machine,2.091730058193207,lateral raise,0.581947535276413,1.5097825229167938,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,chest fly machine,1.9612704515457153,lateral raise,0.7252870500087738,1.2359834015369415,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,leg extension,1.388280212879181,romanian deadlift,0.7962212264537811,0.5920589864253998,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,deadlift,2.5185946822166443,romanian deadlift,0.40841175615787506,2.1101829260587692,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,deadlift,1.6990932822227478,romanian deadlift,0.43534648418426514,1.2637467980384827,mediapipe
+mmfit,w20,mmfit_w20_seg21_lateral_shoulder_raises,lateral raise,t bar row,1.7786566615104675,decline bench press,0.34603147744201124,1.4326251840684563,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,1.6114081889390945,lateral raise,0.7044893652200699,0.9069188237190247,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,2.2645155787467957,lateral raise,0.5897020697593689,1.6748135089874268,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,chest fly machine,2.2021275758743286,t bar row,0.3009350299835205,1.901192545890808,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,2.131030857563019,lateral raise,0.6836811453104019,1.4473497122526169,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,1.5890082120895386,lateral raise,0.6826992332935333,0.9063089787960052,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,chest fly machine,2.1050997972488403,lateral raise,0.5303870588541031,1.5747127383947372,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,2.27718722820282,lateral raise,0.5082956030964851,1.7688916251063347,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,chest fly machine,1.1122988611459732,lateral raise,0.9918543845415115,0.12044447660446167,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,chest fly machine,2.1228076815605164,lateral raise,0.7381736934185028,1.3846339881420135,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,2.3108566999435425,push-up,0.1329655945301056,2.177891105413437,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,chest fly machine,1.7388693690299988,lateral raise,0.8535702228546143,0.8852991461753845,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,chest fly machine,1.8159399628639221,lateral raise,0.7404829859733582,1.075456976890564,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,2.2914122939109802,shoulder press,0.29965854436159134,1.9917537495493889,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,chest fly machine,1.4680604934692383,lateral raise,0.871374636888504,0.5966858565807343,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,1.4340705424547195,lateral raise,0.7896580696105957,0.6444124728441238,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,1.9387230277061462,lateral raise,0.5862360000610352,1.352487027645111,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,chest fly machine,1.8633829057216644,shoulder press,0.3987155742943287,1.4646673314273357,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,1.62637859582901,lateral raise,0.6946482062339783,0.9317303895950317,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,1.5105260908603668,lateral raise,0.9307386726140976,0.5797874182462692,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,chest fly machine,1.90001779794693,lateral raise,0.5671296268701553,1.3328881710767746,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,2.2721943855285645,lateral raise,0.459160715341568,1.8130336701869965,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,1.4924162030220032,lateral raise,0.9434910118579865,0.5489251911640167,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,chest fly machine,1.7038517594337463,shoulder press,0.4108079820871353,1.293043777346611,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,1.727529376745224,lateral raise,0.7091253399848938,1.0184040367603302,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,deadlift,1.7554197907447815,romanian deadlift,1.0552492439746857,0.7001705467700958,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,deadlift,1.652366042137146,leg extension,0.647110428661108,1.005255613476038,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,1.4008661806583405,chest fly machine,0.4504639512160793,0.9504022294422612,mediapipe
+mmfit,w20,mmfit_w20_seg22_lateral_shoulder_raises,lateral raise,leg extension,1.5280472934246063,decline bench press,0.43587810080498457,1.0921691926196218,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,leg extension,1.4597924500703812,chest fly machine,0.7116616275161505,0.7481308225542307,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,leg extension,1.3112889677286148,lateral raise,1.0419010818004608,0.269387885928154,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,chest fly machine,2.0035964846611023,lateral raise,0.4249742180109024,1.5786222666502,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,leg extension,2.230348229408264,lateral raise,0.6153506487607956,1.6149975806474686,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,chest fly machine,1.8712499141693115,t bar row,0.4558403491973877,1.4154095649719238,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,leg extension,1.6442418992519379,lateral raise,0.6991716027259827,0.9450702965259552,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,leg extension,1.6203332841396332,lateral raise,0.694711223244667,0.9256220608949661,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,chest fly machine,1.859382838010788,t bar row,0.4425688311457634,1.4168140068650246,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,leg extension,1.6116780638694763,lateral raise,0.6626335382461548,0.9490445256233215,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,leg extension,1.1041800677776337,lateral raise,1.0269144177436829,0.0772656500339508,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,chest fly machine,2.1529025435447693,lateral raise,0.46293897926807404,1.6899635642766953,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,leg extension,2.269754648208618,lateral raise,0.6208390891551971,1.648915559053421,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,chest fly machine,1.1850741356611252,lateral raise,1.0771970450878143,0.10787709057331085,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,chest fly machine,2.0161250233650208,lateral raise,0.7817432284355164,1.2343817949295044,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,leg extension,2.2846294045448303,lateral raise,0.18219509068876505,2.1024343138560653,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,chest fly machine,2.1208048462867737,lateral raise,0.5824598520994186,1.538344994187355,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,leg extension,2.2805845141410828,lateral raise,0.2834865413606167,1.997097972780466,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,leg extension,1.3086227029561996,lateral raise,0.962001234292984,0.34662146866321564,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,chest fly machine,2.0596121549606323,lateral raise,0.44013509899377823,1.619477055966854,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,leg extension,2.1427359580993652,lateral raise,0.6701544970273972,1.472581461071968,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,chest fly machine,2.005241572856903,lateral raise,0.8272161334753036,1.1780254393815994,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,leg extension,2.2988597750663757,push-up,0.15688571333885193,2.141974061727524,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,deadlift,1.444872960448265,romanian deadlift,1.0321050584316254,0.4127679020166397,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,deadlift,2.586482346057892,romanian deadlift,0.3755130022764206,2.2109693437814713,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,leg extension,1.2572969496250153,deadlift,0.5160807371139526,0.7412162125110626,mediapipe
+mmfit,w20,mmfit_w20_seg23_lateral_shoulder_raises,lateral raise,leg extension,1.5353397727012634,decline bench press,0.3418068327009678,1.1935329400002956,mediapipe

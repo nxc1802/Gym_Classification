@@ -114,13 +114,17 @@ def compute_recording_level_bootstrap_ci(
     y_trues_by_group: np.ndarray,
     target_class_indices: List[int],
     mode: str = "open_set",
+    cluster_ids: Optional[List[str]] = None,
     n_bootstraps: int = 1000,
     confidence_level: float = 0.95,
     seed: int = 42
 ) -> Dict[str, Any]:
     """
     Non-parametric bootstrap confidence interval at recording/group level.
-    Resamples recordings with replacement (B=1000 iterations).
+    If cluster_ids (e.g. workout IDs ['w00', 'w05', ...]) are provided:
+      Performs cluster bootstrap resampling: resamples entire workout clusters with replacement.
+    Otherwise:
+      Resamples individual recordings with replacement (B=1000 iterations).
     """
     rng = np.random.default_rng(seed)
     N = len(y_trues_by_group)
@@ -133,8 +137,24 @@ def compute_recording_level_bootstrap_ci(
     alpha_low = ((1.0 - confidence_level) / 2.0) * 100.0
     alpha_high = (1.0 - (1.0 - confidence_level) / 2.0) * 100.0
 
+    if cluster_ids is not None:
+        cluster_arr = np.array(cluster_ids)
+        unique_clusters = np.unique(cluster_arr)
+        K = len(unique_clusters)
+        cluster_to_indices = {c: np.where(cluster_arr == c)[0] for c in unique_clusters}
+    else:
+        unique_clusters = None
+
     for _ in range(n_bootstraps):
-        boot_idx = rng.choice(N, size=N, replace=True)
+        if unique_clusters is not None:
+            sampled_clusters = rng.choice(unique_clusters, size=K, replace=True)
+            sampled_indices = []
+            for sc in sampled_clusters:
+                sampled_indices.extend(cluster_to_indices[sc])
+            boot_idx = np.array(sampled_indices, dtype=np.int64)
+        else:
+            boot_idx = rng.choice(N, size=N, replace=True)
+
         sub_probs = y_probs_by_group[boot_idx]
         sub_trues = y_trues_by_group[boot_idx]
 

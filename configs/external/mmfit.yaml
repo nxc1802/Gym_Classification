@@ -18,8 +18,8 @@ workout_split:
     - "w11"
 
 pose_protocol:
-  source: native # 'native' or 'mediapipe'
-  geometric_norm: true
+  source: mediapipe # 'native' or 'mediapipe'
+  geometric_norm: false
   align_orientation: false
 
 fps:
@@ -31,7 +31,7 @@ window:
   stride: 32
 
 normalization:
-  geometric: true
+  geometric: false
   feature_stats: skelgym_train # 'skelgym_train' strictly enforces train stats (no leakage)
 
 evaluation:

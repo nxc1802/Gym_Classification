@@ -36,6 +36,7 @@ models_cache/
 
 # Datasets & Heavy Artifacts
 /data/
+data_external/
 mm-fit/
 *.npy
 *.zip
@@ -54,6 +55,10 @@ mm-fit/
 *.synctex.gz
 
 # Outputs & Temporary Files
+outputs/**/*.png
+outputs/**/*.jpg
+outputs/**/*.zip
+outputs/**/*.log
 outputs/*.png
 outputs/*.jpg
 outputs/*.zip

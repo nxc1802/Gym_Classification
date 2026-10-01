@@ -1,0 +1,878 @@
+record_id,subject_id,true_class,pred_class_open,is_correct_open
+mmfit_w00_seg00_squats,w00,squat,incline bench press,False
+mmfit_w00_seg00_squats,w00,squat,pull Up,False
+mmfit_w00_seg00_squats,w00,squat,pull Up,False
+mmfit_w00_seg00_squats,w00,squat,pull Up,False
+mmfit_w00_seg00_squats,w00,squat,incline bench press,False
+mmfit_w00_seg00_squats,w00,squat,incline bench press,False
+mmfit_w00_seg00_squats,w00,squat,incline bench press,False
+mmfit_w00_seg00_squats,w00,squat,pull Up,False
+mmfit_w00_seg00_squats,w00,squat,pull Up,False
+mmfit_w00_seg00_squats,w00,squat,chest fly machine,False
+mmfit_w00_seg00_squats,w00,squat,pull Up,False
+mmfit_w00_seg00_squats,w00,squat,pull Up,False
+mmfit_w00_seg00_squats,w00,squat,pull Up,False
+mmfit_w00_seg00_squats,w00,squat,pull Up,False
+mmfit_w00_seg01_squats,w00,squat,incline bench press,False
+mmfit_w00_seg01_squats,w00,squat,incline bench press,False
+mmfit_w00_seg01_squats,w00,squat,incline bench press,False
+mmfit_w00_seg01_squats,w00,squat,incline bench press,False
+mmfit_w00_seg01_squats,w00,squat,incline bench press,False
+mmfit_w00_seg01_squats,w00,squat,incline bench press,False
+mmfit_w00_seg01_squats,w00,squat,pull Up,False
+mmfit_w00_seg01_squats,w00,squat,push-up,False
+mmfit_w00_seg01_squats,w00,squat,incline bench press,False
+mmfit_w00_seg01_squats,w00,squat,incline bench press,False
+mmfit_w00_seg01_squats,w00,squat,incline bench press,False
+mmfit_w00_seg01_squats,w00,squat,squat,True
+mmfit_w00_seg01_squats,w00,squat,squat,True
+mmfit_w00_seg01_squats,w00,squat,squat,True
+mmfit_w00_seg01_squats,w00,squat,incline bench press,False
+mmfit_w00_seg02_squats,w00,squat,pull Up,False
+mmfit_w00_seg02_squats,w00,squat,pull Up,False
+mmfit_w00_seg02_squats,w00,squat,pull Up,False
+mmfit_w00_seg02_squats,w00,squat,pull Up,False
+mmfit_w00_seg02_squats,w00,squat,pull Up,False
+mmfit_w00_seg02_squats,w00,squat,pull Up,False
+mmfit_w00_seg02_squats,w00,squat,pull Up,False
+mmfit_w00_seg02_squats,w00,squat,pull Up,False
+mmfit_w00_seg02_squats,w00,squat,pull Up,False
+mmfit_w00_seg02_squats,w00,squat,pull Up,False
+mmfit_w00_seg02_squats,w00,squat,pull Up,False
+mmfit_w00_seg02_squats,w00,squat,pull Up,False
+mmfit_w00_seg02_squats,w00,squat,squat,True
+mmfit_w00_seg02_squats,w00,squat,pull Up,False
+mmfit_w00_seg02_squats,w00,squat,tricep dips,False
+mmfit_w00_seg03_pushups,w00,push-up,pull Up,False
+mmfit_w00_seg03_pushups,w00,push-up,pull Up,False
+mmfit_w00_seg03_pushups,w00,push-up,pull Up,False
+mmfit_w00_seg03_pushups,w00,push-up,pull Up,False
+mmfit_w00_seg03_pushups,w00,push-up,pull Up,False
+mmfit_w00_seg03_pushups,w00,push-up,pull Up,False
+mmfit_w00_seg03_pushups,w00,push-up,pull Up,False
+mmfit_w00_seg03_pushups,w00,push-up,pull Up,False
+mmfit_w00_seg03_pushups,w00,push-up,pull Up,False
+mmfit_w00_seg03_pushups,w00,push-up,pull Up,False
+mmfit_w00_seg03_pushups,w00,push-up,pull Up,False
+mmfit_w00_seg03_pushups,w00,push-up,pull Up,False
+mmfit_w00_seg03_pushups,w00,push-up,pull Up,False
+mmfit_w00_seg04_pushups,w00,push-up,incline bench press,False
+mmfit_w00_seg04_pushups,w00,push-up,squat,False
+mmfit_w00_seg04_pushups,w00,push-up,squat,False
+mmfit_w00_seg04_pushups,w00,push-up,incline bench press,False
+mmfit_w00_seg04_pushups,w00,push-up,squat,False
+mmfit_w00_seg04_pushups,w00,push-up,squat,False
+mmfit_w00_seg04_pushups,w00,push-up,incline bench press,False
+mmfit_w00_seg04_pushups,w00,push-up,squat,False
+mmfit_w00_seg04_pushups,w00,push-up,incline bench press,False
+mmfit_w00_seg04_pushups,w00,push-up,shoulder press,False
+mmfit_w00_seg04_pushups,w00,push-up,squat,False
+mmfit_w00_seg04_pushups,w00,push-up,squat,False
+mmfit_w00_seg04_pushups,w00,push-up,squat,False
+mmfit_w00_seg05_pushups,w00,push-up,shoulder press,False
+mmfit_w00_seg05_pushups,w00,push-up,squat,False
+mmfit_w00_seg05_pushups,w00,push-up,shoulder press,False
+mmfit_w00_seg05_pushups,w00,push-up,squat,False
+mmfit_w00_seg05_pushups,w00,push-up,shoulder press,False
+mmfit_w00_seg05_pushups,w00,push-up,shoulder press,False
+mmfit_w00_seg05_pushups,w00,push-up,shoulder press,False
+mmfit_w00_seg05_pushups,w00,push-up,shoulder press,False
+mmfit_w00_seg05_pushups,w00,push-up,squat,False
+mmfit_w00_seg05_pushups,w00,push-up,shoulder press,False
+mmfit_w00_seg05_pushups,w00,push-up,squat,False
+mmfit_w00_seg05_pushups,w00,push-up,shoulder press,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg06_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg07_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg08_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg08_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg08_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg08_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg08_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg08_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg08_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg08_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg08_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg08_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg08_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg08_dumbbell_shoulder_press,w00,shoulder press,leg raises,False
+mmfit_w00_seg08_dumbbell_shoulder_press,w00,shoulder press,pull Up,False
+mmfit_w00_seg24_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg24_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg24_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg24_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg24_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg24_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg24_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg24_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg24_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg24_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg24_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg24_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg24_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg25_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg25_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg25_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg25_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg25_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg25_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg25_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg25_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg25_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg25_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg25_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg25_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg25_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg26_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg26_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg26_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg26_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg26_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg26_lateral_shoulder_raises,w00,lateral raise,leg raises,False
+mmfit_w00_seg26_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg26_lateral_shoulder_raises,w00,lateral raise,chest fly machine,False
+mmfit_w00_seg26_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg26_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg26_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg26_lateral_shoulder_raises,w00,lateral raise,pull Up,False
+mmfit_w00_seg26_lateral_shoulder_raises,w00,lateral raise,incline bench press,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg00_squats,w05,squat,pull Up,False
+mmfit_w05_seg01_squats,w05,squat,incline bench press,False
+mmfit_w05_seg01_squats,w05,squat,incline bench press,False
+mmfit_w05_seg01_squats,w05,squat,incline bench press,False
+mmfit_w05_seg01_squats,w05,squat,pull Up,False
+mmfit_w05_seg01_squats,w05,squat,pull Up,False
+mmfit_w05_seg01_squats,w05,squat,pull Up,False
+mmfit_w05_seg01_squats,w05,squat,incline bench press,False
+mmfit_w05_seg01_squats,w05,squat,incline bench press,False
+mmfit_w05_seg01_squats,w05,squat,pull Up,False
+mmfit_w05_seg01_squats,w05,squat,pull Up,False
+mmfit_w05_seg01_squats,w05,squat,pull Up,False
+mmfit_w05_seg01_squats,w05,squat,pull Up,False
+mmfit_w05_seg01_squats,w05,squat,pull Up,False
+mmfit_w05_seg01_squats,w05,squat,pull Up,False
+mmfit_w05_seg01_squats,w05,squat,pull Up,False
+mmfit_w05_seg01_squats,w05,squat,lat pulldown,False
+mmfit_w05_seg02_squats,w05,squat,pull Up,False
+mmfit_w05_seg02_squats,w05,squat,pull Up,False
+mmfit_w05_seg02_squats,w05,squat,pull Up,False
+mmfit_w05_seg02_squats,w05,squat,pull Up,False
+mmfit_w05_seg02_squats,w05,squat,pull Up,False
+mmfit_w05_seg02_squats,w05,squat,pull Up,False
+mmfit_w05_seg02_squats,w05,squat,pull Up,False
+mmfit_w05_seg02_squats,w05,squat,pull Up,False
+mmfit_w05_seg02_squats,w05,squat,pull Up,False
+mmfit_w05_seg02_squats,w05,squat,pull Up,False
+mmfit_w05_seg02_squats,w05,squat,pull Up,False
+mmfit_w05_seg02_squats,w05,squat,pull Up,False
+mmfit_w05_seg02_squats,w05,squat,pull Up,False
+mmfit_w05_seg02_squats,w05,squat,pull Up,False
+mmfit_w05_seg02_squats,w05,squat,incline bench press,False
+mmfit_w05_seg02_squats,w05,squat,deadlift,False
+mmfit_w05_seg02_squats,w05,squat,squat,True
+mmfit_w05_seg02_squats,w05,squat,squat,True
+mmfit_w05_seg02_squats,w05,squat,leg extension,False
+mmfit_w05_seg03_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg03_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg03_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg03_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg03_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg03_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg03_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg03_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg03_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg03_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg03_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg03_pushups,w05,push-up,pull Up,False
+mmfit_w05_seg03_pushups,w05,push-up,pull Up,False
+mmfit_w05_seg04_pushups,w05,push-up,pull Up,False
+mmfit_w05_seg04_pushups,w05,push-up,pull Up,False
+mmfit_w05_seg04_pushups,w05,push-up,pull Up,False
+mmfit_w05_seg04_pushups,w05,push-up,pull Up,False
+mmfit_w05_seg04_pushups,w05,push-up,pull Up,False
+mmfit_w05_seg04_pushups,w05,push-up,pull Up,False
+mmfit_w05_seg04_pushups,w05,push-up,pull Up,False
+mmfit_w05_seg04_pushups,w05,push-up,squat,False
+mmfit_w05_seg04_pushups,w05,push-up,squat,False
+mmfit_w05_seg04_pushups,w05,push-up,squat,False
+mmfit_w05_seg04_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg04_pushups,w05,push-up,shoulder press,False
+mmfit_w05_seg04_pushups,w05,push-up,deadlift,False
+mmfit_w05_seg04_pushups,w05,push-up,squat,False
+mmfit_w05_seg05_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg05_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg05_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg05_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg05_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg05_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg05_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg05_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg05_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg05_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg05_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg05_pushups,w05,push-up,leg raises,False
+mmfit_w05_seg06_dumbbell_shoulder_press,w05,shoulder press,incline bench press,False
+mmfit_w05_seg06_dumbbell_shoulder_press,w05,shoulder press,squat,False
+mmfit_w05_seg06_dumbbell_shoulder_press,w05,shoulder press,deadlift,False
+mmfit_w05_seg06_dumbbell_shoulder_press,w05,shoulder press,leg raises,False
+mmfit_w05_seg06_dumbbell_shoulder_press,w05,shoulder press,leg raises,False
+mmfit_w05_seg06_dumbbell_shoulder_press,w05,shoulder press,leg raises,False
+mmfit_w05_seg06_dumbbell_shoulder_press,w05,shoulder press,leg raises,False
+mmfit_w05_seg06_dumbbell_shoulder_press,w05,shoulder press,leg raises,False
+mmfit_w05_seg06_dumbbell_shoulder_press,w05,shoulder press,leg raises,False
+mmfit_w05_seg06_dumbbell_shoulder_press,w05,shoulder press,leg raises,False
+mmfit_w05_seg06_dumbbell_shoulder_press,w05,shoulder press,incline bench press,False
+mmfit_w05_seg06_dumbbell_shoulder_press,w05,shoulder press,incline bench press,False
+mmfit_w05_seg06_dumbbell_shoulder_press,w05,shoulder press,squat,False
+mmfit_w05_seg06_dumbbell_shoulder_press,w05,shoulder press,leg raises,False
+mmfit_w05_seg07_dumbbell_shoulder_press,w05,shoulder press,shoulder press,True
+mmfit_w05_seg07_dumbbell_shoulder_press,w05,shoulder press,shoulder press,True
+mmfit_w05_seg07_dumbbell_shoulder_press,w05,shoulder press,shoulder press,True
+mmfit_w05_seg07_dumbbell_shoulder_press,w05,shoulder press,shoulder press,True
+mmfit_w05_seg07_dumbbell_shoulder_press,w05,shoulder press,shoulder press,True
+mmfit_w05_seg07_dumbbell_shoulder_press,w05,shoulder press,squat,False
+mmfit_w05_seg07_dumbbell_shoulder_press,w05,shoulder press,shoulder press,True
+mmfit_w05_seg07_dumbbell_shoulder_press,w05,shoulder press,shoulder press,True
+mmfit_w05_seg07_dumbbell_shoulder_press,w05,shoulder press,squat,False
+mmfit_w05_seg07_dumbbell_shoulder_press,w05,shoulder press,shoulder press,True
+mmfit_w05_seg07_dumbbell_shoulder_press,w05,shoulder press,shoulder press,True
+mmfit_w05_seg07_dumbbell_shoulder_press,w05,shoulder press,squat,False
+mmfit_w05_seg07_dumbbell_shoulder_press,w05,shoulder press,pull Up,False
+mmfit_w05_seg07_dumbbell_shoulder_press,w05,shoulder press,pull Up,False
+mmfit_w05_seg08_dumbbell_shoulder_press,w05,shoulder press,shoulder press,True
+mmfit_w05_seg08_dumbbell_shoulder_press,w05,shoulder press,pull Up,False
+mmfit_w05_seg08_dumbbell_shoulder_press,w05,shoulder press,pull Up,False
+mmfit_w05_seg08_dumbbell_shoulder_press,w05,shoulder press,pull Up,False
+mmfit_w05_seg08_dumbbell_shoulder_press,w05,shoulder press,pull Up,False
+mmfit_w05_seg08_dumbbell_shoulder_press,w05,shoulder press,pull Up,False
+mmfit_w05_seg08_dumbbell_shoulder_press,w05,shoulder press,pull Up,False
+mmfit_w05_seg08_dumbbell_shoulder_press,w05,shoulder press,pull Up,False
+mmfit_w05_seg08_dumbbell_shoulder_press,w05,shoulder press,pull Up,False
+mmfit_w05_seg08_dumbbell_shoulder_press,w05,shoulder press,pull Up,False
+mmfit_w05_seg08_dumbbell_shoulder_press,w05,shoulder press,pull Up,False
+mmfit_w05_seg08_dumbbell_shoulder_press,w05,shoulder press,pull Up,False
+mmfit_w05_seg08_dumbbell_shoulder_press,w05,shoulder press,pull Up,False
+mmfit_w05_seg24_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg24_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg24_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg24_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg24_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg24_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg24_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg24_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg24_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg24_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg24_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg24_lateral_shoulder_raises,w05,lateral raise,pull Up,False
+mmfit_w05_seg24_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg25_lateral_shoulder_raises,w05,lateral raise,lat pulldown,False
+mmfit_w05_seg25_lateral_shoulder_raises,w05,lateral raise,lat pulldown,False
+mmfit_w05_seg25_lateral_shoulder_raises,w05,lateral raise,lat pulldown,False
+mmfit_w05_seg25_lateral_shoulder_raises,w05,lateral raise,lat pulldown,False
+mmfit_w05_seg25_lateral_shoulder_raises,w05,lateral raise,deadlift,False
+mmfit_w05_seg25_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg25_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg25_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg25_lateral_shoulder_raises,w05,lateral raise,pull Up,False
+mmfit_w05_seg25_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg25_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg25_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg25_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg25_lateral_shoulder_raises,w05,lateral raise,squat,False
+mmfit_w05_seg26_lateral_shoulder_raises,w05,lateral raise,leg raises,False
+mmfit_w05_seg26_lateral_shoulder_raises,w05,lateral raise,leg raises,False
+mmfit_w05_seg26_lateral_shoulder_raises,w05,lateral raise,leg raises,False
+mmfit_w05_seg26_lateral_shoulder_raises,w05,lateral raise,pull Up,False
+mmfit_w05_seg26_lateral_shoulder_raises,w05,lateral raise,pull Up,False
+mmfit_w05_seg26_lateral_shoulder_raises,w05,lateral raise,pull Up,False
+mmfit_w05_seg26_lateral_shoulder_raises,w05,lateral raise,pull Up,False
+mmfit_w05_seg26_lateral_shoulder_raises,w05,lateral raise,pull Up,False
+mmfit_w05_seg26_lateral_shoulder_raises,w05,lateral raise,pull Up,False
+mmfit_w05_seg26_lateral_shoulder_raises,w05,lateral raise,pull Up,False
+mmfit_w05_seg26_lateral_shoulder_raises,w05,lateral raise,pull Up,False
+mmfit_w05_seg26_lateral_shoulder_raises,w05,lateral raise,pull Up,False
+mmfit_w05_seg26_lateral_shoulder_raises,w05,lateral raise,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,bench press,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg00_squats,w12,squat,pull Up,False
+mmfit_w12_seg01_squats,w12,squat,pull Up,False
+mmfit_w12_seg01_squats,w12,squat,pull Up,False
+mmfit_w12_seg01_squats,w12,squat,decline bench press,False
+mmfit_w12_seg01_squats,w12,squat,tricep dips,False
+mmfit_w12_seg01_squats,w12,squat,pull Up,False
+mmfit_w12_seg01_squats,w12,squat,pull Up,False
+mmfit_w12_seg01_squats,w12,squat,pull Up,False
+mmfit_w12_seg01_squats,w12,squat,pull Up,False
+mmfit_w12_seg01_squats,w12,squat,chest fly machine,False
+mmfit_w12_seg01_squats,w12,squat,pull Up,False
+mmfit_w12_seg01_squats,w12,squat,chest fly machine,False
+mmfit_w12_seg01_squats,w12,squat,leg raises,False
+mmfit_w12_seg01_squats,w12,squat,pull Up,False
+mmfit_w12_seg01_squats,w12,squat,pull Up,False
+mmfit_w12_seg01_squats,w12,squat,pull Up,False
+mmfit_w12_seg01_squats,w12,squat,pull Up,False
+mmfit_w12_seg02_squats,w12,squat,chest fly machine,False
+mmfit_w12_seg02_squats,w12,squat,pull Up,False
+mmfit_w12_seg02_squats,w12,squat,pull Up,False
+mmfit_w12_seg02_squats,w12,squat,pull Up,False
+mmfit_w12_seg02_squats,w12,squat,leg raises,False
+mmfit_w12_seg02_squats,w12,squat,pull Up,False
+mmfit_w12_seg02_squats,w12,squat,pull Up,False
+mmfit_w12_seg02_squats,w12,squat,leg raises,False
+mmfit_w12_seg02_squats,w12,squat,pull Up,False
+mmfit_w12_seg02_squats,w12,squat,pull Up,False
+mmfit_w12_seg02_squats,w12,squat,bench press,False
+mmfit_w12_seg02_squats,w12,squat,pull Up,False
+mmfit_w12_seg02_squats,w12,squat,pull Up,False
+mmfit_w12_seg02_squats,w12,squat,pull Up,False
+mmfit_w12_seg02_squats,w12,squat,pull Up,False
+mmfit_w12_seg02_squats,w12,squat,pull Up,False
+mmfit_w12_seg02_squats,w12,squat,shoulder press,False
+mmfit_w12_seg03_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg03_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg03_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg03_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg03_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg03_pushups,w12,push-up,squat,False
+mmfit_w12_seg03_pushups,w12,push-up,squat,False
+mmfit_w12_seg03_pushups,w12,push-up,squat,False
+mmfit_w12_seg03_pushups,w12,push-up,squat,False
+mmfit_w12_seg03_pushups,w12,push-up,squat,False
+mmfit_w12_seg03_pushups,w12,push-up,squat,False
+mmfit_w12_seg04_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg04_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg04_pushups,w12,push-up,squat,False
+mmfit_w12_seg04_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg04_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg04_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg04_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg04_pushups,w12,push-up,squat,False
+mmfit_w12_seg04_pushups,w12,push-up,squat,False
+mmfit_w12_seg04_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg04_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg04_pushups,w12,push-up,leg extension,False
+mmfit_w12_seg05_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg05_pushups,w12,push-up,squat,False
+mmfit_w12_seg05_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg05_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg05_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg05_pushups,w12,push-up,squat,False
+mmfit_w12_seg05_pushups,w12,push-up,shoulder press,False
+mmfit_w12_seg05_pushups,w12,push-up,squat,False
+mmfit_w12_seg05_pushups,w12,push-up,squat,False
+mmfit_w12_seg05_pushups,w12,push-up,squat,False
+mmfit_w12_seg05_pushups,w12,push-up,squat,False
+mmfit_w12_seg05_pushups,w12,push-up,squat,False
+mmfit_w12_seg05_pushups,w12,push-up,squat,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,squat,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,squat,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,squat,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,squat,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,squat,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,squat,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,squat,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,squat,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,shoulder press,True
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,incline bench press,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,incline bench press,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,incline bench press,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,incline bench press,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,incline bench press,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,incline bench press,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,incline bench press,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,incline bench press,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,incline bench press,False
+mmfit_w12_seg06_dumbbell_shoulder_press,w12,shoulder press,shoulder press,True
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg07_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg08_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg08_dumbbell_shoulder_press,w12,shoulder press,leg raises,False
+mmfit_w12_seg08_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg08_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg08_dumbbell_shoulder_press,w12,shoulder press,leg raises,False
+mmfit_w12_seg08_dumbbell_shoulder_press,w12,shoulder press,leg raises,False
+mmfit_w12_seg08_dumbbell_shoulder_press,w12,shoulder press,leg raises,False
+mmfit_w12_seg08_dumbbell_shoulder_press,w12,shoulder press,leg raises,False
+mmfit_w12_seg08_dumbbell_shoulder_press,w12,shoulder press,leg raises,False
+mmfit_w12_seg08_dumbbell_shoulder_press,w12,shoulder press,leg raises,False
+mmfit_w12_seg08_dumbbell_shoulder_press,w12,shoulder press,leg raises,False
+mmfit_w12_seg08_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg08_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg08_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w12_seg08_dumbbell_shoulder_press,w12,shoulder press,pull Up,False
+mmfit_w13_seg00_squats,w13,squat,pull Up,False
+mmfit_w13_seg00_squats,w13,squat,pull Up,False
+mmfit_w13_seg00_squats,w13,squat,pull Up,False
+mmfit_w13_seg00_squats,w13,squat,pull Up,False
+mmfit_w13_seg00_squats,w13,squat,lat pulldown,False
+mmfit_w13_seg00_squats,w13,squat,leg raises,False
+mmfit_w13_seg00_squats,w13,squat,pull Up,False
+mmfit_w13_seg00_squats,w13,squat,shoulder press,False
+mmfit_w13_seg00_squats,w13,squat,pull Up,False
+mmfit_w13_seg00_squats,w13,squat,pull Up,False
+mmfit_w13_seg00_squats,w13,squat,pull Up,False
+mmfit_w13_seg00_squats,w13,squat,pull Up,False
+mmfit_w13_seg00_squats,w13,squat,pull Up,False
+mmfit_w13_seg00_squats,w13,squat,pull Up,False
+mmfit_w13_seg00_squats,w13,squat,pull Up,False
+mmfit_w13_seg00_squats,w13,squat,pull Up,False
+mmfit_w13_seg00_squats,w13,squat,pull Up,False
+mmfit_w13_seg01_squats,w13,squat,leg raises,False
+mmfit_w13_seg01_squats,w13,squat,leg raises,False
+mmfit_w13_seg01_squats,w13,squat,pull Up,False
+mmfit_w13_seg01_squats,w13,squat,pull Up,False
+mmfit_w13_seg01_squats,w13,squat,pull Up,False
+mmfit_w13_seg01_squats,w13,squat,pull Up,False
+mmfit_w13_seg01_squats,w13,squat,pull Up,False
+mmfit_w13_seg01_squats,w13,squat,pull Up,False
+mmfit_w13_seg01_squats,w13,squat,pull Up,False
+mmfit_w13_seg01_squats,w13,squat,pull Up,False
+mmfit_w13_seg01_squats,w13,squat,pull Up,False
+mmfit_w13_seg01_squats,w13,squat,leg raises,False
+mmfit_w13_seg01_squats,w13,squat,leg raises,False
+mmfit_w13_seg01_squats,w13,squat,pull Up,False
+mmfit_w13_seg01_squats,w13,squat,leg raises,False
+mmfit_w13_seg01_squats,w13,squat,leg raises,False
+mmfit_w13_seg01_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg02_squats,w13,squat,pull Up,False
+mmfit_w13_seg03_pushups,w13,push-up,pull Up,False
+mmfit_w13_seg03_pushups,w13,push-up,pull Up,False
+mmfit_w13_seg03_pushups,w13,push-up,pull Up,False
+mmfit_w13_seg03_pushups,w13,push-up,pull Up,False
+mmfit_w13_seg03_pushups,w13,push-up,pull Up,False
+mmfit_w13_seg03_pushups,w13,push-up,pull Up,False
+mmfit_w13_seg03_pushups,w13,push-up,pull Up,False
+mmfit_w13_seg03_pushups,w13,push-up,pull Up,False
+mmfit_w13_seg03_pushups,w13,push-up,pull Up,False
+mmfit_w13_seg03_pushups,w13,push-up,pull Up,False
+mmfit_w13_seg03_pushups,w13,push-up,pull Up,False
+mmfit_w13_seg03_pushups,w13,push-up,pull Up,False
+mmfit_w13_seg04_pushups,w13,push-up,pull Up,False
+mmfit_w13_seg04_pushups,w13,push-up,pull Up,False
+mmfit_w13_seg04_pushups,w13,push-up,squat,False
+mmfit_w13_seg04_pushups,w13,push-up,shoulder press,False
+mmfit_w13_seg04_pushups,w13,push-up,shoulder press,False
+mmfit_w13_seg04_pushups,w13,push-up,shoulder press,False
+mmfit_w13_seg04_pushups,w13,push-up,shoulder press,False
+mmfit_w13_seg04_pushups,w13,push-up,shoulder press,False
+mmfit_w13_seg04_pushups,w13,push-up,shoulder press,False
+mmfit_w13_seg04_pushups,w13,push-up,incline bench press,False
+mmfit_w13_seg04_pushups,w13,push-up,incline bench press,False
+mmfit_w13_seg04_pushups,w13,push-up,incline bench press,False
+mmfit_w13_seg05_pushups,w13,push-up,squat,False
+mmfit_w13_seg05_pushups,w13,push-up,squat,False
+mmfit_w13_seg05_pushups,w13,push-up,squat,False
+mmfit_w13_seg05_pushups,w13,push-up,squat,False
+mmfit_w13_seg05_pushups,w13,push-up,squat,False
+mmfit_w13_seg05_pushups,w13,push-up,shoulder press,False
+mmfit_w13_seg05_pushups,w13,push-up,shoulder press,False
+mmfit_w13_seg05_pushups,w13,push-up,shoulder press,False
+mmfit_w13_seg05_pushups,w13,push-up,shoulder press,False
+mmfit_w13_seg05_pushups,w13,push-up,shoulder press,False
+mmfit_w13_seg05_pushups,w13,push-up,squat,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,squat,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,squat,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,squat,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,squat,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,squat,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,squat,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,leg extension,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,squat,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,incline bench press,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,squat,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,squat,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,leg extension,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,squat,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg06_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg07_dumbbell_shoulder_press,w13,shoulder press,leg raises,False
+mmfit_w13_seg08_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg08_dumbbell_shoulder_press,w13,shoulder press,leg raises,False
+mmfit_w13_seg08_dumbbell_shoulder_press,w13,shoulder press,leg raises,False
+mmfit_w13_seg08_dumbbell_shoulder_press,w13,shoulder press,leg raises,False
+mmfit_w13_seg08_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg08_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg08_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg08_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg08_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg08_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg08_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg08_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg08_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg08_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg08_dumbbell_shoulder_press,w13,shoulder press,pull Up,False
+mmfit_w13_seg24_lateral_shoulder_raises,w13,lateral raise,squat,False
+mmfit_w13_seg24_lateral_shoulder_raises,w13,lateral raise,squat,False
+mmfit_w13_seg24_lateral_shoulder_raises,w13,lateral raise,squat,False
+mmfit_w13_seg24_lateral_shoulder_raises,w13,lateral raise,squat,False
+mmfit_w13_seg24_lateral_shoulder_raises,w13,lateral raise,squat,False
+mmfit_w13_seg24_lateral_shoulder_raises,w13,lateral raise,squat,False
+mmfit_w13_seg24_lateral_shoulder_raises,w13,lateral raise,squat,False
+mmfit_w13_seg24_lateral_shoulder_raises,w13,lateral raise,squat,False
+mmfit_w13_seg24_lateral_shoulder_raises,w13,lateral raise,squat,False
+mmfit_w13_seg24_lateral_shoulder_raises,w13,lateral raise,squat,False
+mmfit_w13_seg24_lateral_shoulder_raises,w13,lateral raise,squat,False
+mmfit_w13_seg24_lateral_shoulder_raises,w13,lateral raise,squat,False
+mmfit_w13_seg24_lateral_shoulder_raises,w13,lateral raise,squat,False
+mmfit_w13_seg24_lateral_shoulder_raises,w13,lateral raise,squat,False
+mmfit_w13_seg24_lateral_shoulder_raises,w13,lateral raise,squat,False
+mmfit_w13_seg25_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg25_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg25_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg25_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg25_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg25_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg25_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg25_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg25_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg25_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg25_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg25_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg25_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg25_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg25_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w13_seg26_lateral_shoulder_raises,w13,lateral raise,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,shoulder press,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,shoulder press,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,shoulder press,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,shoulder press,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,shoulder press,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,pull Up,False
+mmfit_w20_seg00_squats,w20,squat,shoulder press,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg01_squats,w20,squat,pull Up,False
+mmfit_w20_seg02_squats,w20,squat,incline bench press,False
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,squat,True
+mmfit_w20_seg02_squats,w20,squat,incline bench press,False
+mmfit_w20_seg02_squats,w20,squat,incline bench press,False
+mmfit_w20_seg02_squats,w20,squat,incline bench press,False
+mmfit_w20_seg02_squats,w20,squat,incline bench press,False
+mmfit_w20_seg02_squats,w20,squat,incline bench press,False
+mmfit_w20_seg02_squats,w20,squat,incline bench press,False
+mmfit_w20_seg02_squats,w20,squat,incline bench press,False
+mmfit_w20_seg02_squats,w20,squat,incline bench press,False
+mmfit_w20_seg02_squats,w20,squat,incline bench press,False
+mmfit_w20_seg02_squats,w20,squat,incline bench press,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg03_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg04_pushups,w20,push-up,pull Up,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg05_pushups,w20,push-up,squat,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,tricep Pushdown,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg21_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,shoulder press,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,squat,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg22_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,incline bench press,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,incline bench press,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,chest fly machine,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,leg raises,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
+mmfit_w20_seg23_lateral_shoulder_raises,w20,lateral raise,pull Up,False
