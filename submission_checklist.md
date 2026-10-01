@@ -281,17 +281,17 @@ Hugging Face
 Toàn bộ các con số đã được đối soát chéo và khớp 100% giữa Code, Scripts, Tables, TeX, README và Cover Letter:
 
 #### Core Metrics (3-Seed Mean ± SD & Seed 42 Baseline)
-- [x] Multi-Seed Window Accuracy (3 seeds) = **70.03% ± 0.70%** (Baseline Seed 42: **70.11%**)
-- [x] Multi-Seed Window Macro-F1 (3 seeds) = **0.6877 ± 0.0051** (Baseline Seed 42: **0.6858**)
-- [x] Multi-Seed Video Accuracy (3 seeds) = **77.68% ± 0.86%** (Baseline Seed 42: **77.68%**)
-- [x] Multi-Seed Video Macro-F1 (3 seeds) = **0.7689 ± 0.0090** (Baseline Seed 42: **0.7649**)
+- [x] Multi-Seed Window Accuracy (3 seeds) = **69.74% ± 1.04%** (Baseline Seed 42: **70.11%**)
+- [x] Multi-Seed Window Macro-F1 (3 seeds) = **0.6882 ± 0.0068** (Baseline Seed 42: **0.6858**)
+- [x] Multi-Seed Video Accuracy (3 seeds) = **79.11% ± 0.25%** (Baseline Seed 42: **77.68%**)
+- [x] Multi-Seed Video Macro-F1 (3 seeds) = **0.7834 ± 0.0082** (Baseline Seed 42: **0.7649**)
 - [x] Test windows = **2,743**
 - [x] Test videos = **233**
 - [x] Params = **1.91M** (Full Ensemble) / **777K** (Lite) / **399K** (Transformer Mix)
 
 #### Statistical Metrics
-- [x] Window CI = $[68.46\%, 71.75\%]$ (Bootstrap Mean: $70.14\%$)
-- [x] Video CI = $[72.09\%, 83.26\%]$ (Bootstrap Mean: $77.65\%$)
+- [x] Window CI = $[68.36\%, 71.75\%]$ (Bootstrap Mean: $70.06\%$)
+- [x] Video CI = $[73.82\%, 84.12\%]$ (Bootstrap Mean: $79.02\%$)
 - [x] Khoảng CI bắt buộc chứa point estimate (Cả $70.11\%$ và $77.68\%$ đều nằm ở trung tâm của khoảng tin cậy).
 
 #### Architecture

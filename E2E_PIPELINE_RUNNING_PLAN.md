@@ -6,15 +6,17 @@
 
 ## 📌 0. Tổng Quan & Trạng Thái Khởi Tạo (Clean Slate)
 
-- **Trạng thái dọn dẹp:** Toàn bộ checkpoints, outputs, và artifacts từ các đợt chạy trước đã được đóng gói an toàn tại `archive_previous_run_backup_20261001.tar.gz`.
-- **Cấu trúc thư mục sạch:**
-  - `checkpoints/`: Sạch sẽ, sẵn sàng ghi nhận trọng số mới theo từng seed (`checkpoints/best_*.pt` cho seed 42; `checkpoints/seed123/`, `checkpoints/seed3407/`).
-  - `outputs/`: Sạch sẽ (sẵn sàng `outputs/logs/` và `outputs/external/`).
-  - `artifacts/reference/`: Sẵn sàng cho việc đóng băng thống kê chuẩn hóa.
+- **Trạng thái dọn dẹp:** Toàn bộ checkpoints, outputs, và artifacts từ các đợt chạy trước đã được đóng gói an toàn tại `archive_pre_clean_results.tar.gz`, `archive_previous_run_backup_20261001.tar.gz`, và `archive_audit_test_run_20261001.tar.gz`.
+- **Cấu trúc thư mục sạch sẵn sàng (Clean Slate):**
+  - `checkpoints/`: Hoàn toàn sạch sẽ, sẵn sàng ghi nhận trọng số mới from-scratch theo từng seed (`checkpoints/best_*.pt` cho seed 42; `checkpoints/seed123/`, `checkpoints/seed3407/`).
+  - `outputs/external/mmfit/`: Hoàn toàn sạch sẽ, sẵn sàng ghi nhận toàn bộ metrics, confusion matrix, bootstrap CI sau khi rerun.
+  - `artifacts/reference/`: Hoàn toàn sạch sẽ, sẵn sàng cho việc đóng băng thống kê chuẩn hóa và trọng số SLSQP tự động ở Phase 2.
+  - `data_external/mmfit/`: Giữ nguyên dữ liệu input thực tế: 5 video raw RGB (`raw/rgb/*.mp4`) và 5 file landmark trích xuất MediaPipe Pose Heavy (`landmarks/*.csv`, ~1.0 GB) để sẵn sàng chạy benchmark.
 - **Quy chuẩn khoa học bắt buộc xuyên suốt:**
   1. **Strict Video-Level Partition:** Phân chia 6:2:2 ở cấp độ source-video (1,024 videos; train: 580, val: 208, test: 236) — tuyệt đối không overlap video giữa các split.
   2. **Zero Test-Data Leakage:** Thống kê chuẩn hóa (z-score mean/std) tính độc quyền trên tập **Train**. Trọng số ensemble soft-voting (SLSQP) và Stacking meta-classifier tối ưu hóa độc quyền trên tập **Validation**. Tập **Test** chỉ dùng một lần duy nhất để đánh giá.
   3. **Multi-Seed Rigor (Bắt buộc Phase 1, 2, 3, 4, 5, 7):** Mọi kết quả từ baseline, constituent models, 5 fusion methods, ablation, bootstrap, đến external test đều phải được thực thi và báo cáo theo định dạng **$\text{Mean} \pm \text{SD}$** trên 3 seed cố định: `42`, `123`, `3407`.
+  4. **Strict Provenance & No Silent Fallbacks:** Mọi script đánh giá đa hạt giống bắt buộc phải nạp đúng checkpoint và trọng số của seed tương ứng; nếu thiếu file phải ném ngoại lệ `FileNotFoundError`, nghiêm cấm fallback âm thầm về seed 42.
 
 ---
 
@@ -50,8 +52,10 @@
                       │
                       ▼
 [Phase 7: Multi-Seed External Cross-Dataset Benchmark (MM-Fit & Fit3D)]
-  ├── Protocol A (MediaPipe Re-extraction) & Protocol B (Native 3D Pose)
-  └── Zero-Shot Open/Closed Set + 100-Trial Few-Shot Simulation
+  ├── Protocol A (MediaPipe Pose Heavy) — Tọa độ Camera tự nhiên (không xoay hình học)
+  ├── Tiền xử lý cửa sổ đạt Parity 100% với SkelGym (zero-frame interpolation)
+  ├── Zero-Shot Open/Closed Set với Workout-Cluster Bootstrap CI 95%
+  └── 100-Trial Few-Shot Simulation với Cách Ly Workout Tuyệt Đối & Trọng số SLSQP 5 luồng
                       │
                       ▼
 [Phase 8: Manuscript LaTeX Synchronization & Publication Compilation]
@@ -63,17 +67,17 @@
 
 ### Phase 0: Kiểm Tra Môi Trường & Chạy Test Suite
 
-Chạy kiểm tra toàn bộ 43 unit và reproducibility test cases trước khi train:
+Chạy kiểm tra toàn bộ 51 unit và reproducibility test cases trước khi train (bao gồm cả test pipeline external mới bổ sung):
 
 ```bash
-# 1. Chạy toàn bộ test suite
+# 1. Chạy toàn bộ test suite (51/51 tests)
 pytest tests/ -v
 
 # 2. Sinh báo cáo thống kê dataset (bảo đảm 1,024 videos, 22 classes, 13 joints)
 python run.py data-report --output_dir outputs/test_report
 ```
 
-*Tiêu chí đạt (Quality Gate):* 43/43 tests PASSED; file `outputs/test_report/dataset_report.md` và `table1_counts.tex` được tạo thành công.
+*Tiêu chí đạt (Quality Gate):* **51/51 tests PASSED**; file `outputs/test_report/dataset_report.md` và `table1_counts.tex` được tạo thành công.
 
 ---
 
@@ -141,16 +145,18 @@ done
 
 ### Phase 2: Đóng Băng Reference Artifacts (Multi-Seed Reference Freeze)
 
-Trích xuất và cố định vĩnh viễn thống kê chuẩn hóa từ tập Train và trọng số SLSQP validation cho seed 42 (tham chiếu chính) và lưu trữ manifests cho các seeds:
+Trích xuất và cố định vĩnh viễn thống kê chuẩn hóa từ tập Train và tối ưu hóa trọng số SLSQP trên tập Validation cho **cả 3 seeds (42, 123, 3407)** độc lập (không dùng fallback):
 
 ```bash
 python scripts/freeze_reference_artifacts.py
 ```
 
 *Sản phẩm đầu ra tại `artifacts/reference/`:*
-- `normalization_mix.npz`, `normalization_rel_3d.npz`, `normalization_bone_3d.npz`, `normalization_joint_motion_3d.npz`, `normalization_bone_motion_3d.npz`
-- `ensemble_weights.json` (Trọng số SLSQP Validation)
-- `checkpoint_manifest.json` (Mã băm SHA-256 các model)
+- Thư mục con cho từng seed: `seed42/`, `seed123/`, `seed3407/`
+- Mỗi seed chứa đầy đủ:
+  - `normalization_mix.npz`, `normalization_rel_3d.npz`, `normalization_bone_3d.npz`, `normalization_joint_motion_3d.npz`, `normalization_bone_motion_3d.npz`
+  - `ensemble_weights.json` (Trọng số SLSQP Validation được fit độc lập trên validation split của từng seed)
+  - `checkpoint_manifest.json` (Mã băm SHA-256 các checkpoint tương ứng)
 - `class_names.json` (22 nhãn lớp canonical)
 
 ---
@@ -239,20 +245,38 @@ python scripts/benchmark_hardware_latency.py --device auto
 
 ### Phase 7: Benchmark Độc Lập Bên Ngoài trên Multi-Seed (MM-Fit & Fit3D)
 
-Đánh giá khả năng tổng quát hóa trên tập dữ liệu external chưa từng tham gia huấn luyện trên **cả 3 seeds (42, 123, 3407)**:
+Đánh giá khả năng tổng quát hóa trên tập dữ liệu external chưa từng tham gia huấn luyện trên **cả 3 seeds (42, 123, 3407)** với đầy đủ các tiêu chuẩn đã qua kiểm toán (Audit-Approved):
 
-#### 1. MM-Fit Benchmark (Dataset có sẵn tại thư mục `mm-fit/`)
+#### 1. MM-Fit Benchmark (Dataset có sẵn tại `data_external/mmfit/` và `mm-fit/`)
 
-```bash
-# a. Trích xuất MediaPipe canonical landmarks (Protocol A)
-python scripts/prepare_mmfit_external.py --root mm-fit --pose-source mediapipe
+- **Bước a: Trích xuất MediaPipe Pose Heavy (nếu chưa trích xuất):**
+  *(Nếu đã có 5 file CSV tại `data_external/mmfit/landmarks/`, có thể bỏ qua bước này)*
+  ```bash
+  python scripts/extract_external_mediapipe.py \
+    --workouts w00 w05 w12 w13 w20 \
+    --raw-dir data_external/mmfit/raw/rgb \
+    --out-dir data_external/mmfit/landmarks \
+    --complexity 2 \
+    --workers 4
+  ```
 
-# b. Đánh giá Zero-shot Cross-Dataset trên cả 3 seeds (Open-set & Closed-set)
-python scripts/evaluate_external.py --config configs/external/mmfit.yaml --seeds 42 123 3407
+- **Bước b: Đăng ký & Thẩm định Metadata Segment (Frame ID Alignment):**
+  Ánh xạ frame ID thực tế và lọc 54 exercise sets cho 4 lớp cốt lõi (`lateral raise`, `push-up`, `shoulder press`, `squat`):
+  ```bash
+  python scripts/prepare_mmfit_external.py --root data_external/mmfit --pose-source mediapipe
+  ```
 
-# c. Đánh giá One-shot Classification Simulation (100 trials) trên cả 3 seeds
-python scripts/evaluate_external_fewshot.py --config configs/external/mmfit.yaml --trials 100 --seeds 42 123 3407
-```
+- **Bước c: Đánh giá Zero-shot Cross-Dataset trên cả 3 seeds (Open-set & Closed-set):**
+  Chạy suy luận với zero-frame interpolation parity, không xoay hình học (`geometric: false`), và tính khoảng tin cậy 95% bằng **Workout-Cluster Bootstrap** ($B=1,000$ iterations trên 5 cụm workout `w00, w05, w12, w13, w20`):
+  ```bash
+  python scripts/evaluate_external.py --config configs/external/mmfit.yaml --seeds 42 123 3407
+  ```
+
+- **Bước d: Đánh giá One-shot Classification Simulation (100 trials x 3 seeds = 300 trials):**
+  Thực thi mô phỏng 1-shot với cách ly workout toàn cục tuyệt đối (không rò rỉ context camera/người tập giữa support và query) và ghép vector đại diện 5 luồng đầy đủ bằng trọng số SLSQP validation ($\mathbf{z}_{\text{Full}} = \frac{[\sqrt{w_i}\hat{\mathbf{z}}_i]_{i=1}^5}{\|[\sqrt{w_i}\hat{\mathbf{z}}_i]_{i=1}^5\|_2}$):
+  ```bash
+  python scripts/evaluate_external_fewshot.py --config configs/external/mmfit.yaml --trials 100 --seeds 42 123 3407
+  ```
 
 #### 2. Fit3D Benchmark (Nếu có dataset Fit3D)
 
@@ -262,12 +286,14 @@ python scripts/evaluate_external.py --config configs/external/fit3d.yaml --seeds
 ```
 
 *Sản phẩm đầu ra tại `outputs/external/mmfit/`:*
-- `dataset_audit.csv`
-- `metrics_closed.csv` & `metrics_open.csv` (ghi nhận $\text{Mean} \pm \text{SD}$ qua 3 seeds)
-- `fewshot_summary.csv` & `fewshot_100_trials.csv`
-- `confusion_closed.png` & `confusion_open.png`
-- `bootstrap_ci.json`
-- `run_manifest.json`
+- `dataset_audit.csv`: Báo cáo lưu giữ và loại trừ dữ liệu theo QC gate
+- `metrics_closed.csv` & `metrics_open.csv`: Ghi nhận $\text{Mean} \pm \text{SD}$ cùng 95% Workout-Cluster Bootstrap CI qua 3 seeds
+- `fewshot_summary.csv` & `fewshot_trials.csv`: Tỷ lệ thành công 1-shot transfer qua 300 trials
+- `confusion_closed.png` & `confusion_open.png`: Ma trận nhầm lẫn chuẩn hóa
+- `bootstrap_ci.json`: Chi tiết phân phối bootstrap CI theo workout cluster
+- `misclassified_records.csv`: Phân tích chuyên sâu các mẫu phân loại sai
+- `domain_gap_diagnostics.json`: Độ tương đồng cosine centroid giữa SkelGym và MM-Fit
+- `run_manifest.json`: Toàn bộ thông số và siêu dữ liệu của phiên chạy
 
 ---
 
@@ -293,13 +319,13 @@ Bạn có thể chạy toàn bộ quy trình tuần tự bằng 1 dòng lệnh b
 ```bash
 pytest tests/ && \
 python run.py data-report && \
-python scripts/run_multi_seed_experiments.py --device auto --include_baselines && \
+python scripts/run_multi_seed_experiments.py --device auto --epochs 100 --include_baselines && \
 python scripts/freeze_reference_artifacts.py && \
 python scripts/evaluate_local_ensemble.py --seeds 42 123 3407 --device auto && \
 python scripts/run_augmentation_experiments.py --mode all --device auto --seeds 42 123 3407 && \
 python scripts/compute_statistical_tests.py && \
 python scripts/benchmark_hardware_latency.py --device auto && \
-python scripts/prepare_mmfit_external.py --root mm-fit --pose-source mediapipe && \
+python scripts/prepare_mmfit_external.py --root data_external/mmfit --pose-source mediapipe && \
 python scripts/evaluate_external.py --config configs/external/mmfit.yaml --seeds 42 123 3407 && \
-python scripts/evaluate_external_fewshot.py --config configs/external/mmfit.yaml --trials 100
+python scripts/evaluate_external_fewshot.py --config configs/external/mmfit.yaml --trials 100 --seeds 42 123 3407
 ```

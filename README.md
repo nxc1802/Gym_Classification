@@ -49,7 +49,7 @@ By abstracting raw video frames into sparse 3D joint trajectories on edge hardwa
 1. **Curated Multi-Source Landmark Benchmark:** Curates and releases 1,024 multi-camera in-the-wild videos spanning 22 resistance exercises across three provenance streams with strict 6:2:2 video-level partitioning (zero source-video overlap), eliminating temporal data leakage prevalent in prior benchmarks.
 2. **117-dimensional Biomechanical Compound Representation:** Fuses 3D relative joint coordinates ($39$-d) with pairwise directional elevation angles ($78$-d), reducing dimensionality by $59.1\%$ compared to combinatorial $3$-joint triplets ($\binom{13}{3} = 286$-d) while resolving multicollinearity, eliminating gradient singularities at joint lockouts, and retaining scale-invariant directional orientation.
 3. **Empirically Selected Augmentation Configuration (SkelGym-Aug):** Systematically investigates a candidate pool of five established skeletal augmentation operators (bilateral sagittal reflection, gravitational yaw rotation, proportional scaling, temporal time warping, and sensor jitter). Through multi-seed Leave-One-Out (LOO) ablation, we demonstrate that temporal warping disrupts exercise cadence and degrades accuracy, leading to an empirically selected 4-operator configuration that boosts generalization while preserving exercise biomechanics. Applied strictly on-the-fly during training forward passes (zero test-time corruption).
-4. **Cross-Paradigm Fusion, Rigorous Benchmarking, and Real-Time Edge Deployment:** Couples custom lightweight backbones ($\approx 350\text{K}$ parameters per stream, trained from scratch) spanning self-attention Transformers and 4-Stream AAGCNs via validation-calibrated SLSQP soft voting, achieving **$69.74\% \pm 1.04\%$** window accuracy, **$79.11\% \pm 0.25\%$** video consensus accuracy (Video Macro F1: **$0.7834 \pm 0.0082$**, Window Macro F1: **$0.6882 \pm 0.0068$**), and ultra-low edge latency (**$0.42\text{--}4.33\text{ ms}$** on host CPU, **$0.08\text{--}0.54\text{ ms}$** on CUDA) for privacy-preserving deployment.
+4. **Cross-Paradigm Fusion, Rigorous Benchmarking, and Real-Time Edge Deployment:** Couples custom lightweight backbones ($\approx 350\text{K}$ parameters per stream, trained from scratch) spanning self-attention Transformers and 4-Stream AAGCNs via validation-calibrated SLSQP soft voting, achieving **$69.74\% \pm 1.04\%$** window accuracy, **$79.11\% \pm 0.25\%$** video consensus accuracy (Video Macro F1: **$0.7834 \pm 0.0082$**, Window Macro F1: **$0.6882 \pm 0.0068$**), and ultra-low edge latency (**$0.42\text{--}4.33\text{ ms}$** on host CPU, **$0.08\text{--}0.54\text{ ms}$** on CUDA) for privacy-aware deployment.
 
 ---
 
@@ -133,15 +133,21 @@ Gym_Classification/
 
 ## 🛠️ Quickstart & Reproducibility
 
-### 1. Installation
+### 1. Installation & Artifact Bootstrap
 ```bash
-git clone https://huggingface.co/Cuong2004/gym-exercise-classification
-cd gym-exercise-classification
+# 1. Clone GitHub Source Repository
+git clone https://github.com/nxc1802/Gym_Classification.git
+cd Gym_Classification
+
+# 2. Install dependencies
 pip install -r requirements.txt
+
+# 3. Bootstrap datasets, metadata, and checkpoints
+python scripts/bootstrap_artifacts.py
 ```
 
 ### 2. Deterministic Result Verification
-Pre-trained model weights for all backbones (Transformer Mix, ST-GCN, 4-Stream AAGCN) are available on Hugging Face Model Hub. You can verify the reported tables without re-training:
+Pre-trained model weights for all backbones (Transformer Mix, ST-GCN, 4-Stream AAGCN) are available on Hugging Face Model Hub (or locally via `python scripts/bootstrap_artifacts.py --from-archive`). You can verify the reported tables without re-training:
 
 ```bash
 # 1. Evaluate local or downloaded ensemble checkpoints (Tables 1-7)

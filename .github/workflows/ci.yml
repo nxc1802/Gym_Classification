@@ -32,3 +32,18 @@ jobs:
     - name: Run Test Suite
       run: |
         python -m pytest tests/ -v
+
+  paper:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Tectonic
+      uses: willemvds/setup-tectonic@v1
+
+    - name: Verify Paper Compilation
+      run: |
+        mkdir -p /tmp/paper_build
+        tectonic paper/paper_eswa.tex --outdir /tmp/paper_build
+        tectonic preprint/main.tex --outdir /tmp/paper_build
+

@@ -142,7 +142,7 @@ This document serves as the **single authoritative Source of Truth (SOT)** for a
 | **Uniform Average Soft Voting** | Equal weights: $w_i = 1/5 = 0.20$ | 79.66% | 82.83% | **72.55%** | **0.7092** | **79.83%** | **0.7890** | Uncalibrated Soft |
 | **Accuracy-Weighted Soft Voting** | Validation accuracy weights ($w_i \propto \text{Acc}_i^{\text{val}}$) | 79.52% | 82.40% | 72.07% | 0.7041 | 78.97% | 0.7812 | Heuristic Soft |
 | **SkelGym-Lite (2 Models)** | Trans + Bone AAGCN (SLSQP Calibrated) | 78.52% | 81.12% | 68.26% $\pm$ 0.69% | 0.6733 $\pm$ 0.0072 | 77.83% $\pm$ 1.31% | 0.7708 $\pm$ 0.0080 | Calibrated Edge Lite |
-| **SkelGym-Full (5 Streams)** | **Trans + 4 AAGCN (SLSQP Calibrated)** | **80.10%** | **83.09%** | **69.74% $\pm$ 1.04%** | **0.6882 $\pm$ 0.0068** | **79.11% $\pm$ 0.25%** | **0.7834 $\pm$ 0.0082** | **Primary Benchmark SOTA** |
+| **SkelGym-Full (5 Streams)** | **Trans + 4 AAGCN (SLSQP Calibrated)** | **80.10%** | **83.09%** | **69.74% $\pm$ 1.04%** | **0.6882 $\pm$ 0.0068** | **79.11% $\pm$ 0.25%** | **0.7834 $\pm$ 0.0082** | **Primary Benchmark (Proposed Full)** |
 
 *SLSQP Simplex Weight Distribution (Mean $\pm$ SD across seeds):*  
 - AAGCN Bone Stream: $62.38\% \pm 11.58\%$  

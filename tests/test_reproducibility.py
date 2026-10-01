@@ -83,5 +83,12 @@ class TestReproducibilityPackaging(unittest.TestCase):
         self.assertEqual(cfg.get("train_stride"), 16)
         self.assertEqual(cfg.get("val_test_stride"), 32)
 
+    def test_bootstrap_artifacts_tool_exists(self):
+        script_path = PROJECT_ROOT / "scripts" / "bootstrap_artifacts.py"
+        self.assertTrue(script_path.exists(), "scripts/bootstrap_artifacts.py must exist")
+        import subprocess, sys
+        res = subprocess.run([sys.executable, str(script_path), "--check-only"], cwd=str(PROJECT_ROOT), capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0, f"bootstrap_artifacts.py --check-only failed: {res.stderr}")
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,169 +1,428 @@
-Mình đã kiểm tra HEAD mới nhất của repo. Commit mới nhất hiện là **`6760317f918321096ffebdc48ad7437270cedafb`**, message:
+Mình đã audit repo được trỏ trong file bạn gửi :chatgpt-content-reference{index="0"}, tập trung vào cấu trúc toàn repo, các entrypoint/runtime path chính trong `src/`, toàn bộ nhóm model/data/training/ensemble, các runner trong `scripts/`, test/CI, config, outputs và source Paper ESWA/LNCS.
 
-`feat(external): add MMFit data audit, mediapipe extraction scripts, and sync pipeline tests`
+## Kết luận
 
-Commit lúc **17:13 ngày 01/10/2026 (UTC+7)**.
+**Chưa nên gọi dự án là “clone về là Ready to Run toàn bộ”.**
 
-Kết luận: **chưa nên chạy final External Test để lấy số liệu publication**. Phần **download + MediaPipe extraction đã gần như ready**, nhưng evaluation còn vài lỗi có thể làm kết quả sai về mặt protocol, đặc biệt là frame alignment, geometric normalization và 1-shot leakage.
+Đánh giá chính xác hơn là:
 
-## Trạng thái hiện tại
-
-| Thành phần | Trạng thái | Nhận xét |
+| Phần | Trạng thái | Nhận xét |
 |---|---|---|
-| Download 5 MM-Fit RGB | 🟢 Ready | `extract_external_mediapipe.py` có URL Zenodo và download tự động |
-| MediaPipe Heavy extraction | 🟢 Gần ready | whole-workout extraction đúng hướng |
-| Audit raw data | 🟡 Có thể chạy | chưa kiểm tra frame-ID alignment đúng nghĩa |
-| Core-4 class mapping | 🟢 Ready | mapping hợp lý |
-| Feature engineering | 🟡 Gần ready | dùng lại SkelGym feature code, nhưng missing-frame handling chưa parity |
-| SkelGym train normalization | 🟡 Logic đúng | cần frozen artifacts thực tế |
-| Open/Closed-set evaluation | 🔴 Chưa ready | geometric norm + frame alignment |
-| Set-level consensus | 🟢 Logic cơ bản đúng | hiện gọi `recording_acc`, nên đổi tên |
-| Workout-level aggregation | 🟠 Chưa thực hiện thật | docstring nói có nhưng code chỉ window→set |
-| Bootstrap CI | 🔴 Chưa đúng protocol | đang resample set, không cluster theo workout |
-| 1-shot | 🔴 Chưa ready | leakage + “SkelGym-Full” chưa thật sự Full |
-| Multi-seed | 🔴 Có silent fallback nguy hiểm | có thể vô tình dùng seed-42 checkpoint/weights |
+| Python package / import / dependencies | 🟢 Ready | Cài được trên clean GitHub Actions |
+| Unit + integration-level tests | 🟢 Ready | **46/46 tests pass** trên Python 3.10 và 3.11 |
+| Core models + features + augmentation | 🟢 Ready | Các forward path và feature dimensions đã được test |
+| Internal training pipeline | 🟢 Ready | Multi-seed runner và canonical hyperparameter registry khá tốt |
+| Internal evaluation / ensemble | 🟢 Ready có điều kiện | Cần landmarks + checkpoints ngoài GitHub |
+| Reproducibility từ **fresh GitHub clone** | 🟠 Chưa hoàn toàn | Data/checkpoints/reference artifacts không nằm trong GitHub và bootstrap chưa tự động |
+| Full paper reproduction | 🟠 Chưa hoàn toàn | Code chạy được, nhưng artifacts và tài liệu còn lệch nhau |
+| MM-Fit external validation | 🔴 Chưa hoàn tất | Data/landmarks/metrics thực tế còn pending |
+| Paper consistency / submission freeze | 🟠 Chưa freeze | Có một số claim và số liệu stale giữa checklist ↔ paper ↔ README |
+| Full E2E từ clean machine | 🔴 Chưa thể xác nhận Ready | CI hiện chỉ test code, chưa chạy research pipeline thật |
+
+**Tóm lại: Core engineering pipeline đã Ready; project release/reproduction E2E vẫn chưa Ready.**
 
 ---
 
-## Các blocker cần sửa trước final run
+## 1. Source code hiện tại tốt hơn khá nhiều so với các notebook ban đầu
 
-1. **P0 — MediaPipe đang bị geometric-normalize dù không nên.** Đây là lỗi quan trọng nhất sau frame alignment. Trong `MMFitExternalDataset`, commit mới đã sửa đúng logic mặc định: `pose_source=="mediapipe"` thì không geometric normalization. Nhưng các caller lại override nó. `configs/external/mmfit.yaml` hiện có `source: native` và `normalization.geometric: true`; `evaluate_external.py` truyền `apply_geometric_norm=True` từ config; `prepare_mmfit_external.py` hardcode `apply_geometric_norm=True`; `evaluate_external_fewshot.py` cũng hardcode `True`. Kết quả là MediaPipe coordinates `[x,y,z]` vốn cùng representation với SkelGym lại bị hip-center + torso scaling + rotation thêm một lần. Với Protocol A hiện tại, config nên khóa thành:
+Repo hiện có hai lớp.
 
-```yaml
-pose_protocol:
-  source: mediapipe
+`Source Code/` chứa các notebook lịch sử như `LSTM_Training.ipynb`, `ST-GCN.ipynb`, `mediapipe.ipynb`, `Split_data.ipynb`, `Test_model.ipynb`...
 
-normalization:
-  geometric: false
-  feature_stats: skelgym_train
-```
-
-và tốt hơn là caller truyền `None` để adapter tự quyết định theo `pose_source`.
-
-2. **P0 — `start_frame/end_frame` của MM-Fit đang bị dùng như array index.** Starter code MM-Fit chính thức không làm vậy. Nó đọc frame ID chứa trong pose data rồi đối chiếu với label start/end. Trong adapter hiện tại lại có:
-
-```python
-s = s_frame
-e = e_frame
-skel_13 = full_pose_3d[s:e]
-```
-
-Điều này đặc biệt sai với native pose. Chính `data_audit.csv` commit mới cho thấy ví dụ `w00`: native pose chỉ có `63,918` samples nhưng label cuối tới frame `67,650`; `w13`: `68,561` samples nhưng label tới `73,024`. Nghĩa là **frame ID ≠ array position**.
-
-Với MediaPipe cũng chưa nên dùng `df.iloc[s:e]`, vì extractor SkelGym hiện ghi cột:
+Nhưng implementation chính hiện đã được refactor thành library:
 
 ```text
-Frame = 1, 2, 3, ...
+src/
+├── cli.py
+├── constants.py
+├── data/
+│   ├── dataset.py
+│   ├── features.py
+│   ├── augmentations.py
+│   ├── extractor.py
+│   └── report.py
+├── models/
+│   ├── lstm.py
+│   ├── transformer.py
+│   ├── stgcn.py
+│   ├── aagcn.py
+│   └── ensemble.py
+├── training/
+│   ├── trainer.py
+│   └── metrics.py
+└── utils/
 ```
 
-trong khi row index là:
-
-```text
-0, 1, 2, ...
-```
-
-Ít nhất có nguy cơ lệch một frame. Adapter nên giữ cột `Frame` và slice bằng frame ID:
-
-```python
-mask = (df_mp["Frame"] >= start_frame) & (df_mp["Frame"] < end_frame)
-df_segment = df_mp.loc[mask]
-```
-
-Sau đó audit phải kiểm tra actual IDs, không phải chỉ:
-
-```python
-len(df_mp) >= last_label_frame
-```
-
-Hiện `frame_alignment_status` chưa thực sự xác nhận alignment.
-
-3. **P0 — 1-shot hiện bị support/query leakage giữa workouts.** Trong `simulate_one_shot_transfer()`, code có tạo:
-
-```python
-support_subjects = set()
-```
-
-nhưng không dùng nó để filter query toàn cục. Nó chỉ loại query nếu query workout giống support workout **của cùng class**. Ví dụ support `squat` lấy từ `w00`; query `push-up` từ `w00` vẫn có thể lọt vào nếu support push-up lấy từ workout khác. Đây vẫn là same-camera/same-person/same-session leakage.
-
-Phải đổi thành logic kiểu:
-
-```python
-support_groups = {
-    record_to_subject[r]
-    for r in support_records.values()
-}
-
-query_records = [
-    r for r in all_records
-    if record_to_subject[r] not in support_groups
-]
-```
-
-Tức **bất kỳ workout nào xuất hiện trong support đều bị loại khỏi toàn bộ query set**.
-
-Ngoài ra hiện `subject_id = w00/w05/...`, thực chất là **workout ID**, không phải participant ID. Vì vậy nếu chưa build mapping workout→participant, paper chỉ nên gọi đây là **workout-disjoint 1-shot**, không gọi subject-disjoint.
-
-4. **P0 — “SkelGym-Full” trong 1-shot không phải SkelGym-Full.** `evaluate_external_fewshot.py` hiện chỉ tạo:
-
-```python
-concat(
-    Transformer embedding,
-    AAGCN Bone embedding
-)
-```
-
-rồi đặt tên:
-
-```text
-SkelGym-Full
-```
-
-Nhưng SkelGym-Full classification có 5 components:
-
-```text
-Transformer Mix
-AAGCN Bone
-AAGCN Rel
-AAGCN Joint Motion
-AAGCN Bone Motion
-```
-
-Hiện embedding này gần với **Lite representation**, không phải Full. Có hai lựa chọn hợp lệ: đổi tên nó thành `Transformer+Bone embedding`, hoặc implement đủ 5 streams với frozen validation weights. Cho publication mình chọn phương án thứ hai.
-
-5. **P0/P1 — bootstrap hiện không phải workout-cluster bootstrap.** Code hiện window→exercise-set rồi `compute_recording_level_bootstrap_ci()` resample từng set. Nhưng các set trong cùng `w00` dùng cùng participant/camera/session và correlated mạnh. Docstring nói “Subject/Workout-level bootstrap”, implementation chưa làm vậy. Với MM-Fit unseen benchmark chỉ có 5 workouts, primary CI nên cluster theo:
-
-```text
-w00
-w05
-w12
-w13
-w20
-```
-
-Một bootstrap draw phải lấy cả cluster tất cả sets thuộc workout đó.
-
-6. **P0 — multi-seed có silent fallback làm sai provenance.** `find_checkpoint_path()` với seed `123` hoặc `3407` nếu không tìm thấy checkpoint seed-specific sẽ fallback sang:
-
-```text
-checkpoints/best_XXX.pt
-```
-
-tức rất có thể seed 42. Sau đó bảng vẫn ghi kết quả là seed 123/3407. Tương tự ensemble weights: nếu `seed123/ensemble_weights.json` thiếu, nó fallback sang base `ensemble_weights.json`; nếu không có gì thì còn fallback uniform weights. Điều này trái với chính claim “frozen SkelGym validation weights”. Final external evaluator nên **fail loudly**, không fallback:
-
-```python
-if seed_specific_checkpoint_missing:
-    raise FileNotFoundError
-```
-
-và ensemble weights cũng vậy.
-
-7. **P1 — external window preprocessing chưa hoàn toàn giống SkelGym.** SkelGym training/test pipeline hiện làm zero-frame interpolation trước feature extraction và reject **từng window** nếu zero ratio >20%. `BaseExternalDataset.extract_windows()` hiện không làm bước đó. Nó chỉ QC cả exercise set trước đó. Có thể một set có zero ratio 10% nhưng toàn bộ missing frames tập trung vào một window 32-frame; window đó vẫn đi vào inference. Cách sạch nhất là reuse chính `extract_windows_from_segment()` của SkelGym thay vì duy trì một phiên bản external riêng.
+Đây là cấu trúc hợp lý cho một research repo muốn reproduce được. Notebook không còn là dependency bắt buộc của pipeline chính.
 
 ---
 
-## Dữ liệu hiện tại cũng chưa sẵn sàng để evaluation
+## 2. Kiến trúc model và Paper nhìn chung khớp nhau
 
-Commit đã commit `outputs/external/mmfit/data_audit.csv`. File đó hiện ghi cho cả 8 workouts:
+Paper hiện mô tả SkelGym-Full là:
+
+**1 Transformer Mix + 4 AAGCN streams → late fusion → SLSQP validation calibration.**
+
+Code cũng đúng cấu trúc đó:
+
+```text
+Transformer
+    └─ mix = 117-d
+
+AAGCN
+    ├─ bone_3d
+    ├─ rel_3d
+    ├─ joint_motion_3d
+    └─ bone_motion_3d
+
+             ↓
+      SLSQP soft voting
+             ↓
+       SkelGym-Full
+```
+
+`src/constants.py` cũng đóng vai trò source-of-truth tương đối tốt cho protocol:
+
+- sequence length = `32`
+- train stride = `16`
+- validation/test stride = `32`
+- Transformer Mix: lr `1e-4`, batch `16`
+- AAGCN: lr `1e-3`, batch `32`
+- 100 epochs
+- patience 10
+- early stopping theo `val_macro_f1`
+
+Điểm này rất quan trọng: runner mới không còn phụ thuộc quá nhiều vào các hyperparameter hard-code rải rác như trước.
+
+---
+
+## 3. Feature 117-d hiện khớp Paper
+
+Implementation hiện dùng:
+
+\[
+39\text{-d Relative 3D} + 78\text{-d Pairwise Angles}=117\text{-d}
+\]
+
+Đây cũng là representation được mô tả trong Paper.
+
+Phần mirror augmentation đã được làm khá cẩn thận. Với 117-d feature, code không chỉ flip dấu X; nó:
+
+1. swap left/right joints;
+2. negate trục X;
+3. **recompute 78 pairwise angles từ coordinates mới**.
+
+Đây là cách đúng hơn nhiều so với việc reorder một vector angle một cách cơ học.
+
+Test suite cũng có test cho consistency này.
+
+---
+
+## 4. SkelGym-Aug hiện khớp với phiên bản Paper mới
+
+`skel_gym_aug()` hiện mặc định gồm:
+
+```text
+Mirror
++ 3D Yaw
++ Scale
++ Jitter
+```
+
+và **TimeWarp bị disable**.
+
+Điều này khớp với narrative hiện tại của Paper: time warping được loại sau ablation vì có thể phá cadence/tempo của exercise.
+
+Phần này mình đánh giá là **Ready**.
+
+---
+
+## 5. Data leakage protection trong code được thiết kế khá đúng
+
+`get_dataloaders()` xử lý:
+
+```text
+metadata split
+    ↓
+train / val / test datasets
+    ↓
+compute μ, σ ONLY from TRAIN
+    ↓
+apply same μ, σ to VAL and TEST
+```
+
+Ngoài ra normalization có thể được freeze thành artifact theo seed.
+
+Đây là một điểm mạnh của implementation hiện tại.
+
+Tuy nhiên, cần phân biệt:
+
+> Code **tuân theo `split` đã có trong metadata**.
+
+Nó không tự chứng minh rằng metadata ban đầu không có cùng subject/session nằm ở hai split. Vì vậy Paper có thể claim **“no source-video overlap”** nếu metadata đã kiểm tra điều đó, nhưng câu kiểu:
+
+> “completely eliminating recording-session memorization”
+
+mạnh hơn những gì source code tự chứng minh được.
+
+---
+
+## 6. Training pipeline hiện đã ở trạng thái tốt
+
+`Trainer` đã có:
+
+- early stopping;
+- best + last checkpoint;
+- AMP;
+- seed handling;
+- checkpoint provenance;
+- SHA-256;
+- normalization provenance;
+- optional Hugging Face upload.
+
+Multi-seed runner cũng có:
+
+```python
+seeds = [42, 123, 3407]
+```
+
+và canonical experiment registry được sử dụng để chọn hyperparameters theo backbone.
+
+Đặc biệt, audit cũ từng phát hiện cross-backbone ablation dùng sai LR/batch size. Phiên bản HEAD đã sửa bằng `CANONICAL_EXPERIMENT_REGISTRY`.
+
+Vì vậy với **data đã có local**, internal training path hiện nhìn khá ổn.
+
+---
+
+# 7. CI thực tế đang xanh
+
+Mình kiểm tra đúng commit HEAD hiện tại:
+
+```text
+6760317f918321096ffebdc48ad7437270cedafb
+```
+
+commit ngày **01/10/2026**.
+
+GitHub Actions run `36847782394` đã:
+
+```text
+Python 3.10   ✅
+Python 3.11   ✅
+```
+
+Trên Python 3.11:
+
+```text
+collected 46 items
+
+46 passed
+1 warning
+```
+
+Warning duy nhất là SciPy precision-loss trong một statistical unit test với dữ liệu gần như giống nhau; nó không phải runtime failure.
+
+Các tests hiện cover được khá nhiều:
+
+- feature extraction;
+- 117-d geometry;
+- augmentations;
+- model forward;
+- parameter budget;
+- ensembles;
+- sliding windows;
+- normalization;
+- missing landmarks;
+- provenance;
+- checkpoint compatibility;
+- bootstrap/statistics;
+- reproducibility packaging.
+
+Đây là evidence mạnh rằng **core code thực sự chạy**, không chỉ là README nói chạy.
+
+---
+
+# 8. Nhưng CI xanh ≠ E2E research pipeline chạy được
+
+Đây là khác biệt quan trọng nhất.
+
+CI chỉ chạy:
+
+```bash
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+pip install -e .
+
+python -m pytest tests/ -v
+```
+
+Nó **không chạy**:
+
+```bash
+python scripts/evaluate_local_ensemble.py
+python scripts/run_multi_seed_experiments.py
+python scripts/evaluate_external.py ...
+```
+
+trên dataset thật + checkpoint thật.
+
+Do đó 46/46 pass chứng minh:
+
+> code/API/model logic hoạt động.
+
+Nó chưa chứng minh:
+
+> fresh clone → download artifacts → reproduce paper numbers.
+
+---
+
+# 9. Blocker lớn nhất: fresh GitHub clone không có data/checkpoints
+
+`.gitignore` cố ý loại:
+
+```text
+/data/
+checkpoints/
+mm-fit/
+*.pt
+*.pth
+*.npy
+```
+
+Đó là hợp lý vì artifacts lớn nằm trên Hugging Face.
+
+Nhưng vấn đề là main reproduction script mặc định:
+
+```python
+--metadata data/Final_dataset_metadata.csv
+--landmark_dir data/landmarks
+--checkpoint_dir checkpoints
+```
+
+Trong GitHub lại chỉ có:
+
+```text
+Final_dataset_metadata.csv
+```
+
+ở **root**, không phải:
+
+```text
+data/Final_dataset_metadata.csv
+```
+
+và không có `data/landmarks/`.
+
+`evaluate_local_ensemble.py` cũng **không tự động bootstrap data/checkpoints** trước khi evaluation.
+
+Trong code đã có utility rất tốt:
+
+```python
+pull_landmarks_from_hf()
+ensure_checkpoint_available()
+```
+
+nhưng các main evaluation runners chưa sử dụng chúng như một automatic preflight.
+
+Đây là lý do chính mình không gọi repo hiện tại là:
+
+> “git clone && python evaluate...”
+
+ready.
+
+---
+
+# 10. README Quickstart đang có một lỗi UX/reproducibility khá lớn
+
+README nằm trong **GitHub repo**, nhưng Quickstart hiện hướng dẫn:
+
+```bash
+git clone https://huggingface.co/Cuong2004/gym-exercise-classification
+cd gym-exercise-classification
+pip install -r requirements.txt
+```
+
+Tức là user đang đọc source GitHub nhưng được bảo clone **Hugging Face model repo**.
+
+Sau đó README lại yêu cầu:
+
+```bash
+python scripts/evaluate_local_ensemble.py
+```
+
+Điều này chỉ an toàn nếu HF repository luôn mirror toàn bộ source tree và đúng commit với GitHub.
+
+Với một publication repo, nên có một đường duy nhất:
+
+```text
+GitHub = code
+Hugging Face = data + weights
+```
+
+rồi bootstrap HF artifacts từ GitHub checkout.
+
+README thực ra nói mô hình tổ chức này ở phần khác, nhưng Quickstart chưa thực thi đúng triết lý đó.
+
+---
+
+# 11. Dependency management chạy được nhưng chưa “frozen reproducibility”
+
+Hiện có ba hệ:
+
+```text
+requirements.txt
+requirements-lock.txt
+environment.yml
+```
+
+và còn có `uv.lock`.
+
+`requirements.txt` sử dụng lower bounds như:
+
+```text
+torch>=2.0
+numpy>=1.23
+mediapipe>=0.10
+...
+```
+
+Điều thú vị là CI mới nhất đã kéo các version rất mới và vẫn pass. Đây là điểm tốt cho compatibility.
+
+Nhưng `requirements-lock.txt` lại ghi:
+
+```text
+verified environment (Python 3.14 / macOS)
+```
+
+trong khi:
+
+```text
+environment.yml: Python >=3.10,<3.12
+CI: Python 3.10, 3.11
+```
+
+Ngoài ra lock file này không phải dependency closure hoàn chỉnh.
+
+Với Paper reproduction, mình sẽ chọn **một canonical environment**, tốt nhất Python 3.11 và một frozen `uv.lock`/lockfile duy nhất.
+
+---
+
+# 12. MM-Fit hiện là blocker rõ ràng nhất cho “Full E2E”
+
+Repo đã có framework khá đầy đủ cho:
+
+```text
+MM-Fit
+ ├─ native pose protocol
+ ├─ MediaPipe protocol
+ ├─ open-set
+ ├─ closed-set
+ └─ one-shot
+```
+
+Nhưng artifacts hiện tại nói rất rõ trạng thái thực tế.
+
+`outputs/external/mmfit/data_audit.csv` cho các workout như `w00`, `w05`, `w12`, `w13`, `w20` hiện có:
 
 ```text
 rgb_video_exists = False
@@ -171,51 +430,183 @@ mediapipe_csv_exists = False
 frame_alignment_status = CHECK_BOUNDS
 ```
 
-Tức commit này mới chứng minh **official labels/native pose đã được index**, chưa có RGB hoặc MediaPipe output ở thời điểm audit được commit.
+Trong `segment_metadata.csv`:
 
-Điểm tốt là segment metadata đã build khá sạch. Với unseen Core-4, các exercise-set đã được index cho squat, push-up, dumbbell shoulder press và lateral raise, đồng thời biceps curl được tách thành supplementary Extended-5. Phần này mình xem là ổn.
+```text
+rgb_path = N/A
+landmark_path = N/A
+qc_status = PENDING_LANDMARKS
+```
+
+Và `dataset_audit.csv` gần như trống.
+
+Quan trọng hơn, chưa thấy các expected final artifacts như:
+
+```text
+metrics_open.csv
+metrics_closed.csv
+fewshot_summary.csv
+confusion_open.png
+confusion_closed.png
+bootstrap_ci.json
+run_manifest.json
+```
+
+Tức là:
+
+**MM-Fit adapter đã xây xong khá nhiều, nhưng external experiment chưa được chạy đến đích.**
+
+Điều này cũng khớp với `docs/AUDIT_FOLLOWUP.md`, nơi internal pipeline được đánh dấu READY nhưng MM-Fit Protocol A/B vẫn là **PENDING**.
 
 ---
 
-## Một vấn đề về test coverage
+# 13. Paper và current final results khá đồng bộ ở phần chính
 
-Commit mới thêm test cho augmentation pipeline, nhưng **không có pytest nào cho `src/external/*`**. `scripts/test_feature_parity.py` là standalone script và còn có logic:
+Điểm tốt là Paper ESWA hiện dùng:
 
-```python
-if no SkelGym test CSV:
-    print("Skipping test")
-    return
+\[
+69.74\%\pm1.04\%
+\]
+
+window accuracy và
+
+\[
+79.11\%\pm0.25\%
+\]
+
+video consensus accuracy.
+
+`outputs/RESULTS_FINAL.md` cũng dùng chính bộ số này.
+
+Macro-F1:
+
+```text
+Window: 0.6882 ± 0.0068
+Video:  0.7834 ± 0.0082
 ```
 
-nên nó không đảm bảo CI fail nếu external parity chưa được kiểm chứng.
+Vì vậy mình xem:
 
-Ngoài ra commit `6760317` hiện không có GitHub combined status hoặc workflow run gắn với commit mà mình có thể thấy. Vì vậy mình không coi “latest external pipeline has passed CI” là đã được xác nhận.
+> `paper/paper_eswa.tex` + `outputs/RESULTS_FINAL.md`
+
+là hai nguồn canonical hiện tại.
+
+Paper cũng khớp code ở:
+
+```text
+117-d representation
+32-frame window
+Transformer + four AAGCN streams
+SLSQP validation late fusion
+SkelGym-Aug without TimeWarp
+```
 
 ---
 
-# Đánh giá cuối cùng
+# 14. Nhưng `submission_checklist.md` đã stale
 
-**Download/extract phase: 8/10 — có thể bắt đầu chạy ngay.**
+Đây là một inconsistency cần sửa trước release.
 
-Script:
+Checklist hiện nói multi-seed:
 
-```bash
-python scripts/extract_external_mediapipe.py \
-  --workouts w00 w05 w12 w13 w20 \
-  --raw-dir data_external/mmfit/raw/rgb \
-  --out-dir data_external/mmfit/landmarks \
-  --complexity 2 \
-  --workers 4
+```text
+Window Accuracy = 70.03% ± 0.70%
+Video Accuracy  = 77.68% ± 0.86%
 ```
 
-là hợp lý để bắt đầu. Mình sẽ dùng **2–4 workers**, chưa dùng mặc định server 8 workers ngay từ đầu vì MediaPipe Heavy trên 5 video lớn có thể tạo RAM/CPU pressure.
+Trong khi Paper + `RESULTS_FINAL.md` hiện là:
 
-Sau extraction có thể chạy audit, **nhưng chưa chạy final classifier metrics** cho tới khi frame-ID alignment được sửa.
+```text
+Window Accuracy = 69.74% ± 1.04%
+Video Accuracy  = 79.11% ± 0.25%
+```
 
-**Open/Closed-set final evaluation: 5/10 — chưa ready.**
+Trong cùng `RESULTS_FINAL.md` còn có:
 
-**1-shot final evaluation: 3/10 — chưa ready**, chủ yếu vì support/query leakage và `SkelGym-Full` chưa đúng định nghĩa.
+```text
+70.11% window
+77.68% video
+```
 
-**Publication-ready External Test: chưa.**
+nhưng đó được ghi rõ là **baseline point run**, không phải 3-seed aggregate.
 
-Nếu sửa 6 điểm chính là **MediaPipe geometric norm, frame-ID slicing, one-shot global workout isolation, true Full embedding, workout-cluster bootstrap, strict seed artifact validation**, thì architecture tổng thể hiện tại đã đủ tốt để tiến tới final run. Sau đó nên sửa thêm zero-frame/window parity trước khi đóng số liệu.
+Có vẻ checklist đang giữ số liệu từ một revision cũ.
+
+Vì thế claim trong checklist rằng:
+
+> “100% Submission-Ready”
+
+hiện không còn chính xác với HEAD.
+
+---
+
+# 15. Còn vài wording issue trong Paper
+
+Mình thấy ít nhất các vấn đề này cần cleanup trước freeze cuối:
+
+- README vẫn có `privacy-preserving deployment`; Paper cũng còn ít nhất một đoạn dùng `privacy-preserving`, dù checklist nói đã đổi toàn bộ sang `privacy-aware`.
+- Paper còn cụm **“state-of-the-art mean video consensus accuracy”**, và `RESULTS_FINAL.md` còn “Primary Benchmark SOTA”, trái với checklist nói self-claimed SOTA đã được loại sạch.
+- Abstract nói **“sub-millisecond edge classification”**, nhưng full ensemble là khoảng `4.33 ms CPU` và `8.77 ms MPS`; chỉ một số single models / CUDA path dưới 1 ms. Câu này nên narrow lại.
+- One-shot comparison với Deyzel dùng protocol tương tự nhưng dataset khác; “matching and outperforming literature baselines” có thể bị reviewer xem là comparison hơi mạnh.
+- Window-level McNemar vẫn có intra-video dependence; Paper đã nhận thức được cluster dependence ở bootstrap, nên tốt nhất nhấn video-level inference/statistics là evidence chính.
+
+Đây không phải lỗi làm code crash, nhưng là **publication blockers** nếu mục tiêu là submission-quality freeze.
+
+---
+
+# 16. Một điểm nữa: Paper PDF có sẵn nhưng mình chưa coi đó là fresh-build proof
+
+Trong repo có:
+
+```text
+paper_eswa.tex
+paper_eswa.pdf
+paper_llncs.tex
+paper_llncs.pdf
+cover_letter.tex
+cover_letter.pdf
+```
+
+Nghĩa là source đã từng compile thành công.
+
+Nhưng CI hiện tại **không compile LaTeX**. Vì thế chưa có guarantee rằng:
+
+> clean checkout HEAD → pdflatex/bibtex → PDF byte mới
+
+vẫn thành công.
+
+Nên thêm một paper-build CI job nếu Paper là artifact chính thức.
+
+---
+
+## Những việc mình xem là bắt buộc trước khi gắn nhãn `READY_TO_RUN`
+
+1. **Tạo một bootstrap command duy nhất** cho fresh clone: tải landmarks, metadata, checkpoints và reference artifacts từ HF; sau đó verify SHA/version.
+2. **Sửa README Quickstart** thành clone GitHub trước, rồi pull artifacts từ Hugging Face; không clone HF thay cho source repo.
+3. **Thêm E2E smoke CI**: dùng một fixture nhỏ + một checkpoint thật và thực sự gọi data loader → model → checkpoint → inference → aggregation, thay vì chỉ unit tests.
+4. **Hoàn tất MM-Fit** hoặc tách hẳn nó khỏi scope của release hiện tại. Hiện state `PENDING_LANDMARKS/CHECK_BOUNDS` không phù hợp với “full pipeline ready”.
+5. **Freeze Paper/repository consistency**: lấy `paper_eswa.tex + RESULTS_FINAL.md` làm source-of-truth, sửa checklist cũ, `privacy-preserving`, self-claimed SOTA và “sub-millisecond” wording; sau đó thêm CI compile Paper.
+
+---
+
+## Verdict cuối
+
+Nếu câu hỏi là:
+
+> **“Source code chính có đủ chất lượng để bắt đầu chạy training trên server không?”**
+
+**Có.** Mình xem internal pipeline là **Ready to rerun**. CI HEAD xanh trên Python 3.10/3.11, 46 tests pass, protocol registry, normalization, augmentation, models và multi-seed runner đã khá chín.
+
+Nếu câu hỏi là:
+
+> **“Một người khác có thể clone GitHub hôm nay và reproduce toàn bộ Paper chỉ bằng vài command README không?”**
+
+**Chưa.**
+
+Nếu câu hỏi là:
+
+> **“Project đã hoàn thành full E2E bao gồm external MM-Fit và đủ sạch để freeze/publication release chưa?”**
+
+**Chưa.** MM-Fit còn pending và paper/reproducibility docs còn một số inconsistency.
+
+Điểm quan trọng nhất hiện tại không phải viết thêm model. **Việc nên làm tiếp theo là biến repo từ “research code chạy được” thành “one-command reproducible release”.**
