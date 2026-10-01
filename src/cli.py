@@ -557,12 +557,11 @@ def cmd_train(args):
         if model_name.endswith(".pt"):
             model_name = model_name[:-3]
     elif getattr(args, "exp_id", None):
-        if getattr(args, "seed", 42) != 42:
-            model_name = f"{args.model}_{args.exp_id}_{args.feature}_seed{args.seed}"
-        else:
-            model_name = f"{args.model}_{args.exp_id}_{args.feature}"
+        model_name = f"{args.model}_{args.exp_id}_{args.feature}"
     else:
-        model_name = f"{args.model}_{args.feature}_aug_{args.augment}_seed{args.seed}"
+        model_name = f"{args.model}_{args.feature}_aug_{args.augment}"
+        if getattr(args, "seed", 42) != 42 and not str(args.checkpoint_dir).endswith(f"seed{args.seed}"):
+            model_name += f"_seed{args.seed}"
 
     # Extract normalization statistics from training dataset
     norm_stats = None

@@ -174,7 +174,7 @@ def parse_validation_metrics_from_log(log_path: Path) -> Dict[str, Any]:
                 if v_loss < min_val_loss:
                     min_val_loss = v_loss
                     min_loss_epoch = ep
-            if "--> Best checkpoint saved (val_acc:" in line:
+            if "--> Best checkpoint saved" in line:
                 best_val_acc = v_acc
                 best_val_loss = v_loss
                 best_train_loss = t_loss
@@ -189,6 +189,39 @@ def parse_validation_metrics_from_log(log_path: Path) -> Dict[str, Any]:
         "best_epoch": best_epoch,
         "loss_gap": round(best_val_loss - best_train_loss, 4)
     }
+
+def get_validation_metrics(ckpt_path: Optional[Path], log_path: Path) -> Dict[str, Any]:
+    """Extracts validation metrics directly from checkpoint provenance sidecar if available, falling back to log parsing."""
+    if ckpt_path and ckpt_path.exists():
+        prov_candidates = [
+            ckpt_path.with_suffix(ckpt_path.suffix + ".provenance.json"),
+            ckpt_path.parent / f"{ckpt_path.name}.provenance.json"
+        ]
+        for prov_p in prov_candidates:
+            if prov_p.exists():
+                try:
+                    with open(prov_p, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    val_acc = data.get("val_acc")
+                    val_loss = data.get("val_loss")
+                    val_f1 = data.get("val_macro_f1")
+                    train_loss = data.get("train_loss")
+                    best_ep = data.get("best_epoch", 0)
+                    if val_acc is not None:
+                        acc_pct = float(val_acc) * 100.0 if float(val_acc) <= 1.0 else float(val_acc)
+                        v_loss = float(val_loss) if val_loss is not None else 0.0
+                        t_loss = float(train_loss) if train_loss is not None else 0.0
+                        return {
+                            "val_acc": round(acc_pct, 2),
+                            "val_loss": round(v_loss, 4),
+                            "val_macro_f1": round(float(val_f1), 4) if val_f1 is not None else 0.0,
+                            "train_loss": round(t_loss, 4),
+                            "best_epoch": int(best_ep),
+                            "loss_gap": round(v_loss - t_loss, 4)
+                        }
+                except Exception:
+                    pass
+    return parse_validation_metrics_from_log(log_path)
 
 # ------------------------------------------------------------------------------
 # Task Execution & Evaluation
@@ -208,6 +241,11 @@ def train_task_subprocess(task: Dict[str, Any], ckpt_path: Path, device: str = "
         "--epochs", "100",
         "--patience", "10",
         "--batch_size", "16",
+        "--label_smoothing", "0.05",
+        "--early_stopping_metric", "val_macro_f1",
+        "--train_stride", "16",
+        "--val_test_stride", "32",
+        "--no_test_eval",
         "--device", device,
         "--checkpoint_dir", str(task_ckpt_dir),
         "--output_dir", f"outputs/ablation_runs/{task['id']}",
@@ -244,7 +282,8 @@ def evaluate_checkpoint(
     feature_method: str,
     device: torch.device,
     metadata_path: str = "Final_dataset_metadata.csv",
-    landmark_dir: str = "data/landmarks"
+    landmark_dir: str = "data/landmarks",
+    seed: Optional[int] = None
 ) -> Dict[str, float]:
     """Evaluates checkpoint on the held-out test partition."""
     state_dict, _ = load_checkpoint_weights(ckpt_path, device="cpu")
@@ -259,11 +298,12 @@ def evaluate_checkpoint(
         feature_method=feature_method,
         batch_size=32,
         seq_len=32,
-        stride=32,
+        stride=16,
         val_test_stride=32,
         landmark_dir=landmark_dir,
         num_workers=0,
-        in_memory=True
+        in_memory=True,
+        seed=seed
     )
 
     test_video_ids = test_loader.dataset.video_ids
@@ -521,9 +561,9 @@ def main():
         t_id = t["id"]
         ckpt = task_ckpts.get(t_id)
 
-        # Parse validation metrics from log
+        # Parse validation metrics from checkpoint sidecar provenance or log
         log_file = Path("outputs/ablation_logs") / f"{t_id}.log"
-        val_metrics = parse_validation_metrics_from_log(log_file)
+        val_metrics = get_validation_metrics(ckpt, log_file)
 
         # Evaluate on test set
         if ckpt and ckpt.exists():
@@ -534,7 +574,8 @@ def main():
                 feature_method=t["feature"],
                 device=eval_device,
                 metadata_path=args.metadata,
-                landmark_dir=args.landmark_dir
+                landmark_dir=args.landmark_dir,
+                seed=t.get("seed")
             )
         else:
             print(f"[{idx_eval}/{len(tasks)}] Checkpoint not found for {t_id}, using log metrics if available.")

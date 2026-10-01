@@ -56,7 +56,7 @@ class TransformerModel(nn.Module):
         d_model: int = 128,
         nhead: int = 8,
         num_layers: int = 3,
-        dim_feedforward: int = 160,
+        dim_feedforward: int = 192,
         dropout: float = 0.2,
         pos_type: str = "learnable"
     ):

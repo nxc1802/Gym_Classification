@@ -63,10 +63,21 @@ CONSTITUENT_MODELS = [
 
 def get_checkpoint_path(seed: int, model_cfg: Dict[str, str], checkpoint_base: Path) -> Path:
     base_name = f"best_{model_cfg['model']}_{model_cfg['exp_id']}_{model_cfg['feature']}.pt"
+    seed_name = f"best_{model_cfg['model']}_{model_cfg['exp_id']}_{model_cfg['feature']}_seed{seed}.pt"
     if seed == 42:
-        return checkpoint_base / base_name
+        cand = checkpoint_base / base_name
+        return cand if cand.exists() or not (checkpoint_base / seed_name).exists() else checkpoint_base / seed_name
     else:
-        return checkpoint_base / f"seed{seed}" / base_name
+        cand_seed_dir = checkpoint_base / f"seed{seed}" / base_name
+        if cand_seed_dir.exists():
+            return cand_seed_dir
+        cand_seed_dir_s = checkpoint_base / f"seed{seed}" / seed_name
+        if cand_seed_dir_s.exists():
+            return cand_seed_dir_s
+        cand_flat = checkpoint_base / seed_name
+        if cand_flat.exists():
+            return cand_flat
+        return cand_seed_dir
 
 def train_model(seed: int, model_cfg: Dict[str, str], device_str: str, checkpoint_base: Path, epochs: int = 100, force_retrain: bool = False, no_test_eval: bool = False):
     ckpt_path = get_checkpoint_path(seed, model_cfg, checkpoint_base)
@@ -382,6 +393,8 @@ def main():
     parser.add_argument("--output_file", type=str, default="outputs/multi_seed_evaluation_results.json")
     parser.add_argument("--skip_train", action="store_true", default=False, help="Skip training and only evaluate")
     parser.add_argument("--force_retrain", action="store_true", default=False, help="Force complete retraining even if checkpoints exist")
+    parser.add_argument("--no_test_eval", action="store_true", default=True, help="Disable test evaluation during training to enforce blind protocol")
+    parser.add_argument("--allow_test_eval", action="store_false", dest="no_test_eval", help="Allow test evaluation during training")
     args = parser.parse_args()
 
     device = torch.device(args.device if torch.cuda.is_available() and args.device == "cuda" else ("mps" if torch.backends.mps.is_available() else "cpu"))
@@ -398,10 +411,10 @@ def main():
             print(f"========================================================")
             if args.include_baselines:
                 for b in BASELINE_MODELS:
-                    train_model(seed, b, args.device, checkpoint_base, epochs=args.epochs, force_retrain=args.force_retrain)
+                    train_model(seed, b, args.device, checkpoint_base, epochs=args.epochs, force_retrain=args.force_retrain, no_test_eval=args.no_test_eval)
 
             for m in CONSTITUENT_MODELS:
-                train_model(seed, m, args.device, checkpoint_base, epochs=args.epochs, force_retrain=args.force_retrain)
+                train_model(seed, m, args.device, checkpoint_base, epochs=args.epochs, force_retrain=args.force_retrain, no_test_eval=args.no_test_eval)
 
     # 2. Evaluation Phase
     results_per_seed = {}

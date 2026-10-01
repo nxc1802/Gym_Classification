@@ -490,7 +490,7 @@ The candidate augmentation pool spans five operators across three physical domai
         \pi = (0)(1 \; 2)(3 \; 4)(5 \; 6)(7 \; 8)(9 \; 10)(11 \; 12),
     \end{equation}
     corresponding to nose ($0 \leftrightarrow 0$), shoulders ($1 \leftrightarrow 2$), elbows ($3 \leftrightarrow 4$), wrists ($5 \leftrightarrow 6$), hips ($7 \leftrightarrow 8$), knees ($9 \leftrightarrow 10$), and ankles ($11 \leftrightarrow 12$). The reflected spatial keypoints are defined as $\tilde{p}'_{t, v} = \sigma( \tilde{p}_{t, \pi(v)} ) = ( -\tilde{x}_{t, \pi(v)}, \; \tilde{y}_{t, \pi(v)}, \; \tilde{z}_{t, \pi(v)} )$. Reflected limb elevation angles are evaluated in physical coordinate space prior to standardization, mapping through the pair permutation involution with appropriate chord orientation parity: $\theta'_{k} = s_k \theta_{\pi_{\text{pair}}(k)}$, applied with activation probability $p_{\text{flip}} = 0.5$ to simulate bilateral camera viewing.
-    \item \textbf{Gravitational Yaw Rotation ($\mathrm{SO}(2)$ Invariance):} To simulate horizontal camera viewpoints around the athlete without altering the gravitational vertical axis $y$, coordinates are rotated about the vertical axis by $\alpha \sim \mathcal{U}(-15^\circ, +15^\circ)$ with probability $p_{\text{yaw}} = 0.5$ using the planar rotation matrix $R_y(\alpha)$:
+    \item \textbf{Gravitational Yaw Rotation ($\mathrm{SO}(2)$ Invariance):} To simulate horizontal camera viewpoints around the athlete without altering the gravitational vertical axis $y$, coordinates are rotated about the vertical axis by continuous random angle $\alpha \sim \mathcal{U}(-15^\circ, +15^\circ)$ using the planar rotation matrix $R_y(\alpha)$:
     \begin{equation}
     \label{eq:yaw_rotation}
         \begin{bmatrix} x' \\ y' \\ z' \end{bmatrix} = \begin{bmatrix} \cos\alpha & 0 & \sin\alpha \\ 0 & 1 & 0 \\ -\sin\alpha & 0 & \cos\alpha \end{bmatrix} \begin{bmatrix} x \\ y \\ z \end{bmatrix}.
@@ -545,7 +545,7 @@ where $W_O \in \mathbb{R}^{128 \times 128}$ aggregates the concatenated multi-he
     Z'^{(l)} &= Z^{(l-1)} + \mathrm{MHSA}\left(\mathrm{LayerNorm}(Z^{(l-1)})\right), \\
     Z^{(l)}  &= Z'^{(l)} + \mathrm{FFN}\left(\mathrm{LayerNorm}(Z'^{(l)})\right).
 \end{align}
-Here, the position-wise feed-forward network is parameterized as $\mathrm{FFN}(u) = \mathrm{GELU}(u W_1 + b_1) W_2 + b_2$ using Gaussian Error Linear Units \cite{hendrycks2016}, with an expansion hidden dimension of $d_{\text{ff}} = 160$ and dropout rate of 0.2.
+Here, the position-wise feed-forward network is parameterized as $\mathrm{FFN}(u) = \mathrm{GELU}(u W_1 + b_1) W_2 + b_2$ using Gaussian Error Linear Units \cite{hendrycks2016}, with an expansion hidden dimension of $d_{\text{ff}} = 192$ and dropout rate of 0.2.
 
 \paragraph{Global Pooling and Classification Head.} Following the final layer $L$, the frame representations are temporally summarized via uniform average pooling, $\hat{z} = \frac{1}{T} \sum_{t=1}^T Z_t^{(L)} \in \mathbb{R}^{128}$, and projected to normalized class posterior probabilities:
 \begin{equation}
@@ -650,9 +650,9 @@ To ensure fair scientific comparison, all individual model backbones were constr
 \textbf{Loss Function \& Smoothing}& Cross-Entropy Loss with label smoothing $\alpha = 0.05$ (optional Focal Loss $\gamma = 2.0$) \\
 \textbf{Precision Acceleration}    & PyTorch Automatic Mixed Precision (AMP) with \texttt{bfloat16} / \texttt{float16} \\
 \midrule
-\textbf{Transformer Architecture}  & 3 layers, 8 attention heads, $d_{\text{model}} = 128$, $d_{\text{ff}} = 160$, learnable PE, dropout 0.2 (399K params) \\
+\textbf{Transformer Architecture}  & 3 layers, 8 attention heads, $d_{\text{model}} = 128$, $d_{\text{ff}} = 192$, learnable PE, dropout 0.2 (399K params) \\
 \textbf{AAGCN Graph Architecture}  & 3 stages [48, 96, 150], kernel 9, adaptive residual topology (378K params/stream) \\
-\textbf{SkelGym-Aug Parameters}    & Bilateral body reflection ($p=0.5$); Gravitational 3D yaw $\alpha \in [-15^\circ, +15^\circ]$ ($p=0.5$); \\
+\textbf{SkelGym-Aug Parameters}    & Bilateral body reflection ($p=0.5$); Gravitational 3D yaw $\alpha \in [-15^\circ, +15^\circ]$; \\
                                    & Proportional scaling $s \in [0.90, 1.10]$; Gaussian sensor jitter $\sigma = 0.008$ \\
 \bottomrule
 \end{tabular}

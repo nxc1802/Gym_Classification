@@ -35,6 +35,33 @@ def load_checkpoint(model_type: str, feat_type: str, ckpt_path: str, device: tor
     m.eval()
     return m
 
+def find_checkpoint_path(ckpt_rel: str, seed: int) -> Path:
+    p = Path(ckpt_rel)
+    stem = p.stem
+    suffix = p.suffix
+    candidates = []
+    if seed != 42:
+        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}{suffix}")
+        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}_seed{seed}{suffix}")
+        candidates.append(PROJECT_ROOT / ckpt_rel)
+    else:
+        candidates.append(PROJECT_ROOT / ckpt_rel)
+        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}{suffix}")
+        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}_seed{seed}{suffix}")
+    for c in candidates:
+        if c.exists():
+            return c
+    return candidates[0]
+
+def load_norm_stats_for_seed(ref_dir: Path, feat: str, seed: int) -> Tuple[np.ndarray, np.ndarray]:
+    stat_file = ref_dir / f"seed{seed}" / f"normalization_{feat}.npz"
+    if not stat_file.exists():
+        stat_file = ref_dir / f"normalization_{feat}.npz"
+    if not stat_file.exists():
+        raise FileNotFoundError(f"Missing normalization artifact for {feat} (seed {seed}): {stat_file}. Run scripts/freeze_reference_artifacts.py first!")
+    data = np.load(stat_file)
+    return (data["mean"], data["std"])
+
 def main():
     parser = argparse.ArgumentParser(description="External Benchmark 1-Shot Transfer Simulation")
     parser.add_argument("--config", type=str, default="configs/external/mmfit.yaml", help="Path to config yaml")
@@ -58,9 +85,12 @@ def main():
     ref_dir = PROJECT_ROOT / cfg.get("paths", {}).get("reference_dir", "artifacts/reference")
     device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu"))
 
+    seeds = args.seeds if args.seeds else [args.seed]
+
     print("=" * 80)
-    print(f"ONE-SHOT CROSS-DATASET METRIC TRANSFER (100 TRIALS, K=1)")
+    print(f"ONE-SHOT CROSS-DATASET METRIC TRANSFER ({args.trials} TRIALS, K=1)")
     print(f"Dataset: {dataset_name.upper()} | Pose: {pose_source.upper()} | Class Set: {class_set}")
+    print(f"Seeds: {seeds}")
     print("=" * 80)
 
     # 1. Load Dataset
@@ -84,83 +114,108 @@ def main():
 
     target_class_indices = get_target_skelgym_indices(dataset_name, class_set)
 
-    # 2. Load Normalization
-    stat_mix = np.load(ref_dir / "normalization_mix.npz")
-    stat_bone = np.load(ref_dir / "normalization_bone_3d.npz")
-
-    # Extract windows
+    # 2. Extract Raw Windows Once
     mix_data = ext_ds.extract_windows("mix", seq_len=32, stride=32)
     bone_data = ext_ds.extract_windows("bone_3d", seq_len=32, stride=32)
 
-    feat_mix = (mix_data["features"] - stat_mix["mean"][None, :, :]) / (stat_mix["std"][None, :, :] + 1e-7)
-    feat_bone = (bone_data["features"] - stat_bone["mean"][None, :, :]) / (stat_bone["std"][None, :, :] + 1e-7)
-
+    raw_mix = mix_data["features"]
+    raw_bone = bone_data["features"]
     record_ids = mix_data["record_ids"]
     labels = mix_data["labels"]
     subject_ids = mix_data["subject_ids"]
 
-    # 3. Load Models
-    m_trans = load_checkpoint("Transformer", "mix", str(PROJECT_ROOT / "checkpoints/best_Transformer_T2.2_mix.pt"), device)
-    m_bone = load_checkpoint("AAGCN", "bone_3d", str(PROJECT_ROOT / "checkpoints/best_AAGCN_T4.2_bone_3d.pt"), device)
+    model_names = ["Transformer (Mix)", "AAGCN (Bone 3D)", "SkelGym-Full"]
+    all_trials_by_model = {m: [] for m in model_names}
+    seed_summaries = []
 
-    # 4. Extract Penultimate Embeddings
-    print("\nExtracting penultimate representation vectors...")
-    embs_trans = extract_penultimate_embeddings(m_trans, feat_mix, "Transformer", device)
-    embs_bone = extract_penultimate_embeddings(m_bone, feat_bone, "AAGCN", device)
+    # 3. Multi-Seed Simulation Loop
+    for s_idx, seed in enumerate(seeds, 1):
+        print(f"\n[{s_idx}/{len(seeds)}] Evaluating 1-Shot Transfer on Seed {seed}...")
+        stat_mix = load_norm_stats_for_seed(ref_dir, "mix", seed)
+        stat_bone = load_norm_stats_for_seed(ref_dir, "bone_3d", seed)
 
-    # Pool embeddings per record
-    unique_recs = sorted(list(set(record_ids)))
-    rec_to_class = {}
-    rec_to_subject = {}
-    rec_embs_trans = {}
-    rec_embs_bone = {}
-    rec_embs_full = {}
+        feat_mix = (raw_mix - stat_mix[0][None, :, :]) / (stat_mix[1][None, :, :] + 1e-7)
+        feat_bone = (raw_bone - stat_bone[0][None, :, :]) / (stat_bone[1][None, :, :] + 1e-7)
 
-    for r in unique_recs:
-        mask = [idx for idx, rec_id in enumerate(record_ids) if rec_id == r]
-        rec_to_class[r] = labels[mask[0]]
-        rec_to_subject[r] = subject_ids[mask[0]]
+        ckpt_trans = find_checkpoint_path("checkpoints/best_Transformer_T2.2_mix.pt", seed)
+        ckpt_bone = find_checkpoint_path("checkpoints/best_AAGCN_T4.2_bone_3d.pt", seed)
 
-        mean_trans = np.mean(embs_trans[mask], axis=0)
-        norm_t = mean_trans / (np.linalg.norm(mean_trans) + 1e-12)
-        rec_embs_trans[r] = norm_t
+        if not ckpt_trans.exists():
+            raise FileNotFoundError(f"Transformer checkpoint not found for seed {seed}: {ckpt_trans}")
+        if not ckpt_bone.exists():
+            raise FileNotFoundError(f"AAGCN checkpoint not found for seed {seed}: {ckpt_bone}")
 
-        mean_bone = np.mean(embs_bone[mask], axis=0)
-        norm_b = mean_bone / (np.linalg.norm(mean_bone) + 1e-12)
-        rec_embs_bone[r] = norm_b
+        m_trans = load_checkpoint("Transformer", "mix", str(ckpt_trans), device)
+        m_bone = load_checkpoint("AAGCN", "bone_3d", str(ckpt_bone), device)
 
-        # Concatenate normalized embeddings for SkelGym-Full
-        c_emb = np.concatenate([norm_t, norm_b])
-        rec_embs_full[r] = c_emb / (np.linalg.norm(c_emb) + 1e-12)
+        embs_trans = extract_penultimate_embeddings(m_trans, feat_mix, "Transformer", device)
+        embs_bone = extract_penultimate_embeddings(m_bone, feat_bone, "AAGCN", device)
 
-    eval_emb_models = {
-        "Transformer (Mix)": rec_embs_trans,
-        "AAGCN (Bone 3D)": rec_embs_bone,
-        "SkelGym-Full": rec_embs_full
-    }
+        # Pool embeddings per record
+        unique_recs = sorted(list(set(record_ids)))
+        rec_to_class = {}
+        rec_to_subject = {}
+        rec_embs_trans = {}
+        rec_embs_bone = {}
+        rec_embs_full = {}
 
+        for r in unique_recs:
+            mask = [idx for idx, rec_id in enumerate(record_ids) if rec_id == r]
+            rec_to_class[r] = labels[mask[0]]
+            rec_to_subject[r] = subject_ids[mask[0]]
+
+            mean_trans = np.mean(embs_trans[mask], axis=0)
+            norm_t = mean_trans / (np.linalg.norm(mean_trans) + 1e-12)
+            rec_embs_trans[r] = norm_t
+
+            mean_bone = np.mean(embs_bone[mask], axis=0)
+            norm_b = mean_bone / (np.linalg.norm(mean_bone) + 1e-12)
+            rec_embs_bone[r] = norm_b
+
+            c_emb = np.concatenate([norm_t, norm_b])
+            rec_embs_full[r] = c_emb / (np.linalg.norm(c_emb) + 1e-12)
+
+        eval_emb_models = {
+            "Transformer (Mix)": rec_embs_trans,
+            "AAGCN (Bone 3D)": rec_embs_bone,
+            "SkelGym-Full": rec_embs_full
+        }
+
+        for m_name, emb_dict in eval_emb_models.items():
+            sim_res = simulate_one_shot_transfer(
+                embeddings_by_record=emb_dict,
+                record_to_class=rec_to_class,
+                record_to_subject=rec_to_subject,
+                target_class_indices=target_class_indices,
+                n_trials=args.trials,
+                seed=seed
+            )
+            trial_accs = sim_res["trials_df"]["accuracy"].tolist()
+            all_trials_by_model[m_name].extend(trial_accs)
+            seed_summaries.append({
+                "seed": seed,
+                "model": m_name,
+                "mean_acc": sim_res["mean"],
+                "std_acc": sim_res["std"],
+                "ci_95_low": sim_res["ci_95"][0],
+                "ci_95_high": sim_res["ci_95"][1]
+            })
+
+    # 4. Global Aggregation across Trials & Seeds
     print("\n" + "=" * 80)
     print("TABLE Z: ONE-SHOT CROSS-DATASET TRANSFER SIMULATION")
+    print(f"Evaluated across {len(seeds)} seed(s) x {args.trials} trials")
     print("=" * 80)
     print(f"{'Model':<25} | {'Mean ± SD':<18} | {'95% Percentile CI':<20}")
     print("-" * 80)
 
     summary_rows = []
-    all_trials_data = {}
-
-    for m_name, emb_dict in eval_emb_models.items():
-        sim_res = simulate_one_shot_transfer(
-            embeddings_by_record=emb_dict,
-            record_to_class=rec_to_class,
-            record_to_subject=rec_to_subject,
-            target_class_indices=target_class_indices,
-            n_trials=args.trials,
-            seed=args.seed
-        )
-
-        mean_acc = sim_res["mean"]
-        std_acc = sim_res["std"]
-        ci_low, ci_high = sim_res["ci_95"]
+    for m_name in model_names:
+        accs = np.array(all_trials_by_model[m_name])
+        mean_acc = float(np.mean(accs))
+        std_acc = float(np.std(accs))
+        ci_low = float(np.percentile(accs, 2.5))
+        ci_high = float(np.percentile(accs, 97.5))
 
         print(f"{m_name:<25} | {mean_acc:>6.2f}% ± {std_acc:<6.2f}% | [{ci_low:>5.2f}%, {ci_high:>5.2f}%]")
         summary_rows.append({
@@ -168,15 +223,17 @@ def main():
             "mean_acc": mean_acc,
             "std_acc": std_acc,
             "ci_95_low": ci_low,
-            "ci_95_high": ci_high
+            "ci_95_high": ci_high,
+            "num_trials": len(accs)
         })
-        all_trials_data[m_name] = sim_res["trials_df"]["accuracy"].tolist()
 
     df_summary = pd.DataFrame(summary_rows)
     df_summary.to_csv(out_dir / "fewshot_summary.csv", index=False)
-    pd.DataFrame(all_trials_data).to_csv(out_dir / "fewshot_100_trials.csv", index=False)
+    pd.DataFrame(all_trials_by_model).to_csv(out_dir / "fewshot_trials.csv", index=False)
+    if len(seeds) > 1:
+        pd.DataFrame(seed_summaries).to_csv(out_dir / "fewshot_seed_runs.csv", index=False)
 
-    print(f"\nSaved 1-shot transfer trial outputs to: {out_dir / 'fewshot_100_trials.csv'}")
+    print(f"\nSaved 1-shot transfer trial outputs to: {out_dir / 'fewshot_trials.csv'}")
 
 if __name__ == "__main__":
     main()

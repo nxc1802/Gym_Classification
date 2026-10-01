@@ -69,6 +69,45 @@ def predict_windows(model: torch.nn.Module, features: np.ndarray, device: torch.
             probs.append(p.cpu().numpy())
     return np.concatenate(probs, axis=0) if probs else np.zeros((0, NUM_CLASSES), dtype=np.float32)
 
+def find_checkpoint_path(ckpt_rel: str, seed: int) -> Path:
+    p = Path(ckpt_rel)
+    stem = p.stem
+    suffix = p.suffix
+    candidates = []
+    if seed != 42:
+        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}{suffix}")
+        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}_seed{seed}{suffix}")
+        candidates.append(PROJECT_ROOT / ckpt_rel)
+    else:
+        candidates.append(PROJECT_ROOT / ckpt_rel)
+        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}{suffix}")
+        candidates.append(PROJECT_ROOT / "checkpoints" / f"seed{seed}" / f"{stem}_seed{seed}{suffix}")
+    for c in candidates:
+        if c.exists():
+            return c
+    return candidates[0]
+
+def load_norm_stats_for_seed(ref_dir: Path, feat: str, seed: int) -> Tuple[np.ndarray, np.ndarray]:
+    stat_file = ref_dir / f"seed{seed}" / f"normalization_{feat}.npz"
+    if not stat_file.exists():
+        stat_file = ref_dir / f"normalization_{feat}.npz"
+    if not stat_file.exists():
+        raise FileNotFoundError(f"Missing normalization artifact for {feat} (seed {seed}): {stat_file}. Run scripts/freeze_reference_artifacts.py first!")
+    data = np.load(stat_file)
+    return (data["mean"], data["std"])
+
+def load_ensemble_weights_for_seed(ref_dir: Path, seed: int) -> Dict[str, Any]:
+    ens_weights_file = ref_dir / f"seed{seed}" / "ensemble_weights.json"
+    if not ens_weights_file.exists():
+        ens_weights_file = ref_dir / "ensemble_weights.json"
+    if not ens_weights_file.exists():
+        return {
+            "lite": {"weights_window": [0.5, 0.5]},
+            "full": {"weights_window": [0.2, 0.2, 0.2, 0.2, 0.2]}
+        }
+    with open(ens_weights_file, "r") as f:
+        return json.load(f)
+
 def main():
     parser = argparse.ArgumentParser(description="Unified External Benchmark Evaluation")
     parser.add_argument("--config", type=str, default="configs/external/mmfit.yaml", help="Path to config yaml")
@@ -132,32 +171,17 @@ def main():
     target_class_names = get_target_skelgym_classes(dataset_name, class_set)
     print(f"  Target Classes ({len(target_class_indices)}): {target_class_names}")
 
-    # 2. Load Frozen Train Normalization Statistics
-    print(f"\n[2/7] Loading frozen SkelGym train normalization statistics...")
-    norm_stats = {}
-    for feat in ["mix", "rel_3d", "bone_3d", "joint_motion_3d", "bone_motion_3d"]:
-        stat_file = ref_dir / f"normalization_{feat}.npz"
-        if not stat_file.exists():
-            raise FileNotFoundError(f"Missing frozen normalization artifact: {stat_file}. Run scripts/freeze_reference_artifacts.py first!")
-        data = np.load(stat_file)
-        norm_stats[feat] = (data["mean"], data["std"])
-        print(f"  Loaded {feat} (shape {data['mean'].shape})")
-
-    # 3. Extract and Normalize Windows for each Feature Representation
-    print(f"\n[3/7] Extracting synchronized windows and standardizing with train stats...")
+    # 2. Extract Raw Synchronized Windows for each Feature Representation
+    print(f"\n[2/7] Extracting raw synchronized windows for feature representations...")
     seq_len = int(cfg.get("window", {}).get("seq_len", 32))
     stride = int(cfg.get("window", {}).get("stride", 32))
 
-    feature_windows = {}
+    raw_features = {}
     base_info = None
 
     for feat in ["mix", "rel_3d", "bone_3d", "joint_motion_3d", "bone_motion_3d"]:
         win_data = ext_ds.extract_windows(feature_method=feat, seq_len=seq_len, stride=stride)
-        raw_feat = win_data["features"]  # (N, T, D)
-        mean, std = norm_stats[feat]
-        # Standardize strictly using train set statistics (prevent target data leakage)
-        norm_feat = (raw_feat - mean[None, :, :]) / (std[None, :, :] + 1e-7)
-        feature_windows[feat] = norm_feat.astype(np.float32)
+        raw_features[feat] = win_data["features"]  # (N, T, D)
 
         if base_info is None:
             base_info = {
@@ -172,8 +196,17 @@ def main():
     N_windows = len(y_win_true)
     print(f"  Total extracted test windows: {N_windows} across {len(set(win_rec_ids))} unique action records")
 
-    # 4. Load Models and Execute Forward Pass
-    print(f"\n[4/7] Loading frozen neural checkpoints and predicting...")
+    # 3. Multi-Seed Model Evaluation Loop
+    seeds = args.seeds if args.seeds else [42]
+    eval_models = ["ST-GCN (Rel 3D)", "Transformer (Mix)", "AAGCN (Bone 3D)", "SkelGym-Lite", "SkelGym-Full"]
+    print(f"\n[3/7] Executing evaluation across {len(seeds)} random seed(s): {seeds}...")
+
+    all_seed_results_open = []
+    all_seed_results_closed = []
+    accum_probs = {m: np.zeros((N_windows, NUM_CLASSES), dtype=np.float64) for m in eval_models}
+    last_models_dict = {}
+    last_feature_windows = {}
+
     model_defs = {
         "ST-GCN (Rel 3D)": ("STGCN", "rel_3d", "checkpoints/best_STGCN_T3.2_rel_3d.pt"),
         "Transformer (Mix)": ("Transformer", "mix", "checkpoints/best_Transformer_T2.2_mix.pt"),
@@ -183,114 +216,187 @@ def main():
         "AAGCN (Bone Mot)": ("AAGCN", "bone_motion_3d", "checkpoints/best_AAGCN_T4.5_bone_motion_3d.pt"),
     }
 
-    test_probs = {}
-    models_dict = {}
+    for s_idx, seed in enumerate(seeds, 1):
+        print(f"\n--- [Seed {seed}] ({s_idx}/{len(seeds)}) Loading artifacts & predicting ---")
+        norm_stats = {}
+        for feat in ["mix", "rel_3d", "bone_3d", "joint_motion_3d", "bone_motion_3d"]:
+            norm_stats[feat] = load_norm_stats_for_seed(ref_dir, feat, seed)
 
-    for name, (m_type, f_type, ckpt_p) in model_defs.items():
-        ckpt_full = str(PROJECT_ROOT / ckpt_p)
-        model = load_checkpoint(m_type, f_type, ckpt_full, device)
-        models_dict[name] = (model, m_type, f_type)
-        feats = feature_windows[f_type]
-        p = predict_windows(model, feats, device)
-        test_probs[name] = p
-        print(f"  Predicted {name:<20}: window shape {p.shape}")
+        feature_windows = {}
+        for feat, raw_feat in raw_features.items():
+            mean, std = norm_stats[feat]
+            norm_feat = (raw_feat - mean[None, :, :]) / (std[None, :, :] + 1e-7)
+            feature_windows[feat] = norm_feat.astype(np.float32)
+        last_feature_windows = feature_windows
 
-    # Load frozen ensemble calibration weights
-    ens_weights_file = ref_dir / "ensemble_weights.json"
-    with open(ens_weights_file, "r") as f:
-        ens_cfg = json.load(f)
+        test_probs = {}
+        for name, (m_type, f_type, ckpt_p) in model_defs.items():
+            ckpt_full = find_checkpoint_path(ckpt_p, seed)
+            if not ckpt_full.exists():
+                raise FileNotFoundError(f"Checkpoint not found for {name} (seed {seed}): {ckpt_full}")
+            model = load_checkpoint(m_type, f_type, str(ckpt_full), device)
+            last_models_dict[name] = (model, m_type, f_type)
+            feats = feature_windows[f_type]
+            p = predict_windows(model, feats, device)
+            test_probs[name] = p
 
-    # SkelGym-Lite Blending
-    w_lite = ens_cfg["lite"]["weights_window"]
-    test_probs["SkelGym-Lite"] = (
-        w_lite[0] * test_probs["Transformer (Mix)"] +
-        w_lite[1] * test_probs["AAGCN (Bone 3D)"]
-    )
+        ens_cfg = load_ensemble_weights_for_seed(ref_dir, seed)
+        w_lite = ens_cfg.get("lite", {}).get("weights_window", [0.5, 0.5])
+        test_probs["SkelGym-Lite"] = (
+            w_lite[0] * test_probs["Transformer (Mix)"] +
+            w_lite[1] * test_probs["AAGCN (Bone 3D)"]
+        )
 
-    # SkelGym-Full Blending
-    w_full = ens_cfg["full"]["weights_window"]
-    test_probs["SkelGym-Full"] = (
-        w_full[0] * test_probs["Transformer (Mix)"] +
-        w_full[1] * test_probs["AAGCN (Bone 3D)"] +
-        w_full[2] * test_probs["AAGCN (Rel 3D)"] +
-        w_full[3] * test_probs["AAGCN (Joint Mot)"] +
-        w_full[4] * test_probs["AAGCN (Bone Mot)"]
-    )
+        w_full = ens_cfg.get("full", {}).get("weights_window", [0.2, 0.2, 0.2, 0.2, 0.2])
+        test_probs["SkelGym-Full"] = (
+            w_full[0] * test_probs["Transformer (Mix)"] +
+            w_full[1] * test_probs["AAGCN (Bone 3D)"] +
+            w_full[2] * test_probs["AAGCN (Rel 3D)"] +
+            w_full[3] * test_probs["AAGCN (Joint Mot)"] +
+            w_full[4] * test_probs["AAGCN (Bone Mot)"]
+        )
 
-    # 5. Open-Set vs. Closed-Set Comprehensive Evaluation
-    print(f"\n[5/7] Executing Open-Set and Closed-Set Hierarchical Evaluation...")
-    eval_models = ["ST-GCN (Rel 3D)", "Transformer (Mix)", "AAGCN (Bone 3D)", "SkelGym-Lite", "SkelGym-Full"]
+        for m_name in eval_models:
+            prob = test_probs[m_name]
+            accum_probs[m_name] += prob / float(len(seeds))
 
-    rows_open = []
-    rows_closed = []
+            res_open_win = evaluate_window_level(prob, y_win_true, target_class_indices, mode="open_set")
+            res_open_rec = aggregate_hierarchical_predictions(prob, y_win_true, win_rec_ids, target_class_indices, mode="open_set")
+            res_closed_win = evaluate_window_level(prob, y_win_true, target_class_indices, mode="closed_set")
+            res_closed_rec = aggregate_hierarchical_predictions(prob, y_win_true, win_rec_ids, target_class_indices, mode="closed_set")
+
+            all_seed_results_open.append({
+                "seed": seed,
+                "model": m_name,
+                "window_acc": res_open_win["accuracy"],
+                "recording_acc": res_open_rec["accuracy"],
+                "macro_f1": res_open_rec["macro_f1"]
+            })
+            all_seed_results_closed.append({
+                "seed": seed,
+                "model": m_name,
+                "window_acc": res_closed_win["accuracy"],
+                "recording_acc": res_closed_rec["accuracy"],
+                "macro_f1": res_closed_rec["macro_f1"],
+                **{f"recall_{k}": v for k, v in res_closed_rec["per_class_recall"].items()}
+            })
+
+    # 4. Statistical Aggregation and Bootstrap Confidence Intervals
+    print("\n" + "=" * 105)
+    print(f"TABLE X: CROSS-DATASET EXTERNAL VALIDATION RESULTS ({dataset_name.upper()} - {split_group.upper()})")
+    print(f"Evaluated across {len(seeds)} random seed(s): {seeds}")
+    print("=" * 105)
+    print(f"{'Model':<22} | {'Open Win (%)':<16} | {'Open Rec (%)':<16} | {'Closed Win (%)':<16} | {'Closed Rec (%)':<16} | {'Macro F1':<16}")
+    print("-" * 115)
+
+    summary_open = []
+    summary_closed = []
     bootstrap_results = {}
 
-    print("\n" + "=" * 95)
-    print(f"TABLE X: CROSS-DATASET EXTERNAL VALIDATION RESULTS ({dataset_name.upper()} - {split_group.upper()})")
-    print("=" * 95)
-    print(f"{'Model':<22} | {'Open Win':<9} | {'Open Rec':<9} | {'Closed Win':<10} | {'Closed Rec':<10} | {'Macro F1':<8}")
-    print("-" * 80)
-
     for m_name in eval_models:
-        prob = test_probs[m_name]
+        m_open = [r for r in all_seed_results_open if r["model"] == m_name]
+        m_closed = [r for r in all_seed_results_closed if r["model"] == m_name]
 
-        # A. Open-Set
-        res_open_win = evaluate_window_level(prob, y_win_true, target_class_indices, mode="open_set")
-        res_open_rec = aggregate_hierarchical_predictions(prob, y_win_true, win_rec_ids, target_class_indices, mode="open_set")
+        open_win_mean = float(np.mean([r["window_acc"] for r in m_open]))
+        open_win_std = float(np.std([r["window_acc"] for r in m_open]))
+        open_rec_mean = float(np.mean([r["recording_acc"] for r in m_open]))
+        open_rec_std = float(np.std([r["recording_acc"] for r in m_open]))
+        open_f1_mean = float(np.mean([r["macro_f1"] for r in m_open]))
+        open_f1_std = float(np.std([r["macro_f1"] for r in m_open]))
 
-        # B. Closed-Set
-        res_closed_win = evaluate_window_level(prob, y_win_true, target_class_indices, mode="closed_set")
-        res_closed_rec = aggregate_hierarchical_predictions(prob, y_win_true, win_rec_ids, target_class_indices, mode="closed_set")
+        closed_win_mean = float(np.mean([r["window_acc"] for r in m_closed]))
+        closed_win_std = float(np.std([r["window_acc"] for r in m_closed]))
+        closed_rec_mean = float(np.mean([r["recording_acc"] for r in m_closed]))
+        closed_rec_std = float(np.std([r["recording_acc"] for r in m_closed]))
+        closed_f1_mean = float(np.mean([r["macro_f1"] for r in m_closed]))
+        closed_f1_std = float(np.std([r["macro_f1"] for r in m_closed]))
 
-        # C. Recording-Level Bootstrap CI (95%, B=1000)
+        if len(seeds) > 1:
+            print(
+                f"{m_name:<22} | {open_win_mean:>5.2f} ± {open_win_std:<6.2f} | "
+                f"{open_rec_mean:>5.2f} ± {open_rec_std:<6.2f} | "
+                f"{closed_win_mean:>5.2f} ± {closed_win_std:<6.2f} | "
+                f"{closed_rec_mean:>5.2f} ± {closed_rec_std:<6.2f} | "
+                f"{closed_f1_mean:>5.4f} ± {closed_f1_std:<5.4f}"
+            )
+        else:
+            print(
+                f"{m_name:<22} | {open_win_mean:>6.2f}%          | "
+                f"{open_rec_mean:>6.2f}%          | "
+                f"{closed_win_mean:>6.2f}%          | "
+                f"{closed_rec_mean:>6.2f}%          | "
+                f"{closed_f1_mean:>6.4f}"
+            )
+
+        avg_prob = accum_probs[m_name]
+        res_open_rec_avg = aggregate_hierarchical_predictions(avg_prob, y_win_true, win_rec_ids, target_class_indices, mode="open_set")
+        res_closed_rec_avg = aggregate_hierarchical_predictions(avg_prob, y_win_true, win_rec_ids, target_class_indices, mode="closed_set")
+
         ci_open = compute_recording_level_bootstrap_ci(
-            res_open_rec["group_probs"], res_open_rec["group_trues"], target_class_indices, mode="open_set"
+            res_open_rec_avg["group_probs"], res_open_rec_avg["group_trues"], target_class_indices, mode="open_set"
         )
         ci_closed = compute_recording_level_bootstrap_ci(
-            res_closed_rec["group_probs"], res_closed_rec["group_trues"], target_class_indices, mode="closed_set"
+            res_closed_rec_avg["group_probs"], res_closed_rec_avg["group_trues"], target_class_indices, mode="closed_set"
         )
         bootstrap_results[m_name] = {
             "open_set_recording": ci_open,
             "closed_set_recording": ci_closed
         }
 
-        print(
-            f"{m_name:<22} | {res_open_win['accuracy']:>8.2f}% | {res_open_rec['accuracy']:>8.2f}% | "
-            f"{res_closed_win['accuracy']:>9.2f}% | {res_closed_rec['accuracy']:>9.2f}% | {res_closed_rec['macro_f1']:>8.4f}"
-        )
-
-        rows_open.append({
+        summary_open.append({
             "model": m_name,
-            "window_acc": res_open_win["accuracy"],
-            "recording_acc": res_open_rec["accuracy"],
-            "macro_f1": res_open_rec["macro_f1"],
+            "window_acc": open_win_mean,
+            "recording_acc": open_rec_mean,
+            "macro_f1": open_f1_mean,
+            "window_acc_mean": open_win_mean,
+            "window_acc_std": open_win_std,
+            "recording_acc_mean": open_rec_mean,
+            "recording_acc_std": open_rec_std,
+            "macro_f1_mean": open_f1_mean,
+            "macro_f1_std": open_f1_std,
             "ci_95_recording_acc": ci_open["acc_ci"],
             "ci_95_macro_f1": ci_open["f1_ci"]
         })
 
-        rows_closed.append({
+        recalls_mean = {}
+        for k in target_class_indices:
+            k_recalls = [r.get(f"recall_{k}", 0.0) for r in m_closed]
+            recalls_mean[f"recall_{k}"] = float(np.mean(k_recalls)) if k_recalls else 0.0
+            recalls_mean[f"recall_{k}_mean"] = float(np.mean(k_recalls)) if k_recalls else 0.0
+            recalls_mean[f"recall_{k}_std"] = float(np.std(k_recalls)) if k_recalls else 0.0
+
+        summary_closed.append({
             "model": m_name,
-            "window_acc": res_closed_win["accuracy"],
-            "recording_acc": res_closed_rec["accuracy"],
-            "macro_f1": res_closed_rec["macro_f1"],
+            "window_acc": closed_win_mean,
+            "recording_acc": closed_rec_mean,
+            "macro_f1": closed_f1_mean,
+            "window_acc_mean": closed_win_mean,
+            "window_acc_std": closed_win_std,
+            "recording_acc_mean": closed_rec_mean,
+            "recording_acc_std": closed_rec_std,
+            "macro_f1_mean": closed_f1_mean,
+            "macro_f1_std": closed_f1_std,
             "ci_95_recording_acc": ci_closed["acc_ci"],
             "ci_95_macro_f1": ci_closed["f1_ci"],
-            **{f"recall_{k}": v for k, v in res_closed_rec["per_class_recall"].items()}
+            **recalls_mean
         })
 
-
-    # Save summary tables
-    df_metrics_open = pd.DataFrame(rows_open)
-    df_metrics_closed = pd.DataFrame(rows_closed)
+    # Save summary tables and run traces
+    df_metrics_open = pd.DataFrame(summary_open)
+    df_metrics_closed = pd.DataFrame(summary_closed)
     df_metrics_open.to_csv(out_dir / "metrics_open.csv", index=False)
     df_metrics_closed.to_csv(out_dir / "metrics_closed.csv", index=False)
+
+    pd.DataFrame(all_seed_results_open).to_csv(out_dir / "metrics_open_runs.csv", index=False)
+    pd.DataFrame(all_seed_results_closed).to_csv(out_dir / "metrics_closed_runs.csv", index=False)
+
     with open(out_dir / "bootstrap_ci.json", "w") as f:
         json.dump(bootstrap_results, f, indent=2)
 
-    # 6. Export Predictions & Confusion Matrices
-    print(f"\n[6/7] Exporting prediction logs and confusion matrices...")
+    # 5. Export Predictions & Confusion Matrices
+    print(f"\n[5/7] Exporting prediction logs and confusion matrices...")
     best_model_name = "SkelGym-Full"
-    best_prob = test_probs[best_model_name]
+    best_prob = accum_probs[best_model_name]
 
     # Save predictions_window.csv
     open_win_preds = np.argmax(best_prob, axis=1)
@@ -322,7 +428,8 @@ def main():
         title=f"{dataset_name.upper()} Closed-Set (SkelGym-Full)"
     )
 
-    # Error analysis table
+    # 6. Error Analysis Table
+    print(f"\n[6/7] Generating error analysis table...")
     generate_error_analysis_table(
         y_probs=best_prob,
         y_trues=y_win_true,
@@ -336,8 +443,8 @@ def main():
     # 7. Domain-Gap Diagnostics (Class Centroid Cosine Similarity)
     print(f"\n[7/7] Computing Domain-Gap Semantic Alignment Diagnostics...")
     # Extract Transformer embeddings on external dataset
-    trans_m = models_dict["Transformer (Mix)"][0]
-    ext_embs = extract_penultimate_embeddings(trans_m, feature_windows["mix"], "Transformer", device)
+    trans_m = last_models_dict["Transformer (Mix)"][0]
+    ext_embs = extract_penultimate_embeddings(trans_m, last_feature_windows["mix"], "Transformer", device)
 
     # Load SkelGym test set dataloader for centroid comparison
     metadata_path = str(PROJECT_ROOT / "data" / "Final_dataset_metadata.csv")
@@ -346,10 +453,12 @@ def main():
         feature_method="mix",
         batch_size=32,
         seq_len=32,
-        stride=32,
+        stride=16,
+        val_test_stride=32,
         landmark_dir=str(PROJECT_ROOT / "data" / "landmarks"),
         num_workers=0,
-        in_memory=True
+        in_memory=True,
+        seed=seeds[0]
     )
     skel_embs = []
     with torch.no_grad():
