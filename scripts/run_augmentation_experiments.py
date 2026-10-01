@@ -58,7 +58,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from src.constants import NUM_CLASSES
+from src.constants import NUM_CLASSES, CANONICAL_EXPERIMENT_REGISTRY
 from src.data.dataset import get_dataloaders
 from src.cli import build_model
 from src.training.trainer import Trainer
@@ -127,20 +127,33 @@ def find_existing_checkpoint(task: Dict[str, Any], checkpoint_base: Path, force_
         checkpoint_base / f"seed{seed}" / f"best_{model}_{feature}_aug_{aug}.pt",
     ]
 
-    # Legacy anchor mappings for seed 42
-    if seed == 42:
-        if model == "Transformer" and feature == "mix" and aug == "none":
+    # Canonical experiment mappings across seeds
+    seed_dir = checkpoint_base / f"seed{seed}"
+    if model == "Transformer" and feature == "mix" and aug == "none":
+        candidates.append(seed_dir / "best_Transformer_T1.27_mix.pt")
+        if seed == 42:
             candidates.append(checkpoint_base / "best_Transformer_T1.27_mix.pt")
-        elif model == "Transformer" and feature == "mix" and aug == "skel_gym_aug":
+    elif model == "Transformer" and feature == "mix" and aug == "skel_gym_aug":
+        candidates.append(seed_dir / "best_Transformer_T2.2_mix.pt")
+        if seed == 42:
             candidates.append(checkpoint_base / "best_Transformer_T2.2_mix.pt")
-        elif model == "AAGCN" and feature == "bone_3d" and aug == "none":
+    elif model == "AAGCN" and feature == "bone_3d" and aug == "none":
+        candidates.append(seed_dir / "best_AAGCN_T3.6_bone_3d.pt")
+        candidates.append(seed_dir / "best_AAGCN_T4.1_bone_3d.pt")
+        if seed == 42:
             candidates.append(checkpoint_base / "best_AAGCN_T4.1_bone_3d.pt")
             candidates.append(checkpoint_base / "best_AAGCN_T3.6_bone_3d.pt")
-        elif model == "AAGCN" and feature == "bone_3d" and aug == "skel_gym_aug":
+    elif model == "AAGCN" and feature == "bone_3d" and aug == "skel_gym_aug":
+        candidates.append(seed_dir / "best_AAGCN_T4.2_bone_3d.pt")
+        if seed == 42:
             candidates.append(checkpoint_base / "best_AAGCN_T4.2_bone_3d.pt")
-        elif model == "BiLSTM" and feature == "mix" and aug == "none":
+    elif model == "BiLSTM" and feature == "mix" and aug == "none":
+        candidates.append(seed_dir / "best_BiLSTM_T1.18_mix.pt")
+        if seed == 42:
             candidates.append(checkpoint_base / "best_BiLSTM_T1.18_mix.pt")
-        elif model == "STGCN" and feature == "rel_3d" and aug == "none":
+    elif model == "STGCN" and feature == "rel_3d" and aug == "none":
+        candidates.append(seed_dir / "best_STGCN_T3.2_rel_3d.pt")
+        if seed == 42:
             candidates.append(checkpoint_base / "best_STGCN_T3.2_rel_3d.pt")
 
     for cand in candidates:
@@ -208,7 +221,7 @@ def get_validation_metrics(ckpt_path: Optional[Path], log_path: Path) -> Dict[st
                     val_loss = data.get("val_loss")
                     val_f1 = data.get("val_macro_f1")
                     train_loss = data.get("train_loss")
-                    best_ep = data.get("best_epoch", 0)
+                    best_ep = data.get("best_epoch", data.get("epoch", 0))
                     if val_acc is not None:
                         acc_pct = float(val_acc) * 100.0 if float(val_acc) <= 1.0 else float(val_acc)
                         v_loss = float(val_loss) if val_loss is not None else 0.0
@@ -228,10 +241,42 @@ def get_validation_metrics(ckpt_path: Optional[Path], log_path: Path) -> Dict[st
 # ------------------------------------------------------------------------------
 # Task Execution & Evaluation
 # ------------------------------------------------------------------------------
+def get_task_hyperparameters(model: str, feature: str, augment: str = "none") -> Dict[str, Any]:
+    """
+    Resolves hyperparameters from CANONICAL_EXPERIMENT_REGISTRY,
+    ensuring each backbone (Transformer, AAGCN, BiLSTM, STGCN) adheres strictly
+    to its canonical training protocol.
+    """
+    # 1. Exact match (model, feature, augment)
+    for exp in CANONICAL_EXPERIMENT_REGISTRY.values():
+        if exp.get("model") == model and exp.get("feature") == feature and exp.get("augment") == augment:
+            return dict(exp)
+
+    # 2. Match (model, feature)
+    for exp in CANONICAL_EXPERIMENT_REGISTRY.values():
+        if exp.get("model") == model and exp.get("feature") == feature:
+            return dict(exp)
+
+    # 3. Canonical defaults by architecture
+    is_graph = model in ("AAGCN", "STGCN")
+    is_smooth = model in ("Transformer", "AAGCN")
+    return {
+        "lr": 1e-3 if model in ("AAGCN", "STGCN", "BiLSTM", "LSTM") else 1e-4,
+        "batch_size": 32 if is_graph else 16,
+        "label_smoothing": 0.05 if is_smooth else 0.0,
+        "patience": 10,
+        "epochs": 100,
+        "early_stopping_metric": "val_macro_f1",
+        "train_stride": 16,
+        "val_test_stride": 32,
+    }
+
 def train_task_subprocess(task: Dict[str, Any], ckpt_path: Path, device: str = "cuda") -> bool:
     """Executes training via isolated subprocess."""
     task_ckpt_dir = ckpt_path.parent / task["id"]
     task_ckpt_dir.mkdir(parents=True, exist_ok=True)
+
+    hp = get_task_hyperparameters(task["model"], task["feature"], task["augment"])
 
     cmd = [
         sys.executable, "-u", "-m", "src.cli", "train",
@@ -240,13 +285,14 @@ def train_task_subprocess(task: Dict[str, Any], ckpt_path: Path, device: str = "
         "--augment", task["augment"],
         "--seed", str(task["seed"]),
         "--checkpoint_name", task["id"],
-        "--epochs", "100",
-        "--patience", "10",
-        "--batch_size", "16",
-        "--label_smoothing", "0.05",
-        "--early_stopping_metric", "val_macro_f1",
-        "--train_stride", "16",
-        "--val_test_stride", "32",
+        "--epochs", str(hp.get("epochs", 100)),
+        "--lr", str(hp.get("lr", 1e-4)),
+        "--patience", str(hp.get("patience", 10)),
+        "--batch_size", str(hp.get("batch_size", 16)),
+        "--label_smoothing", str(hp.get("label_smoothing", 0.05)),
+        "--early_stopping_metric", str(hp.get("early_stopping_metric", "val_macro_f1")),
+        "--train_stride", str(hp.get("train_stride", 16)),
+        "--val_test_stride", str(hp.get("val_test_stride", 32)),
         "--no_test_eval",
         "--device", device,
         "--checkpoint_dir", str(task_ckpt_dir),
@@ -604,6 +650,7 @@ def main():
             v_f1s = get_metric_list("vid_f1")
             val_accs = get_metric_list("val_acc")
             val_losses = get_metric_list("val_loss")
+            val_f1s = get_metric_list("val_macro_f1")
 
             summary[v_key] = {
                 "count": len(v_tasks),
@@ -621,6 +668,8 @@ def main():
                 "val_acc_std": float(np.std(val_accs)) if val_accs else 0.0,
                 "val_loss_mean": float(np.mean(val_losses)) if val_losses else 0.0,
                 "val_loss_std": float(np.std(val_losses)) if val_losses else 0.0,
+                "val_macro_f1_mean": float(np.mean(val_f1s)) if val_f1s else 0.0,
+                "val_macro_f1_std": float(np.std(val_f1s)) if val_f1s else 0.0,
             }
         return summary
 
@@ -682,6 +731,7 @@ def main():
                 diff = s["win_acc_mean"] - ref_loo
                 diff_str = f"+{diff:.2f}%" if diff > 0 else (f"{diff:.2f}%" if diff < 0 else "Ref (0.00%)")
                 va = f"{s['val_acc_mean']:.2f}% ± {s['val_acc_std']:.2f}%" if s.get("val_acc_mean") else "--"
+                vl = f"{s['val_loss_mean']:.4f} ± {s['val_loss_std']:.4f}" if s.get("val_loss_mean") else "--"
                 mf.write(f"| {disp_name} | {domain} | {va} | {vl} | {s['win_acc_mean']:.2f}% ± {s['win_acc_std']:.2f}% | {s['win_f1_mean']:.4f} ± {s['win_f1_std']:.4f} | {diff_str} |\n")
 
         # Table 2: Single Component
@@ -696,6 +746,7 @@ def main():
                 diff = s["win_acc_mean"] - base_single
                 diff_str = f"+{diff:.2f}%" if diff > 0 else (f"{diff:.2f}%" if diff < 0 else "Ref (0.00%)")
                 va = f"{s['val_acc_mean']:.2f}% ± {s['val_acc_std']:.2f}%" if s.get("val_acc_mean") else "--"
+                vl = f"{s['val_loss_mean']:.4f} ± {s['val_loss_std']:.4f}" if s.get("val_loss_mean") else "--"
                 mf.write(f"| {disp_name} | {domain} | {va} | {vl} | {s['win_acc_mean']:.2f}% ± {s['win_acc_std']:.2f}% | {s['win_f1_mean']:.4f} ± {s['win_f1_std']:.4f} | {diff_str} |\n")
 
         # Table 3: Cross-Backbones

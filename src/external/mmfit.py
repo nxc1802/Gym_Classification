@@ -34,13 +34,20 @@ class MMFitExternalDataset(BaseExternalDataset):
         class_set: str = "core4",          # 'core4' or 'extended5'
         pose_source: str = "native",       # 'native' or 'mediapipe'
         qc_gate: Optional[QualityControlGate] = None,
-        apply_geometric_norm: bool = True
+        apply_geometric_norm: Optional[bool] = None
     ):
+        # MediaPipe coordinates are already in camera-image normalized space matching SkelGym training data.
+        # Geometric normalization (re-centering & rotation) is only applied for Native 3D metric skeletons.
+        if apply_geometric_norm is None:
+            apply_geom = (pose_source == "native")
+        else:
+            apply_geom = apply_geometric_norm
+
         super().__init__(
             name="mmfit",
             pose_source=pose_source,
             qc_gate=qc_gate or QualityControlGate(),
-            apply_geometric_norm=apply_geometric_norm
+            apply_geometric_norm=apply_geom
         )
         self.root_dir = Path(root_dir)
         self.split_group = split_group
@@ -68,8 +75,10 @@ class MMFitExternalDataset(BaseExternalDataset):
             raise ValueError(f"Unknown MM-Fit split_group '{self.split_group}'.")
 
     def _load_dataset(self) -> None:
+        from src.constants import RAW_POINTS_13
         target_workouts = self._determine_workouts()
         fps = 30.0  # MM-Fit RGB-D capture rate is native 30 Hz
+        project_root = Path(__file__).resolve().parent.parent.parent
 
         for w in target_workouts:
             w_dir = self.root_dir / w
@@ -99,15 +108,38 @@ class MMFitExternalDataset(BaseExternalDataset):
 
             # Load full workout pose data
             full_pose_3d = None
+            is_pre_extracted_13 = False
+
             if self.pose_source == "native":
                 pose_file = w_dir / f"{w}_pose_3d.npy"
                 if pose_file.exists():
                     full_pose_3d = np.load(pose_file)  # shape (3, T, 18)
             elif self.pose_source == "mediapipe":
-                # Check for extracted MediaPipe landmarks file if present
-                mp_file = w_dir / f"{w}_mediapipe.npy"
-                if mp_file.exists():
-                    full_pose_3d = np.load(mp_file)
+                # Check candidate paths for MediaPipe landmark CSV or NPY
+                cand_paths = [
+                    project_root / "data_external" / "mmfit" / "landmarks" / f"{w}_mediapipe.csv",
+                    w_dir / f"{w}_mediapipe.csv",
+                    self.root_dir / "landmarks" / f"{w}_mediapipe.csv",
+                    w_dir / f"{w}_mediapipe.npy",
+                    project_root / "data_external" / "mmfit" / "landmarks" / f"{w}_mediapipe.npy"
+                ]
+                for cp in cand_paths:
+                    if cp.exists() and cp.stat().st_size > 1000:
+                        if cp.suffix == ".csv":
+                            df_mp = pd.read_csv(cp)
+                            T_mp = len(df_mp)
+                            skel13 = np.zeros((T_mp, 13, 3), dtype=np.float32)
+                            for i, pt in enumerate(RAW_POINTS_13):
+                                if f"{pt}_x" in df_mp.columns:
+                                    skel13[:, i, 0] = df_mp[f"{pt}_x"].fillna(0.0).values
+                                    skel13[:, i, 1] = df_mp[f"{pt}_y"].fillna(0.0).values
+                                    skel13[:, i, 2] = df_mp[f"{pt}_z"].fillna(0.0).values
+                            full_pose_3d = skel13  # (T, 13, 3)
+                            is_pre_extracted_13 = True
+                            break
+                        elif cp.suffix == ".npy":
+                            full_pose_3d = np.load(cp)
+                            break
 
             if full_pose_3d is None:
                 continue
@@ -130,7 +162,7 @@ class MMFitExternalDataset(BaseExternalDataset):
                 skel_class_idx = ACTION_TO_IDX[canonical_act]
 
                 # Extract frames slice
-                T_total = full_pose_3d.shape[1] if full_pose_3d.ndim == 3 and full_pose_3d.shape[0] == 3 else len(full_pose_3d)
+                T_total = full_pose_3d.shape[1] if (full_pose_3d.ndim == 3 and full_pose_3d.shape[0] == 3) else len(full_pose_3d)
                 s = max(0, min(s_frame, T_total - 1))
                 e = min(T_total, max(s + 1, e_frame))
 
@@ -142,11 +174,14 @@ class MMFitExternalDataset(BaseExternalDataset):
                     seg_pose = full_pose_3d[:, s:e, :]
                     skel_13 = openpose18_to_skelgym13(seg_pose)  # (T_seg, 13, 3)
                 else:
-                    seg_pose = full_pose_3d[s:e]
-                    if seg_pose.shape[1] == 33:
-                        skel_13 = mediapipe33_to_skelgym13(seg_pose)
+                    if is_pre_extracted_13:
+                        skel_13 = full_pose_3d[s:e]  # (T_seg, 13, 3)
                     else:
-                        skel_13 = seg_pose[:, :13, :3]
+                        seg_pose = full_pose_3d[s:e]
+                        if seg_pose.shape[1] == 33:
+                            skel_13 = mediapipe33_to_skelgym13(seg_pose)
+                        else:
+                            skel_13 = seg_pose[:, :13, :3]
 
                 record = ExternalRecord(
                     record_id=f"mmfit_{w}_seg{seg_idx:02d}_{raw_act}",

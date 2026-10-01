@@ -1,0 +1,113 @@
+segment_id,workout_id,split,source_class,target_class,start_frame,end_frame,reps,num_frames,rgb_path,landmark_path,mapping_type,is_core4,is_extended5,qc_status,zero_ratio,mean_visibility
+w00_set_001_squats,w00,unseen_test,squats,squat,4040,4500,10,460,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w00_set_002_squats,w00,unseen_test,squats,squat,5435,5928,10,493,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w00_set_003_squats,w00,unseen_test,squats,squat,7200,7685,10,485,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w00_set_004_pushups,w00,unseen_test,pushups,push-up,8770,9197,11,427,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w00_set_005_pushups,w00,unseen_test,pushups,push-up,11160,11586,10,426,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w00_set_006_pushups,w00,unseen_test,pushups,push-up,13620,14000,10,380,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w00_set_007_dumbbell_shoulder_press,w00,unseen_test,dumbbell_shoulder_press,shoulder press,15034,15545,10,511,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w00_set_008_dumbbell_shoulder_press,w00,unseen_test,dumbbell_shoulder_press,shoulder press,17570,18127,10,557,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w00_set_009_dumbbell_shoulder_press,w00,unseen_test,dumbbell_shoulder_press,shoulder press,20482,20908,9,426,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w00_set_022_bicep_curls,w00,unseen_test,bicep_curls,barbell biceps curl,50955,51469,10,514,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w00_set_023_bicep_curls,w00,unseen_test,bicep_curls,barbell biceps curl,52054,52528,10,474,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w00_set_024_bicep_curls,w00,unseen_test,bicep_curls,barbell biceps curl,52966,53405,10,439,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w00_set_025_lateral_shoulder_raises,w00,unseen_test,lateral_shoulder_raises,lateral raise,54880,55303,10,423,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w00_set_026_lateral_shoulder_raises,w00,unseen_test,lateral_shoulder_raises,lateral raise,57634,58061,10,427,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w00_set_027_lateral_shoulder_raises,w00,unseen_test,lateral_shoulder_raises,lateral raise,59858,60277,10,419,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w05_set_001_squats,w05,unseen_test,squats,squat,2830,3355,10,525,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w05_set_002_squats,w05,unseen_test,squats,squat,3635,4153,10,518,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w05_set_003_squats,w05,unseen_test,squats,squat,5112,5711,10,599,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w05_set_004_pushups,w05,unseen_test,pushups,push-up,6353,6780,10,427,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w05_set_005_pushups,w05,unseen_test,pushups,push-up,7897,8360,10,463,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w05_set_006_pushups,w05,unseen_test,pushups,push-up,9365,9761,10,396,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w05_set_007_dumbbell_shoulder_press,w05,unseen_test,dumbbell_shoulder_press,shoulder press,10827,11280,9,453,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w05_set_008_dumbbell_shoulder_press,w05,unseen_test,dumbbell_shoulder_press,shoulder press,12724,13163,9,439,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w05_set_009_dumbbell_shoulder_press,w05,unseen_test,dumbbell_shoulder_press,shoulder press,15003,15433,9,430,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w05_set_022_bicep_curls,w05,unseen_test,bicep_curls,barbell biceps curl,46262,46756,10,494,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w05_set_023_bicep_curls,w05,unseen_test,bicep_curls,barbell biceps curl,47380,47858,10,478,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w05_set_024_bicep_curls,w05,unseen_test,bicep_curls,barbell biceps curl,48482,49003,11,521,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w05_set_025_lateral_shoulder_raises,w05,unseen_test,lateral_shoulder_raises,lateral raise,50035,50450,10,415,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w05_set_026_lateral_shoulder_raises,w05,unseen_test,lateral_shoulder_raises,lateral raise,52965,53402,10,437,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w05_set_027_lateral_shoulder_raises,w05,unseen_test,lateral_shoulder_raises,lateral raise,55565,55988,10,423,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w12_set_001_squats,w12,unseen_test,squats,squat,5812,6360,10,548,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w12_set_002_squats,w12,unseen_test,squats,squat,7213,7735,10,522,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w12_set_003_squats,w12,unseen_test,squats,squat,8965,9505,10,540,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w12_set_004_pushups,w12,unseen_test,pushups,push-up,10994,11331,10,337,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w12_set_005_pushups,w12,unseen_test,pushups,push-up,12370,12740,10,370,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w12_set_006_pushups,w12,unseen_test,pushups,push-up,13776,14190,10,414,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w12_set_007_dumbbell_shoulder_press,w12,unseen_test,dumbbell_shoulder_press,shoulder press,14934,15569,10,635,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w12_set_008_dumbbell_shoulder_press,w12,unseen_test,dumbbell_shoulder_press,shoulder press,17592,18134,10,542,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w12_set_009_dumbbell_shoulder_press,w12,unseen_test,dumbbell_shoulder_press,shoulder press,20678,21165,10,487,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w12_set_022_bicep_curls,w12,unseen_test,bicep_curls,barbell biceps curl,70103,70467,10,364,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w13_set_001_squats,w13,unseen_test,squats,squat,5487,6034,10,547,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w13_set_002_squats,w13,unseen_test,squats,squat,6920,7475,10,555,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w13_set_003_squats,w13,unseen_test,squats,squat,9238,9743,10,505,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w13_set_004_pushups,w13,unseen_test,pushups,push-up,10513,10902,10,389,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w13_set_005_pushups,w13,unseen_test,pushups,push-up,12415,12790,10,375,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w13_set_006_pushups,w13,unseen_test,pushups,push-up,15326,15677,10,351,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w13_set_007_dumbbell_shoulder_press,w13,unseen_test,dumbbell_shoulder_press,shoulder press,17529,18063,10,534,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w13_set_008_dumbbell_shoulder_press,w13,unseen_test,dumbbell_shoulder_press,shoulder press,19536,20047,10,511,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w13_set_009_dumbbell_shoulder_press,w13,unseen_test,dumbbell_shoulder_press,shoulder press,22298,22773,10,475,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w13_set_022_bicep_curls,w13,unseen_test,bicep_curls,barbell biceps curl,55781,56199,10,418,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w13_set_023_bicep_curls,w13,unseen_test,bicep_curls,barbell biceps curl,57079,57460,10,381,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w13_set_024_bicep_curls,w13,unseen_test,bicep_curls,barbell biceps curl,58786,59379,12,593,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w13_set_025_lateral_shoulder_raises,w13,unseen_test,lateral_shoulder_raises,lateral raise,61430,61903,10,473,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w13_set_026_lateral_shoulder_raises,w13,unseen_test,lateral_shoulder_raises,lateral raise,63821,64308,10,487,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w13_set_027_lateral_shoulder_raises,w13,unseen_test,lateral_shoulder_raises,lateral raise,66921,67441,10,520,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w20_set_001_squats,w20,unseen_test,squats,squat,2178,2976,10,798,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w20_set_002_squats,w20,unseen_test,squats,squat,4027,4819,10,792,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w20_set_003_squats,w20,unseen_test,squats,squat,6599,7448,10,849,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w20_set_004_pushups,w20,unseen_test,pushups,push-up,10093,10621,10,528,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w20_set_005_pushups,w20,unseen_test,pushups,push-up,12592,13225,10,633,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w20_set_006_pushups,w20,unseen_test,pushups,push-up,15603,16331,10,728,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w20_set_019_bicep_curls,w20,unseen_test,bicep_curls,barbell biceps curl,67093,67873,10,780,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w20_set_020_bicep_curls,w20,unseen_test,bicep_curls,barbell biceps curl,69715,70503,10,788,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w20_set_021_bicep_curls,w20,unseen_test,bicep_curls,barbell biceps curl,72723,73508,10,785,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w20_set_022_lateral_shoulder_raises,w20,unseen_test,lateral_shoulder_raises,lateral raise,77008,77909,10,901,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w20_set_023_lateral_shoulder_raises,w20,unseen_test,lateral_shoulder_raises,lateral raise,80244,81138,10,894,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w20_set_024_lateral_shoulder_raises,w20,unseen_test,lateral_shoulder_raises,lateral raise,84763,85691,10,928,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w09_set_001_squats,w09,seen_test,squats,squat,3755,4513,10,758,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w09_set_002_squats,w09,seen_test,squats,squat,7836,8475,10,639,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w09_set_003_squats,w09,seen_test,squats,squat,11469,12187,10,718,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w09_set_004_pushups,w09,seen_test,pushups,push-up,12843,13340,10,497,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w09_set_005_pushups,w09,seen_test,pushups,push-up,14161,14729,10,568,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w09_set_006_pushups,w09,seen_test,pushups,push-up,15442,16036,10,594,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w09_set_007_dumbbell_shoulder_press,w09,seen_test,dumbbell_shoulder_press,shoulder press,17462,18247,10,785,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w09_set_008_dumbbell_shoulder_press,w09,seen_test,dumbbell_shoulder_press,shoulder press,19300,20126,10,826,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w09_set_009_dumbbell_shoulder_press,w09,seen_test,dumbbell_shoulder_press,shoulder press,27827,28506,10,679,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w09_set_022_bicep_curls,w09,seen_test,bicep_curls,barbell biceps curl,82836,83672,14,836,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w09_set_023_bicep_curls,w09,seen_test,bicep_curls,barbell biceps curl,85581,86111,10,530,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w09_set_024_bicep_curls,w09,seen_test,bicep_curls,barbell biceps curl,91110,91593,10,483,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w09_set_025_lateral_shoulder_raises,w09,seen_test,lateral_shoulder_raises,lateral raise,100926,101495,10,569,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w09_set_026_lateral_shoulder_raises,w09,seen_test,lateral_shoulder_raises,lateral raise,102180,102750,10,570,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w09_set_027_lateral_shoulder_raises,w09,seen_test,lateral_shoulder_raises,lateral raise,103239,103774,10,535,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w10_set_001_squats,w10,seen_test,squats,squat,2704,3283,10,579,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w10_set_002_squats,w10,seen_test,squats,squat,3761,4310,10,549,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w10_set_003_squats,w10,seen_test,squats,squat,4850,5469,10,619,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w10_set_004_pushups,w10,seen_test,pushups,push-up,6285,6795,10,510,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w10_set_005_pushups,w10,seen_test,pushups,push-up,11703,12204,10,501,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w10_set_006_pushups,w10,seen_test,pushups,push-up,13002,13525,10,523,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w10_set_007_dumbbell_shoulder_press,w10,seen_test,dumbbell_shoulder_press,shoulder press,17935,18644,10,709,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w10_set_008_dumbbell_shoulder_press,w10,seen_test,dumbbell_shoulder_press,shoulder press,22543,23277,10,734,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w10_set_009_dumbbell_shoulder_press,w10,seen_test,dumbbell_shoulder_press,shoulder press,24121,24874,10,753,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w10_set_022_bicep_curls,w10,seen_test,bicep_curls,barbell biceps curl,63823,64492,10,669,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w10_set_023_bicep_curls,w10,seen_test,bicep_curls,barbell biceps curl,69635,70281,10,646,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w10_set_024_bicep_curls,w10,seen_test,bicep_curls,barbell biceps curl,70875,71564,10,689,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w10_set_025_lateral_shoulder_raises,w10,seen_test,lateral_shoulder_raises,lateral raise,73428,74144,10,716,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w10_set_026_lateral_shoulder_raises,w10,seen_test,lateral_shoulder_raises,lateral raise,74898,75577,10,679,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w10_set_027_lateral_shoulder_raises,w10,seen_test,lateral_shoulder_raises,lateral raise,76110,76785,10,675,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w11_set_001_squats,w11,seen_test,squats,squat,3062,3826,10,764,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w11_set_002_squats,w11,seen_test,squats,squat,5889,6636,10,747,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w11_set_003_squats,w11,seen_test,squats,squat,8727,9426,10,699,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w11_set_004_pushups,w11,seen_test,pushups,push-up,9936,10490,10,554,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w11_set_005_pushups,w11,seen_test,pushups,push-up,11552,12129,10,577,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w11_set_006_pushups,w11,seen_test,pushups,push-up,14616,15121,10,505,N/A,N/A,exact,True,True,PENDING_LANDMARKS,0.0,1.0
+w11_set_007_dumbbell_shoulder_press,w11,seen_test,dumbbell_shoulder_press,shoulder press,16770,17542,10,772,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w11_set_008_dumbbell_shoulder_press,w11,seen_test,dumbbell_shoulder_press,shoulder press,20375,21113,10,738,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w11_set_009_dumbbell_shoulder_press,w11,seen_test,dumbbell_shoulder_press,shoulder press,22987,23731,10,744,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w11_set_022_bicep_curls,w11,seen_test,bicep_curls,barbell biceps curl,50125,50760,10,635,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w11_set_023_bicep_curls,w11,seen_test,bicep_curls,barbell biceps curl,51945,52561,10,616,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w11_set_024_bicep_curls,w11,seen_test,bicep_curls,barbell biceps curl,53350,53939,10,589,N/A,N/A,supplementary,False,True,PENDING_LANDMARKS,0.0,1.0
+w11_set_025_lateral_shoulder_raises,w11,seen_test,lateral_shoulder_raises,lateral raise,54579,55525,10,946,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w11_set_026_lateral_shoulder_raises,w11,seen_test,lateral_shoulder_raises,lateral raise,57191,57988,10,797,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
+w11_set_027_lateral_shoulder_raises,w11,seen_test,lateral_shoulder_raises,lateral raise,59340,60155,10,815,N/A,N/A,variant,True,True,PENDING_LANDMARKS,0.0,1.0
