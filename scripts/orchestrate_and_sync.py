@@ -132,7 +132,9 @@ except Exception:
 def sync_report_from_remote() -> bool:
     code = """
 from pathlib import Path
-p = Path("Gym_Classification/outputs/EXPERIMENT_RESULTS.md")
+p = Path("Gym_Classification/outputs/RESULTS_FINAL.md")
+if not p.exists():
+    p = Path("Gym_Classification/outputs/EXPERIMENT_RESULTS.md")
 if p.exists():
     print("REPORT_CONTENT_START")
     print(p.read_text(encoding="utf-8", errors="ignore"))
@@ -141,7 +143,7 @@ if p.exists():
     ret, out, err = exec_remote_python(code, timeout=30)
     if "REPORT_CONTENT_START" in out:
         content = out.split("REPORT_CONTENT_START")[1].split("REPORT_CONTENT_END")[0].strip()
-        local_report = ROOT_DIR / "outputs" / "EXPERIMENT_RESULTS.md"
+        local_report = ROOT_DIR / "outputs" / "RESULTS_FINAL.md"
         local_report.parent.mkdir(parents=True, exist_ok=True)
         local_report.write_text(content + "\n", encoding="utf-8")
         return True

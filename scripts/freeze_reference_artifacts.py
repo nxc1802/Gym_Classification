@@ -68,132 +68,151 @@ def main():
         "bone_motion_3d": "bone_motion_3d"
     }
 
-    norm_stats = {}
-    dataloaders = {}
+    seeds = [42, 123, 3407]
+    for seed in seeds:
+        seed_dir = out_dir / f"seed{seed}"
+        seed_dir.mkdir(parents=True, exist_ok=True)
+        norm_stats = {}
+        dataloaders = {}
 
-    print("\n[2/4] Extracting train normalization statistics & validation dataloaders...")
-    for feat_key, feat_method in feature_streams.items():
-        print(f"  Processing stream: {feat_key} ({feat_method})...")
-        train_l, val_l, test_l = get_dataloaders(
-            metadata_path=metadata_path,
-            feature_method=feat_method,
-            batch_size=32,
-            seq_len=32,
-            stride=32,
-            val_test_stride=32,
-            landmark_dir=landmark_dir,
-            num_workers=0,
-            in_memory=True
-        )
-        dataloaders[feat_key] = (train_l, val_l, test_l)
+        print(f"\n[2/4] [Seed {seed}] Extracting train normalization statistics (stride 16) & validation dataloaders...")
+        for feat_key, feat_method in feature_streams.items():
+            train_l, val_l, test_l = get_dataloaders(
+                metadata_path=metadata_path,
+                feature_method=feat_method,
+                batch_size=32,
+                seq_len=32,
+                stride=16,
+                val_test_stride=32,
+                landmark_dir=landmark_dir,
+                num_workers=0,
+                in_memory=True,
+                seed=seed
+            )
+            dataloaders[feat_key] = (train_l, val_l, test_l)
 
-        # Retrieve train stats
-        train_mean = train_l.dataset.train_mean
-        train_std = train_l.dataset.train_std
-        if isinstance(train_mean, torch.Tensor):
-            train_mean = train_mean.cpu().numpy()
-        if isinstance(train_std, torch.Tensor):
-            train_std = train_std.cpu().numpy()
+            # Retrieve train stats
+            train_mean = train_l.dataset.train_mean
+            train_std = train_l.dataset.train_std
+            if isinstance(train_mean, torch.Tensor):
+                train_mean = train_mean.cpu().numpy()
+            if isinstance(train_std, torch.Tensor):
+                train_std = train_std.cpu().numpy()
 
-        stat_path = out_dir / f"normalization_{feat_key}.npz"
-        np.savez(stat_path, mean=train_mean, std=train_std)
-        norm_stats[feat_key] = {"mean_shape": list(train_mean.shape), "std_shape": list(train_std.shape)}
-        print(f"    Saved {stat_path.name} (shape {train_mean.shape})")
+            stat_path = seed_dir / f"normalization_{feat_key}.npz"
+            np.savez(stat_path, mean=train_mean, std=train_std)
+            if seed == 42:
+                # Also save to base reference dir for default fallback
+                np.savez(out_dir / f"normalization_{feat_key}.npz", mean=train_mean, std=train_std)
 
-    # 3. Model predictions on validation set to fit & freeze SLSQP ensemble weights
-    print("\n[3/4] Evaluating models on validation set to calibrate ensemble weights...")
-    checkpoints = {
-        "Transformer (Mix)": ("Transformer", "mix", "checkpoints/best_Transformer_T2.2_mix.pt"),
-        "ST-GCN (Rel 3D)": ("STGCN", "rel_3d", "checkpoints/best_STGCN_T3.2_rel_3d.pt"),
-        "AAGCN (Bone 3D)": ("AAGCN", "bone_3d", "checkpoints/best_AAGCN_T4.2_bone_3d.pt"),
-        "AAGCN (Rel 3D)": ("AAGCN", "rel_3d", "checkpoints/best_AAGCN_T4.3_rel_3d.pt"),
-        "AAGCN (Joint Mot)": ("AAGCN", "joint_motion_3d", "checkpoints/best_AAGCN_T4.4_joint_motion_3d.pt"),
-        "AAGCN (Bone Mot)": ("AAGCN", "bone_motion_3d", "checkpoints/best_AAGCN_T4.5_bone_motion_3d.pt"),
-    }
+            norm_stats[feat_key] = {"mean_shape": list(train_mean.shape), "std_shape": list(train_std.shape)}
 
-    val_probs = {}
-    val_l_mix = dataloaders["mix"][1]
-    y_val_true = np.array(val_l_mix.dataset.labels)
-    val_video_ids = list(val_l_mix.dataset.video_ids)
+        # 3. Model predictions on validation set to fit & freeze SLSQP ensemble weights
+        print(f"\n[3/4] [Seed {seed}] Checking checkpoints to calibrate ensemble weights...")
+        ckpt_base = PROJECT_ROOT / "checkpoints"
+        if seed != 42:
+            ckpt_base = ckpt_base / f"seed{seed}"
 
-    ckpt_shas = {}
-    for name, (m_type, f_type, ckpt_p) in checkpoints.items():
-        abs_ckpt = str(PROJECT_ROOT / ckpt_p)
-        ckpt_shas[name] = {
-            "path": ckpt_p,
-            "sha256": get_file_sha256(abs_ckpt) if os.path.exists(abs_ckpt) else None
+        checkpoints = {
+            "Transformer (Mix)": ("Transformer", "mix", str(ckpt_base / "best_Transformer_T2.2_mix.pt")),
+            "ST-GCN (Rel 3D)": ("STGCN", "rel_3d", str(ckpt_base / "best_STGCN_T3.2_rel_3d.pt")),
+            "AAGCN (Bone 3D)": ("AAGCN", "bone_3d", str(ckpt_base / "best_AAGCN_T4.2_bone_3d.pt")),
+            "AAGCN (Rel 3D)": ("AAGCN", "rel_3d", str(ckpt_base / "best_AAGCN_T4.3_rel_3d.pt")),
+            "AAGCN (Joint Mot)": ("AAGCN", "joint_motion_3d", str(ckpt_base / "best_AAGCN_T4.4_joint_motion_3d.pt")),
+            "AAGCN (Bone Mot)": ("AAGCN", "bone_motion_3d", str(ckpt_base / "best_AAGCN_T4.5_bone_motion_3d.pt")),
         }
-        model = load_checkpoint_model(m_type, f_type, abs_ckpt, device)
-        _, val_loader, _ = dataloaders[f_type]
-        trainer = Trainer(model=model, device=device)
-        _, _, probs = trainer.predict(val_loader)
-        val_probs[name] = probs
-        print(f"  {name}: val NLL={-np.mean(np.log(np.clip(probs[np.arange(len(y_val_true)), y_val_true], 1e-12, 1.0))):.4f}")
 
-    # Fit SkelGym-Lite (Transformer + AAGCN Bone 3D)
-    lite_ens = WeightedSoftVotingEnsemble()
-    lite_ens.fit_window([val_probs["Transformer (Mix)"], val_probs["AAGCN (Bone 3D)"]], y_val_true)
-    lite_ens.fit_video([val_probs["Transformer (Mix)"], val_probs["AAGCN (Bone 3D)"]], y_val_true, val_video_ids)
+        all_exist = all(os.path.exists(cp) for _, _, cp in checkpoints.values())
+        if not all_exist:
+            print(f"  Checkpoints for seed {seed} not yet fully trained. Saving normalization stats only.")
+            continue
 
-    # Fit SkelGym-Full (5 streams)
-    full_ens = WeightedSoftVotingEnsemble()
-    five_val = [
-        val_probs["Transformer (Mix)"],
-        val_probs["AAGCN (Bone 3D)"],
-        val_probs["AAGCN (Rel 3D)"],
-        val_probs["AAGCN (Joint Mot)"],
-        val_probs["AAGCN (Bone Mot)"]
-    ]
-    full_ens.fit_window(five_val, y_val_true)
-    full_ens.fit_video(five_val, y_val_true, val_video_ids)
+        val_probs = {}
+        val_l_mix = dataloaders["mix"][1]
+        y_val_true = np.array(val_l_mix.dataset.labels)
+        val_video_ids = list(val_l_mix.dataset.video_ids)
 
-    ensemble_weights = {
-        "calibration_source": "skelgym_validation_only",
-        "lite": {
-            "models": ["Transformer (Mix)", "AAGCN (Bone 3D)"],
-            "weights_window": [float(w) for w in lite_ens.weights_window],
-            "weights_video": [float(w) for w in lite_ens.weights_video]
-        },
-        "full": {
-            "models": [
-                "Transformer (Mix)",
-                "AAGCN (Bone 3D)",
-                "AAGCN (Rel 3D)",
-                "AAGCN (Joint Mot)",
-                "AAGCN (Bone Mot)"
-            ],
-            "weights_window": [float(w) for w in full_ens.weights_window],
-            "weights_video": [float(w) for w in full_ens.weights_video]
+        ckpt_shas = {}
+        for name, (m_type, f_type, ckpt_p) in checkpoints.items():
+            ckpt_shas[name] = {
+                "path": ckpt_p,
+                "sha256": get_file_sha256(ckpt_p) if os.path.exists(ckpt_p) else None
+            }
+            model = load_checkpoint_model(m_type, f_type, ckpt_p, device)
+            _, val_loader, _ = dataloaders[f_type]
+            trainer = Trainer(model=model, device=device)
+            _, _, probs = trainer.predict(val_loader)
+            val_probs[name] = probs
+
+        # Fit SkelGym-Lite (Transformer + AAGCN Bone 3D)
+        lite_ens = WeightedSoftVotingEnsemble()
+        lite_ens.fit_window([val_probs["Transformer (Mix)"], val_probs["AAGCN (Bone 3D)"]], y_val_true)
+        lite_ens.fit_video([val_probs["Transformer (Mix)"], val_probs["AAGCN (Bone 3D)"]], y_val_true, val_video_ids)
+
+        # Fit SkelGym-Full (5 streams)
+        full_ens = WeightedSoftVotingEnsemble()
+        five_val = [
+            val_probs["Transformer (Mix)"],
+            val_probs["AAGCN (Bone 3D)"],
+            val_probs["AAGCN (Rel 3D)"],
+            val_probs["AAGCN (Joint Mot)"],
+            val_probs["AAGCN (Bone Mot)"]
+        ]
+        full_ens.fit_window(five_val, y_val_true)
+        full_ens.fit_video(five_val, y_val_true, val_video_ids)
+
+        ensemble_weights = {
+            "calibration_source": "skelgym_validation_only",
+            "seed": seed,
+            "lite": {
+                "models": ["Transformer (Mix)", "AAGCN (Bone 3D)"],
+                "weights_window": [float(w) for w in lite_ens.weights_window],
+                "weights_video": [float(w) for w in lite_ens.weights_video]
+            },
+            "full": {
+                "models": [
+                    "Transformer (Mix)",
+                    "AAGCN (Bone 3D)",
+                    "AAGCN (Rel 3D)",
+                    "AAGCN (Joint Mot)",
+                    "AAGCN (Bone Mot)"
+                ],
+                "weights_window": [float(w) for w in full_ens.weights_window],
+                "weights_video": [float(w) for w in full_ens.weights_video]
+            }
         }
-    }
 
-    ensemble_weights_path = out_dir / "ensemble_weights.json"
-    with open(ensemble_weights_path, "w") as f:
-        json.dump(ensemble_weights, f, indent=2)
-    print(f"\n  Saved ensemble weights to {ensemble_weights_path}")
-    print(f"  Lite window weights: {ensemble_weights['lite']['weights_window']}")
-    print(f"  Full window weights: {ensemble_weights['full']['weights_window']}")
+        ensemble_weights_path = seed_dir / "ensemble_weights.json"
+        with open(ensemble_weights_path, "w") as f:
+            json.dump(ensemble_weights, f, indent=2)
+        if seed == 42:
+            with open(out_dir / "ensemble_weights.json", "w") as f:
+                json.dump(ensemble_weights, f, indent=2)
+        print(f"  Saved ensemble weights for seed {seed}")
 
-    # 4. Checkpoint manifest
-    manifest = {
-        "version": "1.0",
-        "dataset_name": "SkelGym",
-        "num_classes": NUM_CLASSES,
-        "normalization_source": "skelgym_train_only",
-        "ensemble_calibration_source": "skelgym_validation_only",
-        "seq_len": 32,
-        "stride": 32,
-        "seed": 42,
-        "checkpoints": ckpt_shas,
-        "normalization_stats": norm_stats
-    }
+        # 4. Checkpoint manifest
+        manifest = {
+            "version": "1.0",
+            "dataset_name": "SkelGym",
+            "num_classes": NUM_CLASSES,
+            "normalization_source": "skelgym_train_only",
+            "ensemble_calibration_source": "skelgym_validation_only",
+            "seq_len": 32,
+            "stride": 16,
+            "seed": seed,
+            "checkpoints": ckpt_shas,
+            "normalization_stats": norm_stats
+        }
 
-    manifest_path = out_dir / "checkpoint_manifest.json"
-    with open(manifest_path, "w") as f:
-        json.dump(manifest, f, indent=2)
-    print(f"[4/4] Saved checkpoint manifest to {manifest_path}")
+        manifest_path = seed_dir / "checkpoint_manifest.json"
+        with open(manifest_path, "w") as f:
+            json.dump(manifest, f, indent=2)
+        if seed == 42:
+            with open(out_dir / "checkpoint_manifest.json", "w") as f:
+                json.dump(manifest, f, indent=2)
+        print(f"  Saved checkpoint manifest for seed {seed}")
 
-    print("\nPhase 0 complete! All reference artifacts permanently frozen.")
+    print("\nPhase 0 complete! All reference artifacts permanently frozen per seed.")
 
 if __name__ == "__main__":
     main()

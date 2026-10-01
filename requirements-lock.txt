@@ -1,0 +1,28 @@
+# Pinned dependency lockfile for SkelGym reproducibility
+# Generated from verified environment (Python 3.14 / macOS)
+
+# Core Deep Learning Framework
+torch==2.13.0
+torchvision==0.28.0
+
+# Scientific Computing & Data Processing
+numpy==2.5.1
+scipy==1.18.0
+scikit-learn==1.9.0
+pandas==3.0.5
+pyyaml==6.0.3
+
+# Computer Vision & Pose Estimation
+opencv-python==5.0.0.93
+
+# Visualization & Progress
+matplotlib==3.11.1
+seaborn==0.13.2
+tqdm==4.70.0
+
+# Model & Artifact Distribution
+huggingface_hub==1.26.0
+kagglehub==1.0.2
+
+# Testing & Quality Assurance
+pytest==9.1.1

@@ -531,7 +531,8 @@ def cmd_train(args):
         num_workers=args.num_workers,
         smoke_test=is_smoke,
         smoke_class=smoke_class,
-        in_memory=in_mem
+        in_memory=in_mem,
+        seed=getattr(args, "seed", None)
     )
     logger.info(f"Dataset windows -> Train: {len(train_loader.dataset)}, Val: {len(val_loader.dataset)}, Test: {len(test_loader.dataset)}")
 
@@ -565,12 +566,22 @@ def cmd_train(args):
 
     # Extract normalization statistics from training dataset
     norm_stats = None
-    if hasattr(train_loader.dataset, "mean") and train_loader.dataset.mean is not None:
+    mean_val = getattr(train_loader.dataset, "train_mean", None)
+    if mean_val is None:
+        mean_val = getattr(train_loader.dataset, "norm_mean", None)
+    std_val = getattr(train_loader.dataset, "train_std", None)
+    if std_val is None:
+        std_val = getattr(train_loader.dataset, "norm_std", None)
+
+    if mean_val is not None and std_val is not None:
+        mean_np = mean_val.cpu().numpy() if isinstance(mean_val, torch.Tensor) else np.array(mean_val)
+        std_np = std_val.cpu().numpy() if isinstance(std_val, torch.Tensor) else np.array(std_val)
         norm_stats = {
-            "mean_shape": list(train_loader.dataset.mean.shape),
-            "mean_norm": float(np.linalg.norm(train_loader.dataset.mean)),
-            "std_norm": float(np.linalg.norm(train_loader.dataset.std)),
-            "is_normalized": True
+            "mean_shape": list(mean_np.shape),
+            "mean_norm": float(np.linalg.norm(mean_np)),
+            "std_norm": float(np.linalg.norm(std_np)),
+            "is_normalized": True,
+            "seed": getattr(args, "seed", 42)
         }
 
     provenance_metadata = {
@@ -637,6 +648,10 @@ def cmd_train(args):
         history = trainer.fit(train_loader, val_loader, epochs=args.epochs, verbose=True)
 
     # Evaluate on test set
+    if getattr(args, "no_test_eval", False):
+        logger.info("Skipping Test set evaluation (--no_test_eval specified: strictly enforcing train/val phase).")
+        return
+
     logger.info("Evaluating best checkpoint on Test set...")
     y_true, y_pred, y_prob = trainer.predict(test_loader)
     metrics = compute_metrics(y_true, y_pred)
@@ -1311,7 +1326,7 @@ def create_parser() -> argparse.ArgumentParser:
     p_train.add_argument("--dropout", type=float, default=None, help="Dropout probability (None uses calibrated ~350K budget)")
     p_train.add_argument("--seed", type=int, default=42, help="Random seed")
     p_train.add_argument("--num_workers", type=int, default=0, help="DataLoader worker processes")
-    p_train.add_argument("--early_stopping_metric", type=str, default="val_acc", choices=["val_acc", "val_loss"], help="Metric to monitor for early stopping and best checkpoint")
+    p_train.add_argument("--early_stopping_metric", type=str, default="val_macro_f1", choices=["val_acc", "val_loss", "val_macro_f1"], help="Metric to monitor for early stopping and best checkpoint")
     p_train.add_argument("--optimizer", type=str, default="adamw", choices=["adamw", "adam"], help="Optimizer architecture")
     p_train.add_argument("--scheduler", type=str, default="cosine_warmup", choices=["cosine_warmup", "plateau"], help="Learning rate scheduler")
     p_train.add_argument("--warmup_epochs", type=int, default=5, help="Number of linear warmup epochs")
@@ -1329,6 +1344,7 @@ def create_parser() -> argparse.ArgumentParser:
     p_train.add_argument("--checkpoint_name", type=str, default=None, help="Explicit base name for saved checkpoints (overrides auto-generated name)")
     p_train.add_argument("--force_retrain", action="store_true", default=True, help="Force full retraining from scratch (default: True)")
     p_train.add_argument("--no_force_retrain", dest="force_retrain", action="store_false", help="Skip training if matching checkpoint already exists")
+    p_train.add_argument("--no_test_eval", action="store_true", default=False, help="Skip test set evaluation during training (strictly enforce train/val only)")
 
     # Evaluate
     p_eval = subparsers.add_parser("evaluate", help="Evaluate a model checkpoint")

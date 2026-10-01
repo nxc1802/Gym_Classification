@@ -586,6 +586,30 @@ def _compute_train_stats(train_ds: 'GymDataset') -> Tuple[torch.Tensor, torch.Te
     std = flat.std(dim=0, keepdim=True) + 1e-7  # (1, D)
     return mean, std
 
+def load_normalization_artifact(artifact_path: Union[str, Path]) -> Tuple[torch.Tensor, torch.Tensor]:
+    p = Path(artifact_path)
+    if not p.exists():
+        raise FileNotFoundError(f"Normalization artifact not found: {p}")
+    data = np.load(p)
+    mean = torch.from_numpy(data["mean"]).float()
+    std = torch.from_numpy(data["std"]).float()
+    if mean.ndim == 1:
+        mean = mean.unsqueeze(0)
+    if std.ndim == 1:
+        std = std.unsqueeze(0)
+    return mean, std
+
+def save_normalization_artifact(
+    artifact_path: Union[str, Path],
+    mean: Union[torch.Tensor, np.ndarray],
+    std: Union[torch.Tensor, np.ndarray]
+) -> None:
+    p = Path(artifact_path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    mean_np = mean.cpu().numpy() if isinstance(mean, torch.Tensor) else np.array(mean)
+    std_np = std.cpu().numpy() if isinstance(std, torch.Tensor) else np.array(std)
+    np.savez(p, mean=mean_np, std=std_np)
+
 def _apply_normalization(ds: 'GymDataset', mean: torch.Tensor, std: torch.Tensor) -> None:
     """
     Applies z-score normalization in-place to a GymDataset using provided mean/std.
@@ -606,6 +630,8 @@ def _apply_normalization(ds: 'GymDataset', mean: torch.Tensor, std: torch.Tensor
     # Store stats as attributes for inference
     ds.train_mean = mean
     ds.train_std = std
+    ds.norm_mean = mean
+    ds.norm_std = std
 
 def get_dataloaders(
     metadata_path: str,
@@ -622,7 +648,10 @@ def get_dataloaders(
     smoke_class: Optional[str] = "barbell biceps curl",
     in_memory: bool = True,
     is_horizontal_flip: bool = False,
-    max_zero_ratio: float = 0.20
+    max_zero_ratio: float = 0.20,
+    seed: Optional[int] = None,
+    norm_artifact_path: Optional[Union[str, Path]] = None,
+    save_norm_artifact: bool = True
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
     """
     Constructs train, validation, and test DataLoaders.
@@ -662,27 +691,52 @@ def get_dataloaders(
 
     # Global z-score normalization using TRAIN-SET statistics only (prevents data leakage)
     is_branch = (feature_method == "branch_concat")
-    if not is_branch and len(train_ds) > 0:
-        train_mean, train_std = _compute_train_stats(train_ds)
-        # Store train stats on all datasets for evaluation/reproducibility
-        train_ds.train_mean = train_mean
-        train_ds.train_std = train_std
-        val_ds.train_mean = train_mean
-        val_ds.train_std = train_std
-        test_ds.train_mean = train_mean
-        test_ds.train_std = train_std
+    if not is_branch:
+        loaded_stats = False
+        target_artifact_p = None
+        if norm_artifact_path:
+            target_artifact_p = Path(norm_artifact_path)
+        elif seed is not None:
+            cand_p = Path("artifacts") / "reference" / f"seed{seed}" / f"normalization_{feature_method}.npz"
+            if cand_p.exists():
+                target_artifact_p = cand_p
+            else:
+                cand_root = Path("artifacts") / "reference" / f"normalization_{feature_method}.npz"
+                if cand_root.exists():
+                    target_artifact_p = cand_root
 
-        if train_ds.augment_method and train_ds.augment_method != "none":
-            # For dynamic on-the-fly augmentation:
-            # DO NOT normalize in-place! Let GymDataset.__getitem__ apply physical augmentations
-            # in physical space first, followed by z-score standardization.
-            train_ds.set_normalization(train_mean, train_std)
+        if target_artifact_p and target_artifact_p.exists():
+            train_mean, train_std = load_normalization_artifact(target_artifact_p)
+            loaded_stats = True
+        elif len(train_ds) > 0:
+            train_mean, train_std = _compute_train_stats(train_ds)
+            if save_norm_artifact and seed is not None:
+                save_p = Path("artifacts") / "reference" / f"seed{seed}" / f"normalization_{feature_method}.npz"
+                save_normalization_artifact(save_p, train_mean, train_std)
         else:
-            # When no dynamic augmentation is active, normalize in-place for fast retrieval
-            _apply_normalization(train_ds, train_mean, train_std)
+            train_mean, train_std = None, None
 
-        _apply_normalization(val_ds, train_mean, train_std)
-        _apply_normalization(test_ds, train_mean, train_std)
+        if train_mean is not None and train_std is not None:
+            train_ds.train_mean = train_mean
+            train_ds.train_std = train_std
+            train_ds.norm_mean = train_mean
+            train_ds.norm_std = train_std
+            val_ds.train_mean = train_mean
+            val_ds.train_std = train_std
+            val_ds.norm_mean = train_mean
+            val_ds.norm_std = train_std
+            test_ds.train_mean = train_mean
+            test_ds.train_std = train_std
+            test_ds.norm_mean = train_mean
+            test_ds.norm_std = train_std
+
+            if train_ds.augment_method and train_ds.augment_method != "none":
+                train_ds.set_normalization(train_mean, train_std)
+            else:
+                _apply_normalization(train_ds, train_mean, train_std)
+
+            _apply_normalization(val_ds, train_mean, train_std)
+            _apply_normalization(test_ds, train_mean, train_std)
 
     pin_mem = torch.cuda.is_available()
     persistent = (num_workers > 0)

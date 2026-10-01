@@ -77,6 +77,7 @@ def main():
     parser.add_argument("--split-group", type=str, default=None, help="Workout split group (e.g. unseen_test)")
     parser.add_argument("--class-set", type=str, default=None, help="Class subset (e.g. core4, core6)")
     parser.add_argument("--out-dir", type=str, default=None, help="Output destination directory")
+    parser.add_argument("--seeds", type=int, nargs="+", default=[42], help="Random seeds to evaluate across (e.g. --seeds 42 123 3407)")
     args = parser.parse_args()
 
     cfg_p = PROJECT_ROOT / args.config

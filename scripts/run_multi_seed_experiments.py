@@ -41,6 +41,8 @@ from src.models.ensemble import (
 from src.utils.hf_hub import ensure_checkpoint_available, pull_landmarks_from_hf
 from src.utils.reproducibility import load_checkpoint_weights
 
+from src.constants import ACTIONS, NUM_CLASSES, CANONICAL_EXPERIMENT_REGISTRY
+
 SEEDS = [42, 123, 3407]
 
 BASELINE_MODELS = [
@@ -66,7 +68,7 @@ def get_checkpoint_path(seed: int, model_cfg: Dict[str, str], checkpoint_base: P
     else:
         return checkpoint_base / f"seed{seed}" / base_name
 
-def train_model(seed: int, model_cfg: Dict[str, str], device_str: str, checkpoint_base: Path, epochs: int = 100, force_retrain: bool = False):
+def train_model(seed: int, model_cfg: Dict[str, str], device_str: str, checkpoint_base: Path, epochs: int = 100, force_retrain: bool = False, no_test_eval: bool = False):
     ckpt_path = get_checkpoint_path(seed, model_cfg, checkpoint_base)
     if not force_retrain and ckpt_path.exists():
         print(f"[Seed {seed}] Checkpoint already exists: {ckpt_path.name}, skipping training.")
@@ -76,6 +78,15 @@ def train_model(seed: int, model_cfg: Dict[str, str], device_str: str, checkpoin
     ckpt_dir = str(ckpt_path.parent)
     aug = model_cfg.get("augment", "skel_gym_aug")
 
+    reg_cfg = CANONICAL_EXPERIMENT_REGISTRY.get(model_cfg.get("exp_id"), {})
+    lr = reg_cfg.get("lr", 1e-4)
+    batch_size = reg_cfg.get("batch_size", 16)
+    label_smoothing = reg_cfg.get("label_smoothing", 0.05 if ("AAGCN" in model_cfg["model"] or "Transformer" in model_cfg["model"]) else 0.0)
+    patience = reg_cfg.get("patience", 10)
+    train_stride = reg_cfg.get("train_stride", 16)
+    val_test_stride = reg_cfg.get("val_test_stride", 32)
+    es_metric = reg_cfg.get("early_stopping_metric", "val_macro_f1")
+
     cmd = [
         sys.executable, "run.py", "train",
         "--model", model_cfg["model"],
@@ -84,13 +95,21 @@ def train_model(seed: int, model_cfg: Dict[str, str], device_str: str, checkpoin
         "--exp_id", model_cfg["exp_id"],
         "--seed", str(seed),
         "--epochs", str(epochs),
-        "--patience", "10",
+        "--lr", str(lr),
+        "--batch_size", str(batch_size),
+        "--label_smoothing", str(label_smoothing),
+        "--patience", str(patience),
+        "--train_stride", str(train_stride),
+        "--val_test_stride", str(val_test_stride),
+        "--early_stopping_metric", es_metric,
         "--checkpoint_dir", ckpt_dir,
         "--video_level",
         "--device", device_str,
         "--use_amp",
         "--in_memory"
     ]
+    if no_test_eval:
+        cmd.append("--no_test_eval")
 
     print(f"\n========================================================")
     print(f"[Seed {seed}] Training {model_cfg['name']} ({aug}) -> {ckpt_path.name}")
@@ -141,11 +160,12 @@ def evaluate_seed(
                 feature_method=m["feature"],
                 batch_size=32,
                 seq_len=32,
-                stride=32,
+                stride=16,
                 val_test_stride=32,
                 landmark_dir=landmark_dir,
                 num_workers=0,
-                in_memory=True
+                in_memory=True,
+                seed=seed
             )
             trainer = Trainer(model=model, device=device)
             _, _, b_tprob = trainer.predict(te_l)
@@ -178,11 +198,12 @@ def evaluate_seed(
             feature_method=feat,
             batch_size=32,
             seq_len=32,
-            stride=32,
+            stride=16,
             val_test_stride=32,
             landmark_dir=landmark_dir,
             num_workers=0,
-            in_memory=True
+            in_memory=True,
+            seed=seed
         )
 
         if val_video_ids is None:

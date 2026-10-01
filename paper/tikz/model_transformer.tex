@@ -58,14 +58,14 @@
 
 \node[box=bProj, fill=cProj, minimum width=2.2cm, right=of inp] (proj) {
     \textbf{Linear Proj + PE}\\[2pt]
-    {\scriptsize $117 \to 128$ \textbar{} Sinusoid}\\[1pt]
+    {\scriptsize $117 \to 128$ \textbar{} Learnable}\\[1pt]
     {\scriptsize $[B, 32, 128]$}
 };
 
 \node[box=bTrans, fill=cTrans, minimum width=3.8cm, right=of proj] (trans) {
-    \textbf{4$\times$ Transformer Encoder}\\[2pt]
-    {\scriptsize $H=4$ Heads \textbar{} $d_{\text{model}}=128$ \textbar{} $d_{\text{ff}}=256$}\\[1pt]
-    {\scriptsize Pre-LN \textbar{} drop=0.1 \textbar{} $[B, 32, 128]$}
+    \textbf{3$\times$ Transformer Encoder}\\[2pt]
+    {\scriptsize $H=8$ Heads \textbar{} $d_{\text{model}}=128$ \textbar{} $d_{\text{ff}}=160$}\\[1pt]
+    {\scriptsize Pre-LN \textbar{} drop=0.2 \textbar{} $[B, 32, 128]$}
 };
 
 \node[box=bPool, fill=cPool, minimum width=1.8cm, right=of trans] (gap) {
@@ -74,13 +74,13 @@
 };
 
 \node[box=bHead, fill=cHead, minimum width=2.2cm, right=of gap] (mlp) {
-    \textbf{Dense + ReLU}\\[2pt]
-    {\scriptsize $128 \to 64$ \textbar{} drop=0.1}
+    \textbf{Dense + GELU}\\[2pt]
+    {\scriptsize $128 \to 128$ \textbar{} drop=0.2}
 };
 
 \node[box=bHead, fill=cHead, minimum width=2.0cm, right=of mlp] (cls) {
     \textbf{Classifier}\\[2pt]
-    {\scriptsize $64 \to 21$}
+    {\scriptsize $128 \to 22$}
 };
 
 \node[box=bOut, fill=cOut, minimum width=1.9cm, right=of cls] (out) {

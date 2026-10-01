@@ -131,7 +131,7 @@ def find_existing_checkpoint(task: Dict[str, Any], checkpoint_base: Path, force_
     if seed == 42:
         if model == "Transformer" and feature == "mix" and aug == "none":
             candidates.append(checkpoint_base / "best_Transformer_T1.27_mix.pt")
-        elif model == "Transformer" and feature == "mix" and aug in ("skel_gym_aug", "skel_gym_aug_legacy_5op"):
+        elif model == "Transformer" and feature == "mix" and aug == "skel_gym_aug":
             candidates.append(checkpoint_base / "best_Transformer_T2.2_mix.pt")
         elif model == "AAGCN" and feature == "bone_3d" and aug == "none":
             candidates.append(checkpoint_base / "best_AAGCN_T4.1_bone_3d.pt")
@@ -381,7 +381,7 @@ def generate_loo_latex_table(summary_loo: Dict[str, Any]) -> str:
         diff_str = f"+{diff:.2f}\\%" if diff > 0 else (f"{diff:.2f}\\%" if diff < 0 else "0.00\\% (Ref)")
 
         if var_name == "Minus_TimeWarp":
-            lines.append(f"\\textbf{{{disp_name}}} & \\textbf{{{domain}}} & \\textbf{{{va}}} & \\textbf{{{vl}}} & \\textbf{{{ta}}} & \\textbf{{{tf}}} & \\textbf{{{diff_str} (Optimal)}} \\\\")
+            lines.append(f"\\textbf{{{disp_name}}} & \\textbf{{{domain}}} & \\textbf{{{va}}} & \\textbf{{{vl}}} & \\textbf{{{ta}}} & \\textbf{{{tf}}} & \\textbf{{{diff_str}}} \\\\")
         elif var_name in ("Candidate_Full_5op", "Clean_Baseline_NoAug"):
             lines.append(r"\midrule" if var_name == "Minus_Mirror" else "")
             lines.append(f"{disp_name} & {domain} & {va} & {vl} & {ta} & {tf} & {diff_str} \\\\")
@@ -426,7 +426,7 @@ def generate_single_component_latex_table(summary_single: Dict[str, Any]) -> str
 
         if var_name == "SkelGym_Aug_4op":
             lines.append(r"\midrule")
-            lines.append(f"\\textbf{{{disp_name}}} & \\textbf{{{domain}}} & \\textbf{{{va}}} & \\textbf{{{vl}}} & \\textbf{{{ta}}} & \\textbf{{{tf}}} & \\textbf{{{diff_str} (Optimal)}} \\\\")
+            lines.append(f"\\textbf{{{disp_name}}} & \\textbf{{{domain}}} & \\textbf{{{va}}} & \\textbf{{{vl}}} & \\textbf{{{ta}}} & \\textbf{{{tf}}} & \\textbf{{{diff_str}}} \\\\")
         elif var_name == "Clean_Baseline_NoAug":
             lines.append(f"{disp_name} & {domain} & {va} & {vl} & {ta} & {tf} & {diff_str} \\\\")
             lines.append(r"\midrule")

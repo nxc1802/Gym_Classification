@@ -41,9 +41,13 @@ def main():
     print("🚀 STARTING ISOLATED PIPELINE SMOKE TEST")
     print("=" * 60)
 
-    official_report = ROOT / "outputs" / "EXPERIMENT_RESULTS.md"
-    initial_hash = compute_file_hash(official_report)
-    print(f"Initial SHA256 of outputs/EXPERIMENT_RESULTS.md: {initial_hash[:16]}...")
+    official_reports = [
+        ROOT / "outputs" / "RESULTS_FINAL.md",
+        ROOT / "outputs" / "EXPERIMENT_RESULTS.md"
+    ]
+    initial_hashes = {p.name: compute_file_hash(p) for p in official_reports}
+    for name, h in initial_hashes.items():
+        print(f"Initial SHA256 of outputs/{name}: {h[:16]}...")
 
     smoke_output_dir = ROOT / "outputs" / "smoke_test"
     smoke_ckpt_dir = ROOT / "checkpoints" / "smoke_test"
@@ -109,11 +113,12 @@ def main():
     print("🔍 VERIFYING ISOLATION & ARTIFACT GENERATION")
     print("=" * 60)
 
-    final_hash = compute_file_hash(official_report)
-    print(f"Final SHA256 of outputs/EXPERIMENT_RESULTS.md:   {final_hash[:16]}...")
-    if initial_hash != final_hash:
-        raise AssertionError("CRITICAL ERROR: outputs/EXPERIMENT_RESULTS.md was modified during smoke test!")
-    print("✅ PASS: outputs/EXPERIMENT_RESULTS.md remained 100% untouched!")
+    for p in official_reports:
+        final_hash = compute_file_hash(p)
+        print(f"Final SHA256 of outputs/{p.name}:   {final_hash[:16]}...")
+        if initial_hashes[p.name] != final_hash:
+            raise AssertionError(f"CRITICAL ERROR: outputs/{p.name} was modified during smoke test!")
+        print(f"✅ PASS: outputs/{p.name} remained 100% untouched!")
 
     smoke_report = smoke_output_dir / "SMOKE_RESULTS.md"
     if not smoke_report.exists():

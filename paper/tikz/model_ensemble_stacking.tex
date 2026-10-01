@@ -53,11 +53,11 @@
 \node[box=bInput, fill=cInput, minimum width=4.4cm, minimum height=3.6cm] (l0) at (0, 0) {};
 \node[font=\bfseries, text=bInput, anchor=north] at (l0.north) {Level-0 Base Classifiers};
 
-\node[box=bTrans, fill=cTrans, minimum width=3.8cm, minimum height=0.55cm, font=\scriptsize] (m1) at (0, 0.95) {Transformer ($d=128$, 4L)};
+\node[box=bTrans, fill=cTrans, minimum width=3.8cm, minimum height=0.55cm, font=\scriptsize] (m1) at (0, 0.95) {Transformer ($d=128$, 3L)};
 \node[box=bRecurr, fill=cRecurr, minimum width=3.8cm, minimum height=0.55cm, font=\scriptsize] (m2) at (0, 0.35) {LSTM ($h=160$, 2L)};
 \node[box=bRecurr, fill=cRecurr, minimum width=3.8cm, minimum height=0.55cm, font=\scriptsize] (m3) at (0, -0.25) {BiLSTM ($h=192$, 2L)};
 \node[box=bGCN, fill=cGCN, minimum width=3.8cm, minimum height=0.55cm, font=\scriptsize] (m4) at (0, -0.85) {ST-GCN (3 Stages)};
-\node[box=bGCN, fill=cGCN, minimum width=3.8cm, minimum height=0.55cm, font=\scriptsize] (m5) at (0, -1.45) {AAGCN (9 Blocks)};
+\node[box=bGCN, fill=cGCN, minimum width=3.8cm, minimum height=0.55cm, font=\scriptsize] (m5) at (0, -1.45) {AAGCN (3 Stages)};
 
 % Meta-Feature Generator
 \node[box=bFusion, fill=cFusion, minimum width=3.6cm, minimum height=2.2cm, right=1.4cm of l0] (meta_feat) {

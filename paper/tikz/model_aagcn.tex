@@ -63,19 +63,19 @@
 };
 
 \node[box=bGCN, fill=cGCN, minimum width=2.5cm, right=of bn] (stage1) {
-    \textbf{Stage 1 (3 Blocks)}\\[2pt]
+    \textbf{Stage 1 (1 Block)}\\[2pt]
     {\scriptsize $C_{\text{out}}=48$, stride=1}\\[1pt]
     {\scriptsize Adaptive GCN + TCN}
 };
 
 \node[box=bGCN, fill=cGCN, minimum width=2.5cm, right=of stage1] (stage2) {
-    \textbf{Stage 2 (3 Blocks)}\\[2pt]
-    {\scriptsize $C_{\text{out}}=96$, stride=2}\\[1pt]
+    \textbf{Stage 2 (1 Block)}\\[2pt]
+    {\scriptsize $C_{\text{out}}=96$, stride=1}\\[1pt]
     {\scriptsize Adaptive GCN + TCN}
 };
 
 \node[box=bGCN, fill=cGCN, minimum width=2.5cm, right=of stage2] (stage3) {
-    \textbf{Stage 3 (3 Blocks)}\\[2pt]
+    \textbf{Stage 3 (1 Block)}\\[2pt]
     {\scriptsize $C_{\text{out}}=150$, stride=2}\\[1pt]
     {\scriptsize Adaptive GCN + TCN}
 };
@@ -88,7 +88,7 @@
 
 \node[box=bHead, fill=cHead, minimum width=1.8cm, right=of gap] (fc) {
     \textbf{Classifier}\\[2pt]
-    {\scriptsize $150 \to 21$}
+    {\scriptsize $150 \to 22$}
 };
 
 \node[box=bOut, fill=cOut, minimum width=1.9cm, right=of fc] (out) {

@@ -39,7 +39,8 @@ def main():
     parser = argparse.ArgumentParser(description="External Benchmark 1-Shot Transfer Simulation")
     parser.add_argument("--config", type=str, default="configs/external/mmfit.yaml", help="Path to config yaml")
     parser.add_argument("--trials", type=int, default=100, help="Number of random 1-shot trials")
-    parser.add_argument("--seed", type=int, default=42, help="Random seed")
+    parser.add_argument("--seeds", type=int, nargs="+", default=None, help="Random seeds to evaluate across (e.g. --seeds 42 123 3407)")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed (fallback if --seeds not provided)")
     parser.add_argument("--out-dir", type=str, default=None, help="Output destination directory")
     args = parser.parse_args()
 

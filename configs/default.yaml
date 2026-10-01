@@ -12,17 +12,17 @@ feature_method: "mix"           # Default: 117-d compound representation (39-d r
 model_type: "Transformer"       # Primary choices: Transformer, AAGCN, STGCN, LSTM, BiLSTM
 
 # Augmentation Protocol
-augmentation: "skelgym_aug"     # Default task-oriented protocol: Bilateral Sagittal Reflection + Gravitational Yaw + Anatomical Scale
-                                # Choices: skelgym_aug, none, mirror, yaw, scale, jitter, dropout
+augmentation: "skel_gym_aug"    # Default task-oriented protocol: Bilateral Sagittal Reflection + Gravitational Yaw + Anatomical Scale
+                                # Choices: skel_gym_aug, none, mirror, yaw, scale, jitter, dropout
 
 # Training Hyperparameters
 seed: 42
 device: "auto"                  # Choices: auto (cuda -> mps -> cpu), cuda, mps, cpu
-batch_size: 32
+batch_size: 16
 epochs: 100
 learning_rate: 0.0001
 weight_decay: 0.0001
-patience: 20
+patience: 10
 seq_len: 32                     # 1.07 seconds observation horizon at 30 FPS
 train_stride: 16                # 50% temporal window overlap for dense training coverage
 val_test_stride: 32             # Non-overlapping windows for strict validation and evaluation
@@ -30,6 +30,6 @@ num_workers: 0
 
 # Architecture Dimensions
 hidden_dim: 128
-num_layers: 4
+num_layers: 3
 nhead: 8
-dropout: 0.1
+dropout: 0.2

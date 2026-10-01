@@ -32,7 +32,7 @@ By abstracting raw video frames into sparse 3D joint trajectories on edge hardwa
    [SkelGym-Aug: Sagittal Flip + Yaw]                                  [SkelGym-Aug: Symmetry + Yaw]
              │                                                                   │
              ▼                                                                   ▼
-   [Temporal Transformer (4L, 8H, 399K)]                               [4-Stream AAGCN (Adaptive GCN, 1.5M)]
+   [Temporal Transformer (3L, 8H, 399K)]                               [4-Stream AAGCN (Adaptive GCN, 1.5M)]
              │                                                                   │
              └─────────────────────────────────┬─────────────────────────────────┘
                                                ▼
@@ -55,7 +55,9 @@ By abstracting raw video frames into sparse 3D joint trajectories on edge hardwa
 
 ## 📊 Key Benchmark Results
 
-Evaluated on **$2,743$ held-out test windows** across **$233$ out-of-sample test videos** under a strict **Video-Level Partition (6:2:2)** with no source-video overlap across splits:
+Evaluated on **$2,743$ held-out test windows** across **$233$ out-of-sample test videos** under a strict **Video-Level Partition (6:2:2)** with no source-video overlap across splits.
+
+> **Authoritative Benchmark Source of Truth (SOT):** All empirical metrics, ablation sweeps, multi-seed downstream benchmarks, statistical hypothesis tests, and hardware latencies are centralized and actively maintained in [`outputs/RESULTS_FINAL.md`](outputs/RESULTS_FINAL.md).
 
 | Model / Ensemble Architecture | Parameter Footprint | FLOPs / MACs | Window Accuracy | Window Macro F1 | Video Consensus Acc | Video Macro F1 |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -105,7 +107,7 @@ Gym_Classification/
 │   │   ├── augmentations.py           # SkelGym-Aug: Sagittal reflection, Yaw rotation, Warping
 │   │   └── extractor.py               # MediaPipe Pose Heavy landmark extraction pipeline
 │   ├── models/
-│   │   ├── transformer.py             # Temporal Transformer encoder with sinusoidal PE
+│   │   ├── transformer.py             # Temporal Transformer encoder with learnable PE
 │   │   ├── stgcn.py                   # Spatial Temporal Graph Convolutional Network
 │   │   ├── aagcn.py                   # Multi-Stream Adaptive Graph Convolutional Network
 │   │   └── ensemble.py                # SLSQP validation-calibrated soft voting & video consensus

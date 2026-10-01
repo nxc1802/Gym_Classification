@@ -116,9 +116,9 @@ class LandmarkAugmenter:
         dim = x.shape[-1]
         if dim == 117:
             noise_rel = torch.randn_like(x[..., :39]) * self.jitter_sigma
-            noise_ang = torch.randn_like(x[..., 39:]) * (self.jitter_sigma * 0.5)
-            ang_jittered = torch.clamp(x[..., 39:] + noise_ang, -math.pi * 0.5, math.pi * 0.5)
-            return torch.cat([x[..., :39] + noise_rel, ang_jittered], dim=-1)
+            jittered_rel = x[..., :39] + noise_rel
+            recomputed_angles = self.recompute_pair_angles_3d(jittered_rel)
+            return torch.cat([jittered_rel, recomputed_angles], dim=-1)
         elif dim == 325:
             noise_rel = torch.randn_like(x[..., :39]) * self.jitter_sigma
             noise_ang = torch.randn_like(x[..., 39:]) * (self.jitter_sigma * 0.5)

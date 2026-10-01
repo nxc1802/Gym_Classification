@@ -256,11 +256,13 @@ class Trainer:
         return epoch_loss, epoch_acc
 
     @torch.no_grad()
-    def validate(self, val_loader: DataLoader, criterion: nn.Module) -> Tuple[float, float]:
+    def validate(self, val_loader: DataLoader, criterion: nn.Module) -> Tuple[float, float, float]:
         self.model.eval()
         total_loss = 0.0
         correct = 0
         total = 0
+        all_preds = []
+        all_targets = []
 
         for X, y in val_loader:
             if isinstance(X, (tuple, list)):
@@ -281,10 +283,14 @@ class Trainer:
             preds = out.argmax(dim=1)
             correct += (preds == y).sum().item()
             total += y.size(0)
+            all_preds.extend(preds.cpu().numpy().tolist())
+            all_targets.extend(y.cpu().numpy().tolist())
 
         val_loss = total_loss / max(1, total)
         val_acc = correct / max(1, total)
-        return val_loss, val_acc
+        val_f1_dict = compute_metrics(np.array(all_targets), np.array(all_preds))
+        val_macro_f1 = float(val_f1_dict["macro_f1"])
+        return val_loss, val_acc, val_macro_f1
 
     def fit(
         self,
@@ -303,10 +309,14 @@ class Trainer:
             "train_acc": [],
             "val_loss": [],
             "val_acc": [],
+            "val_macro_f1": [],
             "lr": []
         }
 
-        best_metric = -float("inf") if self.early_stopping_metric == "val_acc" else float("inf")
+        if self.early_stopping_metric in ("val_acc", "val_macro_f1"):
+            best_metric = -float("inf")
+        else:
+            best_metric = float("inf")
         patience_counter = 0
 
         amp_info = f" [AMP: {self.amp_dtype}]" if self.use_amp else " [FP32]"
@@ -316,7 +326,7 @@ class Trainer:
         for epoch in range(1, epochs + 1):
             t0 = time.perf_counter()
             tr_loss, tr_acc = self.train_epoch(train_loader, criterion)
-            v_loss, v_acc = self.validate(val_loader, criterion)
+            v_loss, v_acc, v_f1 = self.validate(val_loader, criterion)
             if isinstance(self.scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
                 self.scheduler.step(v_loss)
             else:
@@ -327,6 +337,7 @@ class Trainer:
             history["train_acc"].append(tr_acc)
             history["val_loss"].append(v_loss)
             history["val_acc"].append(v_acc)
+            history["val_macro_f1"].append(v_f1)
             history["lr"].append(current_lr)
 
             elapsed = time.perf_counter() - t0
@@ -335,7 +346,7 @@ class Trainer:
                 print(
                     f"Epoch {epoch:03d}/{epochs:03d} [{elapsed:.1f}s] - "
                     f"loss: {tr_loss:.4f} - acc: {tr_acc:.4f} - "
-                    f"val_loss: {v_loss:.4f} - val_acc: {v_acc:.4f} - "
+                    f"val_loss: {v_loss:.4f} - val_acc: {v_acc:.4f} - val_f1: {v_f1:.4f} - "
                     f"lr: {current_lr:.1e}"
                 )
 
@@ -348,9 +359,18 @@ class Trainer:
             }
             torch.save(last_payload, self.last_checkpoint_path)
 
-            is_better = (v_acc > best_metric) if self.early_stopping_metric == "val_acc" else (v_loss < best_metric)
+            if self.early_stopping_metric == "val_macro_f1":
+                is_better = (v_f1 > best_metric)
+                current_target_metric = v_f1
+            elif self.early_stopping_metric == "val_acc":
+                is_better = (v_acc > best_metric)
+                current_target_metric = v_acc
+            else:
+                is_better = (v_loss < best_metric)
+                current_target_metric = v_loss
+
             if is_better:
-                best_metric = v_acc if self.early_stopping_metric == "val_acc" else v_loss
+                best_metric = current_target_metric
                 patience_counter = 0
 
                 provenance = {
@@ -368,6 +388,7 @@ class Trainer:
                     "best_metric_value": float(best_metric),
                     "val_loss": float(v_loss),
                     "val_acc": float(v_acc),
+                    "val_macro_f1": float(v_f1),
                     "train_loss": float(tr_loss),
                     "train_acc": float(tr_acc),
                     "hyperparameters": {
@@ -404,7 +425,12 @@ class Trainer:
                 save_provenance_metadata(provenance, sidecar_path)
 
                 if verbose:
-                    val_str = f"val_acc: {v_acc * 100:.2f}%" if self.early_stopping_metric == "val_acc" else f"val_loss: {v_loss:.4f}"
+                    if self.early_stopping_metric == "val_macro_f1":
+                        val_str = f"val_f1: {v_f1:.4f}"
+                    elif self.early_stopping_metric == "val_acc":
+                        val_str = f"val_acc: {v_acc * 100:.2f}%"
+                    else:
+                        val_str = f"val_loss: {v_loss:.4f}"
                     print(f"  --> Best checkpoint saved ({val_str}): {self.best_checkpoint_path.name} (SHA-256: {sha256_hash[:12]}...)")
             else:
                 patience_counter += 1
