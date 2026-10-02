@@ -1,0 +1,75 @@
+{
+  "models": {
+    "Transformer Mix (117-d)": {
+      "params_k": 185,
+      "mflops": 10.7,
+      "cuda_mean_ms": 0.5,
+      "cuda_fps": 1999,
+      "mps_mean_ms": 1.24,
+      "mps_fps": 809,
+      "cpu_mean_ms": 0.42,
+      "cpu_fps": 2406
+    },
+    "AAGCN Joint Stream": {
+      "params_k": 377,
+      "mflops": 202.86,
+      "cuda_mean_ms": 1.01,
+      "cuda_fps": 987,
+      "mps_mean_ms": 1.89,
+      "mps_fps": 530,
+      "cpu_mean_ms": 0.9,
+      "cpu_fps": 1115
+    },
+    "AAGCN Bone Stream": {
+      "params_k": 377,
+      "mflops": 202.86,
+      "cuda_mean_ms": 1.02,
+      "cuda_fps": 976,
+      "mps_mean_ms": 1.72,
+      "mps_fps": 581,
+      "cpu_mean_ms": 0.88,
+      "cpu_fps": 1138
+    },
+    "AAGCN Joint-Motion Stream": {
+      "params_k": 377,
+      "mflops": 202.86,
+      "cuda_mean_ms": 1.01,
+      "cuda_fps": 990,
+      "mps_mean_ms": 1.9,
+      "mps_fps": 527,
+      "cpu_mean_ms": 1.02,
+      "cpu_fps": 978
+    },
+    "AAGCN Bone-Motion Stream": {
+      "params_k": 377,
+      "mflops": 202.86,
+      "cuda_mean_ms": 1.02,
+      "cuda_fps": 980,
+      "mps_mean_ms": 1.9,
+      "mps_fps": 527,
+      "cpu_mean_ms": 1.03,
+      "cpu_fps": 975
+    },
+    "SkelGym-Lite (Transformer + Bone)": {
+      "params_k": 562,
+      "mflops": 213.56,
+      "cuda_mean_ms": 1.66,
+      "cuda_fps": 603,
+      "mps_mean_ms": 2.55,
+      "mps_fps": 393,
+      "cpu_mean_ms": 1.49,
+      "cpu_fps": 671
+    },
+    "SkelGym-Full (Transformer + 4 AAGCN)": {
+      "params": "1.69M",
+      "params_k": 1693,
+      "mflops": 822.14,
+      "cuda_mean_ms": 4.65,
+      "cuda_fps": 215,
+      "mps_mean_ms": 5.86,
+      "mps_fps": 171,
+      "cpu_mean_ms": 3.96,
+      "cpu_fps": 253
+    }
+  }
+}

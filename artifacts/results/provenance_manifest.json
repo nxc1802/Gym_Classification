@@ -1,0 +1,547 @@
+{
+  "timestamp_utc": "2026-10-02T17:10:06.505790+00:00",
+  "git": {
+    "commit": "cb288b6e4b1b40d91959be634c61f02ef6671237",
+    "branch": "main"
+  },
+  "dataset_metadata_sha256": "c2f8c35fb9ddf8aa0b2790ee83ed26befbbd7f5064833d6017ef644092bb6c90",
+  "seeds": [
+    42,
+    123,
+    3407
+  ],
+  "normalization_artifacts": {
+    "normalization_bone_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "0448774bcb3187ef9718fca9db7921b31446a8cfd022531b663efe643d05e0ee"
+    },
+    "normalization_bone_motion_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "95ba5077fa61984401402f5d3350259996e82f22bdd5ecb93a9940352d709009"
+    },
+    "normalization_joint_motion_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "a11e4570f3d31822a54d3f7c09fc234b478be18e3f6cf80985ce4d0f24b203b7"
+    },
+    "normalization_mix.npz": {
+      "size_bytes": 1436,
+      "sha256": "2813bf423aa168b35c829ccd957ffe372579d724a77680c1bedfd773a132d903"
+    },
+    "normalization_rel_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "de034a74fee0ce4311172d839583d36c580df183642f523701bd59f59144c72d"
+    }
+  },
+  "archived_result_artifacts": {
+    "table1_feature_screening.json": {
+      "size_bytes": 7956,
+      "sha256": "a9c87220811f197ebc7792a716c5e2aa98844253750b79806fc8621c1827f8ec"
+    },
+    "graph_streams_results.json": {
+      "size_bytes": 2228,
+      "sha256": "10c9215af79dc95edaf18b6b0776cad6aa9a7e8e08c5f507f0a5dc7f9e3bdad4"
+    },
+    "augmentation_ablation_results.json": {
+      "size_bytes": 52588,
+      "sha256": "acb4cb28d1563ba55f6a89683e2d180b7597639b1bd0fcfd432e997dd5d3b387"
+    },
+    "multi_seed_evaluation_results.json": {
+      "size_bytes": 58746,
+      "sha256": "5691a8136e8fb8fefd285e8899ab99cf02040ff5765aa0efa0a5d87f621f2ee8"
+    },
+    "per_class_results.json": {
+      "size_bytes": 6342,
+      "sha256": "7021c2e1d3a94066f2260be370b670c0195882ebe74f406fb01e80c66c5d5c74"
+    },
+    "hardware_latency.json": {
+      "size_bytes": 1704,
+      "sha256": "88ffd15e5de5612a47c3ec55fa90839612e9e14bd722798a67602a18e76b5d4a"
+    },
+    "external_benchmark_results.json": {
+      "size_bytes": 1539,
+      "sha256": "4fb95e252b66cc31e372569a4dd68cd75bd5c541a56eef040b8a3c4eae488943"
+    },
+    "bootstrap_confidence_intervals.md": {
+      "size_bytes": 1383,
+      "sha256": "51447c4fd0f72d6db2fc69377fbcad35f967f807fb4b34a47d1075c31b159c62"
+    },
+    "statistical_tests_report.md": {
+      "size_bytes": 2555,
+      "sha256": "d3569cdf952da77213d5f235db7baedc607870b8a016e27b9610cf0282fe2fcb"
+    }
+  },
+  "checkpoint_provenance": {
+    "ablation_aug/best_AAGCN_bone_3d_aug_none.pt": {
+      "size_bytes": 1550443,
+      "sha256": "df1c483446e91fe7bc1a00fd38ea91ef2f99526c0ec27a1193b117af3f2e35a4"
+    },
+    "ablation_aug/best_AAGCN_bone_3d_aug_skel_gym_aug.pt": {
+      "size_bytes": 1551515,
+      "sha256": "17168246b347f86955e58b8ebb499bd33bed63f762b01335cb38b60d2d039757"
+    },
+    "ablation_aug/best_BiLSTM_mix_aug_none.pt": {
+      "size_bytes": 1610964,
+      "sha256": "1c8fd102429b49343f55460d5567c8cbe6538aeb42b5fb1ea719e8a6e9ada6a1"
+    },
+    "ablation_aug/best_BiLSTM_mix_aug_skel_gym_aug.pt": {
+      "size_bytes": 1611116,
+      "sha256": "6f9192f9c57c4299303093bfcb339a6df4f28cfda318e1e2251062e160021f1e"
+    },
+    "ablation_aug/best_STGCN_rel_3d_aug_none.pt": {
+      "size_bytes": 1432965,
+      "sha256": "f604e77e8db7df632955bbb836dda5572ad9c03d1a41d7573c8511212e791824"
+    },
+    "ablation_aug/best_STGCN_rel_3d_aug_skel_gym_aug.pt": {
+      "size_bytes": 1433549,
+      "sha256": "b05e9a6bd33c713b2d9f4d36eba295744a9cf5c4be614d06e74dd8decb7e0561"
+    },
+    "ablation_aug/best_Transformer_mix_aug_none.pt": {
+      "size_bytes": 1618570,
+      "sha256": "b3934dee0c45ca9e5a6ce7e47a410c60381597885cdbc2fcbef28d0c7417acad"
+    },
+    "ablation_aug/best_Transformer_mix_aug_skel_gym_aug.pt": {
+      "size_bytes": 1619074,
+      "sha256": "4586a94bebca4f094b29e5d366cddd4e505b019d92016fea3fbd8cc42b8de978"
+    },
+    "ablation_aug/best_Transformer_mix_aug_skel_gym_aug_no_jitter.pt": {
+      "size_bytes": 1619688,
+      "sha256": "bf0c64290392d29a11a232d3a67e8eb4979546da37ab35b973c3529bf50e6fa1"
+    },
+    "ablation_aug/best_Transformer_mix_aug_skel_gym_aug_no_mirror.pt": {
+      "size_bytes": 1619688,
+      "sha256": "51639feb702334525e747a73e19216ce0c082b4ca726ca211ba83bef8f62b614"
+    },
+    "ablation_aug/best_Transformer_mix_aug_skel_gym_aug_no_scale.pt": {
+      "size_bytes": 1619569,
+      "sha256": "41c766a70a4e88e7eecbe24f8355b3e7b135d2609fb768c108e1e42cecf7ec60"
+    },
+    "ablation_aug/best_Transformer_mix_aug_skel_gym_aug_no_timewarp.pt": {
+      "size_bytes": 1619798,
+      "sha256": "7278b7a333676ff90f4c5c3ac467bddd3afc26939eee7524e2e2a16dc2f9219a"
+    },
+    "ablation_aug/best_Transformer_mix_aug_skel_gym_aug_no_yaw.pt": {
+      "size_bytes": 1619459,
+      "sha256": "2b1ab702761153c7ffa8a22a39ac2ad411819a65762591dd95b64f331a9b188d"
+    },
+    "ablation_aug/last_AAGCN_bone_3d_aug_none.pt": {
+      "size_bytes": 1550443,
+      "sha256": "288d31a58641d7353b471b3962d904af87a83d12b4d2a1613150d83042d787a4"
+    },
+    "ablation_aug/last_AAGCN_bone_3d_aug_skel_gym_aug.pt": {
+      "size_bytes": 1551515,
+      "sha256": "325094cebf087c7fdc8a5123b7a369c145244740ff9232adda4b09ec7143edb8"
+    },
+    "ablation_aug/last_BiLSTM_mix_aug_none.pt": {
+      "size_bytes": 1610964,
+      "sha256": "e8171802a5464e2f729326e94e2e13f229096578e74bbd3b59a4464e7a8ad8e0"
+    },
+    "ablation_aug/last_BiLSTM_mix_aug_skel_gym_aug.pt": {
+      "size_bytes": 1611116,
+      "sha256": "216c08eaa27d6a6410bcc0749caa541b36c43b2bc4aac70825c24baa955ebf02"
+    },
+    "ablation_aug/last_STGCN_rel_3d_aug_none.pt": {
+      "size_bytes": 1432965,
+      "sha256": "5364305cfadcf35e90498de155a625f2370a9e758ac0068410cd96cb0b1dfbfb"
+    },
+    "ablation_aug/last_STGCN_rel_3d_aug_skel_gym_aug.pt": {
+      "size_bytes": 1433549,
+      "sha256": "34d756cefcd786560ddb61e3678f3dd67900983c4ff2d3a6fed8a2f441636796"
+    },
+    "ablation_aug/last_Transformer_mix_aug_none.pt": {
+      "size_bytes": 1618570,
+      "sha256": "001e6848649dadd96df322230491ff6a92f8222d21634d0b9a8b9202f59db2cf"
+    },
+    "ablation_aug/last_Transformer_mix_aug_skel_gym_aug.pt": {
+      "size_bytes": 1619074,
+      "sha256": "a52f4fe024c58c88c374f9a5a4058a45750311c2ff3770f78da30724c46f6293"
+    },
+    "ablation_aug/last_Transformer_mix_aug_skel_gym_aug_no_jitter.pt": {
+      "size_bytes": 1619688,
+      "sha256": "e52421060ba9897a79d2bac0832d3b55f674475b8a1ded11571dd6de23aaa753"
+    },
+    "ablation_aug/last_Transformer_mix_aug_skel_gym_aug_no_mirror.pt": {
+      "size_bytes": 1619688,
+      "sha256": "3bd14f9cf09ce3cf65320fb6391d83d204bf1460f716bd07af9ba862248ddcca"
+    },
+    "ablation_aug/last_Transformer_mix_aug_skel_gym_aug_no_scale.pt": {
+      "size_bytes": 1619569,
+      "sha256": "c16a3b0dc9eff8c594fcc5ebbf698cc45a9ab1ad9a16e653d9599725a91208a7"
+    },
+    "ablation_aug/last_Transformer_mix_aug_skel_gym_aug_no_timewarp.pt": {
+      "size_bytes": 1619798,
+      "sha256": "c006da9d2af6b03c172078aff0f1ce6543b82eafa6ab5aac5509ebef696743f4"
+    },
+    "ablation_aug/last_Transformer_mix_aug_skel_gym_aug_no_yaw.pt": {
+      "size_bytes": 1619459,
+      "sha256": "0205798ed93ec77fc19a0e135c3a610e35410ee32e2caf286626ec17f55d32de"
+    },
+    "best_AAGCN_T3.5_rel_3d.pt": {
+      "size_bytes": 1550013,
+      "sha256": "cefae98bad593f7962eeeccb8ed3b6d334452aab332aed2e05251b6bd7753bb5"
+    },
+    "best_AAGCN_T3.6_bone_3d.pt": {
+      "size_bytes": 1550099,
+      "sha256": "a43ac9d60eef76b795339b495a84d44ef5846761f5d4cececd297b59c3e462a5"
+    },
+    "best_AAGCN_T3.7_joint_motion_3d.pt": {
+      "size_bytes": 1550787,
+      "sha256": "769b3cf055da7669aa5d0d70384cc1164c0088923e447ced8e878ad8889bf239"
+    },
+    "best_AAGCN_T3.8_bone_motion_3d.pt": {
+      "size_bytes": 1550701,
+      "sha256": "4c7861671f40e8fa8e833688bfa6c6b45ae7f5175df95f078379c8a6337d2718"
+    },
+    "best_AAGCN_T4.1_bone_3d.pt": {
+      "size_bytes": 1548947,
+      "sha256": "b3ba24050f7b5cf2fac713e6af652809347a2acff770da466b3c21405ea84d6a"
+    },
+    "best_AAGCN_T4.1_rel_3d.pt": {
+      "size_bytes": 1550013,
+      "sha256": "c451f4abcb1daa0b71c7f508015190cc8ebda35f7df835da78d74919293f561c"
+    },
+    "best_AAGCN_T4.2_bone_3d.pt": {
+      "size_bytes": 1550099,
+      "sha256": "0df9b3b650206b22e0058aa7b3a7f255f289fdbd7aa847c3fcd23c93243c456e"
+    },
+    "best_AAGCN_T4.2_rel_3d.pt": {
+      "size_bytes": 1550013,
+      "sha256": "3cd55b9cf098b31c0bde5259c82d8e257e13374f9db76316bc6eeb8528e262ba"
+    },
+    "best_AAGCN_T4.3_rel_3d.pt": {
+      "size_bytes": 1550013,
+      "sha256": "9f827041c6de03c03c492563d406522cb354208b0aa9fe2e1b540ebac535b978"
+    },
+    "best_AAGCN_T4.4_joint_motion_3d.pt": {
+      "size_bytes": 1550787,
+      "sha256": "6588cf94171d550cb76f373b9ebf975fa2c35c380c736b48192a626ed5dc575b"
+    },
+    "best_AAGCN_T4.4_rel_3d.pt": {
+      "size_bytes": 1550013,
+      "sha256": "9fbcc59a7eacfc7ebd0124895e1b9bc6772e40642689a51e84fd285346338fd3"
+    },
+    "best_AAGCN_T4.5_bone_motion_3d.pt": {
+      "size_bytes": 1550701,
+      "sha256": "f5e63d33836c68daf7f890db03d25d2be4850143d638e8ccc1a5d4a4c638faed"
+    },
+    "best_AAGCN_T4.bm_bone_motion_3d.pt": {
+      "size_bytes": 1550787,
+      "sha256": "ed3501c8f1a5f85ae8ac989d652a0de43e4936fceb57d072fe40e8160b434233"
+    },
+    "best_AAGCN_T4.bone_bone_3d.pt": {
+      "size_bytes": 1550357,
+      "sha256": "4c3460de9334907e1d669cdfebfbbed9d7f16ddc5ac3a975739057b63e729b19"
+    },
+    "best_AAGCN_T4.jm_joint_motion_3d.pt": {
+      "size_bytes": 1550873,
+      "sha256": "b3d27406af457d026c494e65db22d664cbf0a328df44eb8ac7b5ffb2c3a0f04d"
+    },
+    "best_BiLSTM_12rel_4_aug_none.pt": {
+      "size_bytes": 2390336,
+      "sha256": "6c0ae1a51d15fd9d7ec17e0c3402881e134dd82a60b1d2977db25a2992cfa80f"
+    },
+    "best_BiLSTM_T1.10_angle_2d.pt": {
+      "size_bytes": 2130218,
+      "sha256": "3e25e1428066d7ac2f693f59b32a146371ff597f3fb90e9e42e1e738fe3a35fa"
+    },
+    "best_BiLSTM_T1.10_raw_2d.pt": {
+      "size_bytes": 1331412,
+      "sha256": "010232d4a187a5356c9370d1963e025934cf681faa45382d9302bc50c6d321cd"
+    },
+    "best_BiLSTM_T1.11_raw_3d.pt": {
+      "size_bytes": 1371348,
+      "sha256": "7d4b1eb190bc822b12937ed0b62bbfb286b5e270f00ac8188c9cbb8552db3990"
+    },
+    "best_BiLSTM_T1.11_rel_2d.pt": {
+      "size_bytes": 1331412,
+      "sha256": "713bb94d04cb2c45b16734641be216e96db8b034bec7c0f527b0b23887f19883"
+    },
+    "best_BiLSTM_T1.12_angle_2d.pt": {
+      "size_bytes": 2130218,
+      "sha256": "1d342134397d4fe098913293344746f206b2cb0e656754d4e90d5121ac00dae1"
+    },
+    "best_BiLSTM_T1.12_rel_3d.pt": {
+      "size_bytes": 1371348,
+      "sha256": "5bae312ef8e1d410b679648369dedd875dfd48f97403713c71c6cd1129b1e790"
+    },
+    "best_BiLSTM_T1.13_angle2_2d.pt": {
+      "size_bytes": 1491189,
+      "sha256": "5be126ddcd8131469fe5547024f4acfefb8156a27b9e14133b0df662d1dd2138"
+    },
+    "best_BiLSTM_T1.13_angle_3d.pt": {
+      "size_bytes": 2130218,
+      "sha256": "d6c3002b7368fb114438704fe685f91aa1e888ce8be57833cfc2e4963cd0b36b"
+    },
+    "best_BiLSTM_T1.14_mix.pt": {
+      "size_bytes": 2249843,
+      "sha256": "149a46765aa6056f396f2349b6e2c836a00efc735115ef957e122dab9b96588e"
+    },
+    "best_BiLSTM_T1.14_raw_3d.pt": {
+      "size_bytes": 1371348,
+      "sha256": "cd4e1867cf8e258f479b60b28e5108ed62e9aac205a1a4877b019bc3ecfcab03"
+    },
+    "best_BiLSTM_T1.15_rel_3d.pt": {
+      "size_bytes": 1371348,
+      "sha256": "f5a4b97f497930d2ef32a3660df6e9d08bb7327943141a6663313e362f8dba8c"
+    },
+    "best_BiLSTM_T1.16_angle_3d.pt": {
+      "size_bytes": 2130218,
+      "sha256": "7fad0e118b3831a77f2197681770c7f79b8522951c7da2e0007caa1f8459d7fd"
+    },
+    "best_BiLSTM_T1.17_angle2_3d.pt": {
+      "size_bytes": 1491189,
+      "sha256": "5037cedcb9042256b60d6161f2e073923030e4049daf7122da44817209cf6bb6"
+    },
+    "best_BiLSTM_T1.18_mix.pt": {
+      "size_bytes": 1610867,
+      "sha256": "11f35246fd6c0427ec096ad371b6f791329201481667849f357133390747207e"
+    },
+    "best_BiLSTM_T1.8_raw_2d.pt": {
+      "size_bytes": 1331401,
+      "sha256": "6c87a1b628238cc799b030abd838ccea080589b7742befca5b6f7ba6bf5b2b11"
+    },
+    "best_BiLSTM_T1.9_rel_2d.pt": {
+      "size_bytes": 1331401,
+      "sha256": "2546a80b6cbfe1552576b50f989c63150cba9a7327a164f5bfd461a204d421c7"
+    },
+    "best_LSTM_12rel_4_aug_none.pt": {
+      "size_bytes": 937450,
+      "sha256": "9d6981ce614ba00b7ffab6ec0a19bcefc342877e101126fda1a44438d177153f"
+    },
+    "best_LSTM_T1.1_raw_2d.pt": {
+      "size_bytes": 1356147,
+      "sha256": "9cf89dd5dc54ebed1ee90f6e4ab901b44a9a2d57b7eb34159eabcc9b652af77c"
+    },
+    "best_LSTM_T1.2_rel_2d.pt": {
+      "size_bytes": 1356147,
+      "sha256": "9254b61163cb08586b151d699d7ed29a7d9fcc285940d047a3eadf3791af938f"
+    },
+    "best_LSTM_T1.3_angle_2d.pt": {
+      "size_bytes": 2021833,
+      "sha256": "bcc61515bcc18de5c9e4c3a5f3b365c1fd1dc99837085285f331a8ad6e0718d4"
+    },
+    "best_LSTM_T1.4_angle2_2d.pt": {
+      "size_bytes": 1489364,
+      "sha256": "bc465bac4263381b1060f5e706d6dbc258ebb53fe039424eed983a2776cade41"
+    },
+    "best_LSTM_T1.4_raw_3d.pt": {
+      "size_bytes": 1389427,
+      "sha256": "918e81cb9763e11edba67341ecbe436555d96601da7febfa04db50898e88eab0"
+    },
+    "best_LSTM_T1.5_raw_3d.pt": {
+      "size_bytes": 1389427,
+      "sha256": "e0b0ea05ca4c6e78d53f3115fd09773ea3225fb968324d692db458a826ed78de"
+    },
+    "best_LSTM_T1.5_rel_3d.pt": {
+      "size_bytes": 1389427,
+      "sha256": "d0a25b1d3cd643ea208ca6df50cfc06753a9f5f530661b3cdc2f273eb692db04"
+    },
+    "best_LSTM_T1.6_angle_3d.pt": {
+      "size_bytes": 2021833,
+      "sha256": "c37f913a12a2e0d3cdd23411bfcbec5a4b28d51170756820536c3c5af73d081e"
+    },
+    "best_LSTM_T1.6_rel_3d.pt": {
+      "size_bytes": 1389427,
+      "sha256": "c8daceca4a207b4259f04291926cb36e455a42024539dcc17101ee3fbbc18018"
+    },
+    "best_LSTM_T1.7_angle_3d.pt": {
+      "size_bytes": 2021833,
+      "sha256": "cf40d6bef0ebdf7531ad6df89ce9d01b8f4ff62141eced12b8b9b19e8c3477e6"
+    },
+    "best_LSTM_T1.7_mix.pt": {
+      "size_bytes": 2121554,
+      "sha256": "933d669a388a2626b5f3060f3bbca8b8ad7e6edd1827e7348475e8509eb3ec63"
+    },
+    "best_LSTM_T1.8_angle2_3d.pt": {
+      "size_bytes": 1489364,
+      "sha256": "59b012ca384054302cbc3fe38cec9a840f68c08146d1877e210e2402c1b57520"
+    },
+    "best_LSTM_T1.9_mix.pt": {
+      "size_bytes": 1589074,
+      "sha256": "ef557b3a9944ba351983234f4294705177f783ed46822a19eb42a895ba9cd9dd"
+    },
+    "best_STGCN_T3.1_raw_3d.pt": {
+      "size_bytes": 1432673,
+      "sha256": "a178d069395682f95af599f832de1933363b8e23e0ce68e8d50246bce9c133af"
+    },
+    "best_STGCN_T3.2_rel_3d.pt": {
+      "size_bytes": 1432673,
+      "sha256": "271c497de1d241dcc74145e68c9d02c50778871d8def7702d5f8b588740cc773"
+    },
+    "best_STGCN_T3.3_raw_2d.pt": {
+      "size_bytes": 1432289,
+      "sha256": "3524a220563d60fdb8117f9b3e10ecfb5398ba83adff9fa8c78cb34f614e8910"
+    },
+    "best_STGCN_T3.4_rel_2d.pt": {
+      "size_bytes": 1432289,
+      "sha256": "d31ceb07428ec128c991c10cf2a07b40dc31c5c1d94852cf1a8985b742cd1f0d"
+    },
+    "best_STGCN_T4.1_raw_3d.pt": {
+      "size_bytes": 1432673,
+      "sha256": "ef199a6135e575552bad27cacb74beb0c9efbbc0495fdd9f064ab6836c2bcbec"
+    },
+    "best_STGCN_T4.1_rel_3d.pt": {
+      "size_bytes": 1432673,
+      "sha256": "c5b0108a9b8edba097bbfa9100f840d4c8ec7c0f46f66509d0c794f23f86860b"
+    },
+    "best_STGCN_T4.2_rel_3d.pt": {
+      "size_bytes": 1432673,
+      "sha256": "a25a4dc85be7023105a31a45f591e45d43d6bd9d4da641955e50b19d59cd50ee"
+    },
+    "best_STGCN_T4.3_raw_2d.pt": {
+      "size_bytes": 1432289,
+      "sha256": "b584ddf620bd26492598279230bfddf73a368e33534bcb226df0c0a4ce34773b"
+    },
+    "best_STGCN_T4.4_rel_2d.pt": {
+      "size_bytes": 1432289,
+      "sha256": "65a7bd6dacdde9a17e86b5f00bd2ceeed1c8e7be05e91a88e97041cbadbfe36e"
+    },
+    "best_STGCN_full_4_aug_none.pt": {
+      "size_bytes": 6570261,
+      "sha256": "9843d9ce3ce5f4596555e22dcf2067967fa5487e109528d96c366cc9cecae926"
+    },
+    "best_Transformer_12rel_4_aug_none.pt": {
+      "size_bytes": 2464734,
+      "sha256": "9a80404e8d7894bee94aff5e7c8ae7401efbf168b73a0abcf5c0cf4434960568"
+    },
+    "best_Transformer_12rel_4_aug_rotate.pt": {
+      "size_bytes": 2464860,
+      "sha256": "8cb1818f219b1ec319d5d98dbdc70179bd1d49414792cb1a64cd8e1b7f54a4c4"
+    },
+    "best_Transformer_T1.15_raw_2d.pt": {
+      "size_bytes": 1571210,
+      "sha256": "bfa1e73fd229a21efce54120e1f2346f072eafd71eb21cf34207aad84b2fd0a6"
+    },
+    "best_Transformer_T1.16_rel_2d.pt": {
+      "size_bytes": 1571210,
+      "sha256": "17b178ac98f7d70d4ac96bc48c305dfbe84cc67b0e2bcb2568ee51d156a48610"
+    },
+    "best_Transformer_T1.17_angle_2d.pt": {
+      "size_bytes": 1706680,
+      "sha256": "a0fba79b8cd23615d701878ff07a92cf1c0149104498daa077718ebc5a1e2baf"
+    },
+    "best_Transformer_T1.18_raw_3d.pt": {
+      "size_bytes": 1577994,
+      "sha256": "c4849116cfc8d791a0c3485244cbeae2828c4750c27d676e4ef0ae657de8e036"
+    },
+    "best_Transformer_T1.19_raw_2d.pt": {
+      "size_bytes": 1571210,
+      "sha256": "6c37c706edcbca44d5d54547355f1e05681582a2237f3e2ee201c229cee539fe"
+    },
+    "best_Transformer_T1.19_rel_3d.pt": {
+      "size_bytes": 1577994,
+      "sha256": "e822a62bb0e6579fb4ebda7cc8b25ba6dec489800b4c6a59f44e25a5ea350f1a"
+    },
+    "best_Transformer_T1.20_angle_3d.pt": {
+      "size_bytes": 1706680,
+      "sha256": "2001bca8126a7feff1a2262e399db1d7cb0df7fa8cc93d7bd238d1a9437fa501"
+    },
+    "best_Transformer_T1.20_rel_2d.pt": {
+      "size_bytes": 1571210,
+      "sha256": "49860e551d16bf4a481fe73118018693bce7b925652d40350255dec4b29d0936"
+    },
+    "best_Transformer_T1.21_angle_2d.pt": {
+      "size_bytes": 1706680,
+      "sha256": "691536548322e07502f2b7889bb418bd43ff7a7d059c69011d2aad5d36230862"
+    },
+    "best_Transformer_T1.21_mix.pt": {
+      "size_bytes": 1726565,
+      "sha256": "ac56855a9be5c40e6b973de7963c58a5a87507eb6124b12a06561c726d50f654"
+    },
+    "best_Transformer_T1.22_angle2_2d.pt": {
+      "size_bytes": 1598511,
+      "sha256": "c4ffd575300f107fc0c096072f203820f50decdefc10e6ea1078c7570d1770c7"
+    },
+    "best_Transformer_T1.23_raw_3d.pt": {
+      "size_bytes": 1577994,
+      "sha256": "00fd444f5eefde7e9fc368f40143253716610b554ac07e1cff5b8c67c41d9eba"
+    },
+    "best_Transformer_T1.24_rel_3d.pt": {
+      "size_bytes": 1577994,
+      "sha256": "4424077468b6a24a73b495e22198fcf82282bb7b2dbd47aac55b78b4fb76d0ad"
+    },
+    "best_Transformer_T1.25_angle_3d.pt": {
+      "size_bytes": 1706680,
+      "sha256": "821f87cc31a55d590bb878a22b5423b2cd8b73a95ddd60b7a3f23711a5babcee"
+    },
+    "best_Transformer_T1.26_angle2_3d.pt": {
+      "size_bytes": 1598511,
+      "sha256": "42643d0bf48b16fd535cac16139e8fc528e8e520840542de9569bea56a4ad6a1"
+    },
+    "best_Transformer_T1.27_mix.pt": {
+      "size_bytes": 1618405,
+      "sha256": "cb7c7d404ae89e227fa8767db9b8702adadabbaf531b14ceacc6412f567b7889"
+    },
+    "best_Transformer_T2.1_mix.pt": {
+      "size_bytes": 1726510,
+      "sha256": "a8ee88ac3265997a948a330a0e1eb91744a34dc7a7d5a39c209f7f6a0e678bf3"
+    },
+    "best_Transformer_T2.1_raw_3d.pt": {
+      "size_bytes": 1577939,
+      "sha256": "fec84a8d8f17d7f1073a1aecc33301f7a9e9006ae45e8ca7166ca3b1167903d8"
+    },
+    "best_Transformer_T2.1_rel_3d.pt": {
+      "size_bytes": 1577299,
+      "sha256": "c179f90144050b02f5d80d760c9c4f68f64b80fbf70c0c8cb82a94818a6e89ef"
+    },
+    "best_Transformer_T2.2_mix.pt": {
+      "size_bytes": 1618350,
+      "sha256": "7d3763a0d2a2201f1c2ea9ee45d0c36379fb5ad6e2f634e7f85fe782984fd0c3"
+    },
+    "best_Transformer_T2.2_raw_3d.pt": {
+      "size_bytes": 1577939,
+      "sha256": "d8db93af69cb6c38a60f6352f09b9c17ce758c351f4303cfecbc90d9835a1944"
+    },
+    "best_Transformer_T2.2_rel_3d.pt": {
+      "size_bytes": 1577939,
+      "sha256": "30d50c2929a2563819d9ecc9d0e0d060418647c77765458ce8a8e554af4b80d8"
+    },
+    "best_Transformer_T2.4_raw_3d.pt": {
+      "size_bytes": 1577939,
+      "sha256": "01a3fb43bc7dcbbc4d6b546292bd7a5f46368668f065737f7a0663c7bfca8457"
+    },
+    "best_Transformer_branch_concat_aug_none.pt": {
+      "size_bytes": 5037163,
+      "sha256": "5a0a097638f8b6301c7cd59b32f21a1744896a9a212407ba8457a6f47f4fd5dd"
+    },
+    "seed123/best_AAGCN_T4.2_bone_3d.pt": {
+      "size_bytes": 1550099,
+      "sha256": "813a1799baf93177c15e90f07854812644a0a58514a5ef239285160917b6e8a4"
+    },
+    "seed123/best_AAGCN_T4.3_rel_3d.pt": {
+      "size_bytes": 1550013,
+      "sha256": "e99c9c13acf7a404453911352d4428abd22c7935334b6c04756b9277ea6c6b42"
+    },
+    "seed123/best_AAGCN_T4.4_joint_motion_3d.pt": {
+      "size_bytes": 1550787,
+      "sha256": "c9982c9317eff315a7da2e654410df9cb02fbbf366bef2e138db3717deaa66bc"
+    },
+    "seed123/best_AAGCN_T4.5_bone_motion_3d.pt": {
+      "size_bytes": 1550701,
+      "sha256": "e1947e7db6eb8f6416948b5da582305807f9735c53c1270b74a44b78f8af9c58"
+    },
+    "seed123/best_Transformer_T2.2_mix.pt": {
+      "size_bytes": 1618350,
+      "sha256": "e4fb3866aa0d4da73b8af6771709e076156fbf89831cc844067de0fce094f7a2"
+    },
+    "seed3407/best_AAGCN_T4.2_bone_3d.pt": {
+      "size_bytes": 1550099,
+      "sha256": "5439e750a0dfcd4767ac403fa17ef2046a4bc2a3f24f1f8e4980b66fca41577d"
+    },
+    "seed3407/best_AAGCN_T4.3_rel_3d.pt": {
+      "size_bytes": 1550013,
+      "sha256": "3ce5d5886610a006075790169a3591fcae6ae0d1fdd065115103bcefcbe3509a"
+    },
+    "seed3407/best_AAGCN_T4.4_joint_motion_3d.pt": {
+      "size_bytes": 1550787,
+      "sha256": "d03f9fbc604619c806f938c37c55c374f985caa83de8393a8d51a08272260a27"
+    },
+    "seed3407/best_AAGCN_T4.5_bone_motion_3d.pt": {
+      "size_bytes": 1550701,
+      "sha256": "e5727ce65286caffa3a65206d89fb24ad61ad1897dc37555b4980343a5cae6ea"
+    },
+    "seed3407/best_Transformer_T2.2_mix.pt": {
+      "size_bytes": 1618350,
+      "sha256": "e45eb5a0a48a192af4fb6320caaa6317a2a3c56de18bf2d1d8e204bfbe42dda2"
+    }
+  }
+}

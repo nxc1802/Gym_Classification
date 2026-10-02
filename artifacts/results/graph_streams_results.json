@@ -1,0 +1,94 @@
+{
+  "experiments": [
+    {
+      "exp_id": "T3.1",
+      "model": "ST-GCN Baseline",
+      "stream": "Raw 3D Joint",
+      "augment": "None (Clean)",
+      "val_acc": 63.71,
+      "win_acc": 53.26,
+      "vid_acc": 65.67,
+      "status": "Verified"
+    },
+    {
+      "exp_id": "T3.2",
+      "model": "ST-GCN Baseline",
+      "stream": "Relative 3D Joint",
+      "augment": "None (Clean)",
+      "val_acc": 72.39,
+      "win_acc": 58.8,
+      "vid_acc": 66.95,
+      "status": "Verified"
+    },
+    {
+      "exp_id": "T3.3",
+      "model": "AAGCN Baseline",
+      "stream": "Bone 3D Stream",
+      "augment": "None (Clean)",
+      "val_acc": 76.53,
+      "win_acc": 62.67,
+      "vid_acc": 72.1,
+      "status": "Verified"
+    },
+    {
+      "exp_id": "T3.4",
+      "model": "AAGCN",
+      "stream": "Bone 3D Stream",
+      "augment": "SkelGym-Aug (Proposed)",
+      "val_acc": 80.92,
+      "win_acc": 65.59,
+      "vid_acc": 73.39,
+      "status": "Verified"
+    },
+    {
+      "exp_id": "T3.5",
+      "model": "AAGCN",
+      "stream": "Joint Stream (Rel 3D)",
+      "augment": "SkelGym-Aug (Proposed)",
+      "val_acc": 79.52,
+      "win_acc": 67.15,
+      "vid_acc": 74.25,
+      "status": "Verified"
+    },
+    {
+      "exp_id": "T3.6",
+      "model": "AAGCN",
+      "stream": "Joint Motion 3D ($\\Delta X$)",
+      "augment": "SkelGym-Aug (Proposed)",
+      "val_acc": 63.66,
+      "win_acc": 48.74,
+      "vid_acc": 63.95,
+      "status": "Verified"
+    },
+    {
+      "exp_id": "T3.7",
+      "model": "AAGCN",
+      "stream": "Bone Motion 3D ($\\Delta B$)",
+      "augment": "SkelGym-Aug (Proposed)",
+      "val_acc": 64.72,
+      "win_acc": 49.43,
+      "vid_acc": 64.81,
+      "status": "Verified"
+    },
+    {
+      "exp_id": "T3.8",
+      "model": "Two-Stream AAGCN",
+      "stream": "Joint + Bone",
+      "augment": "Late Fusion (Equal Weights)",
+      "val_acc": 78.11,
+      "win_acc": 69.63,
+      "vid_acc": 78.54,
+      "status": "Verified"
+    },
+    {
+      "exp_id": "T3.9",
+      "model": "Four-Stream AAGCN",
+      "stream": "4 Streams Unified",
+      "augment": "Late Fusion (SLSQP Calibrated)",
+      "val_acc": 79.4,
+      "win_acc": 67.34,
+      "vid_acc": 77.25,
+      "status": "Verified"
+    }
+  ]
+}

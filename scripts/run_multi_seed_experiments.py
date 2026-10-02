@@ -195,12 +195,21 @@ def evaluate_seed(
                 seed=seed
             )
             trainer = Trainer(model=model, device=device)
+            _, _, b_vprob = trainer.predict(v_l)
+            b_vwin_pred = np.argmax(b_vprob, axis=1)
+            b_vwin_m = compute_metrics(np.array(v_l.dataset.labels), b_vwin_pred)
+            _, _, _, b_vvid_m = aggregate_video_level_predictions(b_vprob, np.array(v_l.dataset.labels), v_l.dataset.video_ids)
+
             _, _, b_tprob = trainer.predict(te_l)
             b_win_pred = np.argmax(b_tprob, axis=1)
             b_win_m = compute_metrics(np.array(te_l.dataset.labels), b_win_pred)
             _, _, _, b_vid_m = aggregate_video_level_predictions(b_tprob, np.array(te_l.dataset.labels), te_l.dataset.video_ids)
 
             baseline_results[m["name"]] = {
+                "val_win_acc": float(b_vwin_m["accuracy"] * 100.0),
+                "val_win_f1": float(b_vwin_m["macro_f1"]),
+                "val_vid_acc": float(b_vvid_m["accuracy"] * 100.0),
+                "val_vid_f1": float(b_vvid_m["macro_f1"]),
                 "win_acc": float(b_win_m["accuracy"] * 100.0),
                 "win_f1": float(b_win_m["macro_f1"]),
                 "vid_acc": float(b_vid_m["accuracy"] * 100.0),
@@ -250,7 +259,15 @@ def evaluate_seed(
         val_probs[feat] = y_vp
         test_probs[feat] = y_tp
 
-    # Pre-compute true video labels
+    # Pre-compute true video labels for val and test
+    val_unique_vids = []
+    val_vid_to_label = {}
+    for vid, lbl in zip(val_video_ids, y_val_true):
+        if vid not in val_vid_to_label:
+            val_vid_to_label[vid] = lbl
+            val_unique_vids.append(vid)
+    y_val_vid_true = np.array([val_vid_to_label[v] for v in val_unique_vids])
+
     unique_vids = []
     vid_to_label = {}
     for vid, lbl in zip(test_video_ids, y_test_true):
@@ -259,20 +276,37 @@ def evaluate_seed(
             unique_vids.append(vid)
     y_test_vid_true = np.array([vid_to_label[v] for v in unique_vids])
 
-    # Standalone Augmented Transformer
-    t_test_prob = test_probs["mix"]
-    t_win_pred = np.argmax(t_test_prob, axis=1)
-    t_win_metrics = compute_metrics(y_test_true, t_win_pred)
-    _, _, _, t_vid_metrics = aggregate_video_level_predictions(t_test_prob, y_test_true, test_video_ids)
-
-    individual_runs = {
-        "Transformer Mix (Aug)": {
-            "win_acc": float(t_win_metrics["accuracy"] * 100.0),
-            "win_f1": float(t_win_metrics["macro_f1"]),
-            "vid_acc": float(t_vid_metrics["accuracy"] * 100.0),
-            "vid_f1": float(t_vid_metrics["macro_f1"])
-        }
+    # Standalone Constituent Models Evaluation (Validation + Test)
+    individual_runs = {}
+    constituent_names = {
+        "mix": "Transformer Mix (Aug)",
+        "bone_3d": "AAGCN Bone (Aug)",
+        "rel_3d": "AAGCN Rel (Aug)",
+        "joint_motion_3d": "AAGCN Joint Motion (Aug)",
+        "bone_motion_3d": "AAGCN Bone Motion (Aug)"
     }
+    for feat, name in constituent_names.items():
+        v_prob = val_probs[feat]
+        v_w_pred = np.argmax(v_prob, axis=1)
+        v_w_m = compute_metrics(y_val_true, v_w_pred)
+        _, _, _, v_v_m = aggregate_video_level_predictions(v_prob, y_val_true, val_video_ids)
+
+        t_prob = test_probs[feat]
+        t_w_pred = np.argmax(t_prob, axis=1)
+        t_w_m = compute_metrics(y_test_true, t_w_pred)
+        _, _, _, t_v_m = aggregate_video_level_predictions(t_prob, y_test_true, test_video_ids)
+
+        individual_runs[name] = {
+            "val_win_acc": float(v_w_m["accuracy"] * 100.0),
+            "val_win_f1": float(v_w_m["macro_f1"]),
+            "val_vid_acc": float(v_v_m["accuracy"] * 100.0),
+            "val_vid_f1": float(v_v_m["macro_f1"]),
+            "win_acc": float(t_w_m["accuracy"] * 100.0),
+            "win_f1": float(t_w_m["macro_f1"]),
+            "vid_acc": float(t_v_m["accuracy"] * 100.0),
+            "vid_f1": float(t_v_m["macro_f1"])
+        }
+
     individual_runs.update(baseline_results)
 
     # 4 Ensemble Configurations
@@ -291,27 +325,51 @@ def evaluate_seed(
 
         fusion_evals[ens_name] = {}
 
-        # 1. Hard Voting
+        # 1. Hard Voting (Window & Video)
         hard_ens = HardVotingEnsemble()
+        # Val
+        val_w_preds = hard_ens.predict([np.argmax(p, axis=1) for p in v_sub])
+        val_w_m = compute_metrics(y_val_true, val_w_preds)
+        val_vid_p_list = []
+        for p in v_sub:
+            _, _, vid_p, _ = aggregate_video_level_predictions(p, y_val_true, val_video_ids)
+            val_vid_p_list.append(vid_p)
+        val_vid_preds_list = [np.argmax(vp, axis=1) for vp in val_vid_p_list]
+        val_v_preds = hard_ens.predict(val_vid_preds_list)
+        val_v_m = compute_metrics(y_val_vid_true, val_v_preds)
+
+        # Test
         w_preds = hard_ens.predict([np.argmax(p, axis=1) for p in t_sub])
         w_m = compute_metrics(y_test_true, w_preds)
         vid_p_list = []
         for p in t_sub:
             _, _, vid_p, _ = aggregate_video_level_predictions(p, y_test_true, test_video_ids)
             vid_p_list.append(vid_p)
-        v_preds = hard_ens.predict(vid_p_list)
+        vid_preds_list = [np.argmax(vp, axis=1) for vp in vid_p_list]
+        v_preds = hard_ens.predict(vid_preds_list)
         v_m = compute_metrics(y_test_vid_true, v_preds)
+
         fusion_evals[ens_name]["Hard Voting"] = {
+            "val_win_acc": float(val_w_m["accuracy"] * 100.0), "val_win_f1": float(val_w_m["macro_f1"]),
+            "val_vid_acc": float(val_v_m["accuracy"] * 100.0), "val_vid_f1": float(val_v_m["macro_f1"]),
             "win_acc": float(w_m["accuracy"] * 100.0), "win_f1": float(w_m["macro_f1"]),
             "vid_acc": float(v_m["accuracy"] * 100.0), "vid_f1": float(v_m["macro_f1"])
         }
 
         # 2. Uniform Soft Voting
         u_ens = SoftVotingEnsemble(weights=None)
+        # Val
+        u_val_prob = u_ens.predict_proba(v_sub)
+        u_val_w_m = compute_metrics(y_val_true, np.argmax(u_val_prob, axis=1))
+        _, _, _, u_val_v_m = aggregate_video_level_predictions(u_val_prob, y_val_true, val_video_ids)
+        # Test
         u_prob = u_ens.predict_proba(t_sub)
         u_w_m = compute_metrics(y_test_true, np.argmax(u_prob, axis=1))
         _, _, _, u_v_m = aggregate_video_level_predictions(u_prob, y_test_true, test_video_ids)
+
         fusion_evals[ens_name]["Uniform Soft Voting"] = {
+            "val_win_acc": float(u_val_w_m["accuracy"] * 100.0), "val_win_f1": float(u_val_w_m["macro_f1"]),
+            "val_vid_acc": float(u_val_v_m["accuracy"] * 100.0), "val_vid_f1": float(u_val_v_m["macro_f1"]),
             "win_acc": float(u_w_m["accuracy"] * 100.0), "win_f1": float(u_w_m["macro_f1"]),
             "vid_acc": float(u_v_m["accuracy"] * 100.0), "vid_f1": float(u_v_m["macro_f1"])
         }
@@ -319,10 +377,18 @@ def evaluate_seed(
         # 3. Accuracy-Weighted Soft Voting
         val_accs = [np.mean(y_val_true == np.argmax(vp, axis=1)) for vp in v_sub]
         acc_ens = SoftVotingEnsemble(weights=val_accs)
+        # Val
+        acc_val_prob = acc_ens.predict_proba(v_sub)
+        acc_val_w_m = compute_metrics(y_val_true, np.argmax(acc_val_prob, axis=1))
+        _, _, _, acc_val_v_m = aggregate_video_level_predictions(acc_val_prob, y_val_true, val_video_ids)
+        # Test
         acc_prob = acc_ens.predict_proba(t_sub)
         acc_w_m = compute_metrics(y_test_true, np.argmax(acc_prob, axis=1))
         _, _, _, acc_v_m = aggregate_video_level_predictions(acc_prob, y_test_true, test_video_ids)
+
         fusion_evals[ens_name]["Accuracy-Weighted Soft"] = {
+            "val_win_acc": float(acc_val_w_m["accuracy"] * 100.0), "val_win_f1": float(acc_val_w_m["macro_f1"]),
+            "val_vid_acc": float(acc_val_v_m["accuracy"] * 100.0), "val_vid_f1": float(acc_val_v_m["macro_f1"]),
             "win_acc": float(acc_w_m["accuracy"] * 100.0), "win_f1": float(acc_w_m["macro_f1"]),
             "vid_acc": float(acc_v_m["accuracy"] * 100.0), "vid_f1": float(acc_v_m["macro_f1"])
         }
@@ -330,11 +396,20 @@ def evaluate_seed(
         # 4. Stacking Meta-Classifier
         stk_ens = StackingEnsemble(c_param=1.0)
         stk_ens.fit(v_sub, y_val_true)
+        # Val
+        stk_val_prob = stk_ens.predict_proba(v_sub)
+        stk_val_preds = stk_ens.predict(v_sub)
+        stk_val_w_m = compute_metrics(y_val_true, stk_val_preds)
+        _, _, _, stk_val_v_m = aggregate_video_level_predictions(stk_val_prob, y_val_true, val_video_ids)
+        # Test
         stk_preds = stk_ens.predict(t_sub)
         stk_prob = stk_ens.predict_proba(t_sub)
         stk_w_m = compute_metrics(y_test_true, stk_preds)
         _, _, _, stk_v_m = aggregate_video_level_predictions(stk_prob, y_test_true, test_video_ids)
+
         fusion_evals[ens_name]["Stacking Meta-Classifier"] = {
+            "val_win_acc": float(stk_val_w_m["accuracy"] * 100.0), "val_win_f1": float(stk_val_w_m["macro_f1"]),
+            "val_vid_acc": float(stk_val_v_m["accuracy"] * 100.0), "val_vid_f1": float(stk_val_v_m["macro_f1"]),
             "win_acc": float(stk_w_m["accuracy"] * 100.0), "win_f1": float(stk_w_m["macro_f1"]),
             "vid_acc": float(stk_v_m["accuracy"] * 100.0), "vid_f1": float(stk_v_m["macro_f1"])
         }
@@ -342,12 +417,22 @@ def evaluate_seed(
         # 5. SLSQP Dual-Target Soft Voting
         sls_ens = WeightedSoftVotingEnsemble()
         sls_ens.fit_window(v_sub, y_val_true)
+        # Val
+        sls_val_w_preds = sls_ens.predict_window(v_sub)
+        sls_val_w_m = compute_metrics(y_val_true, sls_val_w_preds)
+        # Test
         sls_w_preds = sls_ens.predict_window(t_sub)
         sls_w_m = compute_metrics(y_test_true, sls_w_preds)
 
         sls_ens.fit_video(v_sub, y_val_true, val_video_ids)
+        # Val
+        _, _, _, sls_val_v_m = sls_ens.predict_video(v_sub, y_val_true, val_video_ids)
+        # Test
         _, _, _, sls_v_m = sls_ens.predict_video(t_sub, y_test_true, test_video_ids)
+
         fusion_evals[ens_name]["SLSQP Soft Voting"] = {
+            "val_win_acc": float(sls_val_w_m["accuracy"] * 100.0), "val_win_f1": float(sls_val_w_m["macro_f1"]),
+            "val_vid_acc": float(sls_val_v_m["accuracy"] * 100.0), "val_vid_f1": float(sls_val_v_m["macro_f1"]),
             "win_acc": float(sls_w_m["accuracy"] * 100.0), "win_f1": float(sls_w_m["macro_f1"]),
             "vid_acc": float(sls_v_m["accuracy"] * 100.0), "vid_f1": float(sls_v_m["macro_f1"]),
             "weights_window": [round(float(w), 4) for w in sls_ens.weights_window],
@@ -361,40 +446,71 @@ def evaluate_seed(
 
 def aggregate_stats(results_per_seed: Dict[str, Any], seeds: List[int]) -> Dict[str, Any]:
     summary = {"individual": {}, "fusion_methods": {}}
+    metric_keys = ["win_acc", "win_f1", "vid_acc", "vid_f1", "val_win_acc", "val_win_f1", "val_vid_acc", "val_vid_f1"]
 
-    # Individual models
-    sample_seed = str(seeds[0])
-    ind_keys = list(results_per_seed[sample_seed]["individual"].keys())
-    for k in ind_keys:
-        w_accs = [results_per_seed[str(s)]["individual"][k]["win_acc"] for s in seeds]
-        w_f1s = [results_per_seed[str(s)]["individual"][k]["win_f1"] for s in seeds]
-        v_accs = [results_per_seed[str(s)]["individual"][k]["vid_acc"] for s in seeds]
-        v_f1s = [results_per_seed[str(s)]["individual"][k]["vid_f1"] for s in seeds]
+    # Individual models (collect all unique keys across evaluated seeds)
+    all_ind_keys = set()
+    for s in seeds:
+        all_ind_keys.update(results_per_seed[str(s)]["individual"].keys())
 
-        summary["individual"][k] = {
-            "win_acc_mean": float(np.mean(w_accs)), "win_acc_sd": float(np.std(w_accs, ddof=1)),
-            "win_f1_mean": float(np.mean(w_f1s)), "win_f1_sd": float(np.std(w_f1s, ddof=1)),
-            "vid_acc_mean": float(np.mean(v_accs)), "vid_acc_sd": float(np.std(v_accs, ddof=1)),
-            "vid_f1_mean": float(np.mean(v_f1s)), "vid_f1_sd": float(np.std(v_f1s, ddof=1)),
-        }
+    for k in sorted(all_ind_keys):
+        summary["individual"][k] = {}
+        for mkey in metric_keys:
+            vals = [
+                results_per_seed[str(s)]["individual"][k][mkey]
+                for s in seeds
+                if k in results_per_seed[str(s)]["individual"]
+                and mkey in results_per_seed[str(s)]["individual"][k]
+            ]
+            if vals:
+                summary["individual"][k][f"{mkey}_mean"] = float(np.mean(vals))
+                summary["individual"][k][f"{mkey}_sd"] = float(np.std(vals, ddof=1)) if len(vals) > 1 else 0.0
 
-    # Fusion methods
-    ens_keys = list(results_per_seed[sample_seed]["fusion_methods"].keys())
-    for e_k in ens_keys:
+    # Fusion methods (collect all unique configurations across evaluated seeds)
+    all_ens_keys = set()
+    for s in seeds:
+        all_ens_keys.update(results_per_seed[str(s)]["fusion_methods"].keys())
+
+    for e_k in sorted(all_ens_keys):
         summary["fusion_methods"][e_k] = {}
-        m_keys = list(results_per_seed[sample_seed]["fusion_methods"][e_k].keys())
-        for m_k in m_keys:
-            w_accs = [results_per_seed[str(s)]["fusion_methods"][e_k][m_k]["win_acc"] for s in seeds]
-            w_f1s = [results_per_seed[str(s)]["fusion_methods"][e_k][m_k]["win_f1"] for s in seeds]
-            v_accs = [results_per_seed[str(s)]["fusion_methods"][e_k][m_k]["vid_acc"] for s in seeds]
-            v_f1s = [results_per_seed[str(s)]["fusion_methods"][e_k][m_k]["vid_f1"] for s in seeds]
+        all_m_keys = set()
+        for s in seeds:
+            if e_k in results_per_seed[str(s)]["fusion_methods"]:
+                all_m_keys.update(results_per_seed[str(s)]["fusion_methods"][e_k].keys())
+        for m_k in sorted(all_m_keys):
+            summary["fusion_methods"][e_k][m_k] = {}
+            for mkey in metric_keys:
+                vals = [
+                    results_per_seed[str(s)]["fusion_methods"][e_k][m_k][mkey]
+                    for s in seeds
+                    if e_k in results_per_seed[str(s)]["fusion_methods"]
+                    and m_k in results_per_seed[str(s)]["fusion_methods"][e_k]
+                    and mkey in results_per_seed[str(s)]["fusion_methods"][e_k][m_k]
+                ]
+                if vals:
+                    summary["fusion_methods"][e_k][m_k][f"{mkey}_mean"] = float(np.mean(vals))
+                    summary["fusion_methods"][e_k][m_k][f"{mkey}_sd"] = float(np.std(vals, ddof=1)) if len(vals) > 1 else 0.0
 
-            summary["fusion_methods"][e_k][m_k] = {
-                "win_acc_mean": float(np.mean(w_accs)), "win_acc_sd": float(np.std(w_accs, ddof=1)),
-                "win_f1_mean": float(np.mean(w_f1s)), "win_f1_sd": float(np.std(w_f1s, ddof=1)),
-                "vid_acc_mean": float(np.mean(v_accs)), "vid_acc_sd": float(np.std(v_accs, ddof=1)),
-                "vid_f1_mean": float(np.mean(v_f1s)), "vid_f1_sd": float(np.std(v_f1s, ddof=1)),
-            }
+            win_weights = [
+                results_per_seed[str(s)]["fusion_methods"][e_k][m_k]["weights_window"]
+                for s in seeds
+                if e_k in results_per_seed[str(s)]["fusion_methods"]
+                and m_k in results_per_seed[str(s)]["fusion_methods"][e_k]
+                and "weights_window" in results_per_seed[str(s)]["fusion_methods"][e_k][m_k]
+            ]
+            vid_weights = [
+                results_per_seed[str(s)]["fusion_methods"][e_k][m_k]["weights_video"]
+                for s in seeds
+                if e_k in results_per_seed[str(s)]["fusion_methods"]
+                and m_k in results_per_seed[str(s)]["fusion_methods"][e_k]
+                and "weights_video" in results_per_seed[str(s)]["fusion_methods"][e_k][m_k]
+            ]
+            if win_weights:
+                win_w = np.mean(win_weights, axis=0)
+                summary["fusion_methods"][e_k][m_k]["weights_window"] = [round(float(w), 4) for w in win_w]
+            if vid_weights:
+                vid_w = np.mean(vid_weights, axis=0)
+                summary["fusion_methods"][e_k][m_k]["weights_video"] = [round(float(w), 4) for w in vid_w]
     return summary
 
 def main():

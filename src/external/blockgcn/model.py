@@ -9,6 +9,7 @@ Faithfully adapted for SkelGym:
 """
 
 import math
+import warnings
 from typing import Optional, Tuple, Union, List
 import numpy as np
 import torch
@@ -264,7 +265,16 @@ class Topo(nn.Module):
             self.vr = VietorisRipsComplex(dim=0)
             self.pl = StructureElementLayer(n_elements=out_dim)
         else:
-            # Structurally equivalent learnable topological metric layer
+            warnings.warn(
+                "torch_topological is NOT installed (requires Python <=3.12 + giotto-ph). "
+                "The Topo branch is using a DEGRADED nn.Linear proxy instead of real persistent homology. "
+                "This is acceptable for local smoke testing ONLY. For production training on the server, "
+                "ensure torch_topological is installed to retain the paper's full architecture.",
+                RuntimeWarning,
+                stacklevel=2
+            )
+            # Degraded proxy: learns a projection from pairwise distance summary instead of
+            # VietorisRipsComplex + StructureElementLayer. NOT equivalent to persistent homology.
             self.proj = nn.Sequential(
                 nn.Linear(num_nodes, out_dim),
                 nn.BatchNorm1d(out_dim),

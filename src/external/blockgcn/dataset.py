@@ -184,7 +184,9 @@ def get_blockgcn_dataloaders(
 
         for _, row in split_meta.iterrows():
             c_name = str(row["class"]).strip()
-            c_idx = ACTION_TO_IDX.get(c_name, 0)
+            if c_name not in ACTION_TO_IDX:
+                raise ValueError(f"Unknown action class '{c_name}' in metadata. Expected one of: {list(ACTION_TO_IDX.keys())}")
+            c_idx = ACTION_TO_IDX[c_name]
             f_path = str(row["filepath"])
             vid_name = Path(f_path).stem
             csv_path = landmark_base / split / c_name / f"{vid_name}.csv"

@@ -15,7 +15,7 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 - **Dataset Scale:** 1,024 unique video recordings ($\approx 10.2$ GB) spanning 22 fine-grained resistance exercises, trimmed into 1,108 clean action segments (average 1.09 segments/video).
 - **Strict Video-Level Partitioning:** Zero source-video overlap across Train ($N=580$), Validation ($N=208$), and Test ($N=236$) sets. All sliding windows ($T=32$ frames) are extracted strictly within individual trimmed action boundaries ($S=16$ train: 13,136 windows; $S=32$ val: 2,075 windows; $S=32$ test: 2,743 windows across 233 valid videos).
 - **Physical Kinematics & Standardization:** 13 anatomically calibrated keypoints from MediaPipe Pose Heavy. Spatial coordinates are centered relative to the mid-hip origin ($p_{\text{hip\_mid}} = \frac{1}{2}(p_{\text{left\_hip}} + p_{\text{right\_hip}})$). Global feature-wise $z$-score normalization statistics $(\mu_{\text{train}}, \sigma_{\text{train}})$ are computed exclusively on the training partition and frozen.
-- **Augmentation Pipeline (SkelGym-Aug):** Dynamic on-the-fly transformations (Bilateral Sagittal Reflection + Gravitational 3D Yaw $\pm 15^\circ$ + Proportional Scaling $\pm 10\%$ + Gaussian Sensor Jitter $\sigma=0.008$) execute **strictly in raw physical coordinate space** prior to feature extraction and normalization.
+- **Augmentation Pipeline (SkelGym-Aug):** Dynamic on-the-fly transformations (Bilateral Sagittal Reflection + Gravitational 3D Yaw $\pm 15^\circ$ + Proportional Scaling $\pm 10\%$ + Gaussian Sensor Jitter $\sigma=0.008$) execute in coordinate space on sliding windows prior to online $z$-score feature normalization (with biomechanical angles dynamically recomputed on the transformed coordinate frames).
 - **Backbone Capacity:** All individual model backbones constrained to an identical compact budget ($\approx 350\text{K} \pm 15\%$ parameters), trained strictly from scratch without external pre-training weights.
 - **Ensemble Architecture:** 5-stream cross-paradigm late fusion (1 sequence Transformer on 117-d mix + 4 spatial-temporal AAGCN streams: Bone 3D, Relative 3D, Joint-Motion 3D, Bone-Motion 3D) calibrated via Sequential Least Squares Programming (SLSQP) on the validation partition under simplex constraints ($\sum w_i = 1, w_i \ge 0$).
 
@@ -50,24 +50,24 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 | **T1.7** | LSTM | Angle 3D (Triplets) | 286 | 0.0447 | 2.3879 | 66.41% | 49.33% | 0.4770 | Verified |
 | **T1.8** | LSTM | Angle2 3D (Pair Elevation) | 78 | 0.0889 | 1.7770 | 71.23% | 55.81% | 0.5631 | Verified |
 | **T1.9** | LSTM | Biomechanical Mix (Ours) | 117 | 0.0772 | 1.9226 | 73.93% | 59.28% | 0.5843 | Verified |
-| **T1.1** | LSTM | Raw 2D Coordinates | 26 | 0.1083 | 2.0594 | 67.13% | 52.31% | 0.5179 | Verified |
-| **T1.1** | LSTM | Raw 2D Coordinates | 26 | 0.1083 | 2.0594 | 67.13% | 52.31% | 0.5179 | Verified |
-| **T1.1** | LSTM | Raw 2D Coordinates | 26 | 0.1083 | 2.0594 | 67.13% | 52.31% | 0.5179 | Verified |
-| **T1.1** | LSTM | Raw 2D Coordinates | 26 | 0.1083 | 2.0594 | 67.13% | 52.31% | 0.5179 | Verified |
-| **T1.1** | LSTM | Raw 2D Coordinates | 26 | 0.1083 | 2.0594 | 67.13% | 52.31% | 0.5179 | Verified |
-| **T1.1** | LSTM | Raw 2D Coordinates | 26 | 0.1083 | 2.0594 | 67.13% | 52.31% | 0.5179 | Verified |
-| **T1.1** | LSTM | Raw 2D Coordinates | 26 | 0.1083 | 2.0594 | 67.13% | 52.31% | 0.5179 | Verified |
-| **T1.1** | LSTM | Raw 2D Coordinates | 26 | 0.1083 | 2.0594 | 67.13% | 52.31% | 0.5179 | Verified |
-| **T1.1** | LSTM | Raw 2D Coordinates | 26 | 0.1083 | 2.0594 | 67.13% | 52.31% | 0.5179 | Verified |
-| **T1.1** | LSTM | Raw 2D Coordinates | 26 | 0.1083 | 2.0594 | 67.13% | 52.31% | 0.5179 | Verified |
-| **T1.2** | LSTM | Relative 2D (Mid-Hip) | 26 | 0.1897 | 1.4853 | 71.04% | 56.91% | 0.5616 | Verified |
-| **T1.2** | LSTM | Relative 2D (Mid-Hip) | 26 | 0.1897 | 1.4853 | 71.04% | 56.91% | 0.5616 | Verified |
-| **T1.2** | LSTM | Relative 2D (Mid-Hip) | 26 | 0.1897 | 1.4853 | 71.04% | 56.91% | 0.5616 | Verified |
-| **T1.2** | LSTM | Relative 2D (Mid-Hip) | 26 | 0.1897 | 1.4853 | 71.04% | 56.91% | 0.5616 | Verified |
-| **T1.2** | LSTM | Relative 2D (Mid-Hip) | 26 | 0.1897 | 1.4853 | 71.04% | 56.91% | 0.5616 | Verified |
-| **T1.2** | LSTM | Relative 2D (Mid-Hip) | 26 | 0.1897 | 1.4853 | 71.04% | 56.91% | 0.5616 | Verified |
-| **T1.2** | LSTM | Relative 2D (Mid-Hip) | 26 | 0.1897 | 1.4853 | 71.04% | 56.91% | 0.5616 | Verified |
-| **T1.2** | LSTM | Relative 2D (Mid-Hip) | 26 | 0.1897 | 1.4853 | 71.04% | 56.91% | 0.5616 | Verified |
+| **T1.10** | BiLSTM | Raw 2D Coordinates | 26 | 0.0538 | 2.2651 | 69.40% | 52.46% | 0.5161 | Verified |
+| **T1.11** | BiLSTM | Relative 2D (Mid-Hip) | 26 | 0.2316 | 1.3567 | 72.10% | 55.56% | 0.5455 | Verified |
+| **T1.12** | BiLSTM | Angle 2D (Triplets) | 286 | 0.0093 | 3.8922 | 65.06% | 51.11% | 0.4855 | Verified |
+| **T1.13** | BiLSTM | Angle2 2D (Pairs) | 78 | 0.1037 | 2.0297 | 66.36% | 52.83% | 0.5133 | Verified |
+| **T1.14** | BiLSTM | Raw 3D Coordinates | 39 | 0.0496 | 2.2351 | 67.71% | 52.61% | 0.5208 | Verified |
+| **T1.15** | BiLSTM | Relative 3D (Mid-Hip) | 39 | 0.1182 | 1.7121 | 70.89% | 56.07% | 0.5470 | Verified |
+| **T1.16** | BiLSTM | Angle 3D (Triplets) | 286 | 0.0893 | 2.3198 | 63.23% | 50.35% | 0.4753 | Verified |
+| **T1.17** | BiLSTM | Angle2 3D (Pair Elevation) | 78 | 0.0263 | 2.2670 | 71.42% | 58.62% | 0.5759 | Verified |
+| **T1.18** | BiLSTM | Biomechanical Mix (Ours) | 117 | 0.0794 | 1.7916 | 74.41% | 58.66% | 0.5735 | Verified |
+| **T1.19** | Transformer | Raw 2D Coordinates | 26 | 0.3871 | 1.1225 | 77.69% | 62.41% | 0.6190 | Verified |
+| **T1.20** | Transformer | Relative 2D (Mid-Hip) | 26 | 0.4396 | 1.2003 | 76.43% | 64.16% | 0.6281 | Verified |
+| **T1.21** | Transformer | Angle 2D (Triplets) | 286 | 0.3663 | 1.4473 | 71.95% | 57.49% | 0.5408 | Verified |
+| **T1.22** | Transformer | Angle2 2D (Pairs) | 78 | 0.3863 | 1.4641 | 70.60% | 57.09% | 0.5598 | Verified |
+| **T1.23** | Transformer | Raw 3D Coordinates | 39 | 0.4260 | 1.0587 | 79.13% | 65.11% | 0.6339 | Verified |
+| **T1.24** | Transformer | Relative 3D (Mid-Hip) | 39 | 0.3763 | 1.1425 | 78.31% | 64.86% | 0.6301 | Verified |
+| **T1.25** | Transformer | Angle 3D (Triplets) | 286 | 0.4132 | 1.5141 | 68.77% | 56.36% | 0.5545 | Verified |
+| **T1.26** | Transformer | Angle2 3D (Pair Elevation) | 78 | 0.3973 | 1.3702 | 72.67% | 60.41% | 0.5860 | Verified |
+| **T1.27** | **Transformer** | **Biomechanical Mix (Ours)** | **117** | 0.4274 | 1.2714 | 74.55% | 63.91% | 0.6240 | **Verified** |
 
 ---
 
@@ -132,14 +132,14 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 
 | Architecture / Configuration | Fusion Protocol & Weighting | Val Win Acc (%) | Val Vid Acc (%) | Test Win Acc (%) | Test Macro F1 | Test Vid Acc (%) | Video Macro F1 | Status |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Transformer Mix (117-d)** | Single Sequence Backbone | 68.68% ± 2.50% | 78.83% ± 2.86% | 68.68% ± 2.50% | 0.6763 ± 0.0163 | 78.83% ± 2.86% | 0.7728 ± 0.0187 | Verified |
-| **AAGCN Bone Stream (Bone 3D)** | Single Graph Backbone | 78.78% ± 2.03% | 73.39% ± 0.00% | 65.34% ± 1.55% | 0.6507 ± 0.0055 | 73.39% ± 0.00% | 0.7304 ± 0.0000 | Verified |
-| **Four-Stream AAGCN** | 4 Streams Unified Graph | 79.40% ± 0.00% | 78.11% ± 0.00% | 68.67% ± 1.42% | 0.6799 ± 0.0112 | 78.40% ± 0.99% | 0.7777 ± 0.0121 | Verified |
-| **Hard Majority Voting** | Discrete mode over class predictions | — | — | 70.25% ± 1.05% | 0.6959 ± 0.0085 | 6.01% ± 0.00% | 0.0052 ± 0.0000 | Verified |
-| **Uniform Average Soft Voting** | Equal weights: $w_i = 1/5 = 0.20$ | — | — | 72.46% ± 0.66% | 0.7132 ± 0.0089 | 81.69% ± 0.66% | 0.8043 ± 0.0123 | Verified |
-| **Accuracy-Weighted Soft Voting** | Validation accuracy weights ($w_i \propto \text{Acc}_i^{\text{val}}$) | — | — | 72.26% ± 0.68% | 0.7108 ± 0.0074 | 81.26% ± 0.89% | 0.7999 ± 0.0181 | Verified |
-| **SkelGym-Lite (2 Models)** | Trans + Bone AAGCN (SLSQP Calibrated) | — | — | 69.08% ± 1.37% | 0.6822 ± 0.0066 | 78.11% ± 0.74% | 0.7742 ± 0.0129 | Verified |
-| **SkelGym-Full (5 Streams)** | **Trans + 4 AAGCN (SLSQP Calibrated)** | — | — | 71.19% ± 0.16% | 0.7012 ± 0.0032 | 80.11% ± 0.89% | 0.7826 ± 0.0237 | **Verified** |
+| **Transformer Mix (117-d)** | Single Sequence Backbone | 76.32% ± 2.10% | 79.07% ± 2.01% | 66.27% ± 2.75% | 0.6544 ± 0.0264 | 75.54% ± 3.81% | 0.7430 ± 0.0430 | Verified |
+| **AAGCN Bone Stream (Bone 3D)** | Single Graph Backbone | 78.83% ± 0.33% | 80.68% ± 0.48% | 66.59% ± 1.43% | 0.6587 ± 0.0181 | 75.82% ± 2.62% | 0.7543 ± 0.0305 | Verified |
+| **Four-Stream AAGCN** | 4 Streams Unified Graph | 79.98% ± 0.27% | 81.96% ± 1.39% | 67.61% ± 1.46% | 0.6688 ± 0.0205 | 77.54% ± 3.33% | 0.7632 ± 0.0387 | Verified |
+| **Hard Majority Voting** | Discrete mode over class predictions | — | — | 70.62% ± 0.54% | 0.7017 ± 0.0064 | 81.40% ± 0.99% | 0.8037 ± 0.0126 | Verified |
+| **Uniform Average Soft Voting** | Equal weights: $w_i = 1/5 = 0.20$ | — | — | 73.05% ± 0.75% | 0.7226 ± 0.0053 | 82.83% ± 1.14% | 0.8143 ± 0.0184 | Verified |
+| **Accuracy-Weighted Soft Voting** | Validation accuracy weights ($w_i \propto \text{Acc}_i^{\text{val}}$) | — | — | 72.56% ± 0.88% | 0.7183 ± 0.0062 | 81.97% ± 1.14% | 0.8063 ± 0.0210 | Verified |
+| **SkelGym-Lite (2 Models)** | Trans + Bone AAGCN (SLSQP Calibrated) | — | — | 68.26% ± 0.66% | 0.6732 ± 0.0067 | 77.68% ± 1.55% | 0.7694 ± 0.0103 | Verified |
+| **SkelGym-Full (5 Streams)** | **Trans + 4 AAGCN (SLSQP Calibrated)** | — | — | 69.73% ± 1.10% | 0.6881 ± 0.0072 | 78.83% ± 0.66% | 0.7807 ± 0.0126 | **Verified** |
 
 ---
 
@@ -187,7 +187,7 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 | Model Architecture | Window Test Acc [95% CI] | Window Macro F1 [95% CI] | Video Consensus Acc [95% CI] | Video Macro F1 [95% CI] | Status |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **LSTM (Mix 117-d)** | 59.29% [52.85%, 65.51%] | 0.5670 [0.5078, 0.6281] | 68.81% [63.09%, 74.68%] | 0.6656 [0.6054, 0.7275] | Verified |
-| **LSTM (Mix 117-d)** | 59.29% [52.85%, 65.51%] | 0.5670 [0.5078, 0.6281] | 68.81% [63.09%, 74.68%] | 0.6656 [0.6054, 0.7275] | Verified |
+| **BiLSTM (Mix 117-d)** | 60.44% [53.62%, 66.61%] | 0.5733 [0.5109, 0.6324] | 67.93% [61.79%, 73.39%] | 0.6429 [0.5763, 0.7049] | Verified |
 | **ST-GCN (Rel 3D)** | 58.83% [52.77%, 64.61%] | 0.5505 [0.4895, 0.6085] | 67.01% [60.94%, 72.97%] | 0.6349 [0.5638, 0.7011] | Verified |
 | **Transformer (Mix 117-d)** | 71.55% [64.67%, 77.99%] | 0.6822 [0.6239, 0.7438] | 81.98% [76.81%, 86.70%] | 0.7835 [0.7254, 0.8429] | Verified |
 | **AAGCN (Bone 3D)** | 65.40% [58.93%, 71.64%] | 0.6369 [0.5780, 0.6907] | 73.32% [67.81%, 78.97%] | 0.7199 [0.6672, 0.7755] | Verified |
@@ -206,10 +206,10 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 | **bench press** | 0.3523 | 0.6458 | 0.4559 | 96 | 0.5625 | 0.6429 | 0.6000 | 14 | Verified |
 | **chest fly machine** | 0.9419 | 0.9878 | 0.9643 | 82 | 0.8750 | 0.8750 | 0.8750 | 8 | Verified |
 | **deadlift** | 0.2410 | 0.5970 | 0.3433 | 67 | 0.6000 | 0.9000 | 0.7200 | 10 | Verified |
-| **bench press** | 0.3523 | 0.6458 | 0.4559 | 96 | 0.5625 | 0.6429 | 0.6000 | 14 | Verified |
+| **decline bench press** | 0.5347 | 0.5746 | 0.5540 | 134 | 0.5000 | 0.6250 | 0.5556 | 8 | Verified |
 | **hammer curl** | 0.5745 | 0.3354 | 0.4235 | 161 | 0.8000 | 0.2857 | 0.4211 | 14 | Verified |
 | **hip thrust** | 0.8782 | 0.5805 | 0.6990 | 236 | 0.8889 | 0.8889 | 0.8889 | 9 | Verified |
-| **bench press** | 0.3523 | 0.6458 | 0.4559 | 96 | 0.5625 | 0.6429 | 0.6000 | 14 | Verified |
+| **incline bench press** | 0.7778 | 0.6447 | 0.7050 | 76 | 0.7500 | 0.3333 | 0.4615 | 9 | Verified |
 | **lat pulldown** | 0.6013 | 0.9500 | 0.7364 | 100 | 0.7222 | 1.0000 | 0.8387 | 13 | Verified |
 | **lateral raise** | 0.9091 | 0.9032 | 0.9061 | 155 | 1.0000 | 1.0000 | 1.0000 | 15 | Verified |
 | **leg extension** | 0.9921 | 1.0000 | 0.9960 | 125 | 1.0000 | 1.0000 | 1.0000 | 13 | Verified |
@@ -217,7 +217,7 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 | **plank** | 0.7442 | 0.5714 | 0.6465 | 56 | 0.3333 | 0.5000 | 0.4000 | 2 | Verified |
 | **pull Up** | 0.9104 | 0.7439 | 0.8188 | 82 | 1.0000 | 0.7000 | 0.8235 | 10 | Verified |
 | **push-up** | 0.7611 | 0.9885 | 0.8600 | 87 | 0.8571 | 1.0000 | 0.9231 | 12 | Verified |
-| **deadlift** | 0.2410 | 0.5970 | 0.3433 | 67 | 0.6000 | 0.9000 | 0.7200 | 10 | Verified |
+| **romanian deadlift** | 0.5109 | 0.3219 | 0.3950 | 146 | 0.6667 | 0.3333 | 0.4444 | 6 | Verified |
 | **russian twist** | 0.9173 | 0.8905 | 0.9037 | 137 | 1.0000 | 1.0000 | 1.0000 | 6 | Verified |
 | **shoulder press** | 0.6900 | 0.4539 | 0.5476 | 152 | 0.7000 | 0.5385 | 0.6087 | 13 | Verified |
 | **squat** | 0.9193 | 0.8613 | 0.8894 | 238 | 1.0000 | 1.0000 | 1.0000 | 15 | Verified |
@@ -255,7 +255,7 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | **ST-GCN (Rel 3D) (Deyzel baseline)** | 67.49% | 77.78% | 82.42% | 88.89% | 0.8901 | Verified |
 | **LSTM (Mix 117-d)** | 63.89% | 77.78% | 78.83% | 87.04% | 0.8746 | Verified |
-| **LSTM (Mix 117-d)** | 63.89% | 77.78% | 78.83% | 87.04% | 0.8746 | Verified |
+| **BiLSTM (Mix 117-d)** | 62.38% | 79.63% | 76.75% | 90.74% | 0.9119 | Verified |
 | **AAGCN (Bone 3D)** | 74.67% | 94.44% | 87.15% | 94.44% | 0.9443 | Verified |
 | **Transformer (Mix 117-d)** | 85.82% | 96.30% | 95.27% | 96.30% | 0.9615 | Verified |
 | **SkelGym-Lite (Transformer + Bone)** | 82.80% | 96.30% | 94.14% | 96.30% | 0.9615 | Verified |

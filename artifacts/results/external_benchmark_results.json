@@ -1,0 +1,60 @@
+{
+  "models": {
+    "ST-GCN (Rel 3D) (Deyzel baseline)": {
+      "open_win_acc": 67.49,
+      "open_vid_acc": 77.78,
+      "closed_win_acc": 82.42,
+      "closed_vid_acc": 88.89,
+      "closed_vid_f1": 0.8901
+    },
+    "ST-GCN (Rel 3D)": {
+      "open_win_acc": 67.49,
+      "open_vid_acc": 77.78,
+      "closed_win_acc": 82.42,
+      "closed_vid_acc": 88.89,
+      "closed_vid_f1": 0.8901
+    },
+    "LSTM (Mix 117-d)": {
+      "open_win_acc": 63.89,
+      "open_vid_acc": 77.78,
+      "closed_win_acc": 78.83,
+      "closed_vid_acc": 87.04,
+      "closed_vid_f1": 0.8746
+    },
+    "BiLSTM (Mix 117-d)": {
+      "open_win_acc": 62.38,
+      "open_vid_acc": 79.63,
+      "closed_win_acc": 76.75,
+      "closed_vid_acc": 90.74,
+      "closed_vid_f1": 0.9119
+    },
+    "AAGCN (Bone 3D)": {
+      "open_win_acc": 74.67,
+      "open_vid_acc": 94.44,
+      "closed_win_acc": 87.15,
+      "closed_vid_acc": 94.44,
+      "closed_vid_f1": 0.9443
+    },
+    "Transformer (Mix 117-d)": {
+      "open_win_acc": 85.82,
+      "open_vid_acc": 96.3,
+      "closed_win_acc": 95.27,
+      "closed_vid_acc": 96.3,
+      "closed_vid_f1": 0.9615
+    },
+    "SkelGym-Lite (Transformer + Bone)": {
+      "open_win_acc": 82.8,
+      "open_vid_acc": 96.3,
+      "closed_win_acc": 94.14,
+      "closed_vid_acc": 96.3,
+      "closed_vid_f1": 0.9615
+    },
+    "SkelGym-Full (Transformer + 4 AAGCN)": {
+      "open_win_acc": 84.5,
+      "open_vid_acc": 98.15,
+      "closed_win_acc": 93.95,
+      "closed_vid_acc": 98.15,
+      "closed_vid_f1": 0.9782
+    }
+  }
+}

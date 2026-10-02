@@ -57,18 +57,22 @@ def format_f1_mean_sd(mean_val: Any, sd_val: Any, fmt: str = ".4f") -> str:
     except (ValueError, TypeError):
         return str(mean_val)
 
-def clean_key(s: str) -> str:
-    return s.replace("*", "").replace("$", "").replace("\\", "").strip().lower()
+def normalize_key(s: str) -> str:
+    s = re.sub(r"[\*\$#_`\\]", "", s)
+    s = s.replace("–", "-").replace("—", "-")
+    s = re.sub(r"\s+", " ", s)
+    return s.strip().lower()
 
 def update_table_rows(content: str, table_title_substr: str, row_updates: Dict[str, List[str]]) -> str:
     """
     Finds table by header substring and updates lines where the first column matches key.
+    Uses strict exact normalized-key matching (no substring matching).
     """
     lines = content.splitlines()
     in_target_table = False
     new_lines = []
 
-    clean_row_updates = {clean_key(k): (k, v) for k, v in row_updates.items()}
+    norm_row_updates = {normalize_key(k): (k, v) for k, v in row_updates.items()}
 
     for line in lines:
         if line.startswith("## ") and table_title_substr.lower() in line.lower():
@@ -81,17 +85,9 @@ def update_table_rows(content: str, table_title_substr: str, row_updates: Dict[s
         if in_target_table and line.strip().startswith("|"):
             parts = [p.strip() for p in line.split("|")]
             if len(parts) >= 3:
-                first_col = clean_key(parts[1])
-                matched_orig_key = None
-
-                # Exact or substring match
-                for ck, (orig_k, vals) in clean_row_updates.items():
-                    if ck == first_col or ck in first_col or first_col in ck:
-                        matched_orig_key = orig_k
-                        break
-
-                if matched_orig_key:
-                    new_vals = row_updates[matched_orig_key]
+                first_col = normalize_key(parts[1])
+                if first_col in norm_row_updates:
+                    orig_k, new_vals = norm_row_updates[first_col]
                     for i, val in enumerate(new_vals):
                         if i + 1 < len(parts) - 1:
                             parts[i + 1] = str(val)
@@ -301,10 +297,12 @@ def update_table6_fusion(content: str, json_path: Path) -> str:
     # 1. Transformer Mix
     if "Transformer Mix (Aug)" in individual:
         t_m = individual["Transformer Mix (Aug)"]
+        val_w = format_mean_sd(t_m.get("val_win_acc_mean"), t_m.get("val_win_acc_sd")) if "val_win_acc_mean" in t_m else "—"
+        val_v = format_mean_sd(t_m.get("val_vid_acc_mean"), t_m.get("val_vid_acc_sd")) if "val_vid_acc_mean" in t_m else "—"
         updates["Transformer Mix (117-d)"] = [
             "**Transformer Mix (117-d)**", "Single Sequence Backbone",
-            format_mean_sd(t_m.get("val_win_acc_mean", t_m.get("win_acc_mean")), t_m.get("val_win_acc_sd", t_m.get("win_acc_sd"))),
-            format_mean_sd(t_m.get("val_vid_acc_mean", t_m.get("vid_acc_mean")), t_m.get("val_vid_acc_sd", t_m.get("vid_acc_sd"))),
+            val_w,
+            val_v,
             format_mean_sd(t_m.get("win_acc_mean"), t_m.get("win_acc_sd")),
             format_f1_mean_sd(t_m.get("win_f1_mean"), t_m.get("win_f1_sd")),
             format_mean_sd(t_m.get("vid_acc_mean"), t_m.get("vid_acc_sd")),
@@ -313,21 +311,31 @@ def update_table6_fusion(content: str, json_path: Path) -> str:
         ]
 
     # 2. AAGCN Bone Stream
-    updates["AAGCN Bone Stream (Bone 3D)"] = [
-        "**AAGCN Bone Stream (Bone 3D)**", "Single Graph Backbone",
-        "78.78% ± 2.03%", "73.39% ± 0.00%",
-        "65.34% ± 1.55%", "0.6507 ± 0.0055",
-        "73.39% ± 0.00%", "0.7304 ± 0.0000",
-        "Verified"
-    ]
+    aagcn_bone = individual.get("AAGCN Bone (Aug)", individual.get("AAGCN_bone_3d", {}))
+    if aagcn_bone:
+        val_w = format_mean_sd(aagcn_bone.get("val_win_acc_mean"), aagcn_bone.get("val_win_acc_sd")) if "val_win_acc_mean" in aagcn_bone else "—"
+        val_v = format_mean_sd(aagcn_bone.get("val_vid_acc_mean"), aagcn_bone.get("val_vid_acc_sd")) if "val_vid_acc_mean" in aagcn_bone else "—"
+        updates["AAGCN Bone Stream (Bone 3D)"] = [
+            "**AAGCN Bone Stream (Bone 3D)**", "Single Graph Backbone",
+            val_w,
+            val_v,
+            format_mean_sd(aagcn_bone.get("win_acc_mean"), aagcn_bone.get("win_acc_sd")),
+            format_f1_mean_sd(aagcn_bone.get("win_f1_mean"), aagcn_bone.get("win_f1_sd")),
+            format_mean_sd(aagcn_bone.get("vid_acc_mean"), aagcn_bone.get("vid_acc_sd")),
+            format_f1_mean_sd(aagcn_bone.get("vid_f1_mean"), aagcn_bone.get("vid_f1_sd")),
+            "Verified"
+        ]
 
     # 3. Four-Stream AAGCN
     four_stream = fusion_methods.get("Four-Stream AAGCN (Aug)", {})
     if four_stream and "SLSQP Soft Voting" in four_stream:
         f_m = four_stream["SLSQP Soft Voting"]
+        val_w = format_mean_sd(f_m.get("val_win_acc_mean"), f_m.get("val_win_acc_sd")) if "val_win_acc_mean" in f_m else "—"
+        val_v = format_mean_sd(f_m.get("val_vid_acc_mean"), f_m.get("val_vid_acc_sd")) if "val_vid_acc_mean" in f_m else "—"
         updates["Four-Stream AAGCN"] = [
             "**Four-Stream AAGCN**", "4 Streams Unified Graph",
-            "79.40% ± 0.00%", "78.11% ± 0.00%",
+            val_w,
+            val_v,
             format_mean_sd(f_m.get("win_acc_mean"), f_m.get("win_acc_sd")),
             format_f1_mean_sd(f_m.get("win_f1_mean"), f_m.get("win_f1_sd")),
             format_mean_sd(f_m.get("vid_acc_mean"), f_m.get("vid_acc_sd")),
