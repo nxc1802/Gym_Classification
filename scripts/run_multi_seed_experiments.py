@@ -79,7 +79,18 @@ def get_checkpoint_path(seed: int, model_cfg: Dict[str, str], checkpoint_base: P
             return cand_flat
         return cand_seed_dir
 
-def train_model(seed: int, model_cfg: Dict[str, str], device_str: str, checkpoint_base: Path, epochs: int = 100, force_retrain: bool = False, no_test_eval: bool = False):
+def train_model(
+    seed: int,
+    model_cfg: Dict[str, str],
+    device_str: str,
+    checkpoint_base: Path,
+    epochs: int = 100,
+    force_retrain: bool = False,
+    no_test_eval: bool = False,
+    push_to_hf: bool = False,
+    hf_repo: str = "Cuong2004/gym-exercise-classification",
+    hf_token: Optional[str] = None
+):
     ckpt_path = get_checkpoint_path(seed, model_cfg, checkpoint_base)
     if not force_retrain and ckpt_path.exists():
         print(f"[Seed {seed}] Checkpoint already exists: {ckpt_path.name}, skipping training.")
@@ -121,6 +132,11 @@ def train_model(seed: int, model_cfg: Dict[str, str], device_str: str, checkpoin
     ]
     if no_test_eval:
         cmd.append("--no_test_eval")
+    if push_to_hf:
+        cmd.append("--push_to_hf")
+        cmd.extend(["--hf_repo", hf_repo])
+        if hf_token:
+            cmd.extend(["--hf_token", hf_token])
 
     print(f"\n========================================================")
     print(f"[Seed {seed}] Training {model_cfg['name']} ({aug}) -> {ckpt_path.name}")
@@ -394,7 +410,9 @@ def main():
     parser.add_argument("--skip_train", action="store_true", default=False, help="Skip training and only evaluate")
     parser.add_argument("--force_retrain", action="store_true", default=False, help="Force complete retraining even if checkpoints exist")
     parser.add_argument("--no_test_eval", action="store_true", default=True, help="Disable test evaluation during training to enforce blind protocol")
-    parser.add_argument("--allow_test_eval", action="store_false", dest="no_test_eval", help="Allow test evaluation during training")
+    parser.add_argument("--push_to_hf", action="store_true", default=False, help="Upload checkpoints to Hugging Face Hub")
+    parser.add_argument("--hf_repo", type=str, default="Cuong2004/gym-exercise-classification", help="Hugging Face Model repository ID")
+    parser.add_argument("--hf_token", type=str, default=None, help="Hugging Face authentication token")
     args = parser.parse_args()
 
     if args.device == "auto":
@@ -402,7 +420,7 @@ def main():
     else:
         device_str = args.device
     device = torch.device(device_str)
-    print(f"Running Multi-Seed Evaluation on device: {device} | Seeds: {args.seeds}")
+    print(f"Running Multi-Seed Evaluation on device: {device} | Seeds: {args.seeds} | Push to HF: {args.push_to_hf}")
 
     checkpoint_base = Path(args.checkpoint_dir)
     checkpoint_base.mkdir(parents=True, exist_ok=True)
@@ -415,10 +433,20 @@ def main():
             print(f"========================================================")
             if args.include_baselines:
                 for b in BASELINE_MODELS:
-                    train_model(seed, b, device_str, checkpoint_base, epochs=args.epochs, force_retrain=args.force_retrain, no_test_eval=args.no_test_eval)
+                    train_model(
+                        seed, b, device_str, checkpoint_base,
+                        epochs=args.epochs, force_retrain=args.force_retrain,
+                        no_test_eval=args.no_test_eval, push_to_hf=args.push_to_hf,
+                        hf_repo=args.hf_repo, hf_token=args.hf_token
+                    )
 
             for m in CONSTITUENT_MODELS:
-                train_model(seed, m, device_str, checkpoint_base, epochs=args.epochs, force_retrain=args.force_retrain, no_test_eval=args.no_test_eval)
+                train_model(
+                    seed, m, device_str, checkpoint_base,
+                    epochs=args.epochs, force_retrain=args.force_retrain,
+                    no_test_eval=args.no_test_eval, push_to_hf=args.push_to_hf,
+                    hf_repo=args.hf_repo, hf_token=args.hf_token
+                )
 
     # 2. Evaluation Phase
     results_per_seed = {}

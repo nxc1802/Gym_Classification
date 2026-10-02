@@ -271,7 +271,14 @@ def get_task_hyperparameters(model: str, feature: str, augment: str = "none") ->
         "val_test_stride": 32,
     }
 
-def train_task_subprocess(task: Dict[str, Any], ckpt_path: Path, device: str = "cuda") -> bool:
+def train_task_subprocess(
+    task: Dict[str, Any],
+    ckpt_path: Path,
+    device: str = "cuda",
+    push_to_hf: bool = False,
+    hf_repo: str = "Cuong2004/gym-exercise-classification",
+    hf_token: Optional[str] = None
+) -> bool:
     """Executes training via isolated subprocess."""
     task_ckpt_dir = ckpt_path.parent / task["id"]
     task_ckpt_dir.mkdir(parents=True, exist_ok=True)
@@ -300,6 +307,11 @@ def train_task_subprocess(task: Dict[str, Any], ckpt_path: Path, device: str = "
         "--metadata", task.get("metadata", "Final_dataset_metadata.csv"),
         "--landmark_dir", task.get("landmark_dir", "data/landmarks")
     ]
+    if push_to_hf:
+        cmd.append("--push_to_hf")
+        cmd.extend(["--hf_repo", hf_repo])
+        if hf_token:
+            cmd.extend(["--hf_token", hf_token])
 
     log_dir = Path("outputs/ablation_logs")
     log_dir.mkdir(parents=True, exist_ok=True)
@@ -541,6 +553,9 @@ def main():
     parser.add_argument("--output_dir", type=str, default="outputs", help="Output directory for reports and results")
     parser.add_argument("--force_retrain", action="store_true", help="Force retraining even if checkpoint exists")
     parser.add_argument("--skip_train", action="store_true", help="Skip training phase and only evaluate existing checkpoints")
+    parser.add_argument("--push_to_hf", action="store_true", default=False, help="Upload checkpoints to Hugging Face Hub")
+    parser.add_argument("--hf_repo", type=str, default="Cuong2004/gym-exercise-classification", help="Hugging Face Model repository ID")
+    parser.add_argument("--hf_token", type=str, default=None, help="Hugging Face authentication token")
     args = parser.parse_args()
 
     # Device resolution
@@ -561,7 +576,7 @@ def main():
     )
     print(f"\n========================================================")
     print(f"  SkelGym Augmentation Ablation Suite (Mode: {args.mode.upper()})")
-    print(f"  Total Tasks: {len(tasks)} | Seeds: {args.seeds} | Device: {device_str}")
+    print(f"  Total Tasks: {len(tasks)} | Seeds: {args.seeds} | Device: {device_str} | Push to HF: {args.push_to_hf}")
     print(f"========================================================\n")
 
     # 1. Resolve Checkpoints & Missing Tasks
@@ -585,7 +600,7 @@ def main():
         print(f"\n>>> Launching {len(tasks_to_train)} training tasks with {args.workers} workers <<<\n")
         with ProcessPoolExecutor(max_workers=args.workers) as executor:
             futures = {
-                executor.submit(train_task_subprocess, t, ckpt, device_str): t["id"]
+                executor.submit(train_task_subprocess, t, ckpt, device_str, args.push_to_hf, args.hf_repo, args.hf_token): t["id"]
                 for t, ckpt in tasks_to_train
             }
             for fut in as_completed(futures):

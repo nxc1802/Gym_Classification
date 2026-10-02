@@ -102,17 +102,34 @@ def upload_checkpoints_to_hf(
     last_ckpt_path: Optional[str] = None,
     model_name: str = "model",
     repo_id: str = DEFAULT_MODEL_REPO,
-    token: Optional[str] = None
+    token: Optional[str] = None,
+    subfolder: Optional[str] = None
 ) -> dict:
     """
-    Uploads both 'best' and 'last' checkpoints for a model to Hugging Face Hub.
+    Uploads both 'best' and 'last' checkpoints for a model to Hugging Face Hub,
+    preserving subfolder structures (e.g. checkpoints/seed123/) and pushing
+    corresponding provenance sidecar JSONs when present.
     """
+    def _resolve_repo_path(file_path: Path) -> str:
+        if subfolder:
+            return f"checkpoints/{subfolder.strip('/')}/{file_path.name}"
+        try:
+            rel = file_path.resolve().relative_to(Path("checkpoints").resolve())
+            return f"checkpoints/{rel.as_posix()}"
+        except ValueError:
+            pass
+        for part in file_path.parts:
+            if part.startswith("seed") or part.startswith("ablation"):
+                return f"checkpoints/{part}/{file_path.name}"
+        return f"checkpoints/{file_path.name}"
+
     urls = {}
     if best_ckpt_path and Path(best_ckpt_path).exists():
-        best_name = Path(best_ckpt_path).name
+        best_p = Path(best_ckpt_path)
+        path_in_repo = _resolve_repo_path(best_p)
         url_best = upload_file_to_hf(
-            local_path=best_ckpt_path,
-            path_in_repo=f"checkpoints/{best_name}",
+            local_path=str(best_p),
+            path_in_repo=path_in_repo,
             repo_id=repo_id,
             repo_type="model",
             token=token,
@@ -120,11 +137,31 @@ def upload_checkpoints_to_hf(
         )
         urls["best"] = url_best
 
+        # Also upload provenance sidecar if it exists
+        prov_candidates = [
+            best_p.with_suffix(".provenance.json"),
+            best_p.parent / f"{best_p.stem}.provenance.json",
+            best_p.parent / f"{best_p.name}.provenance.json"
+        ]
+        for prov_p in prov_candidates:
+            if prov_p.exists():
+                prov_repo_path = _resolve_repo_path(prov_p)
+                upload_file_to_hf(
+                    local_path=str(prov_p),
+                    path_in_repo=prov_repo_path,
+                    repo_id=repo_id,
+                    repo_type="model",
+                    token=token,
+                    commit_message=f"Add provenance sidecar for {model_name}"
+                )
+                break
+
     if last_ckpt_path and Path(last_ckpt_path).exists():
-        last_name = Path(last_ckpt_path).name
+        last_p = Path(last_ckpt_path)
+        path_in_repo = _resolve_repo_path(last_p)
         url_last = upload_file_to_hf(
-            local_path=last_ckpt_path,
-            path_in_repo=f"checkpoints/{last_name}",
+            local_path=str(last_p),
+            path_in_repo=path_in_repo,
             repo_id=repo_id,
             repo_type="model",
             token=token,

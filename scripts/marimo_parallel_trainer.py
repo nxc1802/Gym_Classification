@@ -76,7 +76,10 @@ def run_single_model_task(
     status_lock: threading.Lock,
     status_data: Dict[str, Any],
     trigger_log_path: Path,
-    status_file_path: Path
+    status_file_path: Path,
+    push_to_hf: bool = False,
+    hf_repo: str = "Cuong2004/gym-exercise-classification",
+    hf_token: Optional[str] = None
 ) -> Dict[str, Any]:
     seed = task["seed"]
     cfg = task["model_cfg"]
@@ -140,6 +143,11 @@ def run_single_model_task(
         "--in_memory",
         "--no_test_eval"
     ]
+    if push_to_hf:
+        cmd.append("--push_to_hf")
+        cmd.extend(["--hf_repo", hf_repo])
+        if hf_token:
+            cmd.extend(["--hf_token", hf_token])
 
     task_label = f"{name} (Seed {seed})"
     with status_lock:
@@ -231,6 +239,9 @@ def main():
     parser.add_argument("--force_retrain", action="store_true", default=False, help="Force retrain existing checkpoints")
     parser.add_argument("--skip_baselines", action="store_true", default=False, help="Skip baseline models")
     parser.add_argument("--skip_post_pipeline", action="store_true", default=False, help="Skip Phase 2 & 3 evaluation after training")
+    parser.add_argument("--push_to_hf", action="store_true", default=False, help="Upload checkpoints to Hugging Face Hub")
+    parser.add_argument("--hf_repo", type=str, default="Cuong2004/gym-exercise-classification", help="Hugging Face Model repository ID")
+    parser.add_argument("--hf_token", type=str, default=None, help="Hugging Face authentication token")
     args = parser.parse_args()
 
     device_str = "cuda" if args.device == "cuda" or (args.device == "auto" and subprocess.run(["which", "nvidia-smi"], capture_output=True).returncode == 0) else "cpu"
@@ -270,7 +281,7 @@ def main():
     print(f"\n================================================================================")
     print(f"🏋️‍♂️ SKELGYM PARALLEL TRAINING ENGINE INITIALIZED")
     print(f"Total Models to Train: {total_tasks} ({len(models_to_run)} models x {len(args.seeds)} seeds)")
-    print(f"Parallel Workers: {args.parallel} | Target Device: {device_str.upper()} | Epochs: {args.epochs}")
+    print(f"Parallel Workers: {args.parallel} | Target Device: {device_str.upper()} | Epochs: {args.epochs} | Push to HF: {args.push_to_hf}")
     print(f"================================================================================\n", flush=True)
 
     status_data = {
@@ -302,7 +313,10 @@ def main():
                 status_lock,
                 status_data,
                 trigger_log,
-                status_file
+                status_file,
+                args.push_to_hf,
+                args.hf_repo,
+                args.hf_token
             )
             for task in task_queue
         ]

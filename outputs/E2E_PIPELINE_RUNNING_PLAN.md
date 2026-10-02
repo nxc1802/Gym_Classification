@@ -9,6 +9,31 @@
 - **Trạng thái dọn dẹp:** Toàn bộ checkpoints, outputs, và artifacts từ các đợt chạy trước đã được đóng gói an toàn tại `archive_pre_clean_results.tar.gz`. Toàn bộ file kết quả rác, logs cũ đã được dọn sạch.
 - **Tập tin kết quả duy nhất (Source of Truth Template):**
   - 👉 [`outputs/RESULTS_FINAL.md`](file:///Volumes/WorkSpace/Project/Gym_Classification/outputs/RESULTS_FINAL.md): Chứa đầy đủ cấu trúc của toàn bộ 12 bảng biểu trong bài báo, đang ở trạng thái `Pending` chờ điền kết quả tự động sau mỗi phase.
+- **Cơ chế Tự Động Đẩy Checkpoint lên Hugging Face Hub (Zero Local Disk Pressure):**
+  - **Model Hub Repository:** [`Cuong2004/gym-exercise-classification`](https://huggingface.co/Cuong2004/gym-exercise-classification)
+  - **Cấu hình Token xác thực:** Thiết lập biến môi trường trước khi chạy trên server/Marimo:
+    ```bash
+    export HF_TOKEN="hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    ```
+    *(hoặc truyền cờ `--hf_token <TOKEN>` trong câu lệnh)*.
+  - **Cờ kích hoạt:** Bổ sung cờ `--push_to_hf` vào tất cả các lệnh huấn luyện.
+  - **Cơ chế Stream Trực Tiếp:** Ngay khi một mô hình tìm thấy epoch tối ưu, Trainer tự động upload `best_*.pt` kèm sidecar `best_*.provenance.json` (chứa commit SHA, cấu hình seed, siêu tham số) lên HF Hub. Trọng số được lưu trữ vĩnh viễn trên Cloud ngay cả khi container Marimo/GPU bị tắt ngang, hoàn toàn không cần tải checkpoint nặng về máy local.
+- **Dữ Liệu Sẵn Sàng Trên Hugging Face Hub (TUYỆT ĐỐI KHÔNG CẦN Trích Xuất Lại Bằng MediaPipe):**
+  - **Dataset Hub Repository:** [`Cuong2004/gym-exercise-landmarks`](https://huggingface.co/datasets/Cuong2004/gym-exercise-landmarks)
+  - **Lưu ý tối quan trọng:** **KHÔNG CẦN tải video MP4 gốc (10 GB) hay chạy lại MediaPipe từ đầu**. Toàn bộ 1,024 video SkelGym và tập External Benchmark (MM-Fit / Deyzel et al.) đã được trích xuất sẵn tọa độ không gian 3D keypoints chuẩn (`complexity=2`), thẩm định chất lượng và đóng gói sẵn trên Hugging Face.
+  - **Tải nhanh Dataset SkelGym (Landmarks & Metadata):**
+    ```bash
+    # Cách 1: Lệnh CLI chính thức (tự động tải và giải nén vào data/landmarks/)
+    python run.py pull-landmarks-hf --dest_dir data/landmarks
+
+    # Cách 2: Bootstrap tự động kiểm tra và tải các file còn thiếu
+    python scripts/bootstrap_artifacts.py
+    ```
+  - **Tải nhanh External Dataset (MM-Fit / Deyzel Benchmark):**
+    ```bash
+    # Tự động tải landmarks MediaPipe của tập external MM-Fit vào data_external/mmfit/landmarks/
+    python scripts/sync_mmfit_hf.py --action download_landmarks
+    ```
 - **Quy chuẩn khoa học bắt buộc xuyên suốt:**
   1. **Strict Video-Level Partition:** Phân chia 6:2:2 ở cấp độ source-video (1,024 videos; train: 580, val: 208, test: 236; 233 valid test videos $\ge 32$ frames) — tuyệt đối không overlap video giữa các split.
   2. **Zero Test-Data Leakage:** Thống kê chuẩn hóa (z-score mean/std) tính độc quyền trên tập **Train**. Trọng số ensemble soft-voting (SLSQP) và Stacking meta-classifier tối ưu hóa độc quyền trên tập **Validation**. Tập **Test** chỉ dùng một lần duy nhất để đánh giá cuối cùng.
@@ -20,22 +45,24 @@
 ## 🗺️ Bản Đồ Vận Hành 9 Pha Toàn Diện (Full Workflow Diagram)
 
 ```
-[Phase 0: Pre-flight Verification & Test Suite] (52/52 tests)
+[Phase 0: Data Pull from HF, Verification & Test Suite] (51/51 tests)
                       │
                       ▼
 [Phase 1A: Feature Representation Screening (Paper Table 1)]
   └── 27 Thí nghiệm: 3 Kiến trúc (LSTM, BiLSTM, Transformer) x 9 Feature Spaces (Seed 42)
-      * Mục đích: Chứng minh ưu thế vượt trội của Biomechanical Mix 117-d
+      * Hỗ trợ --push_to_hf stream checkpoint thẳng lên Hugging Face Hub
                       │
                       ▼
 [Phase 1B: Multi-Seed Core Backbone Training (Paper Table 4, 5, 7)]
   ├── 5 Baseline Models (Seed 42, 123, 3407): ST-GCN, LSTM, BiLSTM, Trans Clean, AAGCN Clean
   └── 5 Augmented Streams (Seed 42, 123, 3407): Trans Mix, AAGCN Bone, Rel, J-Mot, B-Mot
+      * Hỗ trợ --push_to_hf stream checkpoint thẳng lên Hugging Face Hub
                       │
                       ▼
 [Phase 1C: Multi-Seed Augmentation Ablation Studies (Paper Table 2 & Table 3)]
   ├── Table 2: Leave-One-Out (LOO) Suite (7 configs x 3 seeds)
   └── Table 3: Single-Component Suite (8 configs x 3 seeds)
+      * Hỗ trợ --push_to_hf stream checkpoint thẳng lên Hugging Face Hub
                       │
                       ▼
 [Phase 2: Multi-Seed Reference Artifacts Freeze]
@@ -71,13 +98,19 @@
 
 ## 🚀 Hướng Dẫn Thực Thi Chi Tiết Từng Pha
 
-### Phase 0: Thẩm Định Môi Trường & Chạy Test Suite
+### Phase 0: Chuẩn Bị Dữ Liệu, Thẩm Định Môi Trường & Chạy Test Suite
 
 ```bash
-# 1. Chạy toàn bộ test suite (Bảo đảm 52/52 tests PASSED)
+# 1. Tải nhanh toàn bộ landmarks SkelGym từ Hugging Face (Bỏ qua nếu data/landmarks đã có sẵn)
+python run.py pull-landmarks-hf --dest_dir data/landmarks
+
+# 2. Tải landmarks external MM-Fit từ Hugging Face (Dành cho Phase 7)
+python scripts/sync_mmfit_hf.py --action download_landmarks
+
+# 3. Chạy toàn bộ test suite (Bảo đảm 51/51 tests PASSED)
 pytest tests/ -v
 
-# 2. Sinh báo cáo thống kê dataset
+# 4. Sinh báo cáo thống kê dataset
 python run.py data-report --output_dir outputs/test_report
 ```
 
@@ -103,10 +136,10 @@ python run.py data-report --output_dir outputs/test_report
 3. **Transformer (9 feature spaces):**
    - `T1.19` $\to$ `T1.27`: Tương tự cho Transformer trên 9 không gian đặc trưng (`T1.27` là cấu hình chiến thắng).
 
-#### Lệnh Thực Thi:
+#### Lệnh Thực Thi (Tự động stream checkpoints lên HF Hub):
 ```bash
-# Chạy toàn bộ 27 thí nghiệm Table 1 (Hỗ trợ 4 workers song song):
-python server_runner.py --table table1 --workers 4
+# Chạy toàn bộ 27 thí nghiệm Table 1 (Hỗ trợ 4 workers song song, tự động upload lên HF):
+python server_runner.py --table table1 --workers 4 --push_to_hf
 ```
 *Ghi chú:* 27 checkpoint của đợt huấn luyện này cũng có thể được phục hồi tức thì từ file `archive_pre_clean_results.tar.gz` nếu cần đối chiếu kết quả nhanh.
 
@@ -114,7 +147,7 @@ python server_runner.py --table table1 --workers 4
 
 ### Phase 1B: Huấn Luyện Multi-Seed Core Backbones (Paper Table 4, 5, 7 — 10 Mô Hình $\times$ 3 Seeds)
 
-*Mục tiêu:* Huấn luyện 10 mô hình chủ lực trên **3 seeds (42, 123, 3407)** làm nền tảng cho các bộ ghép Ensemble.
+*Mục tiêu:* Huấn luyện 10 mô hình chủ lực trên **3 seeds (42, 123, 3407)** làm nền tảng cho các bộ ghép Ensemble, tự động stream weights lên HF Hub.
 
 #### Danh Mục 10 Mô Hình:
 1. **5 Baselines (Không Augmentation):**
@@ -132,25 +165,29 @@ python server_runner.py --table table1 --workers 4
 
 #### Lệnh Thực Thi:
 ```bash
-python scripts/run_multi_seed_experiments.py --device auto --epochs 100 --include_baselines --seeds 42 123 3407
+# Cách 1: Chạy tuần tự / đa luồng chuẩn (Kèm cờ --push_to_hf)
+python scripts/run_multi_seed_experiments.py --device auto --epochs 100 --include_baselines --seeds 42 123 3407 --push_to_hf
+
+# Cách 2: Chạy song song tốc độ cao trên Marimo Server (4 workers song song, tự động keepalive & push HF)
+python scripts/marimo_parallel_trainer.py --parallel 4 --epochs 100 --push_to_hf
 ```
 
 ---
 
 ### Phase 1C: Multi-Seed Augmentation Ablation Studies (Paper Table 2 & Table 3)
 
-*Mục tiêu:* Phân tích định lượng sự cần thiết và đóng góp độc lập của từng phép tăng cường trên `Transformer mix` qua 3 seeds (42, 123, 3407).
+*Mục tiêu:* Phân tích định lượng sự cần thiết và đóng góp độc lập của từng phép tăng cường trên `Transformer mix` qua 3 seeds (42, 123, 3407), tự động upload lên HF Hub.
 
 #### 1. Leave-One-Out (LOO) Suite (Table 2 — 7 Cấu hình $\times$ 3 Seeds):
 - Full 5-op, -Mirror, -Yaw, -Scale, -TimeWarp (SkelGym-Aug 4-op), -Jitter, Clean Baseline.
 ```bash
-python scripts/run_augmentation_experiments.py --mode loo --seeds 42 123 3407 --force_retrain
+python scripts/run_augmentation_experiments.py --mode loo --seeds 42 123 3407 --force_retrain --push_to_hf
 ```
 
 #### 2. Single-Component Isolation Suite (Table 3 — 8 Cấu hình $\times$ 3 Seeds):
 - Clean Baseline, +Mirror, +Yaw, +Scale, +TimeWarp, +Jitter, SkelGym-Aug 4-op, Full 5-op.
 ```bash
-python scripts/run_augmentation_experiments.py --mode single --seeds 42 123 3407 --force_retrain
+python scripts/run_augmentation_experiments.py --mode single --seeds 42 123 3407 --force_retrain --push_to_hf
 ```
 
 ---
@@ -226,12 +263,12 @@ cd paper && pdflatex paper.tex && bibtex paper && pdflatex paper.tex && pdflatex
 
 ## 📊 Ma Trận Tiến Độ Tổng Thể (Master Tracking Matrix)
 
-| Giai Đoạn | Nội Dung | Số Mô Hình / Thí Nghiệm | Tệp Script Chính | Trạng Thái |
+| Giai Đoạn | Nội Dung | Số Mô Hình / Thí Nghiệm | Tệp Script Chính & Cờ HF Hub | Trạng Thái |
 | :--- | :--- | :---: | :--- | :---: |
-| **Phase 0** | Unit Test Suite & Data Report | 52 tests | `pytest tests/` | **PASSED (52/52)** |
-| **Phase 1A** | Feature Representation Screening | 27 models (Seed 42) | `server_runner.py --table table1` | **Pending** |
-| **Phase 1B** | Multi-Seed Core Backbone Training | 10 models x 3 seeds | `run_multi_seed_experiments.py` | **Pending** |
-| **Phase 1C** | Multi-Seed Augmentation Ablation | 15 configs x 3 seeds | `run_augmentation_experiments.py` | **Pending** |
+| **Phase 0** | Unit Test Suite & Data Report | 51 tests | `pytest tests/` | **PASSED (51/51)** |
+| **Phase 1A** | Feature Representation Screening | 27 models (Seed 42) | `server_runner.py --table table1 --push_to_hf` | **Pending** |
+| **Phase 1B** | Multi-Seed Core Backbone Training | 10 models x 3 seeds | `run_multi_seed_experiments.py --push_to_hf` | **Pending** |
+| **Phase 1C** | Multi-Seed Augmentation Ablation | 15 configs x 3 seeds | `run_augmentation_experiments.py --push_to_hf` | **Pending** |
 | **Phase 2** | Freeze Reference & SLSQP Weights | 3 seeds | `freeze_reference_artifacts.py` | **Pending** |
 | **Phase 3** | Late Fusion Comparison (5 methods) | 4 ensembles x 3 seeds | `evaluate_local_ensemble.py` | **Pending** |
 | **Phase 4** | Statistical Testing & Bootstrap CI | 1,000 resamples | `compute_statistical_tests.py` | **Pending** |
