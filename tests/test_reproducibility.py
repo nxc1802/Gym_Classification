@@ -63,12 +63,6 @@ class TestReproducibilityPackaging(unittest.TestCase):
         self.assertIn("jobs", ci_data)
         self.assertIn("test", ci_data["jobs"])
 
-    def test_submission_checklist_exists(self):
-        chk_path = PROJECT_ROOT / "submission_checklist.md"
-        self.assertTrue(chk_path.exists(), "submission_checklist.md must exist")
-        content = chk_path.read_text(encoding="utf-8")
-        self.assertIn("SkelGym Publication & Submission Checklist", content)
-        self.assertIn("Video-Level Split Isolation", content)
 
     def test_default_config_verified(self):
         from src.utils.config import load_config

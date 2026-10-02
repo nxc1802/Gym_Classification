@@ -583,7 +583,9 @@ def _compute_train_stats(train_ds: 'GymDataset') -> Tuple[torch.Tensor, torch.Te
         flat = torch.from_numpy(stacked).float()
 
     mean = flat.mean(dim=0, keepdim=True)  # (1, D)
-    std = flat.std(dim=0, keepdim=True) + 1e-7  # (1, D)
+    std = flat.std(dim=0, keepdim=True)  # (1, D)
+    # Prevent division by zero / astronomical noise on constant channels (e.g. root bone with 0 variance)
+    std = torch.where(std < 1e-4, torch.ones_like(std), std)
     return mean, std
 
 def load_normalization_artifact(artifact_path: Union[str, Path]) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -597,6 +599,8 @@ def load_normalization_artifact(artifact_path: Union[str, Path]) -> Tuple[torch.
         mean = mean.unsqueeze(0)
     if std.ndim == 1:
         std = std.unsqueeze(0)
+    # Safeguard zero-std channels
+    std = torch.where(std < 1e-4, torch.ones_like(std), std)
     return mean, std
 
 def save_normalization_artifact(
@@ -612,26 +616,10 @@ def save_normalization_artifact(
 
 def _apply_normalization(ds: 'GymDataset', mean: torch.Tensor, std: torch.Tensor) -> None:
     """
-    Applies z-score normalization in-place to a GymDataset using provided mean/std.
+    Sets z-score normalization parameters on a GymDataset using provided mean/std.
+    Applies normalization consistently on-the-fly in __getitem__ to prevent double-normalization.
     """
-    if ds.in_memory and ds.tensor_samples is not None:
-        # In-memory tensor: normalize directly
-        # mean/std shape (1, D), tensor_samples shape (N, T, D)
-        ds.tensor_samples = (ds.tensor_samples - mean.unsqueeze(0)) / std.unsqueeze(0)
-    elif ds.samples is not None:
-        for i, s in enumerate(ds.samples):
-            if isinstance(s, tuple):
-                continue  # Skip branch samples for now
-            if isinstance(s, np.ndarray):
-                m = mean.squeeze(0).numpy()
-                s_np = std.squeeze(0).numpy()
-                ds.samples[i] = ((s - m) / s_np).astype(np.float32)
-
-    # Store stats as attributes for inference
-    ds.train_mean = mean
-    ds.train_std = std
-    ds.norm_mean = mean
-    ds.norm_std = std
+    ds.set_normalization(mean, std)
 
 def get_dataloaders(
     metadata_path: str,
@@ -730,13 +718,9 @@ def get_dataloaders(
             test_ds.norm_mean = train_mean
             test_ds.norm_std = train_std
 
-            if train_ds.augment_method and train_ds.augment_method != "none":
-                train_ds.set_normalization(train_mean, train_std)
-            else:
-                _apply_normalization(train_ds, train_mean, train_std)
-
-            _apply_normalization(val_ds, train_mean, train_std)
-            _apply_normalization(test_ds, train_mean, train_std)
+            train_ds.set_normalization(train_mean, train_std)
+            val_ds.set_normalization(train_mean, train_std)
+            test_ds.set_normalization(train_mean, train_std)
 
     pin_mem = torch.cuda.is_available()
     persistent = (num_workers > 0)

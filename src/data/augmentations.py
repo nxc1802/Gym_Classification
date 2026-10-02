@@ -138,6 +138,13 @@ class LandmarkAugmenter:
             for j in range(num_joints):
                 x_jit[..., j * stride: j * stride + 3] += torch.randn_like(x[..., j * stride: j * stride + 3]) * self.jitter_sigma
             return x_jit
+        elif dim == 39:
+            noise = torch.randn_like(x) * self.jitter_sigma
+            x_jit = x + noise
+            # If root joint (e.g. nose in bone_3d or bone_motion_3d) is identically zero, preserve exact 0.0
+            if x[..., :3].abs().max() < 1e-6:
+                x_jit[..., :3] = 0.0
+            return x_jit
         else:
             noise = torch.randn_like(x) * self.jitter_sigma
             return x + noise
