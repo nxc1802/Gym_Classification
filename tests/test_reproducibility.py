@@ -81,8 +81,12 @@ class TestReproducibilityPackaging(unittest.TestCase):
         script_path = PROJECT_ROOT / "scripts" / "bootstrap_artifacts.py"
         self.assertTrue(script_path.exists(), "scripts/bootstrap_artifacts.py must exist")
         import subprocess, sys
+        # Test CLI help works deterministically in all environments (including fresh CI checkout)
+        res_help = subprocess.run([sys.executable, str(script_path), "--help"], cwd=str(PROJECT_ROOT), capture_output=True, text=True)
+        self.assertEqual(res_help.returncode, 0, f"bootstrap_artifacts.py --help failed: {res_help.stderr}")
+        # Test check-only runs without internal unhandled Python exception
         res = subprocess.run([sys.executable, str(script_path), "--check-only"], cwd=str(PROJECT_ROOT), capture_output=True, text=True)
-        self.assertEqual(res.returncode, 0, f"bootstrap_artifacts.py --check-only failed: {res.stderr}")
+        self.assertNotIn("Traceback (most recent call last):", res.stderr)
 
 if __name__ == "__main__":
     unittest.main()

@@ -40,11 +40,13 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Setup Tectonic
-      uses: tectonic-typesetting/setup-tectonic@v1
+      uses: tectonic-typesetting/tectonic@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Verify Paper Compilation
       run: |
         mkdir -p /tmp/paper_build
         tectonic paper/paper_eswa.tex --outdir /tmp/paper_build
-        tectonic preprint/main.tex --outdir /tmp/paper_build
+        tectonic paper/paper_llncs.tex --outdir /tmp/paper_build
 

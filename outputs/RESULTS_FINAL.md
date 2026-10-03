@@ -236,13 +236,13 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 
 | Model Architecture | Parameters | FLOPs per Window | RTX PRO 6000 (CUDA) | Apple M4 (MPS) | Apple M4 (CPU) | Status |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Transformer Mix (117-d)** | 185K | 10.70 MFLOPs | 0.50 ms (1999 FPS) | 1.24 ms (809 FPS) | 0.42 ms (2406 FPS) | Verified |
-| **AAGCN Joint Stream** | 377K | 202.86 MFLOPs | 1.01 ms (987 FPS) | 1.89 ms (530 FPS) | 0.90 ms (1115 FPS) | Verified |
-| **AAGCN Bone Stream** | 377K | 202.86 MFLOPs | 1.02 ms (976 FPS) | 1.72 ms (581 FPS) | 0.88 ms (1138 FPS) | Verified |
-| **AAGCN Joint-Motion Stream** | 377K | 202.86 MFLOPs | 1.01 ms (990 FPS) | 1.90 ms (527 FPS) | 1.02 ms (978 FPS) | Verified |
-| **AAGCN Bone-Motion Stream** | 377K | 202.86 MFLOPs | 1.02 ms (980 FPS) | 1.90 ms (527 FPS) | 1.03 ms (975 FPS) | Verified |
-| **SkelGym-Lite (Transformer + Bone)** | 562K | 213.56 MFLOPs | 1.66 ms (603 FPS) | 2.55 ms (393 FPS) | 1.49 ms (671 FPS) | Verified |
-| **SkelGym-Full (Transformer + 4 AAGCN)** | **1.69M** | 822.14 MFLOPs | 4.65 ms (215 FPS) | 5.86 ms (171 FPS) | 3.96 ms (253 FPS) | **Verified** |
+| **Transformer Mix (117-d)** | 400K | 10.70 MFLOPs | 0.50 ms (1999 FPS) | 1.24 ms (809 FPS) | 0.42 ms (2406 FPS) | Verified |
+| **AAGCN Joint Stream** | 378K | 202.86 MFLOPs | 1.01 ms (987 FPS) | 1.89 ms (530 FPS) | 0.90 ms (1115 FPS) | Verified |
+| **AAGCN Bone Stream** | 378K | 202.86 MFLOPs | 1.02 ms (976 FPS) | 1.72 ms (581 FPS) | 0.88 ms (1138 FPS) | Verified |
+| **AAGCN Joint-Motion Stream** | 378K | 202.86 MFLOPs | 1.01 ms (990 FPS) | 1.90 ms (527 FPS) | 1.02 ms (978 FPS) | Verified |
+| **AAGCN Bone-Motion Stream** | 378K | 202.86 MFLOPs | 1.02 ms (980 FPS) | 1.90 ms (527 FPS) | 1.03 ms (975 FPS) | Verified |
+| **SkelGym-Lite (Transformer + Bone)** | 778K | 213.56 MFLOPs | 1.66 ms (603 FPS) | 2.55 ms (393 FPS) | 1.49 ms (671 FPS) | Verified |
+| **SkelGym-Full (Transformer + 4 AAGCN)** | **1.91M** | 822.14 MFLOPs | 4.65 ms (215 FPS) | 5.86 ms (171 FPS) | 3.96 ms (253 FPS) | **Verified** |
 
 ---
 
