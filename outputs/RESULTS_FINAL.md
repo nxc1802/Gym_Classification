@@ -260,3 +260,15 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 | **Transformer (Mix 117-d)** | 55.47% | 61.11% | 83.71% | 85.19% | 0.8092 | Verified |
 | **SkelGym-Lite (Transformer + Bone)** | 63.55% | 66.67% | 79.95% | 81.48% | 0.7433 | Verified |
 | **SkelGym-Full (Transformer + 4 AAGCN)** | 66.86% | 74.07% | 95.90% | 100.00% | 1.0000 | **Verified** |
+
+---
+
+## Table 13: Strong External Baseline — BlockGCN (CVPR 2024 Adapted) (Paper Benchmark Table)
+
+*Objective:* External benchmark comparison against BlockGCN (CVPR 2024), faithfully adapted to 33 MediaPipe joints ($V=33$, $T=32$, $M=1$, $C=22$, joint-only stream), trained strictly from scratch across 3 independent seeds ($42, 123, 3407$).  
+*Execution Command:* `python scripts/run_blockgcn_baseline.py --config configs/external/blockgcn_original_33j_32f.yaml --device cuda --push_to_hf`
+
+| Model Architecture | Input Representation | Parameters | FLOPs / MACs | Window Test Acc (%) | Window Macro F1 | Video Consensus Acc (%) | Video Macro F1 | Status |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **BlockGCN (CVPR 2024 Adapted)** | 33 Raw MediaPipe XYZ (Joint-only) | 1,352,102 | 525.27 MFLOPs | 54.90% ± 0.76% | 0.5542 ± 0.0031 | 71.05% ± 0.40% | 0.6977 ± 0.0120 | **Verified** |
+
