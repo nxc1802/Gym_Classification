@@ -347,10 +347,12 @@ def run_full_training(config: Dict[str, Any], args: argparse.Namespace, device: 
                 from src.utils.hf_hub import upload_checkpoints_to_hf, upload_file_to_hf
                 logger.info(f"[HF Hub] Uploading Seed {seed} checkpoints...")
                 upload_checkpoints_to_hf(
-                    checkpoint_dir=str(checkpoint_dir),
+                    best_ckpt_path=str(trainer.best_checkpoint_path),
+                    last_ckpt_path=str(trainer.last_checkpoint_path),
                     model_name=f"BlockGCN_seed{seed}",
                     repo_id=config["hf_sync"].get("repo_id", "Cuong2004/gym-exercise-classification"),
-                    token=args.hf_token
+                    token=args.hf_token,
+                    subfolder="external"
                 )
                 upload_file_to_hf(
                     local_path=str(cm_path),
