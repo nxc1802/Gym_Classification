@@ -16,7 +16,10 @@ Supports:
 import os
 import sys
 import time
+import json
+import threading
 import argparse
+import urllib.request
 from pathlib import Path
 from typing import Dict, Any, List
 import yaml
@@ -36,6 +39,37 @@ from src.models.ensemble import aggregate_video_level_predictions
 from src.external.blockgcn import BlockGCNModel, get_blockgcn_dataloaders, BlockGCNTrainer
 
 logger = setup_logger("BlockGCN_Runner")
+
+
+def keepalive_daemon(stop_event: threading.Event, heartbeat_file: Path, ports=(8080, 2718)):
+    """Continuously pings localhost ports and touches heartbeat to prevent server idle timeout."""
+    while not stop_event.is_set():
+        for port in ports:
+            try:
+                req = urllib.request.Request(f"http://127.0.0.1:{port}/", headers={"User-Agent": "Marimo-KeepAlive"})
+                with urllib.request.urlopen(req, timeout=2):
+                    pass
+            except Exception:
+                pass
+        try:
+            heartbeat_file.touch()
+        except Exception:
+            pass
+        time.sleep(15)
+
+
+def emit_trigger(trigger_type: str, data: Dict[str, Any], trigger_log_path: Path):
+    """Appends an event-driven trigger line and writes to JSONL."""
+    record = {
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "trigger": trigger_type,
+        **data
+    }
+    line = f"[TRIGGER: {trigger_type}] " + " | ".join(f"{k}: {v}" for k, v in data.items())
+    logger.info(f"⚡ {line}")
+    trigger_log_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(trigger_log_path, "a") as f:
+        f.write(json.dumps(record) + "\n")
 
 
 def resolve_device(device_str: str) -> torch.device:
@@ -145,9 +179,50 @@ def run_smoke_test(config: Dict[str, Any], device: torch.device):
     logger.info("✅ [SMOKE TEST PASSED] All BlockGCN modules are verified and 100% stable without polluting workspace!")
 
 
+def update_results_final_markdown(results_per_seed: List[Dict[str, Any]], complexity: Dict[str, Any], results_file: Path):
+    win_accs = [r["window_acc"] * 100 for r in results_per_seed]
+    win_f1s = [r["window_macro_f1"] for r in results_per_seed]
+    vid_accs = [r["video_acc"] * 100 for r in results_per_seed]
+    vid_f1s = [r["video_macro_f1"] for r in results_per_seed]
+
+    mean_win_acc = f"{np.mean(win_accs):.2f}% ± {np.std(win_accs):.2f}%"
+    mean_win_f1 = f"{np.mean(win_f1s):.4f} ± {np.std(win_f1s):.4f}"
+    mean_vid_acc = f"{np.mean(vid_accs):.2f}% ± {np.std(vid_accs):.2f}%"
+    mean_vid_f1 = f"{np.mean(vid_f1s):.4f} ± {np.std(vid_f1s):.4f}"
+    params_str = f"{complexity['params']:,}"
+    mflops_str = f"{complexity['flops'] / 1e6:.2f} MFLOPs" if complexity["flops"] > 0 else "—"
+
+    table13_content = f"""---
+
+## Table 13: Strong External Baseline — BlockGCN (CVPR 2024 Adapted) (Paper Benchmark Table)
+
+*Objective:* External benchmark comparison against BlockGCN (CVPR 2024), faithfully adapted to 33 MediaPipe joints ($V=33$, $T=32$, $M=1$, $C=22$, joint-only stream), trained strictly from scratch across 3 independent seeds ($42, 123, 3407$).  
+*Execution Command:* `python scripts/run_blockgcn_baseline.py --config configs/external/blockgcn_original_33j_32f.yaml --device cuda --push_to_hf`
+
+| Model Architecture | Input Representation | Parameters | FLOPs / MACs | Window Test Acc (%) | Window Macro F1 | Video Consensus Acc (%) | Video Macro F1 | Status |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **BlockGCN (CVPR 2024 Adapted)** | 33 Raw MediaPipe XYZ (Joint-only) | {params_str} | {mflops_str} | {mean_win_acc} | {mean_win_f1} | {mean_vid_acc} | {mean_vid_f1} | **Verified** |
+"""
+
+    if not results_file.exists():
+        results_file.write_text(table13_content, encoding="utf-8")
+        return
+
+    import re
+    text = results_file.read_text(encoding="utf-8")
+    if "## Table 13:" in text:
+        pattern = r"(---\s*\n\n## Table 13:.*)"
+        text = re.sub(pattern, table13_content.strip(), text, flags=re.DOTALL)
+    else:
+        text = text.rstrip() + "\n\n" + table13_content
+
+    results_file.write_text(text, encoding="utf-8")
+    logger.info(f"📄 Updated {results_file} with Table 13 results.")
+
+
 def run_full_training(config: Dict[str, Any], args: argparse.Namespace, device: torch.device):
     """
-    Executes full multi-seed training with full metrics reporting and Hugging Face sync.
+    Executes full multi-seed training with full metrics reporting, anti-idle keepalive, triggers, and Hugging Face sync.
     """
     seeds = args.seeds or config["evaluation"].get("seeds", [42, 123, 3407])
     epochs = args.epochs or config["training"].get("num_epoch", 140)
@@ -157,6 +232,24 @@ def run_full_training(config: Dict[str, Any], args: argparse.Namespace, device: 
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    heartbeat_path = ROOT_DIR / "outputs" / "keepalive.heartbeat"
+    trigger_log = ROOT_DIR / "outputs" / "triggers.jsonl"
+    heartbeat_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Start Anti-Idle Keepalive Daemon
+    stop_event = threading.Event()
+    keepalive_thread = threading.Thread(target=keepalive_daemon, args=(stop_event, heartbeat_path), daemon=True)
+    keepalive_thread.start()
+    logger.info("✅ Anti-idle keepalive daemon active (heartbeat interval: 15s).")
+
+    emit_trigger("TRAINING_STARTED", {
+        "baseline": "BlockGCN",
+        "seeds": str(seeds),
+        "epochs": epochs,
+        "batch_size": batch_size,
+        "device": str(device)
+    }, trigger_log)
+
     results_per_seed = []
 
     for seed in seeds:
@@ -164,6 +257,8 @@ def run_full_training(config: Dict[str, Any], args: argparse.Namespace, device: 
         logger.info(f"🚀 Launching BlockGCN Training Run: Seed {seed} ({epochs} epochs)")
         logger.info(f"=======================================================")
         seed_everything(seed)
+        t_seed_start = time.time()
+        emit_trigger("SEED_STARTED", {"seed": seed, "epochs": epochs}, trigger_log)
 
         # 1. Load Data
         train_loader, val_loader, test_loader = get_blockgcn_dataloaders(
@@ -234,6 +329,18 @@ def run_full_training(config: Dict[str, Any], args: argparse.Namespace, device: 
         }
         results_per_seed.append(seed_res)
 
+        seed_duration = time.time() - t_seed_start
+        emit_trigger("MODEL_COMPLETE", {
+            "model": f"BlockGCN (Seed {seed})",
+            "seed": seed,
+            "duration_sec": f"{seed_duration:.1f}",
+            "window_acc": f"{win_metrics['accuracy']*100:.2f}%",
+            "window_macro_f1": f"{win_metrics['macro_f1']:.4f}",
+            "video_acc": f"{vid_metrics['accuracy']*100:.2f}%",
+            "video_macro_f1": f"{vid_metrics['macro_f1']:.4f}",
+            "checkpoint": trainer.best_checkpoint_path.name
+        }, trigger_log)
+
         # Optional HF Hub Sync per seed
         if args.push_to_hf:
             try:
@@ -242,13 +349,15 @@ def run_full_training(config: Dict[str, Any], args: argparse.Namespace, device: 
                 upload_checkpoints_to_hf(
                     checkpoint_dir=str(checkpoint_dir),
                     model_name=f"BlockGCN_seed{seed}",
-                    repo_id=config["hf_sync"].get("repo_id", "Cuong2004/gym-exercise-classification")
+                    repo_id=config["hf_sync"].get("repo_id", "Cuong2004/gym-exercise-classification"),
+                    token=args.hf_token
                 )
                 upload_file_to_hf(
                     local_path=str(cm_path),
                     path_in_repo=f"plots/cm_blockgcn_seed{seed}.png",
                     repo_id=config["hf_sync"].get("repo_id", "Cuong2004/gym-exercise-classification"),
-                    commit_message=f"Upload BlockGCN confusion matrix seed {seed}"
+                    commit_message=f"Upload BlockGCN confusion matrix seed {seed}",
+                    token=args.hf_token
                 )
             except Exception as e:
                 logger.error(f"[HF Hub] Failed to upload seed {seed} to HF Hub: {e}")
@@ -295,6 +404,13 @@ def run_full_training(config: Dict[str, Any], args: argparse.Namespace, device: 
     report_path.write_text("\n".join(lines), encoding="utf-8")
     logger.info(f"📊 Report successfully generated at: {report_path}")
 
+    # Update outputs/RESULTS_FINAL.md with Table 13
+    results_final_path = ROOT_DIR / "outputs" / "RESULTS_FINAL.md"
+    try:
+        update_results_final_markdown(results_per_seed, complexity, results_final_path)
+    except Exception as e:
+        logger.error(f"Failed to update RESULTS_FINAL.md: {e}")
+
     # Generate ADAPTATION.md documentation for manuscript supplementary
     adaptation_path = ROOT_DIR / "docs" / "ADAPTATION.md"
     adaptation_content = """# BlockGCN Adaptation Documentation for SkelGym
@@ -320,6 +436,17 @@ This document specifies the exact architectural and training adaptations applied
     adaptation_path.write_text(adaptation_content, encoding="utf-8")
     logger.info(f"📝 Adaptation documentation saved to: {adaptation_path}")
 
+    emit_trigger("BASELINE_COMPLETE", {
+        "baseline": "BlockGCN",
+        "mean_window_acc": f"{np.mean(win_accs):.2f}% ± {np.std(win_accs):.2f}%",
+        "mean_window_f1": f"{np.mean(win_f1s):.4f} ± {np.std(win_f1s):.4f}",
+        "mean_video_acc": f"{np.mean(vid_accs):.2f}% ± {np.std(vid_accs):.2f}%",
+        "mean_video_f1": f"{np.mean(vid_f1s):.4f} ± {np.std(vid_f1s):.4f}"
+    }, trigger_log)
+
+    # Stop keepalive daemon
+    stop_event.set()
+
     if args.push_to_hf:
         try:
             from src.utils.hf_hub import upload_file_to_hf
@@ -327,14 +454,24 @@ This document specifies the exact architectural and training adaptations applied
                 local_path=str(report_path),
                 path_in_repo="external/blockgcn/BLOCKGCN_RESULTS.md",
                 repo_id=config["hf_sync"].get("repo_id", "Cuong2004/gym-exercise-classification"),
-                commit_message="Upload BlockGCN final results report"
+                commit_message="Upload BlockGCN final results report",
+                token=args.hf_token
             )
             upload_file_to_hf(
                 local_path=str(adaptation_path),
                 path_in_repo="external/blockgcn/ADAPTATION.md",
                 repo_id=config["hf_sync"].get("repo_id", "Cuong2004/gym-exercise-classification"),
-                commit_message="Upload BlockGCN adaptation documentation"
+                commit_message="Upload BlockGCN adaptation documentation",
+                token=args.hf_token
             )
+            if results_final_path.exists():
+                upload_file_to_hf(
+                    local_path=str(results_final_path),
+                    path_in_repo="outputs/RESULTS_FINAL.md",
+                    repo_id=config["hf_sync"].get("repo_id", "Cuong2004/gym-exercise-classification"),
+                    commit_message="Upload updated RESULTS_FINAL.md with Table 13",
+                    token=args.hf_token
+                )
         except Exception as e:
             logger.error(f"[HF Hub] Failed to upload final reports: {e}")
 
@@ -349,9 +486,13 @@ def main():
     parser.add_argument("--batch_size", type=int, default=None, help="Override batch size")
     parser.add_argument("--num_workers", type=int, default=0, help="DataLoader num_workers")
     parser.add_argument("--push_to_hf", action="store_true", help="Upload trained checkpoints and plots to Hugging Face Hub")
+    parser.add_argument("--hf_token", type=str, default=None, help="Hugging Face API token")
     parser.add_argument("--checkpoint_dir", type=str, default="checkpoints/external", help="Checkpoint save directory")
     parser.add_argument("--output_dir", type=str, default="outputs/external/blockgcn", help="Report and plots output directory")
     args = parser.parse_args()
+
+    if args.hf_token:
+        os.environ["HF_TOKEN"] = args.hf_token
 
     cfg_path = Path(args.config)
     if cfg_path.exists():

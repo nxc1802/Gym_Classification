@@ -276,9 +276,9 @@ class BlockGCNTrainer:
             else:
                 logits = self.model(X)
 
-            probs = F.softmax(logits, dim=1).cpu().numpy()
+            probs = F.softmax(logits, dim=1).float().cpu().numpy()
             all_probs.append(probs)
-            all_targets.extend(y.numpy().tolist())
+            all_targets.extend(y.cpu().numpy().tolist())
 
         y_prob = np.concatenate(all_probs, axis=0)
         y_pred = np.argmax(y_prob, axis=1)
