@@ -49,7 +49,7 @@ By abstracting raw video frames into sparse 3D joint trajectories on edge hardwa
 1. **Curated Multi-Source Landmark Benchmark:** Curates and releases 1,024 multi-camera in-the-wild videos spanning 22 resistance exercises across three provenance streams with strict 6:2:2 video-level partitioning (zero source-video overlap), eliminating temporal data leakage prevalent in prior benchmarks.
 2. **117-dimensional Biomechanical Compound Representation:** Fuses 3D relative joint coordinates ($39$-d) with pairwise directional elevation angles ($78$-d), reducing dimensionality by $59.1\%$ compared to combinatorial $3$-joint triplets ($\binom{13}{3} = 286$-d) while resolving multicollinearity, eliminating gradient singularities at joint lockouts, and retaining scale-invariant directional orientation.
 3. **Empirically Selected Augmentation Configuration (SkelGym-Aug):** Systematically investigates a candidate pool of five established skeletal augmentation operators (bilateral sagittal reflection, gravitational yaw rotation, proportional scaling, temporal time warping, and sensor jitter). Through multi-seed Leave-One-Out (LOO) ablation, we demonstrate that temporal warping disrupts exercise cadence and degrades accuracy, leading to an empirically selected 4-operator configuration that boosts generalization while preserving exercise biomechanics. Applied strictly on-the-fly during training forward passes (zero test-time corruption).
-4. **Cross-Paradigm Fusion, Rigorous Benchmarking, and Real-Time Edge Deployment:** Couples custom lightweight backbones ($\approx 350\text{K}$ parameters per stream, trained from scratch) spanning self-attention Transformers and 4-Stream AAGCNs via validation-calibrated SLSQP soft voting, achieving **$69.73\% \pm 1.10\%$** window accuracy, **$78.83\% \pm 0.66\%$** video consensus accuracy (Video Macro F1: **$0.7807 \pm 0.0126$**, Window Macro F1: **$0.6881 \pm 0.0072$**), and ultra-low edge latency (**$0.42\text{--}4.33\text{ ms}$** on host CPU, **$0.08\text{--}0.54\text{ ms}$** on CUDA) for privacy-aware deployment.
+4. **Cross-Paradigm Fusion, Rigorous Benchmarking, and Real-Time Edge Deployment:** Couples custom lightweight backbones ($\approx 350\text{K}$ parameters per stream, trained from scratch) spanning self-attention Transformers and 4-Stream AAGCNs via validation-calibrated SLSQP soft voting, achieving **$69.73\% \pm 1.10\%$** window accuracy, **$78.83\% \pm 0.66\%$** video consensus accuracy (Video Macro F1: **$0.7807 \pm 0.0126$**, Window Macro F1: **$0.6881 \pm 0.0072$**), and ultra-low edge latency (**$0.42\text{--}3.96\text{ ms}$** on host CPU, **$0.50\text{--}4.65\text{ ms}$** on CUDA) for privacy-aware deployment.
 
 ---
 
@@ -64,14 +64,14 @@ Evaluated on **$2,743$ held-out test windows** across **$233$ out-of-sample test
 | **ST-GCN Baseline** (Rel 3D) | 350K | 101.43 MFLOPs | 54.76% (n=1) | 0.5240 | 63.09% (n=1) | 0.5993 |
 | **LSTM Baseline** (Mix 117-d) | 396K | 7.42 MFLOPs | 57.64% (n=1) | 0.5676 | 67.38% (n=1) | 0.6580 |
 | **BiLSTM Baseline** (Mix 117-d) | 402K | 14.84 MFLOPs | 61.25% (n=1) | 0.6015 | 68.67% (n=1) | 0.6830 |
-| **AAGCN Baseline** (Bone 3D) | 378K | 101.43 MFLOPs | 59.50% (n=1) | 0.5960 | 69.53% (n=1) | 0.6904 |
-| **SkelGym-Aug AAGCN** (Bone 3D) | 378K | 101.43 MFLOPs | 66.59% $\pm$ 1.43% | 0.6587 $\pm$ 0.0181 | 75.82% $\pm$ 2.62% | 0.7543 $\pm$ 0.0305 |
-| **Transformer Mix** (Clean) | 400K | 12.50 MFLOPs | 63.40% (n=1) | 0.6218 | 74.25% (n=1) | 0.7304 |
-| **SkelGym-Aug Transformer** (Mix) | 400K | 12.50 MFLOPs | 66.27% $\pm$ 2.75% | 0.6544 $\pm$ 0.0264 | 75.54% $\pm$ 3.81% | 0.7430 ± 0.0430 |
-| **Two-Stream AAGCN** (Aug) | 756K | 202.86 MFLOPs | 67.26% $\pm$ 1.41% | 0.6652 $\pm$ 0.0198 | 77.11% $\pm$ 3.33% | 0.7580 $\pm$ 0.0432 |
-| **Four-Stream AAGCN** (Aug) | 1.51M | 405.71 MFLOPs | 67.61% $\pm$ 1.46% | 0.6688 $\pm$ 0.0205 | 77.54% $\pm$ 3.33% | 0.7632 $\pm$ 0.0387 |
-| **SkelGym-Lite** (Transformer + Bone) | **778K** | **113.93 MFLOPs** | **68.26% $\pm$ 0.66%** | **0.6732 $\pm$ 0.0067** | **77.68% $\pm$ 1.55%** | **0.7694 $\pm$ 0.0103** |
-| **SkelGym-Full** (Cross-Paradigm Ensemble) | **1.91M** | **418.21 MFLOPs** | **69.73% $\pm$ 1.10%** | **0.6881 $\pm$ 0.0072** | **78.83% $\pm$ 0.66%** | **0.7807 $\pm$ 0.0126** |
+| **AAGCN Baseline** (Bone 3D) | 378K | 202.86 MFLOPs | 59.50% (n=1) | 0.5960 | 69.53% (n=1) | 0.6904 |
+| **SkelGym-Aug AAGCN** (Bone 3D) | 378K | 202.86 MFLOPs | 66.59% $\pm$ 1.43% | 0.6587 $\pm$ 0.0181 | 75.82% $\pm$ 2.62% | 0.7543 $\pm$ 0.0305 |
+| **Transformer Mix** (Clean) | 400K | 10.70 MFLOPs | 63.40% (n=1) | 0.6218 | 74.25% (n=1) | 0.7304 |
+| **SkelGym-Aug Transformer** (Mix) | 400K | 10.70 MFLOPs | 66.27% $\pm$ 2.75% | 0.6544 $\pm$ 0.0264 | 75.54% $\pm$ 3.81% | 0.7430 ± 0.0430 |
+| **Two-Stream AAGCN** (Aug) | 756K | 405.71 MFLOPs | 67.26% $\pm$ 1.41% | 0.6652 $\pm$ 0.0198 | 77.11% $\pm$ 3.33% | 0.7580 $\pm$ 0.0432 |
+| **Four-Stream AAGCN** (Aug) | 1.51M | 811.44 MFLOPs | 67.61% $\pm$ 1.46% | 0.6688 $\pm$ 0.0205 | 77.54% $\pm$ 3.33% | 0.7632 $\pm$ 0.0387 |
+| **SkelGym-Lite** (Transformer + Bone) | **778K** | **213.56 MFLOPs** | **68.26% $\pm$ 0.66%** | **0.6732 $\pm$ 0.0067** | **77.68% $\pm$ 1.55%** | **0.7694 $\pm$ 0.0103** |
+| **SkelGym-Full** (Cross-Paradigm Ensemble) | **1.91M** | **822.14 MFLOPs** | **69.73% $\pm$ 1.10%** | **0.6881 $\pm$ 0.0072** | **78.83% $\pm$ 0.66%** | **0.7807 $\pm$ 0.0126** |
 
 *Note:* For multi-seed configurations, metrics are reported as $\text{Mean} \pm \text{SD}$ across 3 independent random seeds (42, 123, 3407) under fixed splits and identical protocols. Single-seed baselines are denoted as $(n=1)$.
 

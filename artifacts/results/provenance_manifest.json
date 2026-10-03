@@ -1,13 +1,13 @@
 {
-  "timestamp_utc": "2026-10-03T05:51:18.395469+00:00",
+  "timestamp_utc": "2026-10-03T06:59:20.021377+00:00",
   "git": {
-    "commit": "31eb8369873ca97950313e3e63c0158676afd0d7",
+    "commit": "7e34fea9162c8ce16255d779e9416620d0add103",
     "branch": "main"
   },
   "provenance_commits": {
     "training_commit": "cb288b6",
-    "evaluation_commit": "31eb8369873ca97950313e3e63c0158676afd0d7",
-    "report_generation_commit": "31eb8369873ca97950313e3e63c0158676afd0d7"
+    "evaluation_commit": "7e34fea9162c8ce16255d779e9416620d0add103",
+    "report_generation_commit": "7e34fea9162c8ce16255d779e9416620d0add103"
   },
   "dataset_metadata_sha256": "c2f8c35fb9ddf8aa0b2790ee83ed26befbbd7f5064833d6017ef644092bb6c90",
   "seeds": [
@@ -132,7 +132,7 @@
     },
     "hardware_latency.json": {
       "size_bytes": 1704,
-      "sha256": "88ffd15e5de5612a47c3ec55fa90839612e9e14bd722798a67602a18e76b5d4a"
+      "sha256": "aa5f128e62c71e1d1d62c6c00deec1a8b190099542ed1402fb65a02e85970163"
     },
     "external_benchmark_results.json": {
       "size_bytes": 1607,
