@@ -88,10 +88,7 @@ def update_table_rows(content: str, table_title_substr: str, row_updates: Dict[s
                 first_col = normalize_key(parts[1])
                 if first_col in norm_row_updates:
                     orig_k, new_vals = norm_row_updates[first_col]
-                    for i, val in enumerate(new_vals):
-                        if i + 1 < len(parts) - 1:
-                            parts[i + 1] = str(val)
-                    line = "| " + " | ".join(parts[1:-1]) + " |"
+                    line = "| " + " | ".join(str(v) for v in new_vals) + " |"
 
         new_lines.append(line)
 
@@ -104,7 +101,7 @@ def update_table_rows(content: str, table_title_substr: str, row_updates: Dict[s
 def update_table2_feature_screening(content: str, json_path: Path) -> str:
     """
     Table 2: Feature Representation Benchmark across Sequence Architectures (T1.1 -> T1.27)
-    Columns: Exp ID | Model Architecture | Feature Representation | Dimension | Train Loss | Val Loss | Val Acc (%) | Test Win Acc (%) | Macro F1 | Status
+    Columns: Exp ID | Model Architecture | Feature Representation | Dimension | Train Loss | Train Acc (%) | Val Loss | Val Acc (%) | Val Macro F1 | Test Win Acc (%) | Test Macro F1 | Status
     """
     if not json_path.exists():
         print(f"[Warning] {json_path} not found for Table 2 update.")
@@ -124,16 +121,30 @@ def update_table2_feature_screening(content: str, json_path: Path) -> str:
             continue
         
         # Support both single-seed and multi-seed formats
+        train_loss_raw = r.get("train_loss_mean", r.get("train_loss"))
+        train_loss_str = format_num(train_loss_raw, fmt=".4f", suffix="") if train_loss_raw is not None else "—"
+
+        train_acc_raw = r.get("train_acc_mean", r.get("train_acc"))
+        train_acc_sd = r.get("train_acc_sd")
+        train_acc_str = format_mean_sd(train_acc_raw, train_acc_sd) if train_acc_sd is not None else format_num(train_acc_raw)
+
+        val_loss_raw = r.get("val_loss_mean", r.get("val_loss"))
+        val_loss_str = format_num(val_loss_raw, fmt=".4f", suffix="") if val_loss_raw is not None else "—"
+
         val_acc_str = format_mean_sd(r.get("val_acc_mean"), r.get("val_acc_sd")) if r.get("val_acc_sd") is not None else format_num(r.get("val_acc", 0) * 100 if r.get("val_acc", 0) <= 1.0 else r.get("val_acc"))
+
+        val_f1_mean = r.get("val_macro_f1_mean", r.get("val_macro_f1"))
+        val_f1_sd = r.get("val_macro_f1_sd")
+        val_macro_f1_str = format_f1_mean_sd(val_f1_mean, val_f1_sd) if val_f1_sd is not None else format_f1(val_f1_mean)
+
         test_acc_raw = r.get("test_win_acc_mean", r.get("test_win_acc", r.get("accuracy", 0)))
         test_acc_sd = r.get("test_win_acc_sd")
         test_acc_str = format_mean_sd(test_acc_raw, test_acc_sd) if test_acc_sd is not None else format_num(test_acc_raw * 100 if test_acc_raw <= 1.0 else test_acc_raw)
+
         f1_mean = r.get("macro_f1_mean", r.get("macro_f1"))
         f1_sd = r.get("macro_f1_sd")
         macro_f1_str = format_f1_mean_sd(f1_mean, f1_sd) if f1_sd is not None else format_f1(f1_mean)
         
-        train_loss_str = format_num(r.get("train_loss_mean", r.get("train_loss")), fmt=".4f", suffix="")
-        val_loss_str = format_num(r.get("val_loss_mean", r.get("val_loss")), fmt=".4f", suffix="")
         status_str = r.get("status", "Verified")
 
         updates[eid] = [
@@ -142,8 +153,10 @@ def update_table2_feature_screening(content: str, json_path: Path) -> str:
             r.get('feature_name', r.get('feature', '')),
             str(r.get('dimension', r.get('dim', ''))),
             train_loss_str,
+            train_acc_str,
             val_loss_str,
             val_acc_str,
+            val_macro_f1_str,
             test_acc_str,
             macro_f1_str,
             status_str
@@ -154,7 +167,7 @@ def update_table2_feature_screening(content: str, json_path: Path) -> str:
 def update_table3_graph_streams(content: str, json_path: Path) -> str:
     """
     Table 3: Spatial-Temporal Graph Kinematic Streams (T3.1 -> T3.9)
-    Columns: Exp ID | Model Architecture | Kinematic Stream | Augmentation Protocol | Val Acc (%) | Test Win Acc (%) | Test Vid Acc (%) | Status
+    Columns: Exp ID | Model Architecture | Kinematic Stream | Augmentation Protocol | Train Loss | Train Acc (%) | Val Loss | Val Acc (%) | Val Macro F1 | Test Win Acc (%) | Test Vid Acc (%) | Status
     """
     if not json_path.exists():
         print(f"[Warning] {json_path} not found for Table 3 update.")
@@ -170,9 +183,26 @@ def update_table3_graph_streams(content: str, json_path: Path) -> str:
         if not eid:
             continue
         
+        if eid in ("T3.8", "T3.9"):
+            train_loss_str = "—"
+            train_acc_str = "—"
+        else:
+            train_loss_raw = r.get("train_loss_mean", r.get("train_loss"))
+            train_loss_str = format_num(train_loss_raw, fmt=".4f", suffix="") if train_loss_raw is not None else "—"
+            train_acc_raw = r.get("train_acc_mean", r.get("train_acc"))
+            train_acc_sd = r.get("train_acc_sd")
+            train_acc_str = format_mean_sd(train_acc_raw, train_acc_sd) if train_acc_sd is not None else format_num(train_acc_raw)
+
+        val_loss_raw = r.get("val_loss_mean", r.get("val_loss"))
+        val_loss_str = format_num(val_loss_raw, fmt=".4f", suffix="") if val_loss_raw is not None and val_loss_raw != 0.0 else "—"
+        
         val_acc_raw = r.get("val_acc_mean", r.get("val_acc"))
         val_acc_sd = r.get("val_acc_sd")
         val_acc_str = format_mean_sd(val_acc_raw, val_acc_sd) if val_acc_sd is not None else format_num(val_acc_raw)
+
+        val_f1_raw = r.get("val_macro_f1_mean", r.get("val_macro_f1"))
+        val_f1_sd = r.get("val_macro_f1_sd")
+        val_f1_str = format_f1_mean_sd(val_f1_raw, val_f1_sd) if val_f1_sd is not None else format_f1(val_f1_raw)
         
         win_acc_raw = r.get("test_win_acc_mean", r.get("test_win_acc", r.get("win_acc")))
         win_acc_sd = r.get("test_win_acc_sd", r.get("win_acc_sd"))
@@ -188,7 +218,11 @@ def update_table3_graph_streams(content: str, json_path: Path) -> str:
             r.get('model', ''),
             r.get('stream', r.get('feature', '')),
             r.get("augment", ""),
+            train_loss_str,
+            train_acc_str,
+            val_loss_str,
             val_acc_str,
+            val_f1_str,
             win_acc_str,
             vid_acc_str,
             status_str
@@ -198,7 +232,7 @@ def update_table3_graph_streams(content: str, json_path: Path) -> str:
 def update_table4_loo(content: str, json_path: Path) -> str:
     """
     Table 4: Systematic Leave-One-Out (LOO) Augmentation Ablation on Transformer Mix
-    Columns: Augmentation Configuration | Excluded Operator / Domain | Val Window Acc (%) | Val Loss | Test Window Acc (%) | Test Macro F1 | Delta vs Full | Status
+    Columns: Augmentation Configuration | Excluded Operator / Domain | Val Loss | Val Window Acc (%) | Val Macro F1 | Test Window Acc (%) | Test Macro F1 | Delta vs Full | Status
     """
     if not json_path.exists():
         print(f"[Warning] {json_path} not found for Table 4 update.")
@@ -225,8 +259,9 @@ def update_table4_loo(content: str, json_path: Path) -> str:
     for row_name, (var_key, domain_str, is_winner) in mapping.items():
         if var_key in loo_summary:
             m = loo_summary[var_key]
-            w_acc = format_mean_sd(m.get("val_acc_mean"), m.get("val_acc_std"))
             w_loss = format_num(m.get("val_loss_mean"), fmt=".4f", suffix="")
+            w_acc = format_mean_sd(m.get("val_acc_mean"), m.get("val_acc_std"))
+            w_f1 = format_f1_mean_sd(m.get("val_macro_f1_mean"), m.get("val_macro_f1_std"))
             t_acc = format_mean_sd(m.get("win_acc_mean"), m.get("win_acc_std"))
             t_f1 = format_f1_mean_sd(m.get("win_f1_mean"), m.get("win_f1_std"))
             
@@ -236,8 +271,9 @@ def update_table4_loo(content: str, json_path: Path) -> str:
             updates[row_name] = [
                 f"**{row_name}**",
                 domain_str,
-                w_acc,
                 w_loss,
+                w_acc,
+                w_f1,
                 t_acc,
                 t_f1,
                 delta,
@@ -249,7 +285,7 @@ def update_table4_loo(content: str, json_path: Path) -> str:
 def update_table5_single(content: str, json_path: Path) -> str:
     """
     Table 5: Systematic Single-Component (Individual) Augmentation Study
-    Columns: Augmentation Configuration | Applied Domain / Mechanism | Val Window Acc (%) | Val Loss | Test Window Acc (%) | Test Macro F1 | Delta vs Baseline | Status
+    Columns: Augmentation Configuration | Applied Domain / Mechanism | Val Loss | Val Window Acc (%) | Val Macro F1 | Test Window Acc (%) | Test Macro F1 | Delta vs Baseline | Status
     """
     if not json_path.exists():
         print(f"[Warning] {json_path} not found for Table 5 update.")
@@ -277,8 +313,9 @@ def update_table5_single(content: str, json_path: Path) -> str:
     for row_name, (var_key, domain_str, is_winner) in mapping.items():
         if var_key in single_summary:
             m = single_summary[var_key]
-            w_acc = format_mean_sd(m.get("val_acc_mean"), m.get("val_acc_std"))
             w_loss = format_num(m.get("val_loss_mean"), fmt=".4f", suffix="")
+            w_acc = format_mean_sd(m.get("val_acc_mean"), m.get("val_acc_std"))
+            w_f1 = format_f1_mean_sd(m.get("val_macro_f1_mean"), m.get("val_macro_f1_std"))
             t_acc = format_mean_sd(m.get("win_acc_mean"), m.get("win_acc_std"))
             t_f1 = format_f1_mean_sd(m.get("win_f1_mean"), m.get("win_f1_std"))
             
@@ -288,8 +325,9 @@ def update_table5_single(content: str, json_path: Path) -> str:
             updates[row_name] = [
                 f"**{row_name}**",
                 domain_str,
-                w_acc,
                 w_loss,
+                w_acc,
+                w_f1,
                 t_acc,
                 t_f1,
                 delta,
@@ -301,7 +339,7 @@ def update_table5_single(content: str, json_path: Path) -> str:
 def update_table6_fusion(content: str, json_path: Path) -> str:
     """
     Table 6: Cross-Paradigm Fusion Protocols & Multi-Seed Downstream Evaluation
-    Columns: Architecture / Configuration | Fusion Protocol & Weighting | Val Win Acc (%) | Val Vid Acc (%) | Test Win Acc (%) | Test Macro F1 | Test Vid Acc (%) | Video Macro F1 | Status
+    Columns: Architecture / Configuration | Fusion Protocol & Weighting | Val Win Acc (%) | Val Win F1 | Val Vid Acc (%) | Val Vid F1 | Test Win Acc (%) | Test Win F1 | Test Vid Acc (%) | Test Vid F1 | Status
     """
     if not json_path.exists():
         print(f"[Warning] {json_path} not found for Table 6 update.")
@@ -316,35 +354,32 @@ def update_table6_fusion(content: str, json_path: Path) -> str:
 
     updates = {}
 
+    def extract_row_metrics(m: Dict[str, Any]) -> List[str]:
+        val_w_acc = format_mean_sd(m.get("val_win_acc_mean"), m.get("val_win_acc_sd")) if "val_win_acc_mean" in m else "—"
+        val_w_f1 = format_f1_mean_sd(m.get("val_win_f1_mean"), m.get("val_win_f1_sd")) if "val_win_f1_mean" in m else "—"
+        val_v_acc = format_mean_sd(m.get("val_vid_acc_mean"), m.get("val_vid_acc_sd")) if "val_vid_acc_mean" in m else "—"
+        val_v_f1 = format_f1_mean_sd(m.get("val_vid_f1_mean"), m.get("val_vid_f1_sd")) if "val_vid_f1_mean" in m else "—"
+        test_w_acc = format_mean_sd(m.get("win_acc_mean"), m.get("win_acc_sd"))
+        test_w_f1 = format_f1_mean_sd(m.get("win_f1_mean"), m.get("win_f1_sd"))
+        test_v_acc = format_mean_sd(m.get("vid_acc_mean"), m.get("vid_acc_sd"))
+        test_v_f1 = format_f1_mean_sd(m.get("vid_f1_mean"), m.get("vid_f1_sd"))
+        return [val_w_acc, val_w_f1, val_v_acc, val_v_f1, test_w_acc, test_w_f1, test_v_acc, test_v_f1]
+
     # 1. Transformer Mix
     if "Transformer Mix (Aug)" in individual:
         t_m = individual["Transformer Mix (Aug)"]
-        val_w = format_mean_sd(t_m.get("val_win_acc_mean"), t_m.get("val_win_acc_sd")) if "val_win_acc_mean" in t_m else "—"
-        val_v = format_mean_sd(t_m.get("val_vid_acc_mean"), t_m.get("val_vid_acc_sd")) if "val_vid_acc_mean" in t_m else "—"
         updates["Transformer Mix (117-d)"] = [
             "**Transformer Mix (117-d)**", "Single Sequence Backbone",
-            val_w,
-            val_v,
-            format_mean_sd(t_m.get("win_acc_mean"), t_m.get("win_acc_sd")),
-            format_f1_mean_sd(t_m.get("win_f1_mean"), t_m.get("win_f1_sd")),
-            format_mean_sd(t_m.get("vid_acc_mean"), t_m.get("vid_acc_sd")),
-            format_f1_mean_sd(t_m.get("vid_f1_mean"), t_m.get("vid_f1_sd")),
+            *extract_row_metrics(t_m),
             "Verified"
         ]
 
     # 2. AAGCN Bone Stream
     aagcn_bone = individual.get("AAGCN Bone (Aug)", individual.get("AAGCN_bone_3d", {}))
     if aagcn_bone:
-        val_w = format_mean_sd(aagcn_bone.get("val_win_acc_mean"), aagcn_bone.get("val_win_acc_sd")) if "val_win_acc_mean" in aagcn_bone else "—"
-        val_v = format_mean_sd(aagcn_bone.get("val_vid_acc_mean"), aagcn_bone.get("val_vid_acc_sd")) if "val_vid_acc_mean" in aagcn_bone else "—"
         updates["AAGCN Bone Stream (Bone 3D)"] = [
             "**AAGCN Bone Stream (Bone 3D)**", "Single Graph Backbone",
-            val_w,
-            val_v,
-            format_mean_sd(aagcn_bone.get("win_acc_mean"), aagcn_bone.get("win_acc_sd")),
-            format_f1_mean_sd(aagcn_bone.get("win_f1_mean"), aagcn_bone.get("win_f1_sd")),
-            format_mean_sd(aagcn_bone.get("vid_acc_mean"), aagcn_bone.get("vid_acc_sd")),
-            format_f1_mean_sd(aagcn_bone.get("vid_f1_mean"), aagcn_bone.get("vid_f1_sd")),
+            *extract_row_metrics(aagcn_bone),
             "Verified"
         ]
 
@@ -352,16 +387,9 @@ def update_table6_fusion(content: str, json_path: Path) -> str:
     four_stream = fusion_methods.get("Four-Stream AAGCN (Aug)", {})
     if four_stream and "SLSQP Soft Voting" in four_stream:
         f_m = four_stream["SLSQP Soft Voting"]
-        val_w = format_mean_sd(f_m.get("val_win_acc_mean"), f_m.get("val_win_acc_sd")) if "val_win_acc_mean" in f_m else "—"
-        val_v = format_mean_sd(f_m.get("val_vid_acc_mean"), f_m.get("val_vid_acc_sd")) if "val_vid_acc_mean" in f_m else "—"
         updates["Four-Stream AAGCN"] = [
             "**Four-Stream AAGCN**", "4 Streams Unified Graph",
-            val_w,
-            val_v,
-            format_mean_sd(f_m.get("win_acc_mean"), f_m.get("win_acc_sd")),
-            format_f1_mean_sd(f_m.get("win_f1_mean"), f_m.get("win_f1_sd")),
-            format_mean_sd(f_m.get("vid_acc_mean"), f_m.get("vid_acc_sd")),
-            format_f1_mean_sd(f_m.get("vid_f1_mean"), f_m.get("vid_f1_sd")),
+            *extract_row_metrics(f_m),
             "Verified"
         ]
 
@@ -380,44 +408,26 @@ def update_table6_fusion(content: str, json_path: Path) -> str:
     for method_name, row_label, proto in fusion_specs:
         if skel_full and method_name in skel_full:
             m = skel_full[method_name]
-            val_w = format_mean_sd(m.get("val_win_acc_mean"), m.get("val_win_acc_sd")) if "val_win_acc_mean" in m else "—"
-            val_v = format_mean_sd(m.get("val_vid_acc_mean"), m.get("val_vid_acc_sd")) if "val_vid_acc_mean" in m else "—"
             updates[row_label] = [
                 f"**{row_label}**", proto,
-                val_w, val_v,
-                format_mean_sd(m.get("win_acc_mean"), m.get("win_acc_sd")),
-                format_f1_mean_sd(m.get("win_f1_mean"), m.get("win_f1_sd")),
-                format_mean_sd(m.get("vid_acc_mean"), m.get("vid_acc_sd")),
-                format_f1_mean_sd(m.get("vid_f1_mean"), m.get("vid_f1_sd")),
+                *extract_row_metrics(m),
                 "Verified"
             ]
 
     if skel_lite and "SLSQP Soft Voting" in skel_lite:
         l_m = skel_lite["SLSQP Soft Voting"]
-        val_w = format_mean_sd(l_m.get("val_win_acc_mean"), l_m.get("val_win_acc_sd")) if "val_win_acc_mean" in l_m else "—"
-        val_v = format_mean_sd(l_m.get("val_vid_acc_mean"), l_m.get("val_vid_acc_sd")) if "val_vid_acc_mean" in l_m else "—"
         updates["SkelGym-Lite (2 Models)"] = [
             "**SkelGym-Lite (2 Models)**", "Trans + Bone AAGCN (SLSQP Calibrated)",
-            val_w, val_v,
-            format_mean_sd(l_m.get("win_acc_mean"), l_m.get("win_acc_sd")),
-            format_f1_mean_sd(l_m.get("win_f1_mean"), l_m.get("win_f1_sd")),
-            format_mean_sd(l_m.get("vid_acc_mean"), l_m.get("vid_acc_sd")),
-            format_f1_mean_sd(l_m.get("vid_f1_mean"), l_m.get("vid_f1_sd")),
+            *extract_row_metrics(l_m),
             "Verified"
         ]
 
     # Also map SkelGym-Full (5 Streams) as alias for SLSQP Soft Voting if present in table
     if skel_full and "SLSQP Soft Voting" in skel_full:
         full_m = skel_full["SLSQP Soft Voting"]
-        val_w = format_mean_sd(full_m.get("val_win_acc_mean"), full_m.get("val_win_acc_sd")) if "val_win_acc_mean" in full_m else "—"
-        val_v = format_mean_sd(full_m.get("val_vid_acc_mean"), full_m.get("val_vid_acc_sd")) if "val_vid_acc_mean" in full_m else "—"
         updates["SkelGym-Full (5 Streams)"] = [
             "**SkelGym-Full (5 Streams)**", "Trans + 4 AAGCN (SLSQP Calibrated)",
-            val_w, val_v,
-            format_mean_sd(full_m.get("win_acc_mean"), full_m.get("win_acc_sd")),
-            format_f1_mean_sd(full_m.get("win_f1_mean"), full_m.get("win_f1_sd")),
-            format_mean_sd(full_m.get("vid_acc_mean"), full_m.get("vid_acc_sd")),
-            format_f1_mean_sd(full_m.get("vid_f1_mean"), full_m.get("vid_f1_sd")),
+            *extract_row_metrics(full_m),
             "Verified"
         ]
 
@@ -657,11 +667,11 @@ def verify_results_final(content: str, out_dir: Path, tolerance: float = 0.05) -
             t6_lines = [l for l in content.splitlines() if ("SkelGym-Full (5 Streams)" in l or "SLSQP Soft Voting" in l) and l.strip().startswith("|")]
             if t6_lines:
                 line = t6_lines[0]
-                # Columns: | Exp/Model | Protocol | Val Win | Val Vid | Test Win | Test F1 | Test Vid | Vid F1 | Status |
+                # Columns: | Architecture | Protocol | Val Win Acc | Val Win F1 | Val Vid Acc | Val Vid F1 | Test Win Acc | Test Win F1 | Test Vid Acc | Test Vid F1 | Status |
                 parts = [p.strip() for p in line.split("|")]
-                if len(parts) >= 9:
-                    m_win = re.search(r"(\d+\.\d+)%", parts[5])
-                    m_vid = re.search(r"(\d+\.\d+)%", parts[7])
+                if len(parts) >= 11:
+                    m_win = re.search(r"(\d+\.\d+)%", parts[7])
+                    m_vid = re.search(r"(\d+\.\d+)%", parts[9])
                     if m_win and m_vid:
                         reported_win = float(m_win.group(1))
                         reported_vid = float(m_vid.group(1))
