@@ -58,11 +58,28 @@ class TransformerModel(nn.Module):
         num_layers: int = 3,
         dim_feedforward: int = 192,
         dropout: float = 0.2,
-        pos_type: str = "learnable"
+        pos_type: str = "learnable",
+        variant: str = "standard"
     ):
         super().__init__()
-        self.in_norm = nn.LayerNorm(feat_dim)
-        self.input_proj = nn.Linear(feat_dim, d_model)
+        self.variant = variant
+        if variant == "no_innorm":
+            self.in_norm = nn.Identity()
+            self.input_proj = nn.Linear(feat_dim, d_model)
+        elif variant == "dual_branch":
+            self.in_norm = nn.Identity()
+            self.d_coord = 39
+            self.d_angle = feat_dim - 39
+            d_branch = d_model // 2
+            self.proj_coord = nn.Linear(self.d_coord, d_branch)
+            self.proj_angle = nn.Linear(self.d_angle, d_branch)
+            self.norm_coord = nn.LayerNorm(d_branch)
+            self.norm_angle = nn.LayerNorm(d_branch)
+            self.input_proj = None
+        else:
+            self.in_norm = nn.LayerNorm(feat_dim)
+            self.input_proj = nn.Linear(feat_dim, d_model)
+
         self.input_drop = nn.Dropout(dropout)
 
         if pos_type == "learnable":
@@ -91,8 +108,15 @@ class TransformerModel(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: (B, T, D)
-        x_norm = self.in_norm(x)
-        h = self.input_proj(x_norm)
+        if self.variant == "dual_branch" and x.shape[-1] >= 78:
+            coords = x[..., :self.d_coord]
+            angles = x[..., self.d_coord:]
+            h_coord = self.norm_coord(self.proj_coord(coords))
+            h_angle = self.norm_angle(self.proj_angle(angles))
+            h = torch.cat([h_coord, h_angle], dim=-1)
+        else:
+            x_norm = self.in_norm(x)
+            h = self.input_proj(x_norm)
         h = self.input_drop(h)
         h = self.pos_encoder(h)
         encoded = self.transformer_encoder(h)  # (B, T, d_model)

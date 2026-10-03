@@ -92,7 +92,8 @@ def build_model(
     hidden_dim: Optional[int] = None,
     num_layers: Optional[int] = None,
     nhead: int = 8,
-    dropout: Optional[float] = None
+    dropout: Optional[float] = None,
+    transformer_variant: str = "standard"
 ) -> nn.Module:
     """
     Model Factory instantiating the requested architecture with compatible input dimensions.
@@ -122,7 +123,7 @@ def build_model(
         h_dim = hidden_dim if hidden_dim is not None else 128
         n_layers = num_layers if num_layers is not None else 3
         drop = dropout if dropout is not None else 0.2
-        return TransformerModel(feat_dim=feat_dim, num_classes=num_classes, d_model=h_dim, nhead=nhead, num_layers=n_layers, dim_feedforward=192, dropout=drop)
+        return TransformerModel(feat_dim=feat_dim, num_classes=num_classes, d_model=h_dim, nhead=nhead, num_layers=n_layers, dim_feedforward=192, dropout=drop, variant=transformer_variant)
 
     elif model_type == "STGCN":
         drop = dropout if dropout is not None else 0.3
@@ -544,7 +545,8 @@ def cmd_train(args):
         hidden_dim=args.hidden_dim,
         num_layers=args.num_layers,
         nhead=args.nhead,
-        dropout=args.dropout
+        dropout=args.dropout,
+        transformer_variant=getattr(args, "transformer_variant", "standard")
     )
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     logger.info(f"Initialized {args.model} model. Trainable parameters: {num_params:,}")
@@ -771,18 +773,27 @@ def cmd_evaluate(args):
         return
 
     logger.info(f"Loading checkpoint: {ckpt_path}")
+    weights, _ = load_checkpoint_weights(ckpt_path, device=device)
+    trans_variant = getattr(args, "transformer_variant", "standard")
+    if trans_variant == "standard" and args.model == "Transformer" and isinstance(weights, dict):
+        if "proj_coord.weight" in weights:
+            trans_variant = "dual_branch"
+        elif "in_norm.weight" not in weights:
+            trans_variant = "no_innorm"
+
     model = build_model(
         model_type=args.model,
         feature_method=args.feature,
         num_classes=NUM_CLASSES,
         hidden_dim=args.hidden_dim,
         num_layers=args.num_layers,
-        nhead=args.nhead
+        nhead=args.nhead,
+        transformer_variant=trans_variant
     )
-    weights, _ = load_checkpoint_weights(ckpt_path, device=device)
     model.load_state_dict(weights)
     model.to(device)
 
+    in_mem = getattr(args, "in_memory", True)
     _, val_loader, test_loader = get_dataloaders(
         metadata_path=args.metadata,
         feature_method=args.feature,
@@ -790,6 +801,7 @@ def cmd_evaluate(args):
         seq_len=args.seq_len,
         landmark_dir=args.landmark_dir,
         num_workers=0,
+        in_memory=in_mem,
         smoke_test=is_smoke
     )
     loader = test_loader if args.split == "test" else val_loader
@@ -1344,6 +1356,7 @@ def create_parser() -> argparse.ArgumentParser:
     p_train.add_argument("--force_retrain", action="store_true", default=True, help="Force full retraining from scratch (default: True)")
     p_train.add_argument("--no_force_retrain", dest="force_retrain", action="store_false", help="Skip training if matching checkpoint already exists")
     p_train.add_argument("--no_test_eval", action="store_true", default=False, help="Skip test set evaluation during training (strictly enforce train/val only)")
+    p_train.add_argument("--transformer_variant", type=str, default="standard", choices=["standard", "no_innorm", "dual_branch"], help="Transformer embedding variant (standard, no_innorm, dual_branch)")
 
     # Evaluate
     p_eval = subparsers.add_parser("evaluate", help="Evaluate a model checkpoint")
@@ -1353,6 +1366,7 @@ def create_parser() -> argparse.ArgumentParser:
         "--feature", type=str, default="mix",
         help="Feature representation method (supports single features or dynamic mix like 'rel_3d+angle2_3d', 'mix')"
     )
+    p_eval.add_argument("--transformer_variant", type=str, default="standard", choices=["standard", "no_innorm", "dual_branch"], help="Transformer embedding variant (standard, no_innorm, dual_branch)")
     p_eval.add_argument("--split", type=str, default="test", choices=["train", "val", "test"])
     p_eval.add_argument("--metadata", type=str, default="Final_dataset_metadata.csv")
     p_eval.add_argument("--landmark_dir", type=str, default="data/landmarks")
@@ -1368,6 +1382,7 @@ def create_parser() -> argparse.ArgumentParser:
     p_eval.add_argument("--hidden_dim", type=int, default=None)
     p_eval.add_argument("--num_layers", type=int, default=None)
     p_eval.add_argument("--nhead", type=int, default=8)
+    p_eval.add_argument("--in_memory", action="store_true", default=True, help="Load dataset into memory for fast evaluation")
 
     # Ensemble
     p_ens = subparsers.add_parser("ensemble", help="Ensemble multiple models")

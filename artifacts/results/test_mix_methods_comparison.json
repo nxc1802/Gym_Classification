@@ -1,0 +1,110 @@
+{
+  "no_innorm": {
+    "variant": "no_innorm",
+    "seeds": [
+      42,
+      123,
+      3407
+    ],
+    "val_acc_mean": 74.66666666666667,
+    "val_acc_sd": 1.168170857040822,
+    "test_win_acc_mean": 73.67666666666666,
+    "test_win_acc_sd": 0.405407887880287,
+    "macro_f1_mean": 0.6382,
+    "macro_f1_sd": 0.0018184242262647597,
+    "test_vid_acc_mean": 0.0,
+    "test_vid_acc_sd": 0.0,
+    "runs": [
+      {
+        "variant": "no_innorm",
+        "seed": 42,
+        "duration": 153.35774207115173,
+        "val_acc": 73.44578313253012,
+        "val_loss": 1.3120268841249396,
+        "val_f1": 0.7322188527314986,
+        "test_win_acc": 73.39,
+        "test_vid_acc": 0.0,
+        "macro_f1": 0.6362,
+        "checkpoint": "/marimo/Gym_Classification/checkpoints/mix_methods/no_innorm/seed42/best_Transformer_no_innorm_mix.pt"
+      },
+      {
+        "variant": "no_innorm",
+        "seed": 123,
+        "duration": 223.4455885887146,
+        "val_acc": 76.24096385542168,
+        "val_loss": 1.2357021818390812,
+        "val_f1": 0.7532917051678656,
+        "test_win_acc": 74.25,
+        "test_vid_acc": 0.0,
+        "macro_f1": 0.6406,
+        "checkpoint": "/marimo/Gym_Classification/checkpoints/mix_methods/no_innorm/seed123/best_Transformer_no_innorm_mix.pt"
+      },
+      {
+        "variant": "no_innorm",
+        "seed": 3407,
+        "duration": 142.3440442085266,
+        "val_acc": 74.3132530120482,
+        "val_loss": 1.2351444497453161,
+        "val_f1": 0.7326276641135263,
+        "test_win_acc": 73.39,
+        "test_vid_acc": 0.0,
+        "macro_f1": 0.6378,
+        "checkpoint": "/marimo/Gym_Classification/checkpoints/mix_methods/no_innorm/seed3407/best_Transformer_no_innorm_mix.pt"
+      }
+    ]
+  },
+  "dual_branch": {
+    "variant": "dual_branch",
+    "seeds": [
+      42,
+      123,
+      3407
+    ],
+    "val_acc_mean": 78.13654618473896,
+    "val_acc_sd": 0.6100188769814513,
+    "test_win_acc_mean": 76.96666666666667,
+    "test_win_acc_sd": 0.8797853273510665,
+    "macro_f1_mean": 0.652,
+    "macro_f1_sd": 0.003395094500402999,
+    "test_vid_acc_mean": 0.0,
+    "test_vid_acc_sd": 0.0,
+    "runs": [
+      {
+        "variant": "dual_branch",
+        "seed": 42,
+        "duration": 298.3243269920349,
+        "val_acc": 78.12048192771084,
+        "val_loss": 1.1725259384476996,
+        "val_f1": 0.7786638327163984,
+        "test_win_acc": 76.82,
+        "test_vid_acc": 0.0,
+        "macro_f1": 0.6535,
+        "checkpoint": "/marimo/Gym_Classification/checkpoints/mix_methods/dual_branch/seed42/best_Transformer_dual_branch_mix.pt"
+      },
+      {
+        "variant": "dual_branch",
+        "seed": 123,
+        "duration": 302.77064633369446,
+        "val_acc": 77.39759036144578,
+        "val_loss": 1.2144730560176344,
+        "val_f1": 0.7680493502596811,
+        "test_win_acc": 78.11,
+        "test_vid_acc": 0.0,
+        "macro_f1": 0.6552,
+        "checkpoint": "/marimo/Gym_Classification/checkpoints/mix_methods/dual_branch/seed123/best_Transformer_dual_branch_mix.pt"
+      },
+      {
+        "variant": "dual_branch",
+        "seed": 3407,
+        "duration": 314.367662191391,
+        "val_acc": 78.89156626506025,
+        "val_loss": 1.1847300107795071,
+        "val_f1": 0.7853391347248251,
+        "test_win_acc": 75.97,
+        "test_vid_acc": 0.0,
+        "macro_f1": 0.6473,
+        "checkpoint": "/marimo/Gym_Classification/checkpoints/mix_methods/dual_branch/seed3407/best_Transformer_dual_branch_mix.pt"
+      }
+    ]
+  }
+}

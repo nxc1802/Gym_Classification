@@ -41,33 +41,33 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 
 | Exp ID | Model Architecture | Feature Representation | Dimension | Train Loss | Val Loss | Val Acc (%) | Test Win Acc (%) | Macro F1 | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **T1.1** | LSTM | Raw 2D Coordinates | 26 | 0.1083 | 2.0594 | 67.13% | 52.31% | 0.5179 | Verified |
-| **T1.2** | LSTM | Relative 2D (Mid-Hip) | 26 | 0.1897 | 1.4853 | 71.04% | 56.91% | 0.5616 | Verified |
-| **T1.3** | LSTM | Angle 2D (Triplets) | 286 | 0.0802 | 2.3990 | 66.99% | 50.42% | 0.4954 | Verified |
-| **T1.4** | LSTM | Angle2 2D (Pairs) | 78 | 0.1486 | 1.9007 | 68.00% | 52.31% | 0.5171 | Verified |
-| **T1.5** | LSTM | Raw 3D Coordinates | 39 | 0.1527 | 1.7012 | 68.29% | 54.87% | 0.5259 | Verified |
-| **T1.6** | LSTM | Relative 3D (Mid-Hip) | 39 | 0.0360 | 2.2855 | 71.42% | 58.51% | 0.5734 | Verified |
-| **T1.7** | LSTM | Angle 3D (Triplets) | 286 | 0.0447 | 2.3879 | 66.41% | 49.33% | 0.4770 | Verified |
-| **T1.8** | LSTM | Angle2 3D (Pair Elevation) | 78 | 0.0889 | 1.7770 | 71.23% | 55.81% | 0.5631 | Verified |
-| **T1.9** | LSTM | Biomechanical Mix (Ours) | 117 | 0.0772 | 1.9226 | 73.93% | 59.28% | 0.5843 | Verified |
-| **T1.10** | BiLSTM | Raw 2D Coordinates | 26 | 0.0538 | 2.2651 | 69.40% | 52.46% | 0.5161 | Verified |
-| **T1.11** | BiLSTM | Relative 2D (Mid-Hip) | 26 | 0.2316 | 1.3567 | 72.10% | 55.56% | 0.5455 | Verified |
-| **T1.12** | BiLSTM | Angle 2D (Triplets) | 286 | 0.0093 | 3.8922 | 65.06% | 51.11% | 0.4855 | Verified |
-| **T1.13** | BiLSTM | Angle2 2D (Pairs) | 78 | 0.1037 | 2.0297 | 66.36% | 52.83% | 0.5133 | Verified |
-| **T1.14** | BiLSTM | Raw 3D Coordinates | 39 | 0.0496 | 2.2351 | 67.71% | 52.61% | 0.5208 | Verified |
-| **T1.15** | BiLSTM | Relative 3D (Mid-Hip) | 39 | 0.1182 | 1.7121 | 70.89% | 56.07% | 0.5470 | Verified |
-| **T1.16** | BiLSTM | Angle 3D (Triplets) | 286 | 0.0893 | 2.3198 | 63.23% | 50.35% | 0.4753 | Verified |
-| **T1.17** | BiLSTM | Angle2 3D (Pair Elevation) | 78 | 0.0263 | 2.2670 | 71.42% | 58.62% | 0.5759 | Verified |
-| **T1.18** | BiLSTM | Biomechanical Mix (Ours) | 117 | 0.0794 | 1.7916 | 74.41% | 58.66% | 0.5735 | Verified |
-| **T1.19** | Transformer | Raw 2D Coordinates | 26 | 0.3871 | 1.1225 | 77.69% | 62.41% | 0.6190 | Verified |
-| **T1.20** | Transformer | Relative 2D (Mid-Hip) | 26 | 0.4396 | 1.2003 | 76.43% | 64.16% | 0.6281 | Verified |
-| **T1.21** | Transformer | Angle 2D (Triplets) | 286 | 0.3663 | 1.4473 | 71.95% | 57.49% | 0.5408 | Verified |
-| **T1.22** | Transformer | Angle2 2D (Pairs) | 78 | 0.3863 | 1.4641 | 70.60% | 57.09% | 0.5598 | Verified |
-| **T1.23** | Transformer | Raw 3D Coordinates | 39 | 0.4260 | 1.0587 | 79.13% | 65.11% | 0.6339 | Verified |
-| **T1.24** | Transformer | Relative 3D (Mid-Hip) | 39 | 0.3763 | 1.1425 | 78.31% | 64.86% | 0.6301 | Verified |
-| **T1.25** | Transformer | Angle 3D (Triplets) | 286 | 0.4132 | 1.5141 | 68.77% | 56.36% | 0.5545 | Verified |
-| **T1.26** | Transformer | Angle2 3D (Pair Elevation) | 78 | 0.3973 | 1.3702 | 72.67% | 60.41% | 0.5860 | Verified |
-| **T1.27** | **Transformer** | **Biomechanical Mix (Ours)** | **117** | 0.4274 | 1.2714 | 74.55% | 63.91% | 0.6240 | **Verified** |
+| **T1.1** | LSTM | Raw 2D Coordinates | 26 | 0.1608 | 1.7996 | 67.49% ± 0.75% | 52.80% ± 1.04% | 0.5143 ± 0.0138 | Verified |
+| **T1.2** | LSTM | Relative 2D (Mid-Hip) | 26 | 0.1994 | 1.4876 | 72.40% ± 1.07% | 56.13% ± 0.66% | 0.5501 ± 0.0082 | Verified |
+| **T1.3** | LSTM | Angle 2D (Triplets) | 286 | 0.2367 | 2.0654 | 64.74% ± 2.62% | 50.45% ± 1.59% | 0.4896 ± 0.0166 | Verified |
+| **T1.4** | LSTM | Angle2 2D (Pairs) | 78 | 0.3623 | 1.5881 | 65.88% ± 1.61% | 52.25% ± 0.70% | 0.5132 ± 0.0028 | Verified |
+| **T1.5** | LSTM | Raw 3D Coordinates | 39 | 0.3129 | 1.6486 | 65.32% ± 2.25% | 52.77% ± 1.77% | 0.5041 ± 0.0250 | Verified |
+| **T1.6** | LSTM | Relative 3D (Mid-Hip) | 39 | 0.1331 | 1.9126 | 72.24% ± 0.99% | 59.28% ± 0.77% | 0.5786 ± 0.0079 | Verified |
+| **T1.7** | LSTM | Angle 3D (Triplets) | 286 | 0.0712 | 2.5788 | 65.73% ± 1.02% | 50.45% ± 0.82% | 0.4886 ± 0.0086 | Verified |
+| **T1.8** | LSTM | Angle2 3D (Pair Elevation) | 78 | 0.3292 | 1.6975 | 70.31% ± 3.35% | 55.29% ± 1.49% | 0.5495 ± 0.0190 | Verified |
+| **T1.9** | LSTM | Biomechanical Mix (Ours) | 117 | 0.0779 | 1.8811 | 74.28% ± 0.50% | 59.35% ± 0.19% | 0.5827 ± 0.0015 | Verified |
+| **T1.10** | BiLSTM | Raw 2D Coordinates | 26 | 0.4437 | 1.6896 | 65.12% ± 3.22% | 51.48% ± 0.71% | 0.4901 ± 0.0184 | Verified |
+| **T1.11** | BiLSTM | Relative 2D (Mid-Hip) | 26 | 0.5620 | 1.3529 | 64.98% ± 6.30% | 54.51% ± 2.33% | 0.5247 ± 0.0290 | Verified |
+| **T1.12** | BiLSTM | Angle 2D (Triplets) | 286 | 0.0845 | 3.0730 | 65.82% ± 0.63% | 52.73% ± 1.58% | 0.5068 ± 0.0175 | Verified |
+| **T1.13** | BiLSTM | Angle2 2D (Pairs) | 78 | 0.0785 | 2.3040 | 69.59% ± 2.28% | 55.35% ± 1.80% | 0.5379 ± 0.0188 | Verified |
+| **T1.14** | BiLSTM | Raw 3D Coordinates | 39 | 0.0691 | 2.4414 | 67.63% ± 0.11% | 53.25% ± 0.88% | 0.5120 ± 0.0087 | Verified |
+| **T1.15** | BiLSTM | Relative 3D (Mid-Hip) | 39 | 0.1283 | 1.7113 | 72.47% ± 1.39% | 58.09% ± 1.46% | 0.5595 ± 0.0089 | Verified |
+| **T1.16** | BiLSTM | Angle 3D (Triplets) | 286 | 0.1500 | 2.1259 | 64.37% ± 0.83% | 50.51% ± 1.57% | 0.4846 ± 0.0201 | Verified |
+| **T1.17** | BiLSTM | Angle2 3D (Pair Elevation) | 78 | 0.0946 | 1.9386 | 72.58% ± 1.06% | 58.56% ± 0.67% | 0.5773 ± 0.0046 | Verified |
+| **T1.18** | BiLSTM | Biomechanical Mix (Ours) | 117 | 0.0984 | 1.7974 | 74.39% ± 0.26% | 60.19% ± 1.14% | 0.5896 ± 0.0126 | Verified |
+| **T1.19** | Transformer | Raw 2D Coordinates | 26 | 0.3789 | 1.1394 | 77.82% ± 0.22% | 63.51% ± 0.80% | 0.6323 ± 0.0094 | Verified |
+| **T1.20** | Transformer | Relative 2D (Mid-Hip) | 26 | 0.4290 | 1.1943 | 76.45% ± 0.41% | 63.06% ± 2.61% | 0.6159 ± 0.0244 | Verified |
+| **T1.21** | Transformer | Angle 2D (Triplets) | 286 | 0.3837 | 1.4445 | 71.78% ± 0.55% | 57.37% ± 0.20% | 0.5437 ± 0.0060 | Verified |
+| **T1.22** | Transformer | Angle2 2D (Pairs) | 78 | 0.4253 | 1.4747 | 69.65% ± 0.68% | 55.27% ± 1.47% | 0.5402 ± 0.0155 | Verified |
+| **T1.23** | Transformer | Raw 3D Coordinates | 39 | 0.3954 | 1.0805 | 79.65% ± 0.80% | 65.01% ± 0.27% | 0.6375 ± 0.0027 | Verified |
+| **T1.24** | Transformer | Relative 3D (Mid-Hip) | 39 | 0.4410 | 1.1776 | 77.69% ± 0.69% | 63.52% ± 1.18% | 0.6151 ± 0.0126 | Verified |
+| **T1.25** | Transformer | Angle 3D (Triplets) | 286 | 0.4006 | 1.4954 | 70.33% ± 1.10% | 56.86% ± 1.09% | 0.5567 ± 0.0081 | Verified |
+| **T1.26** | Transformer | Angle2 3D (Pair Elevation) | 78 | 0.3815 | 1.3522 | 73.61% ± 0.66% | 59.27% ± 1.32% | 0.5826 ± 0.0132 | Verified |
+| **T1.27** | Transformer | Biomechanical Mix (Dual-Branch) | 117 | 0.4182 | 1.1906 | 78.14% ± 0.61% | 76.97% ± 0.88% | 0.6520 ± 0.0034 | Verified |
 
 ---
 
@@ -78,15 +78,15 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 
 | Exp ID | Model Architecture | Kinematic Stream | Augmentation Protocol | Val Acc (%) | Test Win Acc (%) | Test Vid Acc (%) | Status |
 | :---: | :--- | :--- | :--- | :---: | :---: | :---: | :---: |
-| **T3.1** | ST-GCN Baseline | Raw 3D Joint | None (Clean) | 63.71% | 53.26% | 65.67% | Verified |
-| **T3.2** | ST-GCN Baseline | Relative 3D Joint | None (Clean) | 72.39% | 58.80% | 66.95% | Verified |
-| **T3.3** | AAGCN Baseline | Bone 3D Stream | None (Clean) | 76.53% | 62.67% | 72.10% | Verified |
-| **T3.4** | AAGCN | Bone 3D Stream | SkelGym-Aug (Proposed) | 80.92% | 65.59% | 73.39% | Verified |
-| **T3.5** | AAGCN | Joint Stream (Rel 3D) | SkelGym-Aug (Proposed) | 79.52% | 67.15% | 74.25% | Verified |
-| **T3.6** | AAGCN | Joint Motion 3D ($\Delta X$) | SkelGym-Aug (Proposed) | 63.66% | 48.74% | 63.95% | Verified |
-| **T3.7** | AAGCN | Bone Motion 3D ($\Delta B$) | SkelGym-Aug (Proposed) | 64.72% | 49.43% | 64.81% | Verified |
-| **T3.8** | Two-Stream AAGCN | Joint + Bone | Late Fusion (Equal Weights) | 78.11% | 69.63% | 78.54% | Verified |
-| **T3.9** | **Four-Stream AAGCN** | **4 Streams Unified** | Late Fusion (SLSQP Calibrated) | 79.40% | 67.34% | 77.25% | **Verified** |
+| **T3.1** | ST-GCN Baseline | Raw 3D Joint | None (Clean) | 65.35% ± 1.16% | 53.03% ± 0.33% | 64.95% ± 1.33% | Verified |
+| **T3.2** | ST-GCN Baseline | Relative 3D Joint | None (Clean) | 70.46% ± 0.45% | 57.58% ± 0.87% | 66.24% ± 1.32% | Verified |
+| **T3.3** | AAGCN Baseline | Bone 3D Stream | None (Clean) | 76.21% ± 0.49% | 63.02% ± 1.85% | 71.67% ± 1.60% | Verified |
+| **T3.4** | AAGCN | Bone 3D Stream | SkelGym-Aug (Proposed) | 78.78% ± 1.66% | 65.34% ± 1.26% | 73.10% ± 1.07% | Verified |
+| **T3.5** | AAGCN | Joint Stream (Rel 3D) | SkelGym-Aug (Proposed) | 76.51% ± 0.56% | 67.46% ± 0.22% | 76.39% ± 1.75% | Verified |
+| **T3.6** | AAGCN | Joint Motion 3D ($\Delta X$) | SkelGym-Aug (Proposed) | 54.76% ± 3.73% | 48.81% ± 0.27% | 65.66% ± 1.26% | Verified |
+| **T3.7** | AAGCN | Bone Motion 3D ($\Delta B$) | SkelGym-Aug (Proposed) | 48.71% ± 0.92% | 49.17% ± 1.09% | 67.24% ± 2.63% | Verified |
+| **T3.8** | Two-Stream AAGCN | Joint + Bone | Late Fusion (Equal Weights) | 78.11% ± 0.50% | 69.57% ± 0.55% | 78.68% ± 0.41% | Verified |
+| **T3.9** | Four-Stream AAGCN | 4 Streams Unified | Late Fusion (SLSQP Calibrated) | 79.40% ± 0.60% | 68.67% ± 1.15% | 78.40% ± 0.81% | Verified |
 
 ---
 
@@ -101,7 +101,7 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 | **w/o Sagittal Reflection ($-$Mirror)** | Bilateral Reflection | 76.31% ± 0.63% | 1.2502 | 62.80% ± 1.35% | 0.6164 ± 0.0115 | -4.00% | Verified |
 | **w/o Gravitational Yaw ($-$Yaw)** | Vertical Axis 3D Yaw | 78.84% ± 0.60% | 1.1288 | 68.81% ± 2.10% | 0.6796 ± 0.0213 | +2.01% | Verified |
 | **w/o Proportional Scaling ($-$Scale)** | Isotropic Anthropometric Scale | 78.38% ± 0.59% | 1.1061 | 69.23% ± 1.39% | 0.6810 ± 0.0127 | +2.43% | Verified |
-| **w/o Temporal TimeWarp ($-$TimeWarp)** | Cadence / Temporal Phase Warping | 78.25% ± 0.04% | 1.0948 | 68.68% ± 2.04% | 0.6763 ± 0.0133 | +1.88% | **Verified** |
+| **w/o Temporal TimeWarp ($-$TimeWarp)** | Cadence / Temporal Phase Warping | 78.25% ± 0.04% | 1.0948 | 68.68% ± 2.04% | 0.6763 ± 0.0133 | +1.88% | Verified |
 | **w/o Sensor Jitter ($-$Jitter)** | Gaussian Sensor Noise | 77.35% ± 1.17% | 1.1101 | 68.49% ± 1.57% | 0.6701 ± 0.0152 | +1.69% | Verified |
 | **Clean Baseline (No Augmentation)** | All Operators Excluded | 75.27% ± 0.51% | 1.2582 | 62.02% ± 1.40% | 0.6111 ± 0.0096 | -4.78% | Verified |
 
@@ -120,7 +120,7 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 | **+ Proportional Scaling (Scale)** | Stature & Distance Scaling | 76.31% ± 0.90% | 1.2450 | 63.65% ± 1.68% | 0.6218 ± 0.0153 | +1.63% | Verified |
 | **+ Temporal TimeWarp (TimeWarp)** | Synthetic Velocity Perturbation | 75.97% ± 1.18% | 1.2778 | 63.05% ± 1.34% | 0.6147 ± 0.0195 | +1.02% | Verified |
 | **+ Sensor Jitter (Jitter)** | MediaPipe Tracking Noise Tolerance | 76.55% ± 0.40% | 1.2866 | 63.29% ± 1.20% | 0.6194 ± 0.0103 | +1.26% | Verified |
-| **SkelGym-Aug (4-op Suite)** | **Spatial + Sensor (Proposed)** | 78.25% ± 0.04% | 1.0948 | 68.68% ± 2.04% | 0.6763 ± 0.0133 | +6.66% | **Verified** |
+| **SkelGym-Aug (4-op Suite)** | Spatial + Sensor (Proposed) | 78.25% ± 0.04% | 1.0948 | 68.68% ± 2.04% | 0.6763 ± 0.0133 | +6.66% | Verified |
 | **Candidate Full (5-op Suite)** | Spatial + Sensor + Temporal | 78.06% ± 1.17% | 1.0923 | 66.80% ± 0.63% | 0.6574 ± 0.0066 | +4.78% | Verified |
 
 ---
@@ -135,11 +135,13 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 | **Transformer Mix (117-d)** | Single Sequence Backbone | 76.32% ± 2.10% | 79.07% ± 2.01% | 66.27% ± 2.75% | 0.6544 ± 0.0264 | 75.54% ± 3.81% | 0.7430 ± 0.0430 | Verified |
 | **AAGCN Bone Stream (Bone 3D)** | Single Graph Backbone | 78.83% ± 0.33% | 80.68% ± 0.48% | 66.59% ± 1.43% | 0.6587 ± 0.0181 | 75.82% ± 2.62% | 0.7543 ± 0.0305 | Verified |
 | **Four-Stream AAGCN** | 4 Streams Unified Graph | 79.98% ± 0.27% | 81.96% ± 1.39% | 67.61% ± 1.46% | 0.6688 ± 0.0205 | 77.54% ± 3.33% | 0.7632 ± 0.0387 | Verified |
-| **Hard Majority Voting** | Discrete mode over class predictions | — | — | 70.62% ± 0.54% | 0.7017 ± 0.0064 | 81.40% ± 0.99% | 0.8037 ± 0.0126 | Verified |
-| **Uniform Average Soft Voting** | Equal weights: $w_i = 1/5 = 0.20$ | — | — | 73.05% ± 0.75% | 0.7226 ± 0.0053 | 82.83% ± 1.14% | 0.8143 ± 0.0184 | Verified |
-| **Accuracy-Weighted Soft Voting** | Validation accuracy weights ($w_i \propto \text{Acc}_i^{\text{val}}$) | — | — | 72.56% ± 0.88% | 0.7183 ± 0.0062 | 81.97% ± 1.14% | 0.8063 ± 0.0210 | Verified |
-| **SkelGym-Lite (2 Models)** | Trans + Bone AAGCN (SLSQP Calibrated) | — | — | 68.26% ± 0.66% | 0.6732 ± 0.0067 | 77.68% ± 1.55% | 0.7694 ± 0.0103 | Verified |
-| **SkelGym-Full (5 Streams)** | **Trans + 4 AAGCN (SLSQP Calibrated)** | — | — | 69.73% ± 1.10% | 0.6881 ± 0.0072 | 78.83% ± 0.66% | 0.7807 ± 0.0126 | **Verified** |
+| **Hard Majority Voting** | Discrete mode over class predictions | 80.64% ± 0.50% | 84.38% ± 0.74% | 70.62% ± 0.54% | 0.7017 ± 0.0064 | 81.40% ± 0.99% | 0.8037 ± 0.0126 | Verified |
+| **Uniform Average Soft Voting** | Equal weights: $w_i = 1/5 = 0.20$ | 82.36% ± 0.30% | 85.67% ± 1.01% | 73.05% ± 0.75% | 0.7226 ± 0.0053 | 82.83% ± 1.14% | 0.8143 ± 0.0184 | Verified |
+| **Accuracy-Weighted Soft Voting** | Validation accuracy weights ($w_i \propto \text{Acc}_i^{\text{val}}$) | 82.07% ± 0.10% | 84.06% ± 0.84% | 72.56% ± 0.88% | 0.7183 ± 0.0062 | 81.97% ± 1.14% | 0.8063 ± 0.0210 | Verified |
+| **SLSQP Soft Voting** | SLSQP Constrained Calibration ($\sum w_i = 1$) | 80.47% ± 0.62% | 83.09% ± 0.48% | 69.73% ± 1.10% | 0.6881 ± 0.0072 | 78.83% ± 0.66% | 0.7807 ± 0.0126 | Verified |
+| **Stacking Meta-Classifier** | Ridge Classifier on Val Probs | 93.04% ± 0.63% | 94.85% ± 1.39% | 73.53% ± 0.91% | 0.7250 ± 0.0063 | 83.69% ± 0.74% | 0.8354 ± 0.0089 | Verified |
+| **SkelGym-Lite (2 Models)** | Trans + Bone AAGCN (SLSQP Calibrated) | 79.78% ± 0.81% | 82.61% ± 1.67% | 68.26% ± 0.66% | 0.6732 ± 0.0067 | 77.68% ± 1.55% | 0.7694 ± 0.0103 | Verified |
+| **SkelGym-Full (5 Streams)** | Trans + 4 AAGCN (SLSQP Calibrated) | 80.47% ± 0.62% | 83.09% ± 0.48% | 69.73% ± 1.10% | 0.6881 ± 0.0072 | 78.83% ± 0.66% | 0.7807 ± 0.0126 | Verified |
 
 ---
 
@@ -160,7 +162,7 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 | **Two-Stream AAGCN (Aug)** | Joint + Bone Stream Fusion | 756K | 67.26% | 0.6652 | 77.11% | 0.7580 | +9.85% | Verified |
 | **Four-Stream AAGCN (Aug)** | 4-Stream Graph Late Fusion | 1.51M | 67.61% | 0.6688 | 77.54% | 0.7632 | +9.92% | Verified |
 | **SkelGym-Lite (2 Models)** | Transformer + Bone AAGCN | 778K | 68.26% | 0.6732 | 77.68% | 0.7694 | +9.42% | Verified |
-| **SkelGym-Full (5 Streams)** | **Cross-Paradigm SLSQP Ensemble** | **1.91M** | 69.73% | 0.6881 | 78.83% | 0.7807 | +9.10% | **Verified** |
+| **SkelGym-Full (5 Streams)** | Cross-Paradigm SLSQP Ensemble | 1.91M | 69.73% | 0.6881 | 78.83% | 0.7807 | +9.10% | Verified |
 
 ---
 
@@ -175,7 +177,7 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 | **Fixed ST-GCN vs Adaptive Four-Stream AAGCN** | 155.34 | 3.84e-37 | 2.92 | 9338.0 | 3.08e-05 | 3.89e-06 | +0.310 | Verified |
 | **Single Sequence (Trans) vs SkelGym-Full** | 2.16 | 0.1416 | 1.17 | 8050.0 | 6.03e-08 | 1.84e-05 | -0.287 | Verified |
 | **Single Graph (AAGCN Bone) vs SkelGym-Full** | 63.58 | 2.40e-16 | 3.52 | 12219.0 | 0.1706 | 0.0614 | +0.123 | Verified |
-| **Four-Stream Graph AAGCN vs SkelGym-Full** | 57.14 | 6.69e-15 | 3.73 | 8207.0 | 1.40e-07 | 1.33e-05 | +0.292 | **Verified** |
+| **Four-Stream Graph AAGCN vs SkelGym-Full** | 57.14 | 6.69e-15 | 3.73 | 8207.0 | 1.40e-07 | 1.33e-05 | +0.292 | Verified |
 
 ---
 
@@ -192,7 +194,7 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 | **Transformer (Mix 117-d)** | 69.04% [62.60%, 74.91%] | 0.6647 [0.6076, 0.7165] | 79.92% [74.68%, 84.55%] | 0.7835 [0.7252, 0.8416] | Verified |
 | **AAGCN (Bone 3D)** | 65.80% [59.72%, 71.83%] | 0.6293 [0.5742, 0.6827] | 73.01% [66.95%, 78.54%] | 0.7113 [0.6505, 0.7670] | Verified |
 | **SkelGym-Lite (2 Models)** | 68.13% [61.92%, 74.10%] | 0.6530 [0.5951, 0.7075] | 79.05% [73.82%, 84.12%] | 0.7691 [0.7104, 0.8256] | Verified |
-| **SkelGym-Full (5 Streams)** | 70.07% [63.82%, 75.83%] | 0.6733 [0.6169, 0.7292] | 79.02% [73.82%, 84.12%] | 0.7762 [0.7219, 0.8300] | **Verified** |
+| **SkelGym-Full (5 Streams)** | 70.07% [63.82%, 75.83%] | 0.6733 [0.6169, 0.7292] | 79.02% [73.82%, 84.12%] | 0.7762 [0.7219, 0.8300] | Verified |
 
 ---
 
@@ -242,7 +244,7 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 | **AAGCN Joint-Motion Stream** | 378K | 202.86 MFLOPs | 1.01 ms (990 FPS) | 1.90 ms (527 FPS) | 1.02 ms (978 FPS) | Verified |
 | **AAGCN Bone-Motion Stream** | 378K | 202.86 MFLOPs | 1.02 ms (980 FPS) | 1.90 ms (527 FPS) | 1.03 ms (975 FPS) | Verified |
 | **SkelGym-Lite (Transformer + Bone)** | 778K | 213.56 MFLOPs | 1.66 ms (603 FPS) | 2.55 ms (393 FPS) | 1.49 ms (671 FPS) | Verified |
-| **SkelGym-Full (Transformer + 4 AAGCN)** | **1.91M** | 822.14 MFLOPs | 4.65 ms (215 FPS) | 5.86 ms (171 FPS) | 3.96 ms (253 FPS) | **Verified** |
+| **SkelGym-Full (Transformer + 4 AAGCN)** | 1.91M | 822.14 MFLOPs | 4.65 ms (215 FPS) | 5.86 ms (171 FPS) | 3.96 ms (253 FPS) | Verified |
 
 ---
 
@@ -259,7 +261,7 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 | **AAGCN (Bone 3D)** | 58.88% | 62.96% | 74.26% | 77.78% | 0.6667 | Verified |
 | **Transformer (Mix 117-d)** | 55.47% | 61.11% | 83.71% | 85.19% | 0.8092 | Verified |
 | **SkelGym-Lite (Transformer + Bone)** | 63.55% | 66.67% | 79.95% | 81.48% | 0.7433 | Verified |
-| **SkelGym-Full (Transformer + 4 AAGCN)** | 66.86% | 74.07% | 95.90% | 100.00% | 1.0000 | **Verified** |
+| **SkelGym-Full (Transformer + 4 AAGCN)** | 66.86% | 74.07% | 95.90% | 100.00% | 1.0000 | Verified |
 
 ---
 
@@ -270,5 +272,5 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 
 | Model Architecture | Input Representation | Parameters | FLOPs / MACs | Window Test Acc (%) | Window Macro F1 | Video Consensus Acc (%) | Video Macro F1 | Status |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **BlockGCN (CVPR 2024 Adapted)** | 33 Raw MediaPipe XYZ (Joint-only) | 1,352,102 | 525.27 MFLOPs | 54.90% ± 0.76% | 0.5542 ± 0.0031 | 71.05% ± 0.40% | 0.6977 ± 0.0120 | **Verified** |
+| **BlockGCN (CVPR 2024 Adapted)** | 33 Raw MediaPipe XYZ (Joint-only) | 1,352,102 | 525.27 MFLOPs | 54.90% ± 0.76% | 0.5542 ± 0.0031 | 71.05% ± 0.40% | 0.6977 ± 0.0120 | Verified |
 

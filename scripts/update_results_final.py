@@ -122,19 +122,31 @@ def update_table2_feature_screening(content: str, json_path: Path) -> str:
         eid = r.get("exp_id")
         if not eid:
             continue
-        is_winner = (eid == "T1.27")
-        bold_wrap = "**" if is_winner else ""
+        
+        # Support both single-seed and multi-seed formats
+        val_acc_str = format_mean_sd(r.get("val_acc_mean"), r.get("val_acc_sd")) if r.get("val_acc_sd") is not None else format_num(r.get("val_acc", 0) * 100 if r.get("val_acc", 0) <= 1.0 else r.get("val_acc"))
+        test_acc_raw = r.get("test_win_acc_mean", r.get("test_win_acc", r.get("accuracy", 0)))
+        test_acc_sd = r.get("test_win_acc_sd")
+        test_acc_str = format_mean_sd(test_acc_raw, test_acc_sd) if test_acc_sd is not None else format_num(test_acc_raw * 100 if test_acc_raw <= 1.0 else test_acc_raw)
+        f1_mean = r.get("macro_f1_mean", r.get("macro_f1"))
+        f1_sd = r.get("macro_f1_sd")
+        macro_f1_str = format_f1_mean_sd(f1_mean, f1_sd) if f1_sd is not None else format_f1(f1_mean)
+        
+        train_loss_str = format_num(r.get("train_loss_mean", r.get("train_loss")), fmt=".4f", suffix="")
+        val_loss_str = format_num(r.get("val_loss_mean", r.get("val_loss")), fmt=".4f", suffix="")
+        status_str = r.get("status", "Verified")
+
         updates[eid] = [
             f"**{eid}**",
-            f"{bold_wrap}{r.get('model', '')}{bold_wrap}",
-            f"{bold_wrap}{r.get('feature_name', r.get('feature', ''))}{bold_wrap}",
-            f"{bold_wrap}{str(r.get('dimension', r.get('dim', '')))}{bold_wrap}",
-            format_num(r.get("train_loss"), fmt=".4f", suffix=""),
-            format_num(r.get("val_loss"), fmt=".4f", suffix=""),
-            format_num(r.get("val_acc") * 100 if r.get("val_acc", 0) <= 1.0 else r.get("val_acc")),
-            format_num(r.get("test_win_acc", r.get("accuracy", 0)) * 100 if r.get("test_win_acc", r.get("accuracy", 0)) <= 1.0 else r.get("test_win_acc", r.get("accuracy", 0))),
-            format_f1(r.get("macro_f1")),
-            f"{bold_wrap}Verified{bold_wrap}"
+            r.get('model', ''),
+            r.get('feature_name', r.get('feature', '')),
+            str(r.get('dimension', r.get('dim', ''))),
+            train_loss_str,
+            val_loss_str,
+            val_acc_str,
+            test_acc_str,
+            macro_f1_str,
+            status_str
         ]
 
     return update_table_rows(content, "Table 2: Feature Representation Benchmark", updates)
@@ -157,17 +169,29 @@ def update_table3_graph_streams(content: str, json_path: Path) -> str:
         eid = r.get("exp_id")
         if not eid:
             continue
-        is_winner = (eid == "T3.9")
-        bold_wrap = "**" if is_winner else ""
+        
+        val_acc_raw = r.get("val_acc_mean", r.get("val_acc"))
+        val_acc_sd = r.get("val_acc_sd")
+        val_acc_str = format_mean_sd(val_acc_raw, val_acc_sd) if val_acc_sd is not None else format_num(val_acc_raw)
+        
+        win_acc_raw = r.get("test_win_acc_mean", r.get("test_win_acc", r.get("win_acc")))
+        win_acc_sd = r.get("test_win_acc_sd", r.get("win_acc_sd"))
+        win_acc_str = format_mean_sd(win_acc_raw, win_acc_sd) if win_acc_sd is not None else format_num(win_acc_raw)
+        
+        vid_acc_raw = r.get("test_vid_acc_mean", r.get("test_vid_acc", r.get("vid_acc")))
+        vid_acc_sd = r.get("test_vid_acc_sd", r.get("vid_acc_sd"))
+        vid_acc_str = format_mean_sd(vid_acc_raw, vid_acc_sd) if vid_acc_sd is not None else format_num(vid_acc_raw)
+        status_str = r.get("status", "Verified")
+
         updates[eid] = [
             f"**{eid}**",
-            f"{bold_wrap}{r.get('model', '')}{bold_wrap}",
-            f"{bold_wrap}{r.get('stream', r.get('feature', ''))}{bold_wrap}",
+            r.get('model', ''),
+            r.get('stream', r.get('feature', '')),
             r.get("augment", ""),
-            format_num(r.get("val_acc")),
-            format_num(r.get("test_win_acc", r.get("win_acc"))),
-            format_num(r.get("test_vid_acc", r.get("vid_acc"))),
-            f"{bold_wrap}Verified{bold_wrap}"
+            val_acc_str,
+            win_acc_str,
+            vid_acc_str,
+            status_str
         ]
     return update_table_rows(content, "Table 3: Spatial-Temporal Graph", updates)
 
@@ -193,7 +217,7 @@ def update_table4_loo(content: str, json_path: Path) -> str:
         "w/o Sagittal Reflection ($-$Mirror)": ("Minus_Mirror", "Bilateral Reflection", False),
         "w/o Gravitational Yaw ($-$Yaw)": ("Minus_Yaw", "Vertical Axis 3D Yaw", False),
         "w/o Proportional Scaling ($-$Scale)": ("Minus_Scale", "Isotropic Anthropometric Scale", False),
-        "w/o Temporal TimeWarp ($-$TimeWarp)": ("Minus_TimeWarp", "Cadence / Temporal Phase Warping", True),
+        "w/o Temporal TimeWarp ($-$TimeWarp)": ("Minus_TimeWarp", "Cadence / Temporal Phase Warping", False),
         "w/o Sensor Jitter ($-$Jitter)": ("Minus_Jitter", "Gaussian Sensor Noise", False),
         "Clean Baseline (No Augmentation)": ("Clean_Baseline_NoAug", "All Operators Excluded", False)
     }
@@ -208,7 +232,6 @@ def update_table4_loo(content: str, json_path: Path) -> str:
             
             diff = m.get("win_acc_mean", 0.0) - ref_acc
             delta = f"{diff:+.2f}%" if var_key != "Candidate_Full_5op" else "0.00% (Ref)"
-            bold = "**" if is_winner else ""
 
             updates[row_name] = [
                 f"**{row_name}**",
@@ -218,7 +241,7 @@ def update_table4_loo(content: str, json_path: Path) -> str:
                 t_acc,
                 t_f1,
                 delta,
-                f"{bold}Verified{bold}"
+                "Verified"
             ]
 
     return update_table_rows(content, "Table 4: Systematic Leave-One-Out", updates)
@@ -247,7 +270,7 @@ def update_table5_single(content: str, json_path: Path) -> str:
         "+ Proportional Scaling (Scale)": ("Single_Scale", "Stature & Distance Scaling", False),
         "+ Temporal TimeWarp (TimeWarp)": ("Single_TimeWarp", "Synthetic Velocity Perturbation", False),
         "+ Sensor Jitter (Jitter)": ("Single_Jitter", "MediaPipe Tracking Noise Tolerance", False),
-        "SkelGym-Aug (4-op Suite)": ("SkelGym_Aug_4op", "Spatial + Sensor (Proposed)", True),
+        "SkelGym-Aug (4-op Suite)": ("SkelGym_Aug_4op", "Spatial + Sensor (Proposed)", False),
         "Candidate Full (5-op Suite)": ("Candidate_Full_5op", "Spatial + Sensor + Temporal", False)
     }
 
@@ -261,17 +284,16 @@ def update_table5_single(content: str, json_path: Path) -> str:
             
             diff = m.get("win_acc_mean", 0.0) - ref_acc
             delta = f"{diff:+.2f}%" if var_key != "Clean_Baseline_NoAug" else "0.00% (Ref)"
-            bold = "**" if is_winner else ""
 
             updates[row_name] = [
                 f"**{row_name}**",
-                f"{bold}{domain_str}{bold}",
+                domain_str,
                 w_acc,
                 w_loss,
                 t_acc,
                 t_f1,
                 delta,
-                f"{bold}Verified{bold}"
+                "Verified"
             ]
 
     return update_table_rows(content, "Table 5: Systematic Single-Component", updates)
@@ -347,16 +369,22 @@ def update_table6_fusion(content: str, json_path: Path) -> str:
     skel_full = fusion_methods.get("SkelGym-Full", {})
     skel_lite = fusion_methods.get("SkelGym-Lite", {})
 
-    for method_name, row_label, proto in [
+    fusion_specs = [
         ("Hard Voting", "Hard Majority Voting", "Discrete mode over class predictions"),
         ("Uniform Soft Voting", "Uniform Average Soft Voting", "Equal weights: $w_i = 1/5 = 0.20$"),
         ("Accuracy-Weighted Soft", "Accuracy-Weighted Soft Voting", "Validation accuracy weights ($w_i \\propto \\text{Acc}_i^{\\text{val}}$)"),
-    ]:
+        ("SLSQP Soft Voting", "SLSQP Soft Voting", "SLSQP Constrained Calibration ($\\sum w_i = 1$)"),
+        ("Stacking Meta-Classifier", "Stacking Meta-Classifier", "Ridge Classifier on Val Probs")
+    ]
+
+    for method_name, row_label, proto in fusion_specs:
         if skel_full and method_name in skel_full:
             m = skel_full[method_name]
+            val_w = format_mean_sd(m.get("val_win_acc_mean"), m.get("val_win_acc_sd")) if "val_win_acc_mean" in m else "—"
+            val_v = format_mean_sd(m.get("val_vid_acc_mean"), m.get("val_vid_acc_sd")) if "val_vid_acc_mean" in m else "—"
             updates[row_label] = [
                 f"**{row_label}**", proto,
-                "—", "—",
+                val_w, val_v,
                 format_mean_sd(m.get("win_acc_mean"), m.get("win_acc_sd")),
                 format_f1_mean_sd(m.get("win_f1_mean"), m.get("win_f1_sd")),
                 format_mean_sd(m.get("vid_acc_mean"), m.get("vid_acc_sd")),
@@ -366,9 +394,11 @@ def update_table6_fusion(content: str, json_path: Path) -> str:
 
     if skel_lite and "SLSQP Soft Voting" in skel_lite:
         l_m = skel_lite["SLSQP Soft Voting"]
+        val_w = format_mean_sd(l_m.get("val_win_acc_mean"), l_m.get("val_win_acc_sd")) if "val_win_acc_mean" in l_m else "—"
+        val_v = format_mean_sd(l_m.get("val_vid_acc_mean"), l_m.get("val_vid_acc_sd")) if "val_vid_acc_mean" in l_m else "—"
         updates["SkelGym-Lite (2 Models)"] = [
             "**SkelGym-Lite (2 Models)**", "Trans + Bone AAGCN (SLSQP Calibrated)",
-            "—", "—",
+            val_w, val_v,
             format_mean_sd(l_m.get("win_acc_mean"), l_m.get("win_acc_sd")),
             format_f1_mean_sd(l_m.get("win_f1_mean"), l_m.get("win_f1_sd")),
             format_mean_sd(l_m.get("vid_acc_mean"), l_m.get("vid_acc_sd")),
@@ -376,16 +406,19 @@ def update_table6_fusion(content: str, json_path: Path) -> str:
             "Verified"
         ]
 
+    # Also map SkelGym-Full (5 Streams) as alias for SLSQP Soft Voting if present in table
     if skel_full and "SLSQP Soft Voting" in skel_full:
         full_m = skel_full["SLSQP Soft Voting"]
+        val_w = format_mean_sd(full_m.get("val_win_acc_mean"), full_m.get("val_win_acc_sd")) if "val_win_acc_mean" in full_m else "—"
+        val_v = format_mean_sd(full_m.get("val_vid_acc_mean"), full_m.get("val_vid_acc_sd")) if "val_vid_acc_mean" in full_m else "—"
         updates["SkelGym-Full (5 Streams)"] = [
-            "**SkelGym-Full (5 Streams)**", "**Trans + 4 AAGCN (SLSQP Calibrated)**",
-            "—", "—",
+            "**SkelGym-Full (5 Streams)**", "Trans + 4 AAGCN (SLSQP Calibrated)",
+            val_w, val_v,
             format_mean_sd(full_m.get("win_acc_mean"), full_m.get("win_acc_sd")),
             format_f1_mean_sd(full_m.get("win_f1_mean"), full_m.get("win_f1_sd")),
             format_mean_sd(full_m.get("vid_acc_mean"), full_m.get("vid_acc_sd")),
             format_f1_mean_sd(full_m.get("vid_f1_mean"), full_m.get("vid_f1_sd")),
-            "**Verified**"
+            "Verified"
         ]
 
     return update_table_rows(content, "Table 6: Cross-Paradigm Fusion Protocols", updates)
@@ -404,17 +437,15 @@ def update_table7_consensus(content: str, json_path: Path) -> str:
 
     updates = {}
     for row_name, entry in data.items():
-        is_winner = "Full" in row_name
-        bold = "**" if is_winner else ""
-        modality = f"{bold}{entry.get('modality', '')}{bold}"
-        params = f"{bold}{entry.get('params', '')}{bold}"
+        modality = entry.get('modality', '')
+        params = entry.get('params', '')
 
         w_acc = format_num(entry.get("win_acc"))
         w_f1 = format_f1(entry.get("win_f1"))
         v_acc = format_num(entry.get("vid_acc"))
         v_f1 = format_f1(entry.get("vid_f1"))
         gain = entry.get("vid_gain", "")
-        status = f"{bold}Verified{bold}"
+        status = "Verified"
 
         updates[row_name] = [
             f"**{row_name}**",
@@ -444,9 +475,6 @@ def update_table8_statistical_tests(content: str, json_path: Path) -> str:
 
     updates = {}
     for comp_name, entry in data.items():
-        is_winner = "Four-Stream Graph AAGCN vs SkelGym-Full" in comp_name
-        bold = "**" if is_winner else ""
-
         updates[comp_name] = [
             f"**{comp_name}**",
             str(entry.get("win_chi2", "")),
@@ -456,7 +484,7 @@ def update_table8_statistical_tests(content: str, json_path: Path) -> str:
             str(entry.get("vid_wilcoxon_p", "")),
             str(entry.get("vid_paired_t_p", "")),
             str(entry.get("vid_cohens_d", "")),
-            f"{bold}Verified{bold}"
+            "Verified"
         ]
 
     return update_table_rows(content, "Table 8: Paired Statistical Hypothesis Testing", updates)
@@ -475,16 +503,13 @@ def update_table9_bootstrap(content: str, json_path: Path) -> str:
 
     updates = {}
     for mname, entry in data.items():
-        is_winner = "Full" in mname
-        bold = "**" if is_winner else ""
-
         updates[mname] = [
             f"**{mname}**",
             str(entry.get("w_acc_str", "")),
             str(entry.get("w_f1_str", "")),
             str(entry.get("v_acc_str", "")),
             str(entry.get("v_f1_str", "")),
-            f"{bold}Verified{bold}"
+            "Verified"
         ]
 
     return update_table_rows(content, "Table 9: Non-Parametric Video-Level Cluster Bootstrap", updates)
@@ -544,17 +569,14 @@ def update_table11_hardware(content: str, json_path: Path) -> str:
             flops = f"{m.get('mflops', 0):.2f} MFLOPs" if "mflops" in m else "—"
             params = f"{m.get('params_k', 0):.0f}K" if "params_k" in m and not m.get("params") else str(m.get("params", f"{m.get('params_k', 0):.0f}K"))
 
-            is_winner = "Full" in mname
-            bold = "**" if is_winner else ""
-
             updates[mname] = [
                 f"**{mname}**",
-                f"{bold}{params}{bold}",
+                params,
                 flops,
                 cuda_lat,
                 mps_lat,
                 cpu_lat,
-                f"{bold}Verified{bold}"
+                "Verified"
             ]
 
     return update_table_rows(content, "Table 11: Computational Complexity", updates)
@@ -588,8 +610,6 @@ def update_table12_external(content: str, json_path: Path) -> str:
     for mname, m in models_data.items():
         if isinstance(m, dict):
             row_name = row_mapping.get(mname, mname)
-            is_winner = "Full" in row_name
-            bold = "**" if is_winner else ""
             updates[row_name] = [
                 f"**{row_name}**",
                 format_num(m.get("open_win_acc")),
@@ -597,7 +617,7 @@ def update_table12_external(content: str, json_path: Path) -> str:
                 format_num(m.get("closed_win_acc")),
                 format_num(m.get("closed_vid_acc")),
                 format_f1(m.get("closed_vid_f1")),
-                f"{bold}Verified{bold}"
+                "Verified"
             ]
 
     return update_table_rows(content, "Table 12: Strength & Conditioning", updates)
@@ -634,19 +654,21 @@ def verify_results_final(content: str, out_dir: Path, tolerance: float = 0.05) -
             full_m = skel_full["SLSQP Soft Voting"]
             expected_win = full_m.get("win_acc_mean")
             expected_vid = full_m.get("vid_acc_mean")
-            # Find SkelGym-Full row in Table 6
-            t6_lines = [l for l in content.splitlines() if "SkelGym-Full (5 Streams)" in l and "SLSQP" in l]
+            t6_lines = [l for l in content.splitlines() if ("SkelGym-Full (5 Streams)" in l or "SLSQP Soft Voting" in l) and l.strip().startswith("|")]
             if t6_lines:
                 line = t6_lines[0]
-                nums = re.findall(r"(\d+\.\d+)%", line)
-                if nums:
-                    # In Table 6, col 5 is test win acc, col 7 is test vid acc
-                    reported_win = float(nums[0])
-                    reported_vid = float(nums[2]) if len(nums) > 2 else float(nums[1])
-                    if abs(reported_win - expected_win) > tolerance:
-                        raise ValueError(f"Table 6 SkelGym-Full win acc mismatch: reported {reported_win}%, expected {expected_win}%")
-                    if abs(reported_vid - expected_vid) > tolerance:
-                        raise ValueError(f"Table 6 SkelGym-Full vid acc mismatch: reported {reported_vid}%, expected {expected_vid}%")
+                # Columns: | Exp/Model | Protocol | Val Win | Val Vid | Test Win | Test F1 | Test Vid | Vid F1 | Status |
+                parts = [p.strip() for p in line.split("|")]
+                if len(parts) >= 9:
+                    m_win = re.search(r"(\d+\.\d+)%", parts[5])
+                    m_vid = re.search(r"(\d+\.\d+)%", parts[7])
+                    if m_win and m_vid:
+                        reported_win = float(m_win.group(1))
+                        reported_vid = float(m_vid.group(1))
+                        if abs(reported_win - expected_win) > tolerance:
+                            raise ValueError(f"Table 6 SkelGym-Full win acc mismatch: reported {reported_win}%, expected {expected_win}%")
+                        if abs(reported_vid - expected_vid) > tolerance:
+                            raise ValueError(f"Table 6 SkelGym-Full vid acc mismatch: reported {reported_vid}%, expected {expected_vid}%")
         print("  [Pass] Table 6 numerical values verified against multi_seed_evaluation_results.json")
 
     # 3. Verify Table 7 against consensus_gains.json
@@ -741,10 +763,18 @@ def main():
     print(f"Updating {rf.name} for Phase: {args.phase} ...")
 
     if args.phase in ("all", "1a"):
-        content = update_table2_feature_screening(content, out_dir / "table1_feature_screening.json")
+        t1_multiseed = out_dir / "table1_feature_screening_multiseed.json"
+        if not t1_multiseed.exists():
+            t1_multiseed = Path("artifacts/results/table1_feature_screening_multiseed.json")
+        t1_path = t1_multiseed if t1_multiseed.exists() else out_dir / "table1_feature_screening.json"
+        content = update_table2_feature_screening(content, t1_path)
 
     if args.phase in ("all", "1b", "3"):
-        content = update_table3_graph_streams(content, out_dir / "graph_streams_results.json")
+        t3_multiseed = out_dir / "graph_streams_multiseed.json"
+        if not t3_multiseed.exists():
+            t3_multiseed = Path("artifacts/results/graph_streams_multiseed.json")
+        t3_path = t3_multiseed if t3_multiseed.exists() else out_dir / "graph_streams_results.json"
+        content = update_table3_graph_streams(content, t3_path)
         content = update_table6_fusion(content, out_dir / "multi_seed_evaluation_results.json")
         content = update_table7_consensus(content, out_dir / "consensus_gains.json")
 
