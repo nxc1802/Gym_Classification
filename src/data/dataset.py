@@ -639,7 +639,8 @@ def get_dataloaders(
     max_zero_ratio: float = 0.20,
     seed: Optional[int] = None,
     norm_artifact_path: Optional[Union[str, Path]] = None,
-    save_norm_artifact: bool = True
+    save_norm_artifact: bool = True,
+    strict_norm: bool = False
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
     """
     Constructs train, validation, and test DataLoaders.
@@ -688,14 +689,28 @@ def get_dataloaders(
             cand_p = Path("artifacts") / "reference" / f"seed{seed}" / f"normalization_{feature_method}.npz"
             if cand_p.exists():
                 target_artifact_p = cand_p
+            elif strict_norm:
+                raise FileNotFoundError(
+                    f"Strict normalization error: Artifact for seed {seed} and feature {feature_method} "
+                    f"not found at {cand_p}. Cross-seed fallback is prohibited under strict_norm."
+                )
             else:
                 cand_root = Path("artifacts") / "reference" / f"normalization_{feature_method}.npz"
                 if cand_root.exists():
                     target_artifact_p = cand_root
+        else:
+            cand_root = Path("artifacts") / "reference" / f"normalization_{feature_method}.npz"
+            if cand_root.exists():
+                target_artifact_p = cand_root
 
         if target_artifact_p and target_artifact_p.exists():
             train_mean, train_std = load_normalization_artifact(target_artifact_p)
             loaded_stats = True
+        elif strict_norm:
+            raise FileNotFoundError(
+                f"Strict normalization requested (seed={seed}, feature={feature_method}), "
+                f"but artifact was not found at {target_artifact_p}. Refusing to recompute dynamically."
+            )
         elif len(train_ds) > 0:
             train_mean, train_std = _compute_train_stats(train_ds)
             if save_norm_artifact and seed is not None:

@@ -220,7 +220,15 @@ def main():
 
     # 3. Multi-Seed Model Evaluation Loop
     seeds = args.seeds if args.seeds else [42]
-    eval_models = ["ST-GCN (Rel 3D)", "Transformer (Mix)", "AAGCN (Bone 3D)", "SkelGym-Lite", "SkelGym-Full"]
+    eval_models = [
+        "ST-GCN (Rel 3D)",
+        "LSTM (Mix 117-d)",
+        "BiLSTM (Mix 117-d)",
+        "Transformer (Mix)",
+        "AAGCN (Bone 3D)",
+        "SkelGym-Lite",
+        "SkelGym-Full"
+    ]
     print(f"\n[3/7] Executing evaluation across {len(seeds)} random seed(s): {seeds}...")
 
     all_seed_results_open = []
@@ -232,6 +240,8 @@ def main():
 
     model_defs = {
         "ST-GCN (Rel 3D)": ("STGCN", "rel_3d", "checkpoints/best_STGCN_T3.2_rel_3d.pt"),
+        "LSTM (Mix 117-d)": ("LSTM", "mix", "checkpoints/best_LSTM_T1.9_mix.pt"),
+        "BiLSTM (Mix 117-d)": ("BiLSTM", "mix", "checkpoints/best_BiLSTM_T1.18_mix.pt"),
         "Transformer (Mix)": ("Transformer", "mix", "checkpoints/best_Transformer_T2.2_mix.pt"),
         "AAGCN (Bone 3D)": ("AAGCN", "bone_3d", "checkpoints/best_AAGCN_T4.2_bone_3d.pt"),
         "AAGCN (Rel 3D)": ("AAGCN", "rel_3d", "checkpoints/best_AAGCN_T4.3_rel_3d.pt"),
@@ -254,8 +264,8 @@ def main():
 
         test_probs = {}
         for name, (m_type, f_type, ckpt_p) in model_defs.items():
-            if name == "ST-GCN (Rel 3D)" and seed != 42:
-                # Baseline ST-GCN was trained exclusively on canonical seed 42
+            if name in ["ST-GCN (Rel 3D)", "LSTM (Mix 117-d)", "BiLSTM (Mix 117-d)"] and seed != 42:
+                # Baseline models were trained exclusively on canonical seed 42
                 continue
             ckpt_full = find_checkpoint_path(ckpt_p, seed)
             model = load_checkpoint(m_type, f_type, str(ckpt_full), device)

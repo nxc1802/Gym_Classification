@@ -1,0 +1,67 @@
+{
+  "Unaugmented Trans vs SkelGym-Aug Trans": {
+    "win_chi2": 47.77,
+    "win_p": "3.20e-12",
+    "win_p_holm": "6.39e-12",
+    "win_odds_ratio": 1.92,
+    "vid_wilcoxon_w": "11104.0",
+    "vid_wilcoxon_p": "0.0142",
+    "vid_wilcoxon_p_holm": "0.0283",
+    "vid_paired_t_p": "0.0048",
+    "vid_cohens_d": "+0.187",
+    "significance": "*",
+    "status": "Verified"
+  },
+  "Fixed ST-GCN vs Adaptive Four-Stream AAGCN": {
+    "win_chi2": 155.34,
+    "win_p": "3.84e-37",
+    "win_p_holm": "1.92e-36",
+    "win_odds_ratio": 2.92,
+    "vid_wilcoxon_w": "9338.0",
+    "vid_wilcoxon_p": "3.08e-05",
+    "vid_wilcoxon_p_holm": "9.24e-05",
+    "vid_paired_t_p": "3.89e-06",
+    "vid_cohens_d": "+0.310",
+    "significance": "***",
+    "status": "Verified"
+  },
+  "Single Sequence (Trans) vs SkelGym-Full": {
+    "win_chi2": 2.16,
+    "win_p": "0.1416",
+    "win_p_holm": "0.1416",
+    "win_odds_ratio": 1.17,
+    "vid_wilcoxon_w": "8050.0",
+    "vid_wilcoxon_p": "6.03e-08",
+    "vid_wilcoxon_p_holm": "3.01e-07",
+    "vid_paired_t_p": "1.84e-05",
+    "vid_cohens_d": "-0.287",
+    "significance": "***",
+    "status": "Verified"
+  },
+  "Single Graph (AAGCN Bone) vs SkelGym-Full": {
+    "win_chi2": 63.58,
+    "win_p": "2.40e-16",
+    "win_p_holm": "9.61e-16",
+    "win_odds_ratio": 3.52,
+    "vid_wilcoxon_w": "12219.0",
+    "vid_wilcoxon_p": "0.1706",
+    "vid_wilcoxon_p_holm": "0.1706",
+    "vid_paired_t_p": "0.0614",
+    "vid_cohens_d": "+0.123",
+    "significance": "n.s.",
+    "status": "Verified"
+  },
+  "Four-Stream Graph AAGCN vs SkelGym-Full": {
+    "win_chi2": 57.14,
+    "win_p": "6.69e-15",
+    "win_p_holm": "2.01e-14",
+    "win_odds_ratio": 3.73,
+    "vid_wilcoxon_w": "8207.0",
+    "vid_wilcoxon_p": "1.40e-07",
+    "vid_wilcoxon_p_holm": "5.59e-07",
+    "vid_paired_t_p": "1.33e-05",
+    "vid_cohens_d": "+0.292",
+    "significance": "***",
+    "status": "Verified"
+  }
+}

@@ -47,9 +47,13 @@ def archive_provenance(output_dir: str = "artifacts/results") -> Path:
         "graph_streams_results.json",
         "augmentation_ablation_results.json",
         "multi_seed_evaluation_results.json",
+        "consensus_gains.json",
+        "statistical_tests_report.json",
+        "bootstrap_confidence_intervals.json",
         "per_class_results.json",
         "hardware_latency.json",
         "external_benchmark_results.json",
+        "canonical_eval_predictions.npz",
         "bootstrap_confidence_intervals.md",
         "statistical_tests_report.md"
     ]
@@ -80,12 +84,13 @@ def archive_provenance(output_dir: str = "artifacts/results") -> Path:
                     "sha256": compute_sha256(pt_file)
                 }
 
-    # Normalization hashes
+    # Normalization hashes (all seeds)
     norm_hashes = {}
     ref_dir = PROJECT_ROOT / "artifacts" / "reference"
     if ref_dir.exists():
-        for npz in sorted(ref_dir.glob("normalization_*.npz")):
-            norm_hashes[npz.name] = {
+        for npz in sorted(ref_dir.glob("**/*.npz")):
+            rel = str(npz.relative_to(ref_dir))
+            norm_hashes[rel] = {
                 "size_bytes": npz.stat().st_size,
                 "sha256": compute_sha256(npz)
             }
@@ -94,9 +99,15 @@ def archive_provenance(output_dir: str = "artifacts/results") -> Path:
     meta_path = PROJECT_ROOT / "data" / "Final_dataset_metadata.csv"
     meta_hash = compute_sha256(meta_path) if meta_path.exists() else None
 
+    git_current = get_git_info()
     manifest = {
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
-        "git": get_git_info(),
+        "git": git_current,
+        "provenance_commits": {
+            "training_commit": "cb288b6",
+            "evaluation_commit": git_current.get("commit"),
+            "report_generation_commit": git_current.get("commit")
+        },
         "dataset_metadata_sha256": meta_hash,
         "seeds": [42, 123, 3407],
         "normalization_artifacts": norm_hashes,

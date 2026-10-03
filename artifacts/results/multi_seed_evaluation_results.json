@@ -7,6 +7,7 @@
   "summary": {
     "individual": {
       "AAGCN Bone (Aug)": {
+        "n_seeds": 3,
         "win_acc_mean": 66.59375379754528,
         "win_acc_sd": 1.433128981679969,
         "win_f1_mean": 0.6587194258800914,
@@ -25,6 +26,7 @@
         "val_vid_f1_sd": 0.010262472411443995
       },
       "AAGCN Bone Motion (Aug)": {
+        "n_seeds": 3,
         "win_acc_mean": 55.2801069388747,
         "win_acc_sd": 0.689145552497645,
         "win_f1_mean": 0.5462159879014296,
@@ -43,24 +45,26 @@
         "val_vid_f1_sd": 0.03440889743960453
       },
       "AAGCN Clean": {
+        "n_seeds": 1,
         "win_acc_mean": 59.496901203062336,
-        "win_acc_sd": 0.0,
+        "win_acc_sd": null,
         "win_f1_mean": 0.5960288353944649,
-        "win_f1_sd": 0.0,
+        "win_f1_sd": null,
         "vid_acc_mean": 69.52789699570815,
-        "vid_acc_sd": 0.0,
+        "vid_acc_sd": null,
         "vid_f1_mean": 0.6904139351636569,
-        "vid_f1_sd": 0.0,
+        "vid_f1_sd": null,
         "val_win_acc_mean": 75.6144578313253,
-        "val_win_acc_sd": 0.0,
+        "val_win_acc_sd": null,
         "val_win_f1_mean": 0.74297342714293,
-        "val_win_f1_sd": 0.0,
+        "val_win_f1_sd": null,
         "val_vid_acc_mean": 76.32850241545893,
-        "val_vid_acc_sd": 0.0,
+        "val_vid_acc_sd": null,
         "val_vid_f1_mean": 0.7860146090615749,
-        "val_vid_f1_sd": 0.0
+        "val_vid_f1_sd": null
       },
       "AAGCN Joint Motion (Aug)": {
+        "n_seeds": 3,
         "win_acc_mean": 49.92101105845182,
         "win_acc_sd": 0.23438208192959095,
         "win_f1_mean": 0.49240700809117516,
@@ -79,6 +83,7 @@
         "val_vid_f1_sd": 0.02355020306117513
       },
       "AAGCN Rel (Aug)": {
+        "n_seeds": 3,
         "win_acc_mean": 65.24486571879937,
         "win_acc_sd": 1.1854415747485434,
         "win_f1_mean": 0.6364762338991377,
@@ -97,78 +102,83 @@
         "val_vid_f1_sd": 0.001951063828198031
       },
       "BiLSTM Baseline": {
+        "n_seeds": 1,
         "win_acc_mean": 61.24681006197594,
-        "win_acc_sd": 0.0,
+        "win_acc_sd": null,
         "win_f1_mean": 0.6014666344089619,
-        "win_f1_sd": 0.0,
+        "win_f1_sd": null,
         "vid_acc_mean": 68.6695278969957,
-        "vid_acc_sd": 0.0,
+        "vid_acc_sd": null,
         "vid_f1_mean": 0.6830384367418708,
-        "vid_f1_sd": 0.0,
+        "vid_f1_sd": null,
         "val_win_acc_mean": 73.25301204819277,
-        "val_win_acc_sd": 0.0,
+        "val_win_acc_sd": null,
         "val_win_f1_mean": 0.7268400876344828,
-        "val_win_f1_sd": 0.0,
+        "val_win_f1_sd": null,
         "val_vid_acc_mean": 75.84541062801932,
-        "val_vid_acc_sd": 0.0,
+        "val_vid_acc_sd": null,
         "val_vid_f1_mean": 0.7771443592078939,
-        "val_vid_f1_sd": 0.0
+        "val_vid_f1_sd": null
       },
       "LSTM Baseline": {
+        "n_seeds": 1,
         "win_acc_mean": 57.63762304046664,
-        "win_acc_sd": 0.0,
+        "win_acc_sd": null,
         "win_f1_mean": 0.5675984421785487,
-        "win_f1_sd": 0.0,
+        "win_f1_sd": null,
         "vid_acc_mean": 67.38197424892704,
-        "vid_acc_sd": 0.0,
+        "vid_acc_sd": null,
         "vid_f1_mean": 0.6579541996921677,
-        "vid_f1_sd": 0.0,
+        "vid_f1_sd": null,
         "val_win_acc_mean": 73.39759036144578,
-        "val_win_acc_sd": 0.0,
+        "val_win_acc_sd": null,
         "val_win_f1_mean": 0.7202965522778734,
-        "val_win_f1_sd": 0.0,
+        "val_win_f1_sd": null,
         "val_vid_acc_mean": 77.29468599033817,
-        "val_vid_acc_sd": 0.0,
+        "val_vid_acc_sd": null,
         "val_vid_f1_mean": 0.7619265118671886,
-        "val_vid_f1_sd": 0.0
+        "val_vid_f1_sd": null
       },
       "ST-GCN Baseline": {
+        "n_seeds": 1,
         "win_acc_mean": 54.757564710171344,
-        "win_acc_sd": 0.0,
+        "win_acc_sd": null,
         "win_f1_mean": 0.5240450266320452,
-        "win_f1_sd": 0.0,
+        "win_f1_sd": null,
         "vid_acc_mean": 63.0901287553648,
-        "vid_acc_sd": 0.0,
+        "vid_acc_sd": null,
         "vid_f1_mean": 0.5992798655684531,
-        "vid_f1_sd": 0.0,
+        "vid_f1_sd": null,
         "val_win_acc_mean": 64.91566265060241,
-        "val_win_acc_sd": 0.0,
+        "val_win_acc_sd": null,
         "val_win_f1_mean": 0.6665971750980744,
-        "val_win_f1_sd": 0.0,
+        "val_win_f1_sd": null,
         "val_vid_acc_mean": 71.49758454106279,
-        "val_vid_acc_sd": 0.0,
+        "val_vid_acc_sd": null,
         "val_vid_f1_mean": 0.7244626783719437,
-        "val_vid_f1_sd": 0.0
+        "val_vid_f1_sd": null
       },
       "Transformer Clean": {
+        "n_seeds": 1,
         "win_acc_mean": 63.39773970105723,
-        "win_acc_sd": 0.0,
+        "win_acc_sd": null,
         "win_f1_mean": 0.6217924036734034,
-        "win_f1_sd": 0.0,
+        "win_f1_sd": null,
         "vid_acc_mean": 74.2489270386266,
-        "vid_acc_sd": 0.0,
+        "vid_acc_sd": null,
         "vid_f1_mean": 0.7303690730683886,
-        "vid_f1_sd": 0.0,
+        "vid_f1_sd": null,
         "val_win_acc_mean": 75.95180722891565,
-        "val_win_acc_sd": 0.0,
+        "val_win_acc_sd": null,
         "val_win_f1_mean": 0.7505059022044196,
-        "val_win_f1_sd": 0.0,
+        "val_win_f1_sd": null,
         "val_vid_acc_mean": 75.84541062801932,
-        "val_vid_acc_sd": 0.0,
+        "val_vid_acc_sd": null,
         "val_vid_f1_mean": 0.7733965595807702,
-        "val_vid_f1_sd": 0.0
+        "val_vid_f1_sd": null
       },
       "Transformer Mix (Aug)": {
+        "n_seeds": 3,
         "win_acc_mean": 66.26564588649897,
         "win_acc_sd": 2.752480928704435,
         "win_f1_mean": 0.6544120318402994,
@@ -190,6 +200,7 @@
     "fusion_methods": {
       "Four-Stream AAGCN (Aug)": {
         "Accuracy-Weighted Soft": {
+          "n_seeds": 3,
           "win_acc_mean": 71.33309029043626,
           "win_acc_sd": 0.18349336335570873,
           "win_f1_mean": 0.7042463999518204,
@@ -208,6 +219,7 @@
           "val_vid_f1_sd": 0.007753619175424138
         },
         "Hard Voting": {
+          "n_seeds": 3,
           "win_acc_mean": 66.97047028800584,
           "win_acc_sd": 0.23906082844702622,
           "win_f1_mean": 0.6676463765663713,
@@ -226,6 +238,7 @@
           "val_vid_f1_sd": 0.004700524078154149
         },
         "SLSQP Soft Voting": {
+          "n_seeds": 3,
           "win_acc_mean": 67.61453396524486,
           "win_acc_sd": 1.4611406663989095,
           "win_f1_mean": 0.6687940399624951,
@@ -256,6 +269,7 @@
           ]
         },
         "Stacking Meta-Classifier": {
+          "n_seeds": 3,
           "win_acc_mean": 72.17158828533236,
           "win_acc_sd": 0.39321156124348866,
           "win_f1_mean": 0.711585076169199,
@@ -274,6 +288,7 @@
           "val_vid_f1_sd": 0.010154783640009758
         },
         "Uniform Soft Voting": {
+          "n_seeds": 3,
           "win_acc_mean": 71.7948717948718,
           "win_acc_sd": 0.20730006208813212,
           "win_f1_mean": 0.7085778809990528,
@@ -294,6 +309,7 @@
       },
       "SkelGym-Full": {
         "Accuracy-Weighted Soft": {
+          "n_seeds": 3,
           "win_acc_mean": 72.5604569206465,
           "win_acc_sd": 0.8759665228309688,
           "win_f1_mean": 0.7183099361451682,
@@ -312,6 +328,7 @@
           "val_vid_f1_sd": 0.007501906209468563
         },
         "Hard Voting": {
+          "n_seeds": 3,
           "win_acc_mean": 70.61611374407583,
           "win_acc_sd": 0.5395059637968883,
           "win_f1_mean": 0.7016525393624921,
@@ -330,6 +347,7 @@
           "val_vid_f1_sd": 0.0086084373086484
         },
         "SLSQP Soft Voting": {
+          "n_seeds": 3,
           "win_acc_mean": 69.72900716976547,
           "win_acc_sd": 1.0975344697956626,
           "win_f1_mean": 0.6880907475772838,
@@ -362,6 +380,7 @@
           ]
         },
         "Stacking Meta-Classifier": {
+          "n_seeds": 3,
           "win_acc_mean": 73.53262850893184,
           "win_acc_sd": 0.9106814434412481,
           "win_f1_mean": 0.7250420296595975,
@@ -380,6 +399,7 @@
           "val_vid_f1_sd": 0.012842460850513986
         },
         "Uniform Soft Voting": {
+          "n_seeds": 3,
           "win_acc_mean": 73.04654271478917,
           "win_acc_sd": 0.747431003265608,
           "win_f1_mean": 0.7225844267403755,
@@ -400,6 +420,7 @@
       },
       "SkelGym-Lite": {
         "Accuracy-Weighted Soft": {
+          "n_seeds": 3,
           "win_acc_mean": 69.69255073520476,
           "win_acc_sd": 1.5959148628535982,
           "win_f1_mean": 0.6873825379384337,
@@ -418,6 +439,7 @@
           "val_vid_f1_sd": 0.00930218296646949
         },
         "Hard Voting": {
+          "n_seeds": 3,
           "win_acc_mean": 64.33345485478186,
           "win_acc_sd": 0.38293720395160685,
           "win_f1_mean": 0.6476046357327242,
@@ -436,6 +458,7 @@
           "val_vid_f1_sd": 0.011197298159662993
         },
         "SLSQP Soft Voting": {
+          "n_seeds": 3,
           "win_acc_mean": 68.25859764248389,
           "win_acc_sd": 0.664601235332382,
           "win_f1_mean": 0.6732303950816741,
@@ -462,6 +485,7 @@
           ]
         },
         "Stacking Meta-Classifier": {
+          "n_seeds": 3,
           "win_acc_mean": 69.38874711386559,
           "win_acc_sd": 0.8267924993643906,
           "win_f1_mean": 0.6804902732030506,
@@ -480,6 +504,7 @@
           "val_vid_f1_sd": 0.01812169020833209
         },
         "Uniform Soft Voting": {
+          "n_seeds": 3,
           "win_acc_mean": 69.70470288005832,
           "win_acc_sd": 1.5159039654605717,
           "win_f1_mean": 0.6877639416893668,
@@ -500,6 +525,7 @@
       },
       "Two-Stream AAGCN (Aug)": {
         "Accuracy-Weighted Soft": {
+          "n_seeds": 3,
           "win_acc_mean": 68.25859764248389,
           "win_acc_sd": 0.5312308420074017,
           "win_f1_mean": 0.6738818153691789,
@@ -518,6 +544,7 @@
           "val_vid_f1_sd": 0.006229163361281804
         },
         "Hard Voting": {
+          "n_seeds": 3,
           "win_acc_mean": 63.75015190181066,
           "win_acc_sd": 0.29240999916189486,
           "win_f1_mean": 0.6423517655487662,
@@ -536,6 +563,7 @@
           "val_vid_f1_sd": 0.0018121441088412458
         },
         "SLSQP Soft Voting": {
+          "n_seeds": 3,
           "win_acc_mean": 67.26212176449143,
           "win_acc_sd": 1.4081814010811433,
           "win_f1_mean": 0.6651533155012569,
@@ -562,6 +590,7 @@
           ]
         },
         "Stacking Meta-Classifier": {
+          "n_seeds": 3,
           "win_acc_mean": 68.50164053955523,
           "win_acc_sd": 0.2551950419248996,
           "win_f1_mean": 0.6743808756960266,
@@ -580,6 +609,7 @@
           "val_vid_f1_sd": 0.014144994826788656
         },
         "Uniform Soft Voting": {
+          "n_seeds": 3,
           "win_acc_mean": 68.42872767043384,
           "win_acc_sd": 0.35157312289438714,
           "win_f1_mean": 0.6739741823044875,

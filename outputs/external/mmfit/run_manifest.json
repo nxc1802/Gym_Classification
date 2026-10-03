@@ -7,10 +7,12 @@
   "num_windows": 878,
   "evaluated_models": [
     "ST-GCN (Rel 3D)",
+    "LSTM (Mix 117-d)",
+    "BiLSTM (Mix 117-d)",
     "Transformer (Mix)",
     "AAGCN (Bone 3D)",
     "SkelGym-Lite",
     "SkelGym-Full"
   ],
-  "timestamp": "2026-10-02 00:01:28.797980"
+  "timestamp": "2026-10-03 12:37:07.885060"
 }

@@ -1,238 +1,244 @@
 {
-  "barbell biceps curl": {
-    "win_precision": 0.3463687150837989,
-    "win_recall": 0.8985507246376812,
-    "win_f1": 0.5,
-    "win_support": 69,
-    "vid_precision": 0.5833333333333334,
-    "vid_recall": 1.0,
-    "vid_f1": 0.7368421052631579,
-    "vid_support": 14
-  },
-  "bench press": {
-    "win_precision": 0.3522727272727273,
-    "win_recall": 0.6458333333333334,
-    "win_f1": 0.45588235294117646,
-    "win_support": 96,
-    "vid_precision": 0.5625,
-    "vid_recall": 0.6428571428571429,
-    "vid_f1": 0.6,
-    "vid_support": 14
-  },
-  "chest fly machine": {
-    "win_precision": 0.9418604651162791,
-    "win_recall": 0.9878048780487805,
-    "win_f1": 0.9642857142857143,
-    "win_support": 82,
-    "vid_precision": 0.875,
-    "vid_recall": 0.875,
-    "vid_f1": 0.875,
-    "vid_support": 8
-  },
-  "deadlift": {
-    "win_precision": 0.24096385542168675,
-    "win_recall": 0.5970149253731343,
-    "win_f1": 0.34334763948497854,
-    "win_support": 67,
-    "vid_precision": 0.6,
-    "vid_recall": 0.9,
-    "vid_f1": 0.72,
-    "vid_support": 10
-  },
-  "decline bench press": {
-    "win_precision": 0.5347222222222222,
-    "win_recall": 0.5746268656716418,
-    "win_f1": 0.5539568345323741,
-    "win_support": 134,
-    "vid_precision": 0.5,
-    "vid_recall": 0.625,
-    "vid_f1": 0.5555555555555556,
-    "vid_support": 8
-  },
-  "hammer curl": {
-    "win_precision": 0.574468085106383,
-    "win_recall": 0.33540372670807456,
-    "win_f1": 0.4235294117647059,
-    "win_support": 161,
-    "vid_precision": 0.8,
-    "vid_recall": 0.2857142857142857,
-    "vid_f1": 0.42105263157894735,
-    "vid_support": 14
-  },
-  "hip thrust": {
-    "win_precision": 0.8782051282051282,
-    "win_recall": 0.5805084745762712,
-    "win_f1": 0.6989795918367347,
-    "win_support": 236,
-    "vid_precision": 0.8888888888888888,
-    "vid_recall": 0.8888888888888888,
-    "vid_f1": 0.8888888888888888,
-    "vid_support": 9
-  },
-  "incline bench press": {
-    "win_precision": 0.7777777777777778,
-    "win_recall": 0.6447368421052632,
-    "win_f1": 0.7050359712230215,
-    "win_support": 76,
-    "vid_precision": 0.75,
-    "vid_recall": 0.3333333333333333,
-    "vid_f1": 0.46153846153846156,
-    "vid_support": 9
-  },
-  "lat pulldown": {
-    "win_precision": 0.6012658227848101,
-    "win_recall": 0.95,
-    "win_f1": 0.7364341085271318,
-    "win_support": 100,
-    "vid_precision": 0.7222222222222222,
-    "vid_recall": 1.0,
-    "vid_f1": 0.8387096774193549,
-    "vid_support": 13
-  },
-  "lateral raise": {
-    "win_precision": 0.9090909090909091,
-    "win_recall": 0.9032258064516129,
-    "win_f1": 0.9061488673139159,
-    "win_support": 155,
-    "vid_precision": 1.0,
-    "vid_recall": 1.0,
-    "vid_f1": 1.0,
-    "vid_support": 15
-  },
-  "leg extension": {
-    "win_precision": 0.9920634920634921,
-    "win_recall": 1.0,
-    "win_f1": 0.9960159362549801,
-    "win_support": 125,
-    "vid_precision": 1.0,
-    "vid_recall": 1.0,
-    "vid_f1": 1.0,
-    "vid_support": 13
-  },
-  "leg raises": {
-    "win_precision": 1.0,
-    "win_recall": 0.6140350877192983,
-    "win_f1": 0.7608695652173914,
-    "win_support": 114,
-    "vid_precision": 1.0,
-    "vid_recall": 0.8181818181818182,
-    "vid_f1": 0.9,
-    "vid_support": 11
-  },
-  "plank": {
-    "win_precision": 0.7441860465116279,
-    "win_recall": 0.5714285714285714,
-    "win_f1": 0.6464646464646465,
-    "win_support": 56,
-    "vid_precision": 0.3333333333333333,
-    "vid_recall": 0.5,
-    "vid_f1": 0.4,
-    "vid_support": 2
-  },
-  "pull Up": {
-    "win_precision": 0.9104477611940298,
-    "win_recall": 0.7439024390243902,
-    "win_f1": 0.8187919463087249,
-    "win_support": 82,
-    "vid_precision": 1.0,
-    "vid_recall": 0.7,
-    "vid_f1": 0.8235294117647058,
-    "vid_support": 10
-  },
-  "push-up": {
-    "win_precision": 0.7610619469026548,
-    "win_recall": 0.9885057471264368,
-    "win_f1": 0.86,
-    "win_support": 87,
-    "vid_precision": 0.8571428571428571,
-    "vid_recall": 1.0,
-    "vid_f1": 0.9230769230769231,
-    "vid_support": 12
-  },
-  "romanian deadlift": {
-    "win_precision": 0.5108695652173914,
-    "win_recall": 0.3219178082191781,
-    "win_f1": 0.3949579831932773,
-    "win_support": 146,
-    "vid_precision": 0.6666666666666666,
-    "vid_recall": 0.3333333333333333,
-    "vid_f1": 0.4444444444444444,
-    "vid_support": 6
-  },
-  "russian twist": {
-    "win_precision": 0.9172932330827067,
-    "win_recall": 0.8905109489051095,
-    "win_f1": 0.9037037037037037,
-    "win_support": 137,
-    "vid_precision": 1.0,
-    "vid_recall": 1.0,
-    "vid_f1": 1.0,
-    "vid_support": 6
-  },
-  "shoulder press": {
-    "win_precision": 0.69,
-    "win_recall": 0.45394736842105265,
-    "win_f1": 0.5476190476190477,
-    "win_support": 152,
-    "vid_precision": 0.7,
-    "vid_recall": 0.5384615384615384,
-    "vid_f1": 0.6086956521739131,
-    "vid_support": 13
-  },
-  "squat": {
-    "win_precision": 0.9192825112107623,
-    "win_recall": 0.8613445378151261,
-    "win_f1": 0.8893709327548807,
-    "win_support": 238,
-    "vid_precision": 1.0,
-    "vid_recall": 1.0,
-    "vid_f1": 1.0,
-    "vid_support": 15
-  },
-  "t bar row": {
-    "win_precision": 0.8285714285714286,
-    "win_recall": 0.49572649572649574,
-    "win_f1": 0.6203208556149733,
-    "win_support": 117,
-    "vid_precision": 1.0,
-    "vid_recall": 0.7,
-    "vid_f1": 0.8235294117647058,
-    "vid_support": 10
-  },
-  "tricep Pushdown": {
-    "win_precision": 0.6454545454545455,
-    "win_recall": 0.7634408602150538,
-    "win_f1": 0.6995073891625616,
-    "win_support": 93,
-    "vid_precision": 0.7857142857142857,
-    "vid_recall": 0.9166666666666666,
-    "vid_f1": 0.8461538461538461,
-    "vid_support": 12
-  },
-  "tricep dips": {
-    "win_precision": 0.9363636363636364,
-    "win_recall": 0.9363636363636364,
-    "win_f1": 0.9363636363636364,
-    "win_support": 220,
-    "vid_precision": 1.0,
-    "vid_recall": 0.8888888888888888,
-    "vid_f1": 0.9411764705882353,
-    "vid_support": 9
-  },
-  "Overall Accuracy": {
-    "win_f1": 0.7105359095880422,
-    "win_support": 2743,
-    "vid_f1": 0.7939914163090128,
-    "vid_support": 233
-  },
-  "Macro Average": {
-    "win_precision": 0.7278449943024544,
-    "win_recall": 0.716310412630461,
-    "win_f1": 0.6982539152076171,
-    "win_support": 2743,
-    "vid_precision": 0.8011273448773448,
-    "vid_recall": 0.7702875407420862,
-    "vid_f1": 0.7640087945550519,
-    "vid_support": 233
+  "classes": {
+    "barbell biceps curl": {
+      "win_precision": 0.322,
+      "win_recall": 0.8261,
+      "win_f1": 0.4634,
+      "win_support": 69,
+      "vid_precision": 0.5652,
+      "vid_recall": 0.9286,
+      "vid_f1": 0.7027,
+      "vid_support": 14
+    },
+    "bench press": {
+      "win_precision": 0.456,
+      "win_recall": 0.5938,
+      "win_f1": 0.5158,
+      "win_support": 96,
+      "vid_precision": 0.6667,
+      "vid_recall": 0.5714,
+      "vid_f1": 0.6154,
+      "vid_support": 14
+    },
+    "chest fly machine": {
+      "win_precision": 0.8333,
+      "win_recall": 0.9756,
+      "win_f1": 0.8989,
+      "win_support": 82,
+      "vid_precision": 0.875,
+      "vid_recall": 0.875,
+      "vid_f1": 0.875,
+      "vid_support": 8
+    },
+    "deadlift": {
+      "win_precision": 0.3258,
+      "win_recall": 0.6418,
+      "win_f1": 0.4322,
+      "win_support": 67,
+      "vid_precision": 0.6429,
+      "vid_recall": 0.9,
+      "vid_f1": 0.75,
+      "vid_support": 10
+    },
+    "decline bench press": {
+      "win_precision": 0.4082,
+      "win_recall": 0.597,
+      "win_f1": 0.4848,
+      "win_support": 134,
+      "vid_precision": 0.4545,
+      "vid_recall": 0.625,
+      "vid_f1": 0.5263,
+      "vid_support": 8
+    },
+    "hammer curl": {
+      "win_precision": 0.4948,
+      "win_recall": 0.2981,
+      "win_f1": 0.3721,
+      "win_support": 161,
+      "vid_precision": 0.6667,
+      "vid_recall": 0.4286,
+      "vid_f1": 0.5217,
+      "vid_support": 14
+    },
+    "hip thrust": {
+      "win_precision": 0.8606,
+      "win_recall": 0.6017,
+      "win_f1": 0.7082,
+      "win_support": 236,
+      "vid_precision": 0.8889,
+      "vid_recall": 0.8889,
+      "vid_f1": 0.8889,
+      "vid_support": 9
+    },
+    "incline bench press": {
+      "win_precision": 0.7302,
+      "win_recall": 0.6053,
+      "win_f1": 0.6619,
+      "win_support": 76,
+      "vid_precision": 1.0,
+      "vid_recall": 0.6667,
+      "vid_f1": 0.8,
+      "vid_support": 9
+    },
+    "lat pulldown": {
+      "win_precision": 0.5563,
+      "win_recall": 0.89,
+      "win_f1": 0.6846,
+      "win_support": 100,
+      "vid_precision": 0.65,
+      "vid_recall": 1.0,
+      "vid_f1": 0.7879,
+      "vid_support": 13
+    },
+    "lateral raise": {
+      "win_precision": 0.9205,
+      "win_recall": 0.8968,
+      "win_f1": 0.9085,
+      "win_support": 155,
+      "vid_precision": 1.0,
+      "vid_recall": 1.0,
+      "vid_f1": 1.0,
+      "vid_support": 15
+    },
+    "leg extension": {
+      "win_precision": 0.9921,
+      "win_recall": 1.0,
+      "win_f1": 0.996,
+      "win_support": 125,
+      "vid_precision": 1.0,
+      "vid_recall": 1.0,
+      "vid_f1": 1.0,
+      "vid_support": 13
+    },
+    "leg raises": {
+      "win_precision": 1.0,
+      "win_recall": 0.4649,
+      "win_f1": 0.6347,
+      "win_support": 114,
+      "vid_precision": 1.0,
+      "vid_recall": 0.5455,
+      "vid_f1": 0.7059,
+      "vid_support": 11
+    },
+    "plank": {
+      "win_precision": 0.9024,
+      "win_recall": 0.6607,
+      "win_f1": 0.7629,
+      "win_support": 56,
+      "vid_precision": 1.0,
+      "vid_recall": 1.0,
+      "vid_f1": 1.0,
+      "vid_support": 2
+    },
+    "pull Up": {
+      "win_precision": 0.7125,
+      "win_recall": 0.6951,
+      "win_f1": 0.7037,
+      "win_support": 82,
+      "vid_precision": 1.0,
+      "vid_recall": 0.7,
+      "vid_f1": 0.8235,
+      "vid_support": 10
+    },
+    "push-up": {
+      "win_precision": 0.7727,
+      "win_recall": 0.977,
+      "win_f1": 0.8629,
+      "win_support": 87,
+      "vid_precision": 0.8571,
+      "vid_recall": 1.0,
+      "vid_f1": 0.9231,
+      "vid_support": 12
+    },
+    "romanian deadlift": {
+      "win_precision": 0.5455,
+      "win_recall": 0.3699,
+      "win_f1": 0.4408,
+      "win_support": 146,
+      "vid_precision": 0.5,
+      "vid_recall": 0.3333,
+      "vid_f1": 0.4,
+      "vid_support": 6
+    },
+    "russian twist": {
+      "win_precision": 0.8239,
+      "win_recall": 0.854,
+      "win_f1": 0.8387,
+      "win_support": 137,
+      "vid_precision": 0.6667,
+      "vid_recall": 1.0,
+      "vid_f1": 0.8,
+      "vid_support": 6
+    },
+    "shoulder press": {
+      "win_precision": 0.7209,
+      "win_recall": 0.4079,
+      "win_f1": 0.521,
+      "win_support": 152,
+      "vid_precision": 0.625,
+      "vid_recall": 0.3846,
+      "vid_f1": 0.4762,
+      "vid_support": 13
+    },
+    "squat": {
+      "win_precision": 0.8625,
+      "win_recall": 0.8697,
+      "win_f1": 0.8661,
+      "win_support": 238,
+      "vid_precision": 1.0,
+      "vid_recall": 1.0,
+      "vid_f1": 1.0,
+      "vid_support": 15
+    },
+    "t bar row": {
+      "win_precision": 0.8471,
+      "win_recall": 0.6154,
+      "win_f1": 0.7129,
+      "win_support": 117,
+      "vid_precision": 1.0,
+      "vid_recall": 0.8,
+      "vid_f1": 0.8889,
+      "vid_support": 10
+    },
+    "tricep Pushdown": {
+      "win_precision": 0.6762,
+      "win_recall": 0.7634,
+      "win_f1": 0.7172,
+      "win_support": 93,
+      "vid_precision": 0.8333,
+      "vid_recall": 0.8333,
+      "vid_f1": 0.8333,
+      "vid_support": 12
+    },
+    "tricep dips": {
+      "win_precision": 0.9393,
+      "win_recall": 0.9136,
+      "win_f1": 0.9263,
+      "win_support": 220,
+      "vid_precision": 1.0,
+      "vid_recall": 0.8889,
+      "vid_f1": 0.9412,
+      "vid_support": 9
+    },
+    "Overall Accuracy": {
+      "win_precision": 0.7007,
+      "win_recall": 0.7007,
+      "win_f1": 0.7007,
+      "win_support": 2743,
+      "vid_precision": 0.7897,
+      "vid_recall": 0.7897,
+      "vid_f1": 0.7897,
+      "vid_support": 233
+    },
+    "Macro Average": {
+      "win_precision": 0.7138,
+      "win_recall": 0.7054,
+      "win_f1": 0.687,
+      "win_support": 2743,
+      "vid_precision": 0.8133,
+      "vid_recall": 0.7895,
+      "vid_f1": 0.7845,
+      "vid_support": 233
+    }
   }
 }

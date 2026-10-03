@@ -109,11 +109,13 @@ def evaluate_models_for_seed(
                 feature_method=feat,
                 batch_size=32,
                 seq_len=32,
-                stride=32,
+                stride=16,
                 val_test_stride=32,
                 landmark_dir=landmark_dir,
                 num_workers=0,
-                in_memory=True
+                in_memory=True,
+                seed=42,
+                strict_norm=True
             )
             dataloaders_cache[feat] = (tr_l, v_l, te_l)
             if val_video_ids is None and hasattr(v_l.dataset, "video_ids"):

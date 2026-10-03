@@ -366,7 +366,8 @@ def evaluate_checkpoint(
         landmark_dir=landmark_dir,
         num_workers=0,
         in_memory=True,
-        seed=seed
+        seed=seed,
+        strict_norm=True
     )
 
     test_video_ids = test_loader.dataset.video_ids

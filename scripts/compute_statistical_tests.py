@@ -121,12 +121,14 @@ def main():
             feature_method=feat,
             batch_size=32,
             seq_len=32,
-            stride=32,
+            stride=16,
             val_test_stride=32,
             landmark_dir=landmark_dir,
             num_workers=0,
             in_memory=True,
-            smoke_test=args.smoke_test
+            smoke_test=args.smoke_test,
+            seed=42,
+            strict_norm=True
         )
         loaders[feat] = (val_l, test_l)
 

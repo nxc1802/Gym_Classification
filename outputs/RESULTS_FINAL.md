@@ -150,17 +150,17 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 
 | Model Architecture | Input Modality / Paradigm | Trainable Params | Test Win Acc (%) | Test Win Macro F1 | Test Vid Acc (%) | Test Vid Macro F1 | Video Gain (+$\Delta$%) | Status |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Baseline LSTM (Mix 117-d)** | Sequential Recurrent Model | 396K | 59.21% | 0.5838 | 68.67% | 0.6757 | +9.46% | Verified |
-| **Baseline BiLSTM (Mix 117-d)** | Bidirectional Recurrent Model | 402K | 60.41% | 0.5898 | 67.81% | 0.6540 | +7.40% | Verified |
-| **Transformer (Mix 117-d, Clean)** | Self-Attention Baseline | 400K | 61.61% | 0.6088 | 74.25% | 0.7272 | +12.64% | Verified |
-| **Baseline ST-GCN (Rel 3D)** | Rigid Static Graph ($A_{\text{phys}}$) | 350K | 58.84% | 0.5658 | 66.95% | 0.6480 | +8.11% | Verified |
-| **Clean Baseline AAGCN (Bone 3D)** | Adaptive Skeletal Graph (Unaugmented) | 378K | 62.56% | 0.6006 | 72.10% | 0.7002 | +9.54% | Verified |
-| **SkelGym-Aug AAGCN (Bone 3D)** | Adaptive Skeletal Graph + Augmentation | 378K | 65.48% | 0.6514 | 73.39% | 0.7304 | +7.91% | Verified |
-| **SkelGym-Aug Transformer (Mix)** | Self-Attention + Augmentation | 400K | 71.53% | 0.6945 | 81.97% | 0.7920 | +10.44% | Verified |
-| **Two-Stream AAGCN (Aug)** | Joint + Bone Stream Fusion | 756K | 67.85% | 0.6720 | 77.68% | 0.7775 | +9.83% | Verified |
-| **Four-Stream AAGCN (Aug)** | 4-Stream Graph Late Fusion | 1.51M | 67.34% | 0.6685 | 77.25% | 0.7740 | +9.91% | Verified |
-| **SkelGym-Lite (2 Models)** | Transformer + Bone AAGCN | 778K | 69.60% | 0.6822 | 77.68% | 0.7626 | +8.08% | Verified |
-| **SkelGym-Full (5 Streams)** | **Cross-Paradigm SLSQP Ensemble** | **1.91M** | 71.05% | 0.6983 | 79.40% | 0.7640 | +8.35% | **Verified** |
+| **Baseline LSTM (Mix 117-d)** | Sequential Recurrent Model | 396K | 57.64% | 0.5676 | 67.38% | 0.6580 | +9.74% | Verified |
+| **Baseline BiLSTM (Mix 117-d)** | Bidirectional Recurrent Model | 402K | 61.25% | 0.6015 | 68.67% | 0.6830 | +7.42% | Verified |
+| **Transformer (Mix 117-d, Clean)** | Self-Attention Baseline | 400K | 63.40% | 0.6218 | 74.25% | 0.7304 | +10.85% | Verified |
+| **Baseline ST-GCN (Rel 3D)** | Rigid Static Graph ($A_{\text{phys}}$) | 350K | 54.76% | 0.5240 | 63.09% | 0.5993 | +8.33% | Verified |
+| **Clean Baseline AAGCN (Bone 3D)** | Adaptive Skeletal Graph (Unaugmented) | 378K | 59.50% | 0.5960 | 69.53% | 0.6904 | +10.03% | Verified |
+| **SkelGym-Aug AAGCN (Bone 3D)** | Adaptive Skeletal Graph + Augmentation | 378K | 66.59% | 0.6587 | 75.82% | 0.7543 | +9.23% | Verified |
+| **SkelGym-Aug Transformer (Mix)** | Self-Attention + Augmentation | 400K | 66.27% | 0.6544 | 75.54% | 0.7430 | +9.27% | Verified |
+| **Two-Stream AAGCN (Aug)** | Joint + Bone Stream Fusion | 756K | 67.26% | 0.6652 | 77.11% | 0.7580 | +9.85% | Verified |
+| **Four-Stream AAGCN (Aug)** | 4-Stream Graph Late Fusion | 1.51M | 67.61% | 0.6688 | 77.54% | 0.7632 | +9.92% | Verified |
+| **SkelGym-Lite (2 Models)** | Transformer + Bone AAGCN | 778K | 68.26% | 0.6732 | 77.68% | 0.7694 | +9.42% | Verified |
+| **SkelGym-Full (5 Streams)** | **Cross-Paradigm SLSQP Ensemble** | **1.91M** | 69.73% | 0.6881 | 78.83% | 0.7807 | +9.10% | **Verified** |
 
 ---
 
@@ -171,11 +171,11 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 
 | Pairwise Comparison ($M_A$ vs. $M_B$) | Window McNemar $\chi^2$ | Window $p$-value | Window Odds Ratio | Video Wilcoxon $W$ | Video $p$-value | Video Paired $t$ | Video Cohen's $d$ | Status |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Unaugmented Trans vs SkelGym-Aug Trans** | 146.21 | $3.89 \times 10^{-35}$ | 3.32 | — | $8.14 \times 10^{-9}$ | $2.75 \times 10^{-8}$ | +0.377 | Verified |
-| **Fixed ST-GCN vs Adaptive Four-Stream AAGCN** | 86.04 | $9.28 \times 10^{-21}$ | 2.17 | — | $1.61 \times 10^{-5}$ | 0.0009 | -0.221 | Verified |
-| **Single Sequence (Trans) vs SkelGym-Full** | 0.66 | 0.4524 (n.s.) | 0.90 | — | $6.05 \times 10^{-6}$ | $5.34 \times 10^{-6}$ | -0.305 | Verified |
-| **Single Graph (AAGCN Bone) vs SkelGym-Full** | 117.63 | $2.20 \times 10^{-30}$ | 7.65 | — | 0.0309 | 0.0071 | +0.178 | Verified |
-| **Four-Stream Graph AAGCN vs SkelGym-Full** | 62.67 | $4.79 \times 10^{-16}$ | 4.19 | — | $2.81 \times 10^{-21}$ | $1.93 \times 10^{-22}$ | +0.711 | **Verified** |
+| **Unaugmented Trans vs SkelGym-Aug Trans** | 47.77 | 3.20e-12 | 1.92 | 11104.0 | 0.0142 | 0.0048 | +0.187 | Verified |
+| **Fixed ST-GCN vs Adaptive Four-Stream AAGCN** | 155.34 | 3.84e-37 | 2.92 | 9338.0 | 3.08e-05 | 3.89e-06 | +0.310 | Verified |
+| **Single Sequence (Trans) vs SkelGym-Full** | 2.16 | 0.1416 | 1.17 | 8050.0 | 6.03e-08 | 1.84e-05 | -0.287 | Verified |
+| **Single Graph (AAGCN Bone) vs SkelGym-Full** | 63.58 | 2.40e-16 | 3.52 | 12219.0 | 0.1706 | 0.0614 | +0.123 | Verified |
+| **Four-Stream Graph AAGCN vs SkelGym-Full** | 57.14 | 6.69e-15 | 3.73 | 8207.0 | 1.40e-07 | 1.33e-05 | +0.292 | **Verified** |
 
 ---
 
@@ -186,13 +186,13 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 
 | Model Architecture | Window Test Acc [95% CI] | Window Macro F1 [95% CI] | Video Consensus Acc [95% CI] | Video Macro F1 [95% CI] | Status |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **LSTM (Mix 117-d)** | 59.29% [52.85%, 65.51%] | 0.5670 [0.5078, 0.6281] | 68.81% [63.09%, 74.68%] | 0.6656 [0.6054, 0.7275] | Verified |
-| **BiLSTM (Mix 117-d)** | 60.44% [53.62%, 66.61%] | 0.5733 [0.5109, 0.6324] | 67.93% [61.79%, 73.39%] | 0.6429 [0.5763, 0.7049] | Verified |
-| **ST-GCN (Rel 3D)** | 58.83% [52.77%, 64.61%] | 0.5505 [0.4895, 0.6085] | 67.01% [60.94%, 72.97%] | 0.6349 [0.5638, 0.7011] | Verified |
-| **Transformer (Mix 117-d)** | 71.55% [64.67%, 77.99%] | 0.6822 [0.6239, 0.7438] | 81.98% [76.81%, 86.70%] | 0.7835 [0.7254, 0.8429] | Verified |
-| **AAGCN (Bone 3D)** | 65.40% [58.93%, 71.64%] | 0.6369 [0.5780, 0.6907] | 73.32% [67.81%, 78.97%] | 0.7199 [0.6672, 0.7755] | Verified |
-| **SkelGym-Lite (2 Models)** | 69.57% [62.88%, 75.83%] | 0.6693 [0.6118, 0.7263] | 77.63% [72.10%, 82.83%] | 0.7530 [0.6946, 0.8096] | Verified |
-| **SkelGym-Full (5 Streams)** | 71.02% [64.30%, 77.31%] | 0.6871 [0.6278, 0.7441] | 79.35% [73.82%, 84.55%] | 0.7546 [0.6941, 0.8151] | **Verified** |
+| **LSTM (Mix 117-d)** | 57.72% [52.30%, 62.97%] | 0.5504 [0.4952, 0.6052] | 67.53% [61.80%, 73.39%] | 0.6478 [0.5791, 0.7137] | Verified |
+| **BiLSTM (Mix 117-d)** | 61.29% [55.07%, 67.21%] | 0.5849 [0.5286, 0.6379] | 68.76% [62.66%, 74.25%] | 0.6723 [0.6111, 0.7285] | Verified |
+| **ST-GCN (Rel 3D)** | 54.75% [48.54%, 60.79%] | 0.5107 [0.4590, 0.5623] | 63.18% [56.65%, 69.53%] | 0.5909 [0.5332, 0.6531] | Verified |
+| **Transformer (Mix 117-d)** | 69.04% [62.60%, 74.91%] | 0.6647 [0.6076, 0.7165] | 79.92% [74.68%, 84.55%] | 0.7835 [0.7252, 0.8416] | Verified |
+| **AAGCN (Bone 3D)** | 65.80% [59.72%, 71.83%] | 0.6293 [0.5742, 0.6827] | 73.01% [66.95%, 78.54%] | 0.7113 [0.6505, 0.7670] | Verified |
+| **SkelGym-Lite (2 Models)** | 68.13% [61.92%, 74.10%] | 0.6530 [0.5951, 0.7075] | 79.05% [73.82%, 84.12%] | 0.7691 [0.7104, 0.8256] | Verified |
+| **SkelGym-Full (5 Streams)** | 70.07% [63.82%, 75.83%] | 0.6733 [0.6169, 0.7292] | 79.02% [73.82%, 84.12%] | 0.7762 [0.7219, 0.8300] | **Verified** |
 
 ---
 
@@ -202,30 +202,30 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 
 | Exercise Class | Window Precision | Window Recall | Window F1 | Window Support | Video Precision | Video Recall | Video F1 | Video Support | Status |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **barbell biceps curl** | 0.3464 | 0.8986 | 0.5000 | 69 | 0.5833 | 1.0000 | 0.7368 | 14 | Verified |
-| **bench press** | 0.3523 | 0.6458 | 0.4559 | 96 | 0.5625 | 0.6429 | 0.6000 | 14 | Verified |
-| **chest fly machine** | 0.9419 | 0.9878 | 0.9643 | 82 | 0.8750 | 0.8750 | 0.8750 | 8 | Verified |
-| **deadlift** | 0.2410 | 0.5970 | 0.3433 | 67 | 0.6000 | 0.9000 | 0.7200 | 10 | Verified |
-| **decline bench press** | 0.5347 | 0.5746 | 0.5540 | 134 | 0.5000 | 0.6250 | 0.5556 | 8 | Verified |
-| **hammer curl** | 0.5745 | 0.3354 | 0.4235 | 161 | 0.8000 | 0.2857 | 0.4211 | 14 | Verified |
-| **hip thrust** | 0.8782 | 0.5805 | 0.6990 | 236 | 0.8889 | 0.8889 | 0.8889 | 9 | Verified |
-| **incline bench press** | 0.7778 | 0.6447 | 0.7050 | 76 | 0.7500 | 0.3333 | 0.4615 | 9 | Verified |
-| **lat pulldown** | 0.6013 | 0.9500 | 0.7364 | 100 | 0.7222 | 1.0000 | 0.8387 | 13 | Verified |
-| **lateral raise** | 0.9091 | 0.9032 | 0.9061 | 155 | 1.0000 | 1.0000 | 1.0000 | 15 | Verified |
+| **barbell biceps curl** | 0.3220 | 0.8261 | 0.4634 | 69 | 0.5652 | 0.9286 | 0.7027 | 14 | Verified |
+| **bench press** | 0.4560 | 0.5938 | 0.5158 | 96 | 0.6667 | 0.5714 | 0.6154 | 14 | Verified |
+| **chest fly machine** | 0.8333 | 0.9756 | 0.8989 | 82 | 0.8750 | 0.8750 | 0.8750 | 8 | Verified |
+| **deadlift** | 0.3258 | 0.6418 | 0.4322 | 67 | 0.6429 | 0.9000 | 0.7500 | 10 | Verified |
+| **decline bench press** | 0.4082 | 0.5970 | 0.4848 | 134 | 0.4545 | 0.6250 | 0.5263 | 8 | Verified |
+| **hammer curl** | 0.4948 | 0.2981 | 0.3721 | 161 | 0.6667 | 0.4286 | 0.5217 | 14 | Verified |
+| **hip thrust** | 0.8606 | 0.6017 | 0.7082 | 236 | 0.8889 | 0.8889 | 0.8889 | 9 | Verified |
+| **incline bench press** | 0.7302 | 0.6053 | 0.6619 | 76 | 1.0000 | 0.6667 | 0.8000 | 9 | Verified |
+| **lat pulldown** | 0.5563 | 0.8900 | 0.6846 | 100 | 0.6500 | 1.0000 | 0.7879 | 13 | Verified |
+| **lateral raise** | 0.9205 | 0.8968 | 0.9085 | 155 | 1.0000 | 1.0000 | 1.0000 | 15 | Verified |
 | **leg extension** | 0.9921 | 1.0000 | 0.9960 | 125 | 1.0000 | 1.0000 | 1.0000 | 13 | Verified |
-| **leg raises** | 1.0000 | 0.6140 | 0.7609 | 114 | 1.0000 | 0.8182 | 0.9000 | 11 | Verified |
-| **plank** | 0.7442 | 0.5714 | 0.6465 | 56 | 0.3333 | 0.5000 | 0.4000 | 2 | Verified |
-| **pull Up** | 0.9104 | 0.7439 | 0.8188 | 82 | 1.0000 | 0.7000 | 0.8235 | 10 | Verified |
-| **push-up** | 0.7611 | 0.9885 | 0.8600 | 87 | 0.8571 | 1.0000 | 0.9231 | 12 | Verified |
-| **romanian deadlift** | 0.5109 | 0.3219 | 0.3950 | 146 | 0.6667 | 0.3333 | 0.4444 | 6 | Verified |
-| **russian twist** | 0.9173 | 0.8905 | 0.9037 | 137 | 1.0000 | 1.0000 | 1.0000 | 6 | Verified |
-| **shoulder press** | 0.6900 | 0.4539 | 0.5476 | 152 | 0.7000 | 0.5385 | 0.6087 | 13 | Verified |
-| **squat** | 0.9193 | 0.8613 | 0.8894 | 238 | 1.0000 | 1.0000 | 1.0000 | 15 | Verified |
-| **t bar row** | 0.8286 | 0.4957 | 0.6203 | 117 | 1.0000 | 0.7000 | 0.8235 | 10 | Verified |
-| **tricep Pushdown** | 0.6455 | 0.7634 | 0.6995 | 93 | 0.7857 | 0.9167 | 0.8462 | 12 | Verified |
-| **tricep dips** | 0.9364 | 0.9364 | 0.9364 | 220 | 1.0000 | 0.8889 | 0.9412 | 9 | Verified |
-| **Overall Accuracy** | — | — | 0.7105 | **2743** | — | — | 0.7940 | **233** | **Verified** |
-| **Macro Average** | 0.7278 | 0.7163 | 0.6983 | **2743** | 0.8011 | 0.7703 | 0.7640 | **233** | **Verified** |
+| **leg raises** | 1.0000 | 0.4649 | 0.6347 | 114 | 1.0000 | 0.5455 | 0.7059 | 11 | Verified |
+| **plank** | 0.9024 | 0.6607 | 0.7629 | 56 | 1.0000 | 1.0000 | 1.0000 | 2 | Verified |
+| **pull Up** | 0.7125 | 0.6951 | 0.7037 | 82 | 1.0000 | 0.7000 | 0.8235 | 10 | Verified |
+| **push-up** | 0.7727 | 0.9770 | 0.8629 | 87 | 0.8571 | 1.0000 | 0.9231 | 12 | Verified |
+| **romanian deadlift** | 0.5455 | 0.3699 | 0.4408 | 146 | 0.5000 | 0.3333 | 0.4000 | 6 | Verified |
+| **russian twist** | 0.8239 | 0.8540 | 0.8387 | 137 | 0.6667 | 1.0000 | 0.8000 | 6 | Verified |
+| **shoulder press** | 0.7209 | 0.4079 | 0.5210 | 152 | 0.6250 | 0.3846 | 0.4762 | 13 | Verified |
+| **squat** | 0.8625 | 0.8697 | 0.8661 | 238 | 1.0000 | 1.0000 | 1.0000 | 15 | Verified |
+| **t bar row** | 0.8471 | 0.6154 | 0.7129 | 117 | 1.0000 | 0.8000 | 0.8889 | 10 | Verified |
+| **tricep Pushdown** | 0.6762 | 0.7634 | 0.7172 | 93 | 0.8333 | 0.8333 | 0.8333 | 12 | Verified |
+| **tricep dips** | 0.9393 | 0.9136 | 0.9263 | 220 | 1.0000 | 0.8889 | 0.9412 | 9 | Verified |
+| **Overall Accuracy** | 0.7007 | 0.7007 | 0.7007 | **2743** | 0.7897 | 0.7897 | 0.7897 | **233** | **Verified** |
+| **Macro Average** | 0.7138 | 0.7054 | 0.6870 | **2743** | 0.8133 | 0.7895 | 0.7845 | **233** | **Verified** |
 
 ---
 
@@ -246,17 +246,17 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 
 ---
 
-## Table 12: Strength & Conditioning Exercise Recognition (Deyzel et al. Subset) (Paper Table 12)
+## Table 12: Strength & Conditioning Exercise Recognition (MM-Fit External Benchmark) (Paper Table 12)
 
-*Objective:* Comparative evaluation across the four overlapping Strength & Conditioning (S&C) exercises inspired by Deyzel et al. (2023) (*squat*, *deadlift*, *barbell biceps curl*, *lateral raise*) over 54 held-out test videos ($N=529$ windows).  
-*Execution Command:* `python scripts/evaluate_external_benchmark.py`
+*Objective:* Comparative transfer evaluation across the four overlapping Strength & Conditioning (S&C) exercises inspired by Deyzel et al. (2023) (*squat*, *deadlift*, *barbell biceps curl*, *lateral raise*) on the genuine MM-Fit external benchmark (MediaPipe Pose protocol across 5 unseen workout recordings: `w00`, `w05`, `w12`, `w13`, `w20`; $N=54$ recordings, $N=878$ windows).  
+*Execution Command:* `python scripts/evaluate_external.py --config configs/external/mmfit.yaml --pose-source mediapipe --seeds 42`
 
 | Model Architecture | Open-Set Test Win Acc (%) | Open-Set Test Vid Acc (%) | Closed-Set Test Win Acc (%) | Closed-Set Test Vid Acc (%) | Closed-Set Test Vid Macro F1 | Status |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **ST-GCN (Rel 3D) (Deyzel baseline)** | 67.49% | 77.78% | 82.42% | 88.89% | 0.8901 | Verified |
-| **LSTM (Mix 117-d)** | 63.89% | 77.78% | 78.83% | 87.04% | 0.8746 | Verified |
-| **BiLSTM (Mix 117-d)** | 62.38% | 79.63% | 76.75% | 90.74% | 0.9119 | Verified |
-| **AAGCN (Bone 3D)** | 74.67% | 94.44% | 87.15% | 94.44% | 0.9443 | Verified |
-| **Transformer (Mix 117-d)** | 85.82% | 96.30% | 95.27% | 96.30% | 0.9615 | Verified |
-| **SkelGym-Lite (Transformer + Bone)** | 82.80% | 96.30% | 94.14% | 96.30% | 0.9615 | Verified |
-| **SkelGym-Full (Transformer + 4 AAGCN)** | 84.50% | 98.15% | 93.95% | 98.15% | 0.9782 | **Verified** |
+| **ST-GCN (Rel 3D) (Deyzel baseline)** | 37.93% | 38.89% | 67.43% | 70.37% | 0.6524 | Verified |
+| **LSTM (Mix 117-d)** | 61.96% | 77.78% | 87.02% | 90.74% | 0.8904 | Verified |
+| **BiLSTM (Mix 117-d)** | 61.16% | 68.52% | 80.41% | 83.33% | 0.7775 | Verified |
+| **AAGCN (Bone 3D)** | 58.88% | 62.96% | 74.26% | 77.78% | 0.6667 | Verified |
+| **Transformer (Mix 117-d)** | 55.47% | 61.11% | 83.71% | 85.19% | 0.8092 | Verified |
+| **SkelGym-Lite (Transformer + Bone)** | 63.55% | 66.67% | 79.95% | 81.48% | 0.7433 | Verified |
+| **SkelGym-Full (Transformer + 4 AAGCN)** | 66.86% | 74.07% | 95.90% | 100.00% | 1.0000 | **Verified** |

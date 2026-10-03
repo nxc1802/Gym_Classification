@@ -1,8 +1,13 @@
 {
-  "timestamp_utc": "2026-10-02T17:10:06.505790+00:00",
+  "timestamp_utc": "2026-10-03T05:51:01.306511+00:00",
   "git": {
-    "commit": "cb288b6e4b1b40d91959be634c61f02ef6671237",
+    "commit": "e8d08e24215caf5618093021b784870ea1acab30",
     "branch": "main"
+  },
+  "provenance_commits": {
+    "training_commit": "cb288b6",
+    "evaluation_commit": "e8d08e24215caf5618093021b784870ea1acab30",
+    "report_generation_commit": "e8d08e24215caf5618093021b784870ea1acab30"
   },
   "dataset_metadata_sha256": "c2f8c35fb9ddf8aa0b2790ee83ed26befbbd7f5064833d6017ef644092bb6c90",
   "seeds": [
@@ -30,6 +35,66 @@
     "normalization_rel_3d.npz": {
       "size_bytes": 812,
       "sha256": "de034a74fee0ce4311172d839583d36c580df183642f523701bd59f59144c72d"
+    },
+    "seed123/normalization_bone_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "0448774bcb3187ef9718fca9db7921b31446a8cfd022531b663efe643d05e0ee"
+    },
+    "seed123/normalization_bone_motion_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "95ba5077fa61984401402f5d3350259996e82f22bdd5ecb93a9940352d709009"
+    },
+    "seed123/normalization_joint_motion_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "a11e4570f3d31822a54d3f7c09fc234b478be18e3f6cf80985ce4d0f24b203b7"
+    },
+    "seed123/normalization_mix.npz": {
+      "size_bytes": 1436,
+      "sha256": "2813bf423aa168b35c829ccd957ffe372579d724a77680c1bedfd773a132d903"
+    },
+    "seed123/normalization_rel_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "de034a74fee0ce4311172d839583d36c580df183642f523701bd59f59144c72d"
+    },
+    "seed3407/normalization_bone_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "0448774bcb3187ef9718fca9db7921b31446a8cfd022531b663efe643d05e0ee"
+    },
+    "seed3407/normalization_bone_motion_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "95ba5077fa61984401402f5d3350259996e82f22bdd5ecb93a9940352d709009"
+    },
+    "seed3407/normalization_joint_motion_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "a11e4570f3d31822a54d3f7c09fc234b478be18e3f6cf80985ce4d0f24b203b7"
+    },
+    "seed3407/normalization_mix.npz": {
+      "size_bytes": 1436,
+      "sha256": "2813bf423aa168b35c829ccd957ffe372579d724a77680c1bedfd773a132d903"
+    },
+    "seed3407/normalization_rel_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "de034a74fee0ce4311172d839583d36c580df183642f523701bd59f59144c72d"
+    },
+    "seed42/normalization_bone_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "0448774bcb3187ef9718fca9db7921b31446a8cfd022531b663efe643d05e0ee"
+    },
+    "seed42/normalization_bone_motion_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "95ba5077fa61984401402f5d3350259996e82f22bdd5ecb93a9940352d709009"
+    },
+    "seed42/normalization_joint_motion_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "a11e4570f3d31822a54d3f7c09fc234b478be18e3f6cf80985ce4d0f24b203b7"
+    },
+    "seed42/normalization_mix.npz": {
+      "size_bytes": 1436,
+      "sha256": "2813bf423aa168b35c829ccd957ffe372579d724a77680c1bedfd773a132d903"
+    },
+    "seed42/normalization_rel_3d.npz": {
+      "size_bytes": 812,
+      "sha256": "de034a74fee0ce4311172d839583d36c580df183642f523701bd59f59144c72d"
     }
   },
   "archived_result_artifacts": {
@@ -46,20 +111,36 @@
       "sha256": "acb4cb28d1563ba55f6a89683e2d180b7597639b1bd0fcfd432e997dd5d3b387"
     },
     "multi_seed_evaluation_results.json": {
-      "size_bytes": 58746,
-      "sha256": "5691a8136e8fb8fefd285e8899ab99cf02040ff5765aa0efa0a5d87f621f2ee8"
+      "size_bytes": 59486,
+      "sha256": "ba7609bc9c1d1220104b366c645e2bb3f3dba3181eb380ba90616f786ef58126"
+    },
+    "consensus_gains.json": {
+      "size_bytes": 4190,
+      "sha256": "49e27b41fe285bcf9ea8ae1d89927d8e9e87836112b6310141be7535ac666f2d"
+    },
+    "statistical_tests_report.json": {
+      "size_bytes": 1886,
+      "sha256": "083eea9b3a0e4e13eb252e82ffb222844887d52664d322eadcdeb76fffca6fba"
+    },
+    "bootstrap_confidence_intervals.json": {
+      "size_bytes": 3724,
+      "sha256": "d273d3677c90cb7c0523702a836d4cdfa27738afc082e4ab0ec925bd2bbce997"
     },
     "per_class_results.json": {
-      "size_bytes": 6342,
-      "sha256": "7021c2e1d3a94066f2260be370b670c0195882ebe74f406fb01e80c66c5d5c74"
+      "size_bytes": 5788,
+      "sha256": "a6892711cdae1b15d1164fcfd7795525a6b8e3ce426a8bd8fffb67b53c1121ad"
     },
     "hardware_latency.json": {
       "size_bytes": 1704,
       "sha256": "88ffd15e5de5612a47c3ec55fa90839612e9e14bd722798a67602a18e76b5d4a"
     },
     "external_benchmark_results.json": {
-      "size_bytes": 1539,
-      "sha256": "4fb95e252b66cc31e372569a4dd68cd75bd5c541a56eef040b8a3c4eae488943"
+      "size_bytes": 1607,
+      "sha256": "5ec4725e3bda4a63e7ca7b9b5a9df29fbe2430c268a7fc5ff4bd0a6dc7f81535"
+    },
+    "canonical_eval_predictions.npz": {
+      "size_bytes": 25459371,
+      "sha256": "b4a2533356945b3d3ae603032c6a1481ea50bb3a3f437ade5b07facf20502b77"
     },
     "bootstrap_confidence_intervals.md": {
       "size_bytes": 1383,

@@ -64,6 +64,7 @@ outputs/*.jpg
 outputs/*.zip
 outputs/*.log
 outputs/*.json
+outputs/*.npz
 outputs/ensemble/
 outputs/test_report/
 outputs/smoke_test/
