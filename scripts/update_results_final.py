@@ -398,7 +398,7 @@ def update_table5_single(content: str, json_path: Path) -> str:
                 "Verified"
             ]
 
-    return update_table_rows(content, "Table 5: Systematic Single-Component", updates)
+    return update_table_rows(content, "Table 5:", updates)
 
 def update_table6_fusion(content: str, json_path: Path) -> str:
     """
@@ -497,7 +497,7 @@ def update_table6_fusion(content: str, json_path: Path) -> str:
             "Verified"
         ]
 
-    return update_table_rows(content, "Table 6: Cross-Paradigm Fusion Protocols", updates)
+    return update_table_rows(content, "Table 6:", updates)
 
 def update_table7_consensus(content: str, json_path: Path) -> str:
     """
@@ -548,7 +548,7 @@ def update_table7_consensus(content: str, json_path: Path) -> str:
                 status
             ]
 
-    return update_table_rows(content, "Table 7: Window-Level vs Video Consensus", updates)
+    return update_table_rows(content, "Table 7:", updates)
 
 def update_table8_statistical_tests(content: str, json_path: Path) -> str:
     """
@@ -576,7 +576,7 @@ def update_table8_statistical_tests(content: str, json_path: Path) -> str:
             "Verified"
         ]
 
-    return update_table_rows(content, "Table 8: Paired Statistical Hypothesis Testing", updates)
+    return update_table_rows(content, "Table 8:", updates)
 
 def update_table9_bootstrap(content: str, json_path: Path) -> str:
     """
@@ -611,7 +611,7 @@ def update_table9_bootstrap(content: str, json_path: Path) -> str:
                 "Verified"
             ]
 
-    return update_table_rows(content, "Table 9: Non-Parametric Video-Level Cluster Bootstrap", updates)
+    return update_table_rows(content, "Table 9:", updates)
 
 def update_table10_per_class(content: str, json_path: Path) -> str:
     """
@@ -644,7 +644,7 @@ def update_table10_per_class(content: str, json_path: Path) -> str:
                 f"{bold}Verified{bold}"
             ]
 
-    return update_table_rows(content, "Table 10: Per-Class Performance Breakdown", updates)
+    return update_table_rows(content, "Table 10:", updates)
 
 def update_table11_hardware(content: str, json_path: Path) -> str:
     """
@@ -678,7 +678,7 @@ def update_table11_hardware(content: str, json_path: Path) -> str:
                 "Verified"
             ]
 
-    return update_table_rows(content, "Table 11: Computational Complexity", updates)
+    return update_table_rows(content, "Table 11:", updates)
 
 def update_table12_external(content: str, json_path: Path) -> str:
     """
