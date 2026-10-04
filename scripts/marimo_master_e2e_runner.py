@@ -340,9 +340,9 @@ def execute_training_task(
         return {"task": task, "status": "cached", "checkpoint": str(ckpt_path)}
 
     reg_cfg = CANONICAL_EXPERIMENT_REGISTRY.get(eid, {})
-    lr = reg_cfg.get("lr", 1e-4)
-    batch_size = reg_cfg.get("batch_size", 32 if "AAGCN" in model else 16)
-    label_smoothing = reg_cfg.get("label_smoothing", 0.05 if ("AAGCN" in model or "Transformer" in model) else 0.0)
+    lr = reg_cfg.get("lr", 1e-4 if model == "Transformer" else 1e-3)
+    batch_size = reg_cfg.get("batch_size", 32 if "GCN" in model else 16)
+    label_smoothing = reg_cfg.get("label_smoothing", 0.05 if (model in ("AAGCN", "Transformer")) else 0.0)
     patience = reg_cfg.get("patience", 10)
     train_stride = reg_cfg.get("train_stride", 16)
     val_test_stride = reg_cfg.get("val_test_stride", 32)
