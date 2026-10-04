@@ -804,7 +804,8 @@ def cmd_evaluate(args):
         landmark_dir=args.landmark_dir,
         num_workers=0,
         in_memory=in_mem,
-        smoke_test=is_smoke
+        smoke_test=is_smoke,
+        seed=getattr(args, "seed", None)
     )
     loader = test_loader if args.split == "test" else val_loader
 
@@ -1384,6 +1385,7 @@ def create_parser() -> argparse.ArgumentParser:
     p_eval.add_argument("--hidden_dim", type=int, default=None)
     p_eval.add_argument("--num_layers", type=int, default=None)
     p_eval.add_argument("--nhead", type=int, default=8)
+    p_eval.add_argument("--seed", type=int, default=None, help="Random seed for normalization artifact")
     p_eval.add_argument("--in_memory", action="store_true", default=True, help="Load dataset into memory for fast evaluation")
 
     # Ensemble
