@@ -53,24 +53,24 @@
 
 \node[box=bInput, fill=cInput, minimum width=2.0cm] (inp) {
     \textbf{Input Tensor}\\[2pt]
-    {\scriptsize $[B, 32, 117]$}
+    {\scriptsize $[B, 32, 63]$}
 };
 
 \node[box=bProj, fill=cProj, minimum width=2.2cm, right=of inp] (proj) {
-    \textbf{Linear Proj + PE}\\[2pt]
-    {\scriptsize $117 \to 128$ \textbar{} Learnable}\\[1pt]
-    {\scriptsize $[B, 32, 128]$}
+    \textbf{Dual Proj + PE}\\[2pt]
+    {\scriptsize $39 \to 56, 24 \to 56$ \textbar{} Learnable}\\[1pt]
+    {\scriptsize $[B, 32, 112]$}
 };
 
 \node[box=bTrans, fill=cTrans, minimum width=3.8cm, right=of proj] (trans) {
     \textbf{3$\times$ Transformer Encoder}\\[2pt]
     {\scriptsize $H=8$ Heads \textbar{} $d_{\text{model}}=128$ \textbar{} $d_{\text{ff}}=192$}\\[1pt]
-    {\scriptsize Pre-LN \textbar{} drop=0.2 \textbar{} $[B, 32, 128]$}
+    {\scriptsize Pre-LN \textbar{} drop=0.2 \textbar{} $[B, 32, 112]$}
 };
 
 \node[box=bPool, fill=cPool, minimum width=1.8cm, right=of trans] (gap) {
     \textbf{Temp GAP}\\[2pt]
-    {\scriptsize $\frac{1}{T}\sum_t \mathbf{z}_t \to [B, 128]$}
+    {\scriptsize $\frac{1}{T}\sum_t \mathbf{z}_t \to [B, 112]$}
 };
 
 \node[box=bHead, fill=cHead, minimum width=2.2cm, right=of gap] (mlp) {

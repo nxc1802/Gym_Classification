@@ -53,12 +53,12 @@
 
 \node[box=bInput, fill=cInput, minimum width=2.0cm] (inp) {
     \textbf{Input Tensor}\\[2pt]
-    {\scriptsize $[B, 32, 117]$}
+    {\scriptsize $[B, 32, 63]$}
 };
 
 \node[box=bProj, fill=cProj, minimum width=1.8cm, right=of inp] (norm) {
     \textbf{LayerNorm}\\[2pt]
-    {\scriptsize $D = 117$}
+    {\scriptsize $D = 63$}
 };
 
 \node[box=bRecurr, fill=cRecurr, minimum width=3.3cm, right=of norm] (bilstm) {
