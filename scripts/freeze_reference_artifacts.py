@@ -50,7 +50,7 @@ def main():
     out_dir = PROJECT_ROOT / "artifacts" / "reference"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    metadata_path = str(PROJECT_ROOT / "data" / "Final_dataset_metadata.csv")
+    metadata_path = str(PROJECT_ROOT / "data" / "Final_dataset_metadata.csv") if (PROJECT_ROOT / "data" / "Final_dataset_metadata.csv").exists() else str(PROJECT_ROOT / "Final_dataset_metadata.csv")
     landmark_dir = str(PROJECT_ROOT / "data" / "landmarks")
 
     # 1. Canonical class names
@@ -61,7 +61,7 @@ def main():
 
     # 2. Extract and freeze train normalization statistics
     feature_streams = {
-        "mix": "mix_v2",
+        "mix_v2": "mix_v2",
         "rel_3d": "rel_3d",
         "bone_3d": "bone_3d",
         "joint_motion_3d": "joint_motion_3d",
@@ -101,9 +101,13 @@ def main():
 
             stat_path = seed_dir / f"normalization_{feat_key}.npz"
             np.savez(stat_path, mean=train_mean, std=train_std)
+            if feat_key == "mix_v2":
+                np.savez(seed_dir / "normalization_mix.npz", mean=train_mean, std=train_std)
             if seed == 42:
                 # Also save to base reference dir for default fallback
                 np.savez(out_dir / f"normalization_{feat_key}.npz", mean=train_mean, std=train_std)
+                if feat_key == "mix_v2":
+                    np.savez(out_dir / "normalization_mix.npz", mean=train_mean, std=train_std)
 
             norm_stats[feat_key] = {"mean_shape": list(train_mean.shape), "std_shape": list(train_std.shape)}
 
@@ -138,7 +142,7 @@ def main():
             continue
 
         val_probs = {}
-        val_l_mix = dataloaders["mix"][1]
+        val_l_mix = (dataloaders.get("mix_v2") or dataloaders.get("mix"))[1]
         y_val_true = np.array(val_l_mix.dataset.labels)
         val_video_ids = list(val_l_mix.dataset.video_ids)
 
@@ -149,7 +153,8 @@ def main():
                 "sha256": get_file_sha256(ckpt_p) if os.path.exists(ckpt_p) else None
             }
             model = load_checkpoint_model(m_type, f_type, ckpt_p, device)
-            _, val_loader, _ = dataloaders[f_type]
+            loader_entry = dataloaders.get(f_type) or dataloaders.get("mix_v2") or dataloaders.get("mix")
+            _, val_loader, _ = loader_entry
             trainer = Trainer(model=model, device=device)
             _, _, probs = trainer.predict(val_loader)
             val_probs[name] = probs
