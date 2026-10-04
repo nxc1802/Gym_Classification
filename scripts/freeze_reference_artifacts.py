@@ -61,7 +61,7 @@ def main():
 
     # 2. Extract and freeze train normalization statistics
     feature_streams = {
-        "mix": "mix",
+        "mix": "mix_v2",
         "rel_3d": "rel_3d",
         "bone_3d": "bone_3d",
         "joint_motion_3d": "joint_motion_3d",
@@ -113,8 +113,12 @@ def main():
         if seed != 42:
             ckpt_base = ckpt_base / f"seed{seed}"
 
+        trans_mix_cand = ckpt_base / "best_Transformer_T2.2_mix_v2.pt"
+        if not trans_mix_cand.exists():
+            trans_mix_cand = ckpt_base / "best_Transformer_T2.2_mix.pt"
+
         ensemble_models = {
-            "Transformer (Mix)": ("Transformer", "mix", str(ckpt_base / "best_Transformer_T2.2_mix.pt")),
+            "Transformer (Mix)": ("Transformer", "mix_v2", str(trans_mix_cand)),
             "AAGCN (Bone 3D)": ("AAGCN", "bone_3d", str(ckpt_base / "best_AAGCN_T4.2_bone_3d.pt")),
             "AAGCN (Rel 3D)": ("AAGCN", "rel_3d", str(ckpt_base / "best_AAGCN_T4.3_rel_3d.pt")),
             "AAGCN (Joint Mot)": ("AAGCN", "joint_motion_3d", str(ckpt_base / "best_AAGCN_T4.4_joint_motion_3d.pt")),

@@ -245,7 +245,7 @@ CANONICAL_EXPERIMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
     "T1.9": {
         "name": "LSTM Baseline",
         "model": "LSTM",
-        "feature": "mix",
+        "feature": "mix_v2",
         "augment": "none",
         "lr": 1e-3,
         "batch_size": 16,
@@ -259,7 +259,7 @@ CANONICAL_EXPERIMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
     "T1.18": {
         "name": "BiLSTM Baseline",
         "model": "BiLSTM",
-        "feature": "mix",
+        "feature": "mix_v2",
         "augment": "none",
         "lr": 1e-3,
         "batch_size": 16,
@@ -273,7 +273,7 @@ CANONICAL_EXPERIMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
     "T1.27": {
         "name": "Transformer Clean",
         "model": "Transformer",
-        "feature": "mix",
+        "feature": "mix_v2",
         "augment": "none",
         "lr": 1e-4,
         "batch_size": 16,
@@ -302,7 +302,7 @@ CANONICAL_EXPERIMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
     "T2.2": {
         "name": "Transformer Mix",
         "model": "Transformer",
-        "feature": "mix",
+        "feature": "mix_v2",
         "augment": "skel_gym_aug",
         "lr": 1e-4,
         "batch_size": 16,

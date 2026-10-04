@@ -58,14 +58,14 @@ SEEDS = [42, 123, 3407]
 
 BASELINE_MODELS = [
     {"name": "ST-GCN Baseline", "model": "STGCN", "feature": "rel_3d", "augment": "none", "exp_id": "T3.2"},
-    {"name": "LSTM Baseline", "model": "LSTM", "feature": "mix", "augment": "none", "exp_id": "T1.9"},
-    {"name": "BiLSTM Baseline", "model": "BiLSTM", "feature": "mix", "augment": "none", "exp_id": "T1.18"},
-    {"name": "Transformer Clean", "model": "Transformer", "feature": "mix", "augment": "none", "exp_id": "T1.27"},
+    {"name": "LSTM Baseline", "model": "LSTM", "feature": "mix_v2", "augment": "none", "exp_id": "T1.9"},
+    {"name": "BiLSTM Baseline", "model": "BiLSTM", "feature": "mix_v2", "augment": "none", "exp_id": "T1.18"},
+    {"name": "Transformer Clean", "model": "Transformer", "feature": "mix_v2", "augment": "none", "exp_id": "T1.27"},
     {"name": "AAGCN Clean", "model": "AAGCN", "feature": "bone_3d", "augment": "none", "exp_id": "T3.6"},
 ]
 
 CONSTITUENT_MODELS = [
-    {"name": "Transformer_mix", "model": "Transformer", "feature": "mix", "augment": "skel_gym_aug", "exp_id": "T2.2"},
+    {"name": "Transformer_mix", "model": "Transformer", "feature": "mix_v2", "augment": "skel_gym_aug", "exp_id": "T2.2"},
     {"name": "AAGCN_bone_3d", "model": "AAGCN", "feature": "bone_3d", "augment": "skel_gym_aug", "exp_id": "T4.2"},
     {"name": "AAGCN_rel_3d", "model": "AAGCN", "feature": "rel_3d", "augment": "skel_gym_aug", "exp_id": "T4.3"},
     {"name": "AAGCN_joint_motion_3d", "model": "AAGCN", "feature": "joint_motion_3d", "augment": "skel_gym_aug", "exp_id": "T4.4"},

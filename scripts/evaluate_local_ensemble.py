@@ -62,14 +62,14 @@ logger = logging.getLogger("LocalEval")
 
 BASELINE_MODELS = [
     {"name": "ST-GCN Baseline (Rel 3D)", "model": "STGCN", "feat": "rel_3d", "exp_id": "T3.2"},
-    {"name": "LSTM Baseline (Mix 117-d)", "model": "LSTM", "feat": "mix", "exp_id": "T1.9"},
-    {"name": "BiLSTM Baseline (Mix 117-d)", "model": "BiLSTM", "feat": "mix", "exp_id": "T1.18"},
-    {"name": "Transformer Clean (Mix 117-d)", "model": "Transformer", "feat": "mix", "exp_id": "T1.27"},
+    {"name": "LSTM Baseline (Mix)", "model": "LSTM", "feat": "mix_v2", "exp_id": "T1.9"},
+    {"name": "BiLSTM Baseline (Mix)", "model": "BiLSTM", "feat": "mix_v2", "exp_id": "T1.18"},
+    {"name": "Transformer Clean (Mix)", "model": "Transformer", "feat": "mix_v2", "exp_id": "T1.27"},
     {"name": "AAGCN Clean (Bone 3D)", "model": "AAGCN", "feat": "bone_3d", "exp_id": "T3.6"},
 ]
 
 CONSTITUENT_MODELS = [
-    {"name": "Transformer Mix (Aug)", "model": "Transformer", "feat": "mix", "exp_id": "T2.2"},
+    {"name": "Transformer Mix (Aug)", "model": "Transformer", "feat": "mix_v2", "exp_id": "T2.2"},
     {"name": "AAGCN Joint (Aug)", "model": "AAGCN", "feat": "rel_3d", "exp_id": "T4.3"},
     {"name": "AAGCN Bone (Aug)", "model": "AAGCN", "feat": "bone_3d", "exp_id": "T4.2"},
     {"name": "AAGCN J-Motion (Aug)", "model": "AAGCN", "feat": "joint_motion_3d", "exp_id": "T4.4"},

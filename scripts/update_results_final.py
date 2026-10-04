@@ -164,6 +164,59 @@ def update_table2_feature_screening(content: str, json_path: Path) -> str:
 
     return update_table_rows(content, "Table 2: Feature Representation Benchmark", updates)
 
+def update_table2b_transformer_features(content: str, json_path: Path) -> str:
+    """
+    Table 2b: Multi-Seed Controlled-Capacity Transformer Feature Benchmark (300K Budget, Seeds 42, 123, 3407)
+    Columns: Feature Paradigm | Input Dim | Params | Train Loss | Val Loss | Val Win Acc (%) | Val Win Macro F1 | Val Vid Acc (%) | Val Vid Macro F1 | Test Win Acc (%) | Test Win Macro F1 | Test Vid Acc (%) | Test Vid Macro F1 | Status
+    """
+    if not json_path.exists():
+        print(f"[Warning] {json_path} not found for Table 2b update.")
+        return content
+
+    with open(json_path) as f:
+        data = json.load(f)
+
+    updates = {}
+    mapping = {
+        "raw_3d": ("**Raw 3D Coordinates**", 39, "301K"),
+        "rel_3d_norm": ("**Scale-Norm Rel 3D (`rel_3d_norm`)**", 39, "301K"),
+        "mix_v2": ("**Biomechanical Mix v2 (`mix_v2`)**", 63, "300K")
+    }
+
+    for feat_key, (row_name, dim, params) in mapping.items():
+        if feat_key not in data:
+            continue
+        stats = data[feat_key]
+        train_loss = format_num(stats.get("train_loss_mean"), fmt=".4f", suffix="")
+        val_loss = format_num(stats.get("val_loss_mean"), fmt=".4f", suffix="")
+        val_win_acc = format_mean_sd(stats.get("val_win_acc_mean"), stats.get("val_win_acc_sd"))
+        val_win_f1 = format_f1_mean_sd(stats.get("val_win_f1_mean"), stats.get("val_win_f1_sd"))
+        val_vid_acc = format_mean_sd(stats.get("val_vid_acc_mean"), stats.get("val_vid_acc_sd"))
+        val_vid_f1 = format_f1_mean_sd(stats.get("val_vid_f1_mean"), stats.get("val_vid_f1_sd"))
+        test_win_acc = format_mean_sd(stats.get("test_win_acc_mean"), stats.get("test_win_acc_sd"))
+        test_win_f1 = format_f1_mean_sd(stats.get("test_win_f1_mean"), stats.get("test_win_f1_sd"))
+        test_vid_acc = format_mean_sd(stats.get("test_vid_acc_mean"), stats.get("test_vid_acc_sd"))
+        test_vid_f1 = format_f1_mean_sd(stats.get("test_vid_f1_mean"), stats.get("test_vid_f1_sd"))
+
+        updates[row_name] = [
+            row_name,
+            str(dim),
+            params,
+            train_loss,
+            val_loss,
+            val_win_acc,
+            val_win_f1,
+            val_vid_acc,
+            val_vid_f1,
+            test_win_acc,
+            test_win_f1,
+            test_vid_acc,
+            test_vid_f1,
+            "Verified"
+        ]
+
+    return update_table_rows(content, "Table 2b: Multi-Seed Controlled-Capacity", updates)
+
 def update_table3_graph_streams(content: str, json_path: Path) -> str:
     """
     Table 3: Spatial-Temporal Graph Kinematic Streams (T3.1 -> T3.9)
@@ -778,6 +831,7 @@ def main():
             t1_multiseed = Path("artifacts/results/table1_feature_screening_multiseed.json")
         t1_path = t1_multiseed if t1_multiseed.exists() else out_dir / "table1_feature_screening.json"
         content = update_table2_feature_screening(content, t1_path)
+        content = update_table2b_transformer_features(content, out_dir / "upgrade_mix_evaluation_report.json")
 
     if args.phase in ("all", "1b", "3"):
         t3_multiseed = out_dir / "graph_streams_multiseed.json"

@@ -91,11 +91,17 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Required Checkpoint Paths
+    def find_ckpt(name_v2, name_v1):
+        p2 = ckpt_base / name_v2
+        if p2.exists():
+            return p2
+        return ckpt_base / name_v1
+
     ckpt_paths = {
-        "LSTM_mix": ckpt_base / "best_LSTM_T1.9_mix.pt",
-        "BiLSTM_mix": ckpt_base / "best_BiLSTM_T1.18_mix.pt",
-        "Clean_Trans_mix": ckpt_base / "best_Transformer_T1.27_mix.pt",
-        "Aug_Trans_mix": ckpt_base / "best_Transformer_T2.2_mix.pt",
+        "LSTM_mix": find_ckpt("best_LSTM_T1.9_mix_v2.pt", "best_LSTM_T1.9_mix.pt"),
+        "BiLSTM_mix": find_ckpt("best_BiLSTM_T1.18_mix_v2.pt", "best_BiLSTM_T1.18_mix.pt"),
+        "Clean_Trans_mix": find_ckpt("best_Transformer_T1.27_mix_v2.pt", "best_Transformer_T1.27_mix.pt"),
+        "Aug_Trans_mix": find_ckpt("best_Transformer_T2.2_mix_v2.pt", "best_Transformer_T2.2_mix.pt"),
         "STGCN_rel_3d": ckpt_base / "best_STGCN_T3.2_rel_3d.pt",
         "AAGCN_bone_3d": ckpt_base / "best_AAGCN_T4.2_bone_3d.pt",
         "AAGCN_rel_3d": ckpt_base / "best_AAGCN_T4.3_rel_3d.pt",
@@ -114,7 +120,8 @@ def main():
     # Load dataloaders
     print("\nLoading validation and test partitions...")
     loaders = {}
-    features = ["mix", "bone_3d", "rel_3d", "joint_motion_3d", "bone_motion_3d"]
+    mix_feat = "mix_v2" if any("mix_v2" in str(p) for p in [ckpt_paths["LSTM_mix"], ckpt_paths["Aug_Trans_mix"]]) else "mix"
+    features = [mix_feat, "bone_3d", "rel_3d", "joint_motion_3d", "bone_motion_3d"]
     for feat in features:
         _, val_l, test_l = get_dataloaders(
             metadata_path=metadata_path,
@@ -132,7 +139,7 @@ def main():
         )
         loaders[feat] = (val_l, test_l)
 
-    val_l_mix, test_l_mix = loaders["mix"]
+    val_l_mix, test_l_mix = loaders[mix_feat]
     y_test_true = np.array(test_l_mix.dataset.labels)
     test_vids = test_l_mix.dataset.video_ids
     val_vids = val_l_mix.dataset.video_ids
@@ -146,16 +153,16 @@ def main():
     if not missing_ckpts:
         print("\nLoading models and extracting predictions...")
         vprob_lstm, tprob_lstm, _, _, _, tp_lstm = get_predictions(
-            "LSTM", "mix", ckpt_paths["LSTM_mix"], device, loaders["mix"][0], loaders["mix"][1]
+            "LSTM", mix_feat, ckpt_paths["LSTM_mix"], device, loaders[mix_feat][0], loaders[mix_feat][1]
         )
         vprob_bilstm, tprob_bilstm, _, _, _, tp_bilstm = get_predictions(
-            "BiLSTM", "mix", ckpt_paths["BiLSTM_mix"], device, loaders["mix"][0], loaders["mix"][1]
+            "BiLSTM", mix_feat, ckpt_paths["BiLSTM_mix"], device, loaders[mix_feat][0], loaders[mix_feat][1]
         )
         vprob_clean_trans, tprob_clean_trans, _, _, _, tp_clean_trans = get_predictions(
-            "Transformer", "mix", ckpt_paths["Clean_Trans_mix"], device, loaders["mix"][0], loaders["mix"][1]
+            "Transformer", mix_feat, ckpt_paths["Clean_Trans_mix"], device, loaders[mix_feat][0], loaders[mix_feat][1]
         )
         vprob_aug_trans, tprob_aug_trans, _, _, _, tp_aug_trans = get_predictions(
-            "Transformer", "mix", ckpt_paths["Aug_Trans_mix"], device, loaders["mix"][0], loaders["mix"][1]
+            "Transformer", mix_feat, ckpt_paths["Aug_Trans_mix"], device, loaders[mix_feat][0], loaders[mix_feat][1]
         )
         vprob_stgcn, tprob_stgcn, _, _, _, tp_stgcn = get_predictions(
             "STGCN", "rel_3d", ckpt_paths["STGCN_rel_3d"], device, loaders["rel_3d"][0], loaders["rel_3d"][1]

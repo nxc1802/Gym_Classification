@@ -93,9 +93,9 @@ SINGLE_COMPONENT_VARIANTS = [
 ]
 
 BACKBONES = [
-    ("Transformer", "mix"),
+    ("Transformer", "mix_v2"),
     ("AAGCN", "bone_3d"),
-    ("BiLSTM", "mix"),
+    ("BiLSTM", "mix_v2"),
     ("STGCN", "rel_3d"),
 ]
 
@@ -129,13 +129,17 @@ def find_existing_checkpoint(task: Dict[str, Any], checkpoint_base: Path, force_
 
     # Canonical experiment mappings across seeds
     seed_dir = checkpoint_base / f"seed{seed}"
-    if model == "Transformer" and feature == "mix" and aug == "none":
+    if model == "Transformer" and feature in ("mix", "mix_v2") and aug == "none":
+        candidates.append(seed_dir / "best_Transformer_T1.27_mix_v2.pt")
         candidates.append(seed_dir / "best_Transformer_T1.27_mix.pt")
         if seed == 42:
+            candidates.append(checkpoint_base / "best_Transformer_T1.27_mix_v2.pt")
             candidates.append(checkpoint_base / "best_Transformer_T1.27_mix.pt")
-    elif model == "Transformer" and feature == "mix" and aug == "skel_gym_aug":
+    elif model == "Transformer" and feature in ("mix", "mix_v2") and aug == "skel_gym_aug":
+        candidates.append(seed_dir / "best_Transformer_T2.2_mix_v2.pt")
         candidates.append(seed_dir / "best_Transformer_T2.2_mix.pt")
         if seed == 42:
+            candidates.append(checkpoint_base / "best_Transformer_T2.2_mix_v2.pt")
             candidates.append(checkpoint_base / "best_Transformer_T2.2_mix.pt")
     elif model == "AAGCN" and feature == "bone_3d" and aug == "none":
         candidates.append(seed_dir / "best_AAGCN_T3.6_bone_3d.pt")
@@ -147,9 +151,11 @@ def find_existing_checkpoint(task: Dict[str, Any], checkpoint_base: Path, force_
         candidates.append(seed_dir / "best_AAGCN_T4.2_bone_3d.pt")
         if seed == 42:
             candidates.append(checkpoint_base / "best_AAGCN_T4.2_bone_3d.pt")
-    elif model == "BiLSTM" and feature == "mix" and aug == "none":
+    elif model == "BiLSTM" and feature in ("mix", "mix_v2") and aug == "none":
+        candidates.append(seed_dir / "best_BiLSTM_T1.18_mix_v2.pt")
         candidates.append(seed_dir / "best_BiLSTM_T1.18_mix.pt")
         if seed == 42:
+            candidates.append(checkpoint_base / "best_BiLSTM_T1.18_mix_v2.pt")
             candidates.append(checkpoint_base / "best_BiLSTM_T1.18_mix.pt")
     elif model == "STGCN" and feature == "rel_3d" and aug == "none":
         candidates.append(seed_dir / "best_STGCN_T3.2_rel_3d.pt")
@@ -408,7 +414,7 @@ def build_task_list(
                     "domain": domain,
                     "id": f"LOO_Trans_{var_name}_seed{seed}",
                     "model": "Transformer",
-                    "feature": "mix",
+                    "feature": "mix_v2",
                     "augment": aug_method,
                     "seed": seed,
                     "metadata": metadata_path,
@@ -426,7 +432,7 @@ def build_task_list(
                     "domain": domain,
                     "id": f"Single_Trans_{var_name}_seed{seed}",
                     "model": "Transformer",
-                    "feature": "mix",
+                    "feature": "mix_v2",
                     "augment": aug_method,
                     "seed": seed,
                     "metadata": metadata_path,

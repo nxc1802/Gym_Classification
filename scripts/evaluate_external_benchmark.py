@@ -60,8 +60,15 @@ def get_embeddings(model, loader, device, model_type):
                 x = [xi.to(device) for xi in x]
             
             if model_type == "Transformer":
-                x_norm = model.in_norm(x)
-                h = model.input_proj(x_norm)
+                if getattr(model, "variant", "standard") == "dual_branch" and x.shape[-1] > getattr(model, "d_coord", 39):
+                    coords = x[..., :model.d_coord]
+                    angles = x[..., model.d_coord:]
+                    h_coord = model.norm_coord(model.proj_coord(coords))
+                    h_angle = model.norm_angle(model.proj_angle(angles))
+                    h = torch.cat([h_coord, h_angle], dim=-1)
+                else:
+                    x_norm = model.in_norm(x)
+                    h = model.input_proj(x_norm)
                 h = model.input_drop(h)
                 h = model.pos_encoder(h)
                 enc = model.norm(model.transformer_encoder(h))
@@ -99,10 +106,14 @@ def main():
     sc_class_indices = [all_classes.index(c) for c in SC_CLASS_NAMES]
     print(f"S&C Classes & Indices: {dict(zip(SC_CLASS_NAMES, sc_class_indices))}")
 
+    # Determine mix feature representation
+    trans_ckpt = "checkpoints/best_Transformer_T2.2_mix_v2.pt" if os.path.exists("checkpoints/best_Transformer_T2.2_mix_v2.pt") else "checkpoints/best_Transformer_T2.2_mix.pt"
+    mix_feat = "mix_v2" if "mix_v2" in trans_ckpt or not os.path.exists("checkpoints/best_Transformer_T2.2_mix.pt") else "mix"
+
     # Load dataloaders
     print("Loading test datasets...")
     _, val_l_mix, test_l_mix = get_dataloaders(
-        metadata_path=metadata_path, feature_method="mix", batch_size=32, seq_len=32, stride=32, val_test_stride=32,
+        metadata_path=metadata_path, feature_method=mix_feat, batch_size=32, seq_len=32, stride=32, val_test_stride=32,
         landmark_dir="data/landmarks", num_workers=0, in_memory=True
     )
     _, val_l_rel, test_l_rel = get_dataloaders(
@@ -135,7 +146,7 @@ def main():
     # Load models
     models = {
         "ST-GCN (Rel 3D)": (load_model("STGCN", "rel_3d", "checkpoints/best_STGCN_T3.2_rel_3d.pt", device), test_l_rel, val_l_rel),
-        "Transformer (Mix)": (load_model("Transformer", "mix", "checkpoints/best_Transformer_T2.2_mix.pt", device), test_l_mix, val_l_mix),
+        "Transformer (Mix)": (load_model("Transformer", mix_feat, trans_ckpt, device), test_l_mix, val_l_mix),
         "AAGCN (Bone 3D)": (load_model("AAGCN", "bone_3d", "checkpoints/best_AAGCN_T4.2_bone_3d.pt", device), test_l_bone, val_l_bone),
         "AAGCN (Rel 3D)": (load_model("AAGCN", "rel_3d", "checkpoints/best_AAGCN_T4.3_rel_3d.pt", device), test_l_rel, val_l_rel),
         "AAGCN (Joint Mot)": (load_model("AAGCN", "joint_motion_3d", "checkpoints/best_AAGCN_T4.4_joint_motion_3d.pt", device), test_l_jm, val_l_jm),

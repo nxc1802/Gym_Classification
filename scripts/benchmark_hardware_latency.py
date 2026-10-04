@@ -132,7 +132,7 @@ def main():
 
     # Model specifications (Name, Type, Feature Space, Input Shape for T=32 frames)
     models_spec = [
-        ("Transformer Mix (117-d)", "Transformer", "mix", torch.randn(1, 32, 117)),
+        ("Transformer Mix (63-d)", "Transformer", "mix_v2", torch.randn(1, 32, 63)),
         ("AAGCN Joint Stream", "AAGCN", "rel_3d", torch.randn(1, 32, 39)),
         ("AAGCN Bone Stream", "AAGCN", "bone_3d", torch.randn(1, 32, 39)),
         ("AAGCN Joint-Motion Stream", "AAGCN", "joint_motion_3d", torch.randn(1, 32, 39)),
@@ -166,8 +166,8 @@ def main():
     # SkelGym-Lite: Transformer Mix + AAGCN Bone
     lite_models = [instantiated_models[0][1], instantiated_models[2][1]]
     lite_inputs = [instantiated_models[0][2], instantiated_models[2][2]]
-    lite_params = benchmark_data["Transformer Mix (117-d)"]["params"] + benchmark_data["AAGCN Bone Stream"]["params"]
-    lite_mmacs = benchmark_data["Transformer Mix (117-d)"]["mmacs"] + benchmark_data["AAGCN Bone Stream"]["mmacs"]
+    lite_params = benchmark_data["Transformer Mix (63-d)"]["params"] + benchmark_data["AAGCN Bone Stream"]["params"]
+    lite_mmacs = benchmark_data["Transformer Mix (63-d)"]["mmacs"] + benchmark_data["AAGCN Bone Stream"]["mmacs"]
     lite_stats = benchmark_ensemble(lite_models, lite_inputs, device, warmup=args.warmup, iterations=args.iterations)
 
     # SkelGym-Full: Transformer Mix + 4 Streams
@@ -187,7 +187,7 @@ def main():
     print("=" * 105)
     print("  Tier 1 [Observation Horizon]      : 1.07 seconds (32 frames @ 30 FPS physical motion window)")
     print("  Tier 2 [Per-Frame Pose Tracking]   : ~8.00 - 15.00 ms/frame (Google MediaPipe Pose streaming ring-buffer)")
-    print(f"  Tier 3 [Classifier Post-Window]   : {full_stats['mean_ms']:.2f} ms (SkelGym-Full) / {lite_stats['mean_ms']:.2f} ms (SkelGym-Lite) / {benchmark_data['Transformer Mix (117-d)']['mean_ms']:.2f} ms (Transformer)")
+    print(f"  Tier 3 [Classifier Post-Window]   : {full_stats['mean_ms']:.2f} ms (SkelGym-Full) / {lite_stats['mean_ms']:.2f} ms (SkelGym-Lite) / {benchmark_data['Transformer Mix (63-d)']['mean_ms']:.2f} ms (Transformer)")
     print(f"  -> Total Incremental Feedback Latency per incoming frame: ~{8.00 + full_stats['mean_ms']:.2f} - {15.00 + full_stats['mean_ms']:.2f} ms")
     print("  -> Execution Verdict: Fully compliant with 30 FPS real-time feedback constraint (< 33.3 ms)")
     print("=" * 105 + "\n")
