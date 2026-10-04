@@ -19,8 +19,11 @@ import time
 import argparse
 from pathlib import Path
 import numpy as np
-import torch
-from thop import profile
+try:
+    from thop import profile
+    HAS_THOP = True
+except ImportError:
+    HAS_THOP = False
 
 # Ensure project root is in sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -76,10 +79,16 @@ def benchmark_model(model: torch.nn.Module, dummy_input: torch.Tensor, device: t
     }
 
 def compute_complexity(model: torch.nn.Module, dummy_input: torch.Tensor):
-    macs, params = profile(model, inputs=(dummy_input,), verbose=False)
-    mmacs = macs / 1e6
-    # In literature, 1 Multiply-Accumulate (MAC) is commonly counted as 2 Floating-Point Operations (FLOPs)
-    mflops = (2 * macs) / 1e6
+    params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    mmacs = 0.0
+    mflops = 0.0
+    if HAS_THOP:
+        try:
+            macs, _ = profile(model, inputs=(dummy_input,), verbose=False)
+            mmacs = macs / 1e6
+            mflops = (2 * macs) / 1e6
+        except Exception as e:
+            print(f"[Warning] Failed to profile FLOPs with thop: {e}")
     return params, mmacs, mflops
 
 def benchmark_ensemble(models: list, dummy_inputs: list, device: torch.device, warmup: int = 50, iterations: int = 500):
