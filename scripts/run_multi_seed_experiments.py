@@ -180,6 +180,24 @@ def evaluate_seed(
     val_video_ids = None
     test_video_ids = None
 
+    loader_cache: Dict[str, Any] = {}
+    def get_cached_loaders(f_type: str):
+        if f_type not in loader_cache:
+            loader_cache[f_type] = get_dataloaders(
+                metadata_path=metadata_path,
+                feature_method=f_type,
+                batch_size=32,
+                seq_len=32,
+                stride=16,
+                val_test_stride=32,
+                landmark_dir=landmark_dir,
+                num_workers=0,
+                in_memory=True,
+                seed=seed,
+                strict_norm=True
+            )
+        return loader_cache[f_type]
+
     # Evaluate Baselines if requested and present
     baseline_results = {}
     baseline_raw = {}
@@ -194,19 +212,7 @@ def evaluate_seed(
             model.to(device)
             model.eval()
 
-            _, v_l, te_l = get_dataloaders(
-                metadata_path=metadata_path,
-                feature_method=m["feature"],
-                batch_size=32,
-                seq_len=32,
-                stride=16,
-                val_test_stride=32,
-                landmark_dir=landmark_dir,
-                num_workers=0,
-                in_memory=True,
-                seed=seed,
-                strict_norm=True
-            )
+            _, v_l, te_l = get_cached_loaders(m["feature"])
             trainer = Trainer(model=model, device=device)
             _, _, b_vprob = trainer.predict(v_l)
             b_vwin_pred = np.argmax(b_vprob, axis=1)
@@ -249,19 +255,7 @@ def evaluate_seed(
         model.to(device)
         model.eval()
 
-        _, val_loader, test_loader = get_dataloaders(
-            metadata_path=metadata_path,
-            feature_method=feat,
-            batch_size=32,
-            seq_len=32,
-            stride=16,
-            val_test_stride=32,
-            landmark_dir=landmark_dir,
-            num_workers=0,
-            in_memory=True,
-            seed=seed,
-            strict_norm=True
-        )
+        _, val_loader, test_loader = get_cached_loaders(feat)
 
         if val_video_ids is None:
             val_video_ids = list(val_loader.dataset.video_ids)
