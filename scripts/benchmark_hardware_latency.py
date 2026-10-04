@@ -16,6 +16,7 @@ Usage:
 
 import sys
 import time
+import json
 import argparse
 from pathlib import Path
 import numpy as np
@@ -201,6 +202,64 @@ def main():
     print(f"  -> Total Incremental Feedback Latency per incoming frame: ~{8.00 + full_stats['mean_ms']:.2f} - {15.00 + full_stats['mean_ms']:.2f} ms")
     print("  -> Execution Verdict: Fully compliant with 30 FPS real-time feedback constraint (< 33.3 ms)")
     print("=" * 105 + "\n")
+
+    # Save standardized hardware latency JSON for Table 11
+    out_dir = PROJECT_ROOT / "outputs"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    art_dir = PROJECT_ROOT / "artifacts" / "results"
+    art_dir.mkdir(parents=True, exist_ok=True)
+    
+    art_file = art_dir / "hardware_latency.json"
+    prior_data = {}
+    if art_file.exists():
+        try:
+            with open(art_file, "r") as f:
+                prior_data = json.load(f).get("models", {})
+        except Exception:
+            pass
+
+    save_models = {}
+    key_mapping = {
+        "Transformer Mix (63-d)": "Transformer Mix v2 (63-d)",
+        "AAGCN Joint Stream": "AAGCN Joint Stream",
+        "AAGCN Bone Stream": "AAGCN Bone Stream",
+        "AAGCN Joint-Motion Stream": "AAGCN Joint-Motion Stream",
+        "AAGCN Bone-Motion Stream": "AAGCN Bone-Motion Stream",
+    }
+    
+    for orig_name, table_name in key_mapping.items():
+        m_entry = prior_data.get(table_name, prior_data.get(orig_name, {})).copy()
+        cur_stats = benchmark_data[orig_name]
+        m_entry["params_k"] = round(cur_stats["params"] / 1000.0)
+        m_entry["mflops"] = round(cur_stats["mflops"], 2)
+        if device.type == "cuda":
+            m_entry["cuda_mean_ms"] = round(cur_stats["mean_ms"], 2)
+            m_entry["cuda_fps"] = round(cur_stats["fps"], 0)
+        save_models[table_name] = m_entry
+        
+    lite_entry = prior_data.get("SkelGym-Lite (Transformer + Bone)", {}).copy()
+    lite_entry["params_k"] = round(lite_params / 1000.0)
+    lite_entry["mflops"] = round(2 * lite_mmacs, 2)
+    if device.type == "cuda":
+        lite_entry["cuda_mean_ms"] = round(lite_stats["mean_ms"], 2)
+        lite_entry["cuda_fps"] = round(lite_stats["fps"], 0)
+    save_models["SkelGym-Lite (Transformer + Bone)"] = lite_entry
+
+    full_entry = prior_data.get("SkelGym-Full (Transformer + 4 AAGCN)", {}).copy()
+    full_entry["params"] = f"{full_params / 1e6:.2f}M"
+    full_entry["params_k"] = round(full_params / 1000.0)
+    full_entry["mflops"] = round(2 * full_mmacs, 2)
+    if device.type == "cuda":
+        full_entry["cuda_mean_ms"] = round(full_stats["mean_ms"], 2)
+        full_entry["cuda_fps"] = round(full_stats["fps"], 0)
+    save_models["SkelGym-Full (Transformer + 4 AAGCN)"] = full_entry
+
+    out_payload = {"models": save_models}
+    with open(out_dir / "hardware_latency.json", "w") as f:
+        json.dump(out_payload, f, indent=2)
+    with open(art_dir / "hardware_latency.json", "w") as f:
+        json.dump(out_payload, f, indent=2)
+    print(f"Saved latency benchmark to {out_dir / 'hardware_latency.json'}")
 
 if __name__ == "__main__":
     main()

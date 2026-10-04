@@ -13,6 +13,9 @@ Covers:
 
 import os
 import sys
+import json
+import shutil
+import argparse
 from pathlib import Path
 import numpy as np
 import torch
@@ -97,7 +100,13 @@ def get_embeddings(model, loader, device, model_type):
     return np.concatenate(embeds, axis=0)
 
 def main():
-    device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu"))
+    parser = argparse.ArgumentParser(description="Evaluate External S&C Benchmark")
+    parser.add_argument("--device", type=str, default="auto", help="Device (cuda/mps/cpu)")
+    args, unknown = parser.parse_known_args()
+    if args.device != "auto":
+        device = torch.device(args.device)
+    else:
+        device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu"))
     print(f"Running External S&C Benchmark on device: {device}")
 
     metadata_path = "data/Final_dataset_metadata.csv" if os.path.exists("data/Final_dataset_metadata.csv") else "Final_dataset_metadata.csv"
@@ -340,6 +349,14 @@ def main():
         std_acc = np.std(trial_accs)
         ci_low, ci_high = np.percentile(trial_accs, 2.5), np.percentile(trial_accs, 97.5)
         print(f"{m_name:<25}: Mean = {mean_acc:.2f}% ± {std_acc:.2f}% | 95% CI: [{ci_low:.2f}%, {ci_high:.2f}%]")
+
+    out_dir = PROJECT_ROOT / "outputs"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    art_file = PROJECT_ROOT / "artifacts" / "results" / "external_benchmark_results.json"
+    dest_file = out_dir / "external_benchmark_results.json"
+    if art_file.exists():
+        shutil.copy(art_file, dest_file)
+        print(f"Synced external benchmark artifacts to {dest_file}")
 
     print("\nExternal benchmark verification complete!")
 
