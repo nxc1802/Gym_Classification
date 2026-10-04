@@ -357,7 +357,16 @@ def evaluate_checkpoint(
     """Evaluates checkpoint on the held-out test partition."""
     state_dict, _ = load_checkpoint_weights(ckpt_path, device="cpu")
 
-    model = build_model(model_type, feature_method, num_classes=NUM_CLASSES)
+    if model_type == "Transformer":
+        if "proj_coord.weight" in state_dict:
+            model = build_model(model_type, feature_method, num_classes=NUM_CLASSES, transformer_variant="dual_branch")
+        elif "input_proj.weight" in state_dict:
+            model = build_model(model_type, feature_method, num_classes=NUM_CLASSES, transformer_variant="standard")
+        else:
+            model = build_model(model_type, feature_method, num_classes=NUM_CLASSES)
+    else:
+        model = build_model(model_type, feature_method, num_classes=NUM_CLASSES)
+
     model.load_state_dict(state_dict)
     model.to(device)
     model.eval()
