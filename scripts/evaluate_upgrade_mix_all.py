@@ -37,8 +37,10 @@ def evaluate_single_checkpoint(
     ckpt_path: Path,
     feature: str,
     seed: int,
-    device: str = "cuda"
+    device: Any = "cuda"
 ) -> Dict[str, Any]:
+    if isinstance(device, str):
+        device = torch.device(device)
     print(f"\n=======================================================", flush=True)
     print(f"Evaluating {feature} (Seed {seed}) from {ckpt_path.name}", flush=True)
     print(f"=======================================================", flush=True)
@@ -162,7 +164,7 @@ def upload_models_to_hub(all_results: List[Dict[str, Any]]):
             )
 
 def main():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     base_dir = PROJECT_ROOT / "checkpoints" / "upgrade_mix"
     
     all_results = []
