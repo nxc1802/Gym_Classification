@@ -279,6 +279,12 @@ def evaluate_seed(
 
         val_probs[feat] = y_vp
         test_probs[feat] = y_tp
+        if feat == "mix_v2":
+            val_probs["mix"] = y_vp
+            test_probs["mix"] = y_tp
+        elif feat == "mix":
+            val_probs["mix_v2"] = y_vp
+            test_probs["mix_v2"] = y_tp
 
     # Pre-compute true video labels for val and test
     val_unique_vids = []
@@ -300,8 +306,9 @@ def evaluate_seed(
     # Standalone Constituent Models Evaluation (Validation + Test)
     individual_runs = {}
     constituent_raw = {}
+    feat_mix = "mix_v2" if "mix_v2" in val_probs else "mix"
     constituent_names = {
-        "mix": "Transformer Mix (Aug)",
+        feat_mix: "Transformer Mix (Aug)",
         "bone_3d": "AAGCN Bone (Aug)",
         "rel_3d": "AAGCN Rel (Aug)",
         "joint_motion_3d": "AAGCN Joint Motion (Aug)",
@@ -340,8 +347,8 @@ def evaluate_seed(
     ensemble_configs = {
         "Two-Stream AAGCN (Aug)": ["rel_3d", "bone_3d"],
         "Four-Stream AAGCN (Aug)": ["bone_3d", "rel_3d", "joint_motion_3d", "bone_motion_3d"],
-        "SkelGym-Lite": ["mix", "bone_3d"],
-        "SkelGym-Full": ["mix", "bone_3d", "rel_3d", "joint_motion_3d", "bone_motion_3d"]
+        "SkelGym-Lite": [feat_mix, "bone_3d"],
+        "SkelGym-Full": [feat_mix, "bone_3d", "rel_3d", "joint_motion_3d", "bone_motion_3d"]
     }
 
     fusion_evals = {}
@@ -698,9 +705,10 @@ def export_canonical_artifacts(
     p_clean_trans_v = raw42["baseline_raw"]["Transformer Clean"]["vid_pred"]
     prob_clean_trans_v = raw42["baseline_raw"]["Transformer Clean"]["vid_prob"]
 
-    p_aug_trans_w = np.argmax(raw42["test_probs"]["mix"], axis=1)
+    mix_key = "mix_v2" if "mix_v2" in raw42["test_probs"] else "mix"
+    p_aug_trans_w = np.argmax(raw42["test_probs"][mix_key], axis=1)
     _, p_aug_trans_v, prob_aug_trans_v, _ = aggregate_video_level_predictions(
-        raw42["test_probs"]["mix"], y_test_t, split_info["test_video_ids"]
+        raw42["test_probs"][mix_key], y_test_t, split_info["test_video_ids"]
     )
 
     p_stgcn_w = raw42["baseline_raw"]["ST-GCN Baseline"]["win_pred"]
@@ -907,6 +915,15 @@ def main():
     parser.add_argument("--hf_repo", type=str, default="Cuong2004/gym-exercise-classification", help="Hugging Face Model repository ID")
     parser.add_argument("--hf_token", type=str, default=None, help="Hugging Face authentication token")
     args = parser.parse_args()
+
+    # Robust metadata resolution
+    metadata_cand = Path(args.metadata)
+    if not metadata_cand.exists():
+        if Path("Final_dataset_metadata.csv").exists():
+            metadata_cand = Path("Final_dataset_metadata.csv")
+        elif Path("data/Final_dataset_metadata.csv").exists():
+            metadata_cand = Path("data/Final_dataset_metadata.csv")
+    args.metadata = str(metadata_cand)
 
     if args.device == "auto":
         device_str = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")
