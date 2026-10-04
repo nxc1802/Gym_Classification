@@ -301,6 +301,11 @@ def update_table4_loo(content: str, json_path: Path) -> str:
 
     mapping = {
         "Candidate Full (All 5 Ops)": ("Candidate_Full_5op", "None (Reference Suite)", False),
+        "Minus Noise / Jitter": ("Minus_Jitter", "Gaussian Coordinate Jitter ($\\sigma=0.008$)", False),
+        "Minus Mirroring": ("Minus_Mirror", "Sagittal Horizontal Flip ($p=0.5$)", False),
+        "Minus Rotation / Yaw": ("Minus_Yaw", "Gravitational Yaw Rotation ($\\pm 15^\\circ$)", False),
+        "Minus Scaling": ("Minus_Scale", "Proportional Scale Variation ($\\pm 10\\%$)", False),
+        "Minus Time Interpolation": ("Minus_TimeWarp", "Temporal Resampling ($0.8\\times - 1.2\\times$)", False),
         "w/o Sagittal Reflection ($-$Mirror)": ("Minus_Mirror", "Bilateral Reflection", False),
         "w/o Gravitational Yaw ($-$Yaw)": ("Minus_Yaw", "Vertical Axis 3D Yaw", False),
         "w/o Proportional Scaling ($-$Scale)": ("Minus_Scale", "Isotropic Anthropometric Scale", False),
@@ -353,6 +358,12 @@ def update_table5_single(content: str, json_path: Path) -> str:
     ref_acc = single_summary.get("Clean_Baseline_NoAug", {}).get("win_acc_mean", 62.02)
 
     mapping = {
+        "None (Clean Baseline)": ("Clean_Baseline_NoAug", "Unaugmented Native Window Sequences", False),
+        "Only Jitter": ("Single_Jitter", "Gaussian Noise ($\\sigma=0.008$)", False),
+        "Only Mirroring": ("Single_Mirror", "Sagittal Bilateral Reflection", False),
+        "Only Rotation": ("Single_Yaw", "3D Yaw Perturbation ($\\pm 15^\\circ$)", False),
+        "Only Scaling": ("Single_Scale", "Proportional Scale Jitter ($\\pm 10\\%$)", False),
+        "Only Time Interpolation": ("Single_TimeWarp", "Linear Sequence Resampling", False),
         "Clean Baseline (Control)": ("Clean_Baseline_NoAug", "None (Unaugmented)", False),
         "+ Sagittal Reflection (Mirror)": ("Single_Mirror", "Bilateral Body Reflection", False),
         "+ Gravitational Yaw (Yaw)": ("Single_Yaw", "3D Viewpoint Invariance", False),
@@ -421,20 +432,22 @@ def update_table6_fusion(content: str, json_path: Path) -> str:
     # 1. Transformer Mix
     if "Transformer Mix (Aug)" in individual:
         t_m = individual["Transformer Mix (Aug)"]
-        updates["Transformer Mix (117-d)"] = [
-            "**Transformer Mix (117-d)**", "Single Sequence Backbone",
-            *extract_row_metrics(t_m),
-            "Verified"
-        ]
+        for t_key in ["Transformer Mix (63-d)", "Transformer Mix (117-d)"]:
+            updates[t_key] = [
+                f"**{t_key}**", "Single Sequence Backbone",
+                *extract_row_metrics(t_m),
+                "Verified"
+            ]
 
     # 2. AAGCN Bone Stream
     aagcn_bone = individual.get("AAGCN Bone (Aug)", individual.get("AAGCN_bone_3d", {}))
     if aagcn_bone:
-        updates["AAGCN Bone Stream (Bone 3D)"] = [
-            "**AAGCN Bone Stream (Bone 3D)**", "Single Graph Backbone",
-            *extract_row_metrics(aagcn_bone),
-            "Verified"
-        ]
+        for b_key in ["AAGCN Bone Stream", "AAGCN Bone Stream (Bone 3D)"]:
+            updates[b_key] = [
+                f"**{b_key}**", "Single Graph Backbone",
+                *extract_row_metrics(aagcn_bone),
+                "Verified"
+            ]
 
     # 3. Four-Stream AAGCN
     four_stream = fusion_methods.get("Four-Stream AAGCN (Aug)", {})
@@ -521,6 +534,19 @@ def update_table7_consensus(content: str, json_path: Path) -> str:
             gain,
             status
         ]
+        if "117-d" in row_name:
+            alt_name = row_name.replace("117-d", "63-d")
+            updates[alt_name] = [
+                f"**{alt_name}**",
+                modality,
+                params,
+                w_acc,
+                w_f1,
+                v_acc,
+                v_f1,
+                gain,
+                status
+            ]
 
     return update_table_rows(content, "Table 7: Window-Level vs Video Consensus", updates)
 
@@ -574,6 +600,16 @@ def update_table9_bootstrap(content: str, json_path: Path) -> str:
             str(entry.get("v_f1_str", "")),
             "Verified"
         ]
+        if "117-d" in mname:
+            alt_mname = mname.replace("117-d", "63-d")
+            updates[alt_mname] = [
+                f"**{alt_mname}**",
+                str(entry.get("w_acc_str", "")),
+                str(entry.get("w_f1_str", "")),
+                str(entry.get("v_acc_str", "")),
+                str(entry.get("v_f1_str", "")),
+                "Verified"
+            ]
 
     return update_table_rows(content, "Table 9: Non-Parametric Video-Level Cluster Bootstrap", updates)
 
@@ -742,11 +778,11 @@ def verify_results_final(content: str, out_dir: Path, tolerance: float = 0.05) -
         for row_name, entry in t7_data.items():
             expected_win = entry["win_acc"]
             expected_vid = entry["vid_acc"]
-            # Look for row in content
-            matched_lines = [l for l in content.splitlines() if normalize_key(row_name) in normalize_key(l) and l.strip().startswith("|")]
+            alt_row_name = row_name.replace("117-d", "63-d")
+            matched_lines = [l for l in content.splitlines() if (normalize_key(row_name) in normalize_key(l) or normalize_key(alt_row_name) in normalize_key(l)) and l.strip().startswith("|")]
             for line in matched_lines:
                 # Find Table 7 line (has params like 396K, 1.91M, etc.)
-                if any(p in line for p in ["396K", "402K", "400K", "350K", "378K", "756K", "1.51M", "778K", "1.91M"]):
+                if any(p in line for p in ["396K", "402K", "400K", "350K", "378K", "367K", "300K", "301K", "756K", "1.51M", "678K", "778K", "1.81M", "1.91M"]):
                     nums = re.findall(r"(\d+\.\d+)%", line)
                     if len(nums) >= 2:
                         rep_w = float(nums[0])
