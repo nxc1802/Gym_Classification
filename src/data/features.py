@@ -79,6 +79,47 @@ def extract_relative_features(
 
     return np.stack(features, axis=1).astype(np.float32)
 
+def extract_relative_norm_features(
+    df: pd.DataFrame,
+    points: List[str] = RAW_POINTS_13,
+    dims: List[str] = ("x", "y", "z")
+) -> np.ndarray:
+    """
+    Anisotropic Anthropometric Scale Normalization:
+    - Re-centers coordinates relative to mid-hip origin.
+    - Scales X-axis by bi-iliac hip width (|LEFT_HIP_x - RIGHT_HIP_x|).
+    - Scales Y-axis and Z-axis by torso length (|MID_SHOULDER_y - MID_HIP_y|).
+    Produces anthropometrically invariant and camera-distance invariant 3D coordinates.
+    Shape: (N_frames, len(points) * len(dims)) -> (N_frames, 39)
+    """
+    n_frames = len(df)
+    coords = {}
+    needed = set(points) | {"LEFT_HIP", "RIGHT_HIP", "LEFT_SHOULDER", "RIGHT_SHOULDER", "NOSE"}
+    for pt in needed:
+        xs = df[f"{pt}_x"].fillna(0.0).values if f"{pt}_x" in df.columns else np.zeros(n_frames, dtype=np.float32)
+        ys = df[f"{pt}_y"].fillna(0.0).values if f"{pt}_y" in df.columns else np.zeros(n_frames, dtype=np.float32)
+        zs = df[f"{pt}_z"].fillna(0.0).values if f"{pt}_z" in df.columns else np.zeros(n_frames, dtype=np.float32)
+        coords[pt] = np.stack([xs, ys, zs], axis=1)
+
+    hip_mid = (coords["LEFT_HIP"] + coords["RIGHT_HIP"]) / 2.0
+    sh_mid = (coords["LEFT_SHOULDER"] + coords["RIGHT_SHOULDER"]) / 2.0
+
+    # Scale factors with protective floor to avoid division by zero
+    lx = np.maximum(np.abs(coords["RIGHT_HIP"][:, 0] - coords["LEFT_HIP"][:, 0]), 0.05)
+    ly = np.maximum(np.abs(sh_mid[:, 1] - hip_mid[:, 1]), 0.10)
+    lz = ly
+
+    scale = np.stack([lx, ly, lz], axis=1)  # (N_frames, 3)
+
+    norm_features = []
+    for pt in points:
+        pt_centered = coords[pt] - hip_mid
+        pt_norm = pt_centered / scale
+        for d_i in range(len(dims)):
+            norm_features.append(pt_norm[:, d_i].astype(np.float32))
+
+    return np.stack(norm_features, axis=1).astype(np.float32)
+
 def extract_bone_features(
     df: pd.DataFrame,
     points: List[str] = RAW_POINTS_13,
@@ -243,6 +284,99 @@ def compute_pair_angles_3d(df: pd.DataFrame, points: List[str] = RAW_POINTS_13) 
 
     return angles
 
+def compute_kinematic_angles_24(df: pd.DataFrame) -> np.ndarray:
+    """
+    Computes 24 anatomical kinematic angles:
+    14 Bone inclination angles (elevation from horizontal ground plane X-Z):
+      1. Left Upper Arm (LEFT_SHOULDER -> LEFT_ELBOW)
+      2. Right Upper Arm (RIGHT_SHOULDER -> RIGHT_ELBOW)
+      3. Left Forearm (LEFT_ELBOW -> LEFT_WRIST)
+      4. Right Forearm (RIGHT_ELBOW -> RIGHT_WRIST)
+      5. Left Thigh (LEFT_HIP -> LEFT_KNEE)
+      6. Right Thigh (RIGHT_HIP -> RIGHT_KNEE)
+      7. Left Shin (LEFT_KNEE -> LEFT_ANKLE)
+      8. Right Shin (RIGHT_KNEE -> RIGHT_ANKLE)
+      9. Shoulder Girdle (LEFT_SHOULDER -> RIGHT_SHOULDER)
+      10. Pelvic Girdle (LEFT_HIP -> RIGHT_HIP)
+      11. Left Torso Flank (LEFT_SHOULDER -> LEFT_HIP)
+      12. Right Torso Flank (RIGHT_SHOULDER -> RIGHT_HIP)
+      13. Spine Axis (MID_HIP -> MID_SHOULDER)
+      14. Neck Axis (MID_SHOULDER -> NOSE)
+    10 3D Joint Articulation Angles (Triplets, 3D dot product in [0, pi]):
+      15. Left Elbow Flexion (SHOULDER - ELBOW - WRIST)
+      16. Right Elbow Flexion (SHOULDER - ELBOW - WRIST)
+      17. Left Shoulder Angle (HIP - SHOULDER - ELBOW)
+      18. Right Shoulder Angle (HIP - SHOULDER - ELBOW)
+      19. Left Hip Hinge (SHOULDER - HIP - KNEE)
+      20. Right Hip Hinge (SHOULDER - HIP - KNEE)
+      21. Left Knee Flexion (HIP - KNEE - ANKLE)
+      22. Right Knee Flexion (HIP - KNEE - ANKLE)
+      23. Torso Posture Angle (NOSE - MID_SHOULDER - MID_HIP)
+      24. Arm Splay Angle (LEFT_ELBOW - MID_SHOULDER - RIGHT_ELBOW)
+    Shape: (N_frames, 24)
+    """
+    n_frames = len(df)
+    coords = {}
+    needed = [
+        "NOSE", "LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_ELBOW", "RIGHT_ELBOW",
+        "LEFT_WRIST", "RIGHT_WRIST", "LEFT_HIP", "RIGHT_HIP", "LEFT_KNEE",
+        "RIGHT_KNEE", "LEFT_ANKLE", "RIGHT_ANKLE"
+    ]
+    for pt in needed:
+        xs = df[f"{pt}_x"].fillna(0.0).values if f"{pt}_x" in df.columns else np.zeros(n_frames, dtype=np.float32)
+        ys = df[f"{pt}_y"].fillna(0.0).values if f"{pt}_y" in df.columns else np.zeros(n_frames, dtype=np.float32)
+        zs = df[f"{pt}_z"].fillna(0.0).values if f"{pt}_z" in df.columns else np.zeros(n_frames, dtype=np.float32)
+        coords[pt] = np.stack([xs, ys, zs], axis=1)
+
+    coords["MID_HIP"] = (coords["LEFT_HIP"] + coords["RIGHT_HIP"]) / 2.0
+    coords["MID_SHOULDER"] = (coords["LEFT_SHOULDER"] + coords["RIGHT_SHOULDER"]) / 2.0
+
+    def bone_elev(p1, p2):
+        d = p2 - p1
+        ground = np.maximum(np.sqrt(d[:, 0]**2 + d[:, 2]**2), 1e-4)
+        return np.arctan2(d[:, 1], ground).astype(np.float32)
+
+    def joint_angle(pa, pb, pc):
+        # angle at vertex pb
+        v1 = pa - pb
+        v2 = pc - pb
+        v1_norm = np.maximum(np.linalg.norm(v1, axis=1), 1e-4)
+        v2_norm = np.maximum(np.linalg.norm(v2, axis=1), 1e-4)
+        cos_a = np.sum(v1 * v2, axis=1) / (v1_norm * v2_norm)
+        cos_a = np.clip(cos_a, -1.0, 1.0)
+        return np.arccos(cos_a).astype(np.float32)
+
+    angles = [
+        # 14 Bone elevations
+        bone_elev(coords["LEFT_SHOULDER"], coords["LEFT_ELBOW"]),
+        bone_elev(coords["RIGHT_SHOULDER"], coords["RIGHT_ELBOW"]),
+        bone_elev(coords["LEFT_ELBOW"], coords["LEFT_WRIST"]),
+        bone_elev(coords["RIGHT_ELBOW"], coords["RIGHT_WRIST"]),
+        bone_elev(coords["LEFT_HIP"], coords["LEFT_KNEE"]),
+        bone_elev(coords["RIGHT_HIP"], coords["RIGHT_KNEE"]),
+        bone_elev(coords["LEFT_KNEE"], coords["LEFT_ANKLE"]),
+        bone_elev(coords["RIGHT_KNEE"], coords["RIGHT_ANKLE"]),
+        bone_elev(coords["LEFT_SHOULDER"], coords["RIGHT_SHOULDER"]),
+        bone_elev(coords["LEFT_HIP"], coords["RIGHT_HIP"]),
+        bone_elev(coords["LEFT_SHOULDER"], coords["LEFT_HIP"]),
+        bone_elev(coords["RIGHT_SHOULDER"], coords["RIGHT_HIP"]),
+        bone_elev(coords["MID_HIP"], coords["MID_SHOULDER"]),
+        bone_elev(coords["MID_SHOULDER"], coords["NOSE"]),
+        # 10 Joint articulation angles
+        joint_angle(coords["LEFT_SHOULDER"], coords["LEFT_ELBOW"], coords["LEFT_WRIST"]),
+        joint_angle(coords["RIGHT_SHOULDER"], coords["RIGHT_ELBOW"], coords["RIGHT_WRIST"]),
+        joint_angle(coords["LEFT_HIP"], coords["LEFT_SHOULDER"], coords["LEFT_ELBOW"]),
+        joint_angle(coords["RIGHT_HIP"], coords["RIGHT_SHOULDER"], coords["RIGHT_ELBOW"]),
+        joint_angle(coords["LEFT_SHOULDER"], coords["LEFT_HIP"], coords["LEFT_KNEE"]),
+        joint_angle(coords["RIGHT_SHOULDER"], coords["RIGHT_HIP"], coords["RIGHT_KNEE"]),
+        joint_angle(coords["LEFT_HIP"], coords["LEFT_KNEE"], coords["LEFT_ANKLE"]),
+        joint_angle(coords["RIGHT_HIP"], coords["RIGHT_KNEE"], coords["RIGHT_ANKLE"]),
+        joint_angle(coords["NOSE"], coords["MID_SHOULDER"], coords["MID_HIP"]),
+        joint_angle(coords["LEFT_ELBOW"], coords["MID_SHOULDER"], coords["RIGHT_ELBOW"]),
+    ]
+
+    return np.stack(angles, axis=1).astype(np.float32)
+
 def extract_mix_features(df: pd.DataFrame, components: Optional[List[str]] = None) -> np.ndarray:
     """
     Extracts unified Mix representation by dynamically concatenating arbitrary feature sets.
@@ -359,6 +493,14 @@ def extract_features_by_method(df: pd.DataFrame, method: str) -> Union[np.ndarra
         return compute_pair_angles_2d(df, RAW_POINTS_13)  # 78
     elif method == "angle2_3d":
         return compute_pair_angles_3d(df, RAW_POINTS_13)  # 78
+    elif method in ("rel_3d_norm", "rel_norm", "rel_norm_3d"):
+        return extract_relative_norm_features(df, RAW_POINTS_13, ["x", "y", "z"])  # 39
+    elif method in ("angle_kinematic_24", "kinematic_24", "angle_24"):
+        return compute_kinematic_angles_24(df)  # 24
+    elif method in ("mix_v2", "mix_63", "biomechanical_mix_v2"):
+        rel_n = extract_relative_norm_features(df, RAW_POINTS_13, ["x", "y", "z"])
+        ang_24 = compute_kinematic_angles_24(df)
+        return np.concatenate([rel_n, ang_24], axis=1).astype(np.float32)  # 63
 
     # Legacy support
     elif method == "full_4":

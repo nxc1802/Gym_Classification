@@ -108,7 +108,7 @@ class TransformerModel(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: (B, T, D)
-        if self.variant == "dual_branch" and x.shape[-1] >= 78:
+        if self.variant == "dual_branch" and x.shape[-1] > self.d_coord:
             coords = x[..., :self.d_coord]
             angles = x[..., self.d_coord:]
             h_coord = self.norm_coord(self.proj_coord(coords))

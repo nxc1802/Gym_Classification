@@ -120,10 +120,12 @@ def build_model(
     elif model_type == "Transformer":
         if feature_method == "branch_concat":
             return BranchConcatTransformer(dim1=53, dim2=286, num_classes=num_classes, d_model=hidden_dim or 128, nhead=nhead, num_layers=num_layers or 3, dropout=dropout or 0.2)
-        h_dim = hidden_dim if hidden_dim is not None else 128
+        h_dim = hidden_dim if hidden_dim is not None else 112
         n_layers = num_layers if num_layers is not None else 3
+        dim_ff = 168 if h_dim == 112 else (192 if h_dim == 128 else int(h_dim * 1.5))
+        n_head = 4 if (h_dim % 8 != 0 and h_dim % 4 == 0) else nhead
         drop = dropout if dropout is not None else 0.2
-        return TransformerModel(feat_dim=feat_dim, num_classes=num_classes, d_model=h_dim, nhead=nhead, num_layers=n_layers, dim_feedforward=192, dropout=drop, variant=transformer_variant)
+        return TransformerModel(feat_dim=feat_dim, num_classes=num_classes, d_model=h_dim, nhead=n_head, num_layers=n_layers, dim_feedforward=dim_ff, dropout=drop, variant=transformer_variant)
 
     elif model_type == "STGCN":
         drop = dropout if dropout is not None else 0.3

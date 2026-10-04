@@ -171,6 +171,9 @@ FEATURE_DIMS: Dict[str, int] = {
     "angle2_2d": 78,
     "angle2_3d": 78,
     "mix": 117,  # rel_3d (39) + angle2_3d (78)
+    "rel_3d_norm": 39,
+    "angle_kinematic_24": 24,
+    "mix_v2": 63,  # rel_3d_norm (39) + angle_kinematic_24 (24)
     "raw_13": 39,
     "raw_13_2d": 26,
     "raw_13_3d": 39,
