@@ -8,12 +8,12 @@
     ],
     "val_acc_mean": 74.66666666666667,
     "val_acc_sd": 1.168170857040822,
-    "test_win_acc_mean": 73.67666666666666,
-    "test_win_acc_sd": 0.405407887880287,
-    "macro_f1_mean": 0.6382,
-    "macro_f1_sd": 0.0018184242262647597,
-    "test_vid_acc_mean": 0.0,
-    "test_vid_acc_sd": 0.0,
+    "test_win_acc_mean": 64.81954311588663,
+    "test_win_acc_sd": 0.6128038741369324,
+    "macro_f1_mean": 0.6385868289454179,
+    "macro_f1_sd": 0.002307842691285265,
+    "test_vid_acc_mean": 73.67666666666666,
+    "test_vid_acc_sd": 0.405407887880287,
     "runs": [
       {
         "variant": "no_innorm",
@@ -22,9 +22,9 @@
         "val_acc": 73.44578313253012,
         "val_loss": 1.3120268841249396,
         "val_f1": 0.7322188527314986,
-        "test_win_acc": 73.39,
-        "test_vid_acc": 0.0,
-        "macro_f1": 0.6362,
+        "test_win_acc": 64.09041195771053,
+        "test_vid_acc": 73.39055793991416,
+        "macro_f1": 0.6353982402129524,
         "checkpoint": "/marimo/Gym_Classification/checkpoints/mix_methods/no_innorm/seed42/best_Transformer_no_innorm_mix.pt"
       },
       {
@@ -34,9 +34,9 @@
         "val_acc": 76.24096385542168,
         "val_loss": 1.2357021818390812,
         "val_f1": 0.7532917051678656,
-        "test_win_acc": 74.25,
-        "test_vid_acc": 0.0,
-        "macro_f1": 0.6406,
+        "test_win_acc": 65.58512577469924,
+        "test_vid_acc": 74.2489270386266,
+        "macro_f1": 0.6407941217316391,
         "checkpoint": "/marimo/Gym_Classification/checkpoints/mix_methods/no_innorm/seed123/best_Transformer_no_innorm_mix.pt"
       },
       {
@@ -46,9 +46,9 @@
         "val_acc": 74.3132530120482,
         "val_loss": 1.2351444497453161,
         "val_f1": 0.7326276641135263,
-        "test_win_acc": 73.39,
-        "test_vid_acc": 0.0,
-        "macro_f1": 0.6378,
+        "test_win_acc": 64.78309161525009,
+        "test_vid_acc": 73.39055793991416,
+        "macro_f1": 0.6395681248916624,
         "checkpoint": "/marimo/Gym_Classification/checkpoints/mix_methods/no_innorm/seed3407/best_Transformer_no_innorm_mix.pt"
       }
     ]
@@ -62,12 +62,12 @@
     ],
     "val_acc_mean": 78.13654618473896,
     "val_acc_sd": 0.6100188769814513,
-    "test_win_acc_mean": 76.96666666666667,
-    "test_win_acc_sd": 0.8797853273510665,
-    "macro_f1_mean": 0.652,
-    "macro_f1_sd": 0.003395094500402999,
-    "test_vid_acc_mean": 0.0,
-    "test_vid_acc_sd": 0.0,
+    "test_win_acc_mean": 66.1441244379633,
+    "test_win_acc_sd": 0.11269435527397692,
+    "macro_f1_mean": 0.6516375813274854,
+    "macro_f1_sd": 0.002848453671996688,
+    "test_vid_acc_mean": 76.96709585121603,
+    "test_vid_acc_sd": 0.8818904153031416,
     "runs": [
       {
         "variant": "dual_branch",
@@ -76,9 +76,9 @@
         "val_acc": 78.12048192771084,
         "val_loss": 1.1725259384476996,
         "val_f1": 0.7786638327163984,
-        "test_win_acc": 76.82,
-        "test_vid_acc": 0.0,
-        "macro_f1": 0.6535,
+        "test_win_acc": 66.24134159679183,
+        "test_vid_acc": 76.82403433476395,
+        "macro_f1": 0.653147313028247,
         "checkpoint": "/marimo/Gym_Classification/checkpoints/mix_methods/dual_branch/seed42/best_Transformer_dual_branch_mix.pt"
       },
       {
@@ -88,9 +88,9 @@
         "val_acc": 77.39759036144578,
         "val_loss": 1.2144730560176344,
         "val_f1": 0.7680493502596811,
-        "test_win_acc": 78.11,
-        "test_vid_acc": 0.0,
-        "macro_f1": 0.6552,
+        "test_win_acc": 65.98614655486693,
+        "test_vid_acc": 78.11158798283262,
+        "macro_f1": 0.65411707246514,
         "checkpoint": "/marimo/Gym_Classification/checkpoints/mix_methods/dual_branch/seed123/best_Transformer_dual_branch_mix.pt"
       },
       {
@@ -100,9 +100,9 @@
         "val_acc": 78.89156626506025,
         "val_loss": 1.1847300107795071,
         "val_f1": 0.7853391347248251,
-        "test_win_acc": 75.97,
-        "test_vid_acc": 0.0,
-        "macro_f1": 0.6473,
+        "test_win_acc": 66.20488516223114,
+        "test_vid_acc": 75.9656652360515,
+        "macro_f1": 0.6476483584890691,
         "checkpoint": "/marimo/Gym_Classification/checkpoints/mix_methods/dual_branch/seed3407/best_Transformer_dual_branch_mix.pt"
       }
     ]

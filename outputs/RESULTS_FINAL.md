@@ -67,7 +67,7 @@ This document serves as the **single authoritative Source of Truth (SOT) and exe
 | **T1.24** | Transformer | Relative 3D (Mid-Hip) | 39 | 0.4410 | 97.32% ± 2.61% | 1.1776 | 77.69% ± 0.69% | 0.7692 ± 0.0107 | 63.52% ± 1.18% | 0.6151 ± 0.0126 | Verified |
 | **T1.25** | Transformer | Angle 3D (Triplets) | 286 | 0.4006 | 98.53% ± 0.18% | 1.4954 | 70.33% ± 1.10% | 0.6842 ± 0.0096 | 56.86% ± 1.09% | 0.5567 ± 0.0081 | Verified |
 | **T1.26** | Transformer | Angle2 3D (Pair Elevation) | 78 | 0.3815 | 99.05% ± 0.27% | 1.3522 | 73.61% ± 0.66% | 0.7325 ± 0.0083 | 59.27% ± 1.32% | 0.5826 ± 0.0132 | Verified |
-| **T1.27** | Transformer | Biomechanical Mix (Dual-Branch) | 117 | 0.3665 | 99.39% ± 0.04% | 1.1906 | 78.14% ± 0.61% | 0.7774 ± 0.0071 | 76.97% ± 0.88% | 0.6520 ± 0.0034 | Verified |
+| **T1.27** | Transformer | Biomechanical Mix (Dual-Branch) | 117 | 0.3665 | 99.39% ± 0.04% | 1.1906 | 78.14% ± 0.61% | 0.7774 ± 0.0071 | 66.14% ± 0.11% | 0.6516 ± 0.0028 | Verified |
 
 ---
 

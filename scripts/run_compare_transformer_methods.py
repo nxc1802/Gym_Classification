@@ -130,13 +130,19 @@ def run_task(variant: str, seed: int, output_base: Path, trigger_log: Path) -> D
 
     if eval_res.returncode == 0:
         import re
-        m_win = re.search(r"Accuracy:\s+([\d\.]+)%", eval_res.stdout)
+        m_win = re.search(r"Window-Level Acc:\s+([\d\.]+)%", eval_res.stdout)
+        if not m_win:
+            m_win = re.search(r"(?:Window\s+)?Accuracy:\s+([\d\.]+)%", eval_res.stdout)
         if m_win:
             test_win_acc = float(m_win.group(1))
+
         m_f1 = re.search(r"Macro F1:\s+([\d\.]+)", eval_res.stdout)
         if m_f1:
             test_f1 = float(m_f1.group(1))
-        m_vid = re.search(r"Video-Level Consensus Accuracy:\s+([\d\.]+)%", eval_res.stdout)
+
+        m_vid = re.search(r"VIDEO-LEVEL[^\n]*Accuracy:\s+([\d\.]+)%", eval_res.stdout)
+        if not m_vid:
+            m_vid = re.search(r"Video-Level Consensus Accuracy:\s+([\d\.]+)%", eval_res.stdout)
         if m_vid:
             test_vid_acc = float(m_vid.group(1))
 
