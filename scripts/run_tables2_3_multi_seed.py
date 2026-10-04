@@ -83,9 +83,21 @@ FEATURE_SPACES = [
     ("rel_3d", 39, "Relative 3D (Mid-Hip)"),
     ("angle_3d", 286, "Angle 3D (Triplets)"),
     ("angle2_3d", 78, "Angle2 3D (Pair Elevation)"),
-    ("mix", 117, "Biomechanical Mix (Ours)")
+    ("mix_v2", 63, "Biomechanical Mix v2 (Ours)")
 ]
 MODELS_T2 = ["LSTM", "BiLSTM", "Transformer"]
+
+# Module-level constant so other scripts can import it
+TABLE3_SPECS = [
+    # (exp_id, model_label, model_key, feature, stream_name, aug_desc, ckpt_filename)
+    ("T3.1", "ST-GCN Baseline",  "STGCN", "raw_3d",          "Raw 3D Joint",                "None (Clean)",            "best_STGCN_T3.1_raw_3d.pt"),
+    ("T3.2", "ST-GCN Baseline",  "STGCN", "rel_3d",          "Relative 3D Joint",           "None (Clean)",            "best_STGCN_T3.2_rel_3d.pt"),
+    ("T3.3", "AAGCN Baseline",   "AAGCN", "bone_3d",         "Bone 3D Stream",              "None (Clean)",            "best_AAGCN_T3.6_bone_3d.pt"),
+    ("T3.4", "AAGCN",            "AAGCN", "bone_3d",         "Bone 3D Stream",              "SkelGym-Aug (Proposed)",  "best_AAGCN_T4.2_bone_3d.pt"),
+    ("T3.5", "AAGCN",            "AAGCN", "rel_3d",          "Joint Stream (Rel 3D)",        "SkelGym-Aug (Proposed)",  "best_AAGCN_T4.3_rel_3d.pt"),
+    ("T3.6", "AAGCN",            "AAGCN", "joint_motion_3d", r"Joint Motion 3D ($\Delta X$)","SkelGym-Aug (Proposed)",  "best_AAGCN_T4.4_joint_motion_3d.pt"),
+    ("T3.7", "AAGCN",            "AAGCN", "bone_motion_3d",  r"Bone Motion 3D ($\Delta B$)", "SkelGym-Aug (Proposed)",  "best_AAGCN_T4.5_bone_motion_3d.pt"),
+]
 
 def build_table2_tasks(seeds: List[int]) -> List[Dict[str, Any]]:
     tasks = []
