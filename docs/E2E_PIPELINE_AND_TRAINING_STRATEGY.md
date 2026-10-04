@@ -139,10 +139,89 @@ Stochastic on-the-fly 3D skeletal transformations on training batches:
 
 ### 3.4 Parallel Training Strategy
 
-- **4 parallel workers** (`--workers 4`) run simultaneously on the single GPU using `ThreadPoolExecutor`.
-- Each worker launches an independent `subprocess` calling `python run.py train ...` with its own seed and feature config.
-- GPU memory is sufficient (102 GB VRAM) for 4 concurrent training processes with AMP enabled.
-- **Checkpoint deduplication:** If `best_*.pt` already exists and `--force_retrain` is not set, that model is skipped (cache hit) and the runner proceeds with the next incomplete model.
+#### Cơ chế hoạt động
+
+Training song song được thực hiện qua `concurrent.futures.ThreadPoolExecutor` kết hợp với `subprocess`. Mỗi "worker" là một Python thread trong main process, nhưng thực sự nó spawn một **process con hoàn toàn độc lập** (`subprocess.run`) để chạy `run.py train`. Đây là thiết kế quan trọng:
+
+```
+Main Process (marimo_master_e2e_runner.py)
+│
+├── Thread 1 (worker 1) ──► subprocess: python run.py train --model LSTM --feature raw_2d --seed 42
+├── Thread 2 (worker 2) ──► subprocess: python run.py train --model LSTM --feature rel_2d --seed 42
+├── Thread 3 (worker 3) ──► subprocess: python run.py train --model LSTM --feature raw_3d --seed 123
+└── Thread 4 (worker 4) ──► subprocess: python run.py train --model BiLSTM --feature mix_v2 --seed 42
+         ...
+         Khi một subprocess kết thúc, thread đó nhận task mới từ queue
+```
+
+#### Tại sao không xung đột GPU?
+
+- Mỗi subprocess là **process Python riêng biệt**, có PyTorch CUDA context riêng.
+- NVIDIA RTX PRO 6000 Blackwell (102 GB VRAM) đủ chứa 4 model nhỏ (~300–380K params) cùng lúc với AMP (`bfloat16`). Ước tính VRAM mỗi model: ~200–400 MB ⟹ tổng 4 workers: ~1–2 GB, chỉ ~1–2% VRAM.
+- CUDA MPS (Multi-Process Service) không cần cấu hình thêm — PyTorch tự xử lý time-slicing GPU ở mức kernel.
+
+#### Checkpoint deduplication (cache-hit)
+
+Nếu `best_*.pt` **đã tồn tại** và `--force_retrain` **không được đặt**, worker sẽ phát hiện checkpoint hiện có và **bỏ qua** training task đó (emit `MODEL_CACHED` trigger). Điều này cho phép resume sau khi crash:
+
+```python
+# Logic trong execute_training_task():
+if not force_retrain and ckpt_path.exists():
+    emit_trigger("MODEL_CACHED", {...})
+    return {"status": "cached"}   # Skip — không train lại
+```
+
+> **Quan trọng:** Khi chạy clean-slate toàn bộ, **phải dùng `--force_retrain`** để bắt buộc train lại từ đầu, bất kể checkpoint có tồn tại không.
+
+#### Error Handling khi Worker Thất Bại
+
+Nếu một subprocess fail (returncode != 0), worker đó raise `RuntimeError`. `ThreadPoolExecutor` sẽ:
+1. Ghi trigger `MODEL_FAILED` vào `outputs/triggers.jsonl`.
+2. Raise exception lên main thread khi `fut.result()` được gọi.
+3. **Crash toàn bộ pipeline** (để bảo đảm không có kết quả nào được tính từ partial failure).
+
+```python
+# Cách phát hiện worker thất bại trong triggers.jsonl:
+# {"trigger": "MODEL_FAILED", "model": "LSTM_T1.3_angle_2d (Seed 42)", "error": "..."}
+```
+
+Nếu pipeline crash, có thể restart với `--skip_phase1a` / `--skip_phase1b` tùy theo stage đã hoàn thành, kết hợp **bỏ `--force_retrain`** để tận dụng checkpoint đã lưu.
+
+#### Theo dõi tiến độ từng Worker
+
+```python
+import json, subprocess
+from pathlib import Path
+
+# Xem 20 trigger events gần nhất (bao gồm MODEL_COMPLETE, MODEL_CACHED, MODEL_FAILED)
+log = Path("/marimo/Gym_Classification/outputs/triggers.jsonl")
+if log.exists():
+    lines = [l for l in log.read_text().strip().split("\n") if l]
+    for ev in [json.loads(l) for l in lines[-20:]]:
+        icon = {"MODEL_COMPLETE": "✅", "MODEL_CACHED": "⚡", "MODEL_FAILED": "❌",
+                "PHASE_COMPLETE": "🏁"}.get(ev["trigger"], "ℹ️")
+        print(f"{icon} [{ev['timestamp']}] {ev['trigger']} — {ev.get('model', ev.get('phase', ''))}")
+
+# Đếm checkpoints hiện có
+r = subprocess.run(["find", "checkpoints/", "-name", "*.pt"],
+                   cwd="/marimo/Gym_Classification", capture_output=True, text=True)
+ckpts = [f for f in r.stdout.strip().split("\n") if f]
+print(f"\n📦 Checkpoints saved: {len(ckpts)} / 150 expected total")
+```
+
+#### Thứ tự Execution thực tế
+
+Tasks được submit theo thứ tự định nghĩa trong `build_phase1a_tasks(seeds)`, nhưng do parallel execution, thứ tự **hoàn thành** là không xác định. Điều này hoàn toàn bình thường — aggregation sau đó sẽ collect đủ từ checkpoint files, không phụ thuộc thứ tự hoàn thành.
+
+#### Cấu hình khuyến nghị
+
+| Scenario | `--workers` | Ghi chú |
+|---|---|---|
+| **Full pipeline (default)** | `4` | Optimal trên Blackwell 102GB |
+| Debug / troubleshoot một model | `1` | Sequential, dễ đọc log |
+| Nếu VRAM đầy (unlikely) | `2` | Giảm concurrency |
+| Muốn tăng throughput tối đa | `6–8` | Thận trọng — monitor VRAM |
+
 
 ### 3.5 Anti-Idle Keepalive Daemon
 
