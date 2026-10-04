@@ -19,6 +19,7 @@ import time
 import argparse
 from pathlib import Path
 import numpy as np
+import torch
 try:
     from thop import profile
     HAS_THOP = True
