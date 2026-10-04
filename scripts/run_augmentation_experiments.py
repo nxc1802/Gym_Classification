@@ -720,17 +720,40 @@ def main():
                 "vid_f1_std": float(np.std(v_f1s)) if v_f1s else 0.0,
             }
 
-    # 5. Save JSON Database
+    # 5. Save JSON Database (Merge with existing database if available)
+    out_json = out_dir / "augmentation_ablation_results.json"
+    prior_payload = {}
+    if out_json.exists():
+        try:
+            with open(out_json, "r", encoding="utf-8") as f:
+                prior_payload = json.load(f)
+        except Exception:
+            pass
+
+    merged_loo = prior_payload.get("summary_leave_one_out", {})
+    if summary_loo:
+        merged_loo.update(summary_loo)
+
+    merged_single = prior_payload.get("summary_single_component", {})
+    if summary_single:
+        merged_single.update(summary_single)
+
+    merged_backbones = prior_payload.get("summary_backbones", {})
+    if summary_backbones:
+        merged_backbones.update(summary_backbones)
+
+    merged_raw = prior_payload.get("raw_tasks", {})
+    merged_raw.update(all_results)
+
     final_payload = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "seeds": args.seeds,
-        "summary_leave_one_out": summary_loo,
-        "summary_single_component": summary_single,
-        "summary_backbones": summary_backbones,
-        "raw_tasks": all_results
+        "summary_leave_one_out": merged_loo,
+        "summary_single_component": merged_single,
+        "summary_backbones": merged_backbones,
+        "raw_tasks": merged_raw
     }
 
-    out_json = out_dir / "augmentation_ablation_results.json"
     with open(out_json, "w", encoding="utf-8") as f:
         json.dump(final_payload, f, indent=2)
     print(f"\n[SAVED] Structured JSON database written to {out_json}")
