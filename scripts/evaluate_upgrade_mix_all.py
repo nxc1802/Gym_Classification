@@ -25,7 +25,8 @@ from src.constants import NUM_CLASSES
 from src.cli import build_model
 from src.data.dataset import get_dataloaders
 from src.training.trainer import Trainer
-from src.training.metrics import compute_metrics, aggregate_video_level_predictions
+from src.training.metrics import compute_metrics
+from src.models.ensemble import aggregate_video_level_predictions
 from src.utils.hf_hub import upload_file_to_hf, get_hf_token
 
 HF_REPO = "Cuong2004/gym-exercise-classification"
