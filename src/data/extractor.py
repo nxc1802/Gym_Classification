@@ -38,11 +38,13 @@ def extract_landmarks_from_video(
     output_csv_path: Optional[str] = None,
     model_complexity: int = 2,
     min_detection_confidence: float = 0.5,
-    min_tracking_confidence: float = 0.5
+    min_tracking_confidence: float = 0.5,
+    world_landmarks: bool = False
 ) -> pd.DataFrame:
     """
     Extracts 33 pose landmarks for each frame of a video using MediaPipe Pose.
     model_complexity: 0 (lite), 1 (full), 2 (heavy - best accuracy for research).
+    world_landmarks: If True, extracts pose_world_landmarks (metric 3D coordinates in meters, mid-hip origin).
     Returns a DataFrame with columns: ['Frame', '{LANDMARK}_x', '{LANDMARK}_y', '{LANDMARK}_z', '{LANDMARK}_visibility']
     Total columns = 1 + 33*4 = 133 columns.
     """
@@ -91,8 +93,9 @@ def extract_landmarks_from_video(
             result = detector.detect_for_video(mp_image, ts_ms)
 
             row = [frame_idx]
-            if result.pose_landmarks and len(result.pose_landmarks) > 0:
-                first_person = result.pose_landmarks[0]
+            target_landmarks = result.pose_world_landmarks if world_landmarks else result.pose_landmarks
+            if target_landmarks and len(target_landmarks) > 0:
+                first_person = target_landmarks[0]
                 for lm in first_person:
                     vis = getattr(lm, "visibility", 1.0)
                     vis = 1.0 if vis is None else float(vis)
@@ -124,9 +127,12 @@ def extract_landmarks_from_video(
             result = pose.process(frame_rgb)
 
             row = [frame_idx]
-            if result.pose_landmarks:
-                for lm in result.pose_landmarks.landmark:
-                    row.extend([float(lm.x), float(lm.y), float(lm.z), float(lm.visibility)])
+            target_landmarks = result.pose_world_landmarks if world_landmarks else result.pose_landmarks
+            if target_landmarks and target_landmarks.landmark:
+                for lm in target_landmarks.landmark:
+                    vis = getattr(lm, "visibility", 1.0)
+                    vis = 1.0 if vis is None else float(vis)
+                    row.extend([float(lm.x), float(lm.y), float(lm.z), vis])
             else:
                 row.extend([0.0] * (len(RAW_POINTS_33) * 4))
 

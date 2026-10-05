@@ -174,6 +174,8 @@ FEATURE_DIMS: Dict[str, int] = {
     "rel_3d_norm": 39,
     "angle_kinematic_24": 24,
     "mix_v2": 63,  # rel_3d_norm (39) + angle_kinematic_24 (24)
+    "world_3d": 39,  # Metric 3D coordinates (Mid-Hip Origin, in meters)
+    "world_13_3d": 39,
     "raw_13": 39,
     "raw_13_2d": 26,
     "raw_13_3d": 39,

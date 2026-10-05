@@ -469,6 +469,8 @@ def extract_features_by_method(df: pd.DataFrame, method: str) -> Union[np.ndarra
         return extract_relative_features(df, RAW_POINTS_13, ["x", "y"], include_origin_vis=False)  # 26
     elif method in ("rel_3d", "rel_13", "rel_13_3d"):
         return extract_relative_features(df, RAW_POINTS_13, ["x", "y", "z"], include_origin_vis=False)  # 39
+    elif method in ("world_3d", "world_13_3d"):
+        return extract_raw_features(df, RAW_POINTS_13, ["x", "y", "z"])  # 39 (already mid-hip centered and metric)
     elif method in ("raw_13_4", "13_4"):
         return extract_raw_features(df, RAW_POINTS_13, ["x", "y", "z", "visibility"])  # 52
     elif method in ("rel_13_4", "12rel_4"):
