@@ -130,6 +130,8 @@
 | **Only Rotation** | 3D Yaw Perturbation ($\pm 15^\circ$) | 1.0790 | 80.16% ± 0.82% | 0.7973 ± 0.0105 | 66.20% ± 1.16% | 0.6537 ± 0.0134 | +0.10% | Verified |
 | **Only Scaling** | Proportional Scale Jitter ($\pm 10\%$) | 1.0770 | 79.86% ± 1.54% | 0.7936 ± 0.0138 | 65.82% ± 0.74% | 0.6512 ± 0.0071 | -0.29% | Verified |
 | **Only Time Interpolation** | Linear Sequence Resampling | 1.0739 | 79.69% ± 1.04% | 0.7900 ± 0.0115 | 65.79% ± 0.82% | 0.6521 ± 0.0102 | -0.32% | Verified |
+| **SkelGym-Aug (4-op Suite)** | Spatial + Sensor (Proposed) | 0.9801 | 81.89% ± 0.66% | 0.8155 ± 0.0078 | 69.05% ± 1.81% | 0.6877 ± 0.0213 | +2.94% | Verified |
+| **Candidate Full (5-op Suite)** | Spatial + Sensor + Temporal | 0.9801 | 81.45% ± 0.69% | 0.8112 ± 0.0095 | 69.24% ± 1.65% | 0.6894 ± 0.0182 | +3.13% | Verified |
 
 ---
 
