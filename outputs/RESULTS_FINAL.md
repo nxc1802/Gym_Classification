@@ -162,17 +162,19 @@
 
 | Model Architecture | Input Modality / Paradigm | Trainable Params | Test Win Acc (%) | Test Win Macro F1 | Test Vid Acc (%) | Test Vid Macro F1 | Video Gain (+$\Delta$%) | Status |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Baseline LSTM (Mix 63-d)** | Sequential Recurrent Model | 396K | 61.27% | 0.5943 | 71.67% | 0.6932 | +10.40% | Verified |
-| **Baseline BiLSTM (Mix 63-d)** | Bidirectional Recurrent Model | 402K | 59.63% | 0.5831 | 69.10% | 0.6650 | +9.47% | Verified |
-| **Transformer (Mix 63-d, Clean)** | Self-Attention Baseline | 400K | 66.11% | 0.6536 | 76.25% | 0.7536 | +10.14% | Verified |
+| **Baseline LSTM (Mix 63-d)** | Sequential Recurrent Model | 362K | 61.27% | 0.5943 | 71.67% | 0.6932 | +10.40% | Verified |
+| **Baseline BiLSTM (Mix 63-d)** | Bidirectional Recurrent Model | 360K | 59.63% | 0.5831 | 69.10% | 0.6650 | +9.47% | Verified |
+| **Transformer (Mix 63-d, Clean)** | Self-Attention Baseline | 301K | 66.11% | 0.6536 | 76.25% | 0.7536 | +10.14% | Verified |
 | **Baseline ST-GCN (Rel 3D)** | Rigid Static Graph ($A_{\text{phys}}$) | 350K | 57.58% | 0.5574 | 66.24% | 0.6350 | +8.66% | Verified |
 | **Clean Baseline AAGCN (Bone 3D)** | Adaptive Skeletal Graph (Unaugmented) | 378K | 63.02% | 0.6140 | 71.67% | 0.6985 | +8.65% | Verified |
 | **SkelGym-Aug AAGCN (Bone 3D)** | Adaptive Skeletal Graph + Augmentation | 378K | 65.34% | 0.6507 | 73.10% | 0.7292 | +7.76% | Verified |
-| **SkelGym-Aug Transformer (Mix)** | Self-Attention + Augmentation | 400K | 69.05% | 0.6877 | 79.26% | 0.7892 | +10.21% | Verified |
-| **Two-Stream AAGCN (Aug)** | Joint + Bone Stream Fusion | 756K | 68.42% | 0.6770 | 78.40% | 0.7777 | +9.98% | Verified |
-| **Four-Stream AAGCN (Aug)** | 4-Stream Graph Late Fusion | 1.51M | 68.67% | 0.6799 | 78.40% | 0.7777 | +9.73% | Verified |
-| **SkelGym-Lite (2 Models)** | Transformer + Bone AAGCN | 778K | 71.49% | 0.7101 | 80.26% | 0.8027 | +8.77% | Verified |
-| **SkelGym-Full (5 Streams)** | Cross-Paradigm SLSQP Ensemble | 1.91M | 72.45% | 0.7164 | 81.40% | 0.8103 | +8.95% | Verified |
+| **SkelGym-Aug Transformer (Mix)** | Self-Attention + Augmentation | 301K | 69.05% | 0.6877 | 79.26% | 0.7892 | +10.21% | Verified |
+| **Two-Stream AAGCN (Aug)** | Joint + Bone Stream Fusion (Uniform) | 756K | 69.57% | 0.6851 | 78.68% | 0.7731 | +9.11% | Verified |
+| **Four-Stream AAGCN (Aug)** | 4-Stream Graph Late Fusion (Uniform) | 1.51M | 70.71% | 0.6982 | 80.40% | 0.7919 | +9.69% | Verified |
+| **SkelGym-Lite (2 Models)** | Transformer + Bone AAGCN (SLSQP) | 679K | 71.49% | 0.7101 | 80.26% | 0.8027 | +8.77% | Verified |
+| **SkelGym-Full (Uniform Soft Voting)** | Equal Weights ($w_i=0.2$) Multi-Stream | 1.81M | 73.01% | 0.7220 | 83.12% | 0.8205 | +10.11% | Verified |
+| **SkelGym-Full (SLSQP Calibrated)** | Constrained Validation Calibration | 1.81M | 72.45% | 0.7164 | 81.40% | 0.8103 | +8.95% | Verified |
+| **SkelGym-Full (Stacking Meta-Classifier)** | Ridge Meta-Learner (Proposed SOTA) | 1.81M | 73.37% | 0.7242 | **83.83%** | **0.8336** | **+10.46%** | **Verified** |
 
 ---
 
