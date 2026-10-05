@@ -211,6 +211,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run 12 LOO training runs on mix_v2")
     parser.add_argument("--force_retrain", action="store_true", help="Force retrain existing checkpoints")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--workers", type=int, default=3, help="Number of concurrent worker threads")
     args = parser.parse_args()
 
     meta_cand = ROOT_DIR / "data" / "Final_dataset_metadata.csv"
@@ -222,7 +223,7 @@ def main():
     device = torch.device(args.device)
     print(f"============================================================")
     print(f"=== SKELGYM LOO mix_v2 (63-d) BENCHMARK RUNNER           ===")
-    print(f"=== Device: {device} | Metadata: {metadata_path} ===")
+    print(f"=== Device: {device} | Workers: {args.workers} | Meta: {metadata_path} ===")
     print(f"============================================================")
 
     results_json = ROOT_DIR / "outputs" / "augmentation_ablation_results.json"
@@ -234,33 +235,61 @@ def main():
     raw_tasks = existing_data.get("raw_tasks", {})
     summary_single = existing_data.get("summary_single_component", {})
 
-    loo_eval_results = {}
+    loo_eval_results = {v[0]: [] for v in LOO_TARGET_VARIANTS}
 
-    # Run the 12 tasks
-    total_start = time.time()
+    # Build task list
+    all_tasks = []
     for var_name, aug_method, disp_name, domain in LOO_TARGET_VARIANTS:
-        loo_eval_results[var_name] = []
-        print(f"\n>>> Running Variant: {var_name} ({disp_name}) <<<")
         for seed in SEEDS:
-            task_id = f"LOO_Trans_{var_name}_seed{seed}"
-            # 1. Train
-            ckpt_path = train_one_task(
-                var_name=var_name,
-                aug_method=aug_method,
-                seed=seed,
-                metadata_path=metadata_path,
-                landmark_dir=landmark_dir,
-                device=args.device,
-                force_retrain=args.force_retrain
-            )
-            # 2. Evaluate
-            metrics = evaluate_task(
-                ckpt_path=ckpt_path,
-                metadata_path=metadata_path,
-                landmark_dir=landmark_dir,
-                seed=seed,
-                device=device
-            )
+            all_tasks.append((var_name, aug_method, disp_name, domain, seed))
+
+    def process_task(task_tuple):
+        var_name, aug_method, disp_name, domain, seed = task_tuple
+        task_id = f"LOO_Trans_{var_name}_seed{seed}"
+        ckpt_path = train_one_task(
+            var_name=var_name,
+            aug_method=aug_method,
+            seed=seed,
+            metadata_path=metadata_path,
+            landmark_dir=landmark_dir,
+            device=args.device,
+            force_retrain=args.force_retrain
+        )
+        metrics = evaluate_task(
+            ckpt_path=ckpt_path,
+            metadata_path=metadata_path,
+            landmark_dir=landmark_dir,
+            seed=seed,
+            device=device
+        )
+        print(f"  [EVAL] {task_id} -> ValWin: {metrics['val_acc']}%, TestWin: {metrics['win_acc']:.2f}%, TestVid: {metrics['vid_acc']:.2f}%", flush=True)
+        return (task_id, var_name, disp_name, domain, aug_method, seed, ckpt_path, metrics)
+
+    total_start = time.time()
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    if args.workers > 1:
+        print(f"\nLaunching {len(all_tasks)} tasks with {args.workers} concurrent workers on {args.device}...")
+        with ThreadPoolExecutor(max_workers=args.workers) as executor:
+            futures = {executor.submit(process_task, t): t for t in all_tasks}
+            for fut in as_completed(futures):
+                task_id, var_name, disp_name, domain, aug_method, seed, ckpt_path, metrics = fut.result()
+                loo_eval_results[var_name].append(metrics)
+                raw_tasks[task_id] = {
+                    "group": "Leave_One_Out",
+                    "variant": var_name,
+                    "display_name": disp_name,
+                    "domain": domain,
+                    "model": "Transformer",
+                    "feature": "mix_v2",
+                    "augment": aug_method,
+                    "seed": seed,
+                    "checkpoint_path": str(ckpt_path.relative_to(ROOT_DIR)),
+                    "metrics": metrics
+                }
+    else:
+        for t in all_tasks:
+            task_id, var_name, disp_name, domain, aug_method, seed, ckpt_path, metrics = process_task(t)
             loo_eval_results[var_name].append(metrics)
             raw_tasks[task_id] = {
                 "group": "Leave_One_Out",
@@ -274,7 +303,6 @@ def main():
                 "checkpoint_path": str(ckpt_path.relative_to(ROOT_DIR)),
                 "metrics": metrics
             }
-            print(f"  [EVAL] {task_id} -> ValWin: {metrics['val_acc']}%, TestWin: {metrics['win_acc']:.2f}%, TestVid: {metrics['vid_acc']:.2f}%", flush=True)
 
     # Now compute aggregated summary_leave_one_out
     summary_loo = {}
