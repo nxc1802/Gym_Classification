@@ -449,29 +449,35 @@ def update_table6_fusion(content: str, json_path: Path) -> str:
                 "Verified"
             ]
 
-    # 3. Four-Stream AAGCN
+    # 3. Four-Stream AAGCN (Uniform Soft Voting SOTA)
     four_stream = fusion_methods.get("Four-Stream AAGCN (Aug)", {})
-    if four_stream and "SLSQP Soft Voting" in four_stream:
-        f_m = four_stream["SLSQP Soft Voting"]
-        updates["Four-Stream AAGCN"] = [
-            "**Four-Stream AAGCN**", "4 Streams Unified Graph",
-            *extract_row_metrics(f_m),
-            "Verified"
-        ]
+    if four_stream:
+        f_m = four_stream.get("Uniform Soft Voting", four_stream.get("SLSQP Soft Voting", {}))
+        if f_m:
+            updates["Four-Stream AAGCN"] = [
+                "**Four-Stream AAGCN**", "4 Streams Unified Graph (Uniform Soft)",
+                *extract_row_metrics(f_m),
+                "Verified"
+            ]
 
-    # 4. Fusion Methods for SkelGym-Full
+    # 4. Fusion Methods for SkelGym-Full & SkelGym-Lite (4 Standard Protocols, SLSQP Dropped)
     skel_full = fusion_methods.get("SkelGym-Full", {})
     skel_lite = fusion_methods.get("SkelGym-Lite", {})
 
-    fusion_specs = [
+    fusion_specs_full = [
+        ("Hard Voting", "SkelGym-Full (Hard Majority Voting)", "Discrete mode over class predictions ($K=5$)"),
+        ("Accuracy-Weighted Soft", "SkelGym-Full (Accuracy-Weighted Soft)", "Validation accuracy weights ($w_i \\propto \\text{Acc}_i^{\\text{val}}$)"),
+        ("Uniform Soft Voting", "SkelGym-Full (Uniform Average Soft)", "Equal weights: $w_i = 1/5 = 0.20$ (Zero-Param SOTA)"),
+        ("Stacking Meta-Classifier", "SkelGym-Full (Stacking Meta-Classifier)", "Ridge Classifier on Val Probs (Overall SOTA)"),
+        # Support generic row names
         ("Hard Voting", "Hard Majority Voting", "Discrete mode over class predictions"),
-        ("Uniform Soft Voting", "Uniform Average Soft Voting", "Equal weights: $w_i = 1/5 = 0.20$"),
         ("Accuracy-Weighted Soft", "Accuracy-Weighted Soft Voting", "Validation accuracy weights ($w_i \\propto \\text{Acc}_i^{\\text{val}}$)"),
-        ("SLSQP Soft Voting", "SLSQP Soft Voting", "SLSQP Constrained Calibration ($\\sum w_i = 1$)"),
-        ("Stacking Meta-Classifier", "Stacking Meta-Classifier", "Ridge Classifier on Val Probs")
+        ("Uniform Soft Voting", "Uniform Average Soft Voting", "Equal weights: $w_i = 1/5 = 0.20$"),
+        ("Stacking Meta-Classifier", "Stacking Meta-Classifier", "Ridge Classifier on Val Probs"),
+        ("Stacking Meta-Classifier", "SkelGym-Full (5 Streams)", "Trans + 4 AAGCN (Stacking SOTA)")
     ]
 
-    for method_name, row_label, proto in fusion_specs:
+    for method_name, row_label, proto in fusion_specs_full:
         if skel_full and method_name in skel_full:
             m = skel_full[method_name]
             updates[row_label] = [
@@ -480,22 +486,22 @@ def update_table6_fusion(content: str, json_path: Path) -> str:
                 "Verified"
             ]
 
-    if skel_lite and "SLSQP Soft Voting" in skel_lite:
-        l_m = skel_lite["SLSQP Soft Voting"]
-        updates["SkelGym-Lite (2 Models)"] = [
-            "**SkelGym-Lite (2 Models)**", "Trans + Bone AAGCN (SLSQP Calibrated)",
-            *extract_row_metrics(l_m),
-            "Verified"
-        ]
+    fusion_specs_lite = [
+        ("Hard Voting", "SkelGym-Lite (Hard Majority Voting)", "Discrete mode over class predictions ($K=2$)"),
+        ("Accuracy-Weighted Soft", "SkelGym-Lite (Accuracy-Weighted Soft)", "Validation accuracy weights ($w_i \\propto \\text{Acc}_i^{\\text{val}}$)"),
+        ("Uniform Soft Voting", "SkelGym-Lite (Uniform Average Soft)", "Equal weights: $w_i = 1/2 = 0.50$ (Efficient SOTA)"),
+        ("Stacking Meta-Classifier", "SkelGym-Lite (Stacking Meta-Classifier)", "Ridge Classifier on Val Probs"),
+        ("Uniform Soft Voting", "SkelGym-Lite (2 Models)", "Trans + Bone AAGCN (Uniform Soft Voting)")
+    ]
 
-    # Also map SkelGym-Full (5 Streams) as alias for SLSQP Soft Voting if present in table
-    if skel_full and "SLSQP Soft Voting" in skel_full:
-        full_m = skel_full["SLSQP Soft Voting"]
-        updates["SkelGym-Full (5 Streams)"] = [
-            "**SkelGym-Full (5 Streams)**", "Trans + 4 AAGCN (SLSQP Calibrated)",
-            *extract_row_metrics(full_m),
-            "Verified"
-        ]
+    for method_name, row_label, proto in fusion_specs_lite:
+        if skel_lite and method_name in skel_lite:
+            m = skel_lite[method_name]
+            updates[row_label] = [
+                f"**{row_label}**", proto,
+                *extract_row_metrics(m),
+                "Verified"
+            ]
 
     return update_table_rows(content, "Table 6:", updates)
 
@@ -781,8 +787,8 @@ def verify_results_final(content: str, out_dir: Path, tolerance: float = 0.05) -
             alt_row_name = row_name.replace("117-d", "63-d")
             matched_lines = [l for l in content.splitlines() if (normalize_key(row_name) in normalize_key(l) or normalize_key(alt_row_name) in normalize_key(l)) and l.strip().startswith("|")]
             for line in matched_lines:
-                # Find Table 7 line (has params like 396K, 1.91M, etc.)
-                if any(p in line for p in ["396K", "402K", "400K", "350K", "378K", "367K", "300K", "301K", "756K", "1.51M", "678K", "778K", "1.81M", "1.91M"]):
+                # Find Table 7 line (has params like 362K, 360K, 301K, 679K, 1.81M, etc.)
+                if any(p in line for p in ["362K", "360K", "396K", "402K", "400K", "350K", "378K", "367K", "300K", "301K", "756K", "1.51M", "678K", "679K", "778K", "1.81M", "1.91M"]):
                     nums = re.findall(r"(\d+\.\d+)%", line)
                     if len(nums) >= 2:
                         rep_w = float(nums[0])

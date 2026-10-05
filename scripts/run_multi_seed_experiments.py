@@ -642,24 +642,27 @@ def export_canonical_artifacts(
 
     # 2. Table 7: consensus_gains.json
     row_specs = [
-        ("Baseline LSTM (Mix 117-d)", "LSTM Baseline", "individual", "Sequential Recurrent Model", "396K"),
-        ("Baseline BiLSTM (Mix 117-d)", "BiLSTM Baseline", "individual", "Bidirectional Recurrent Model", "402K"),
-        ("Transformer (Mix 117-d, Clean)", "Transformer Clean", "individual", "Self-Attention Baseline", "400K"),
-        ("Baseline ST-GCN (Rel 3D)", "ST-GCN Baseline", "individual", "Rigid Static Graph ($A_{\\text{phys}}$)", "350K"),
-        ("Clean Baseline AAGCN (Bone 3D)", "AAGCN Clean", "individual", "Adaptive Skeletal Graph (Unaugmented)", "378K"),
-        ("SkelGym-Aug AAGCN (Bone 3D)", "AAGCN Bone (Aug)", "individual", "Adaptive Skeletal Graph + Augmentation", "378K"),
-        ("SkelGym-Aug Transformer (Mix)", "Transformer Mix (Aug)", "individual", "Self-Attention + Augmentation", "400K"),
-        ("Two-Stream AAGCN (Aug)", "Two-Stream AAGCN (Aug)", "fusion", "Joint + Bone Stream Fusion", "756K"),
-        ("Four-Stream AAGCN (Aug)", "Four-Stream AAGCN (Aug)", "fusion", "4-Stream Graph Late Fusion", "1.51M"),
-        ("SkelGym-Lite (2 Models)", "SkelGym-Lite", "fusion", "Transformer + Bone AAGCN", "778K"),
-        ("SkelGym-Full (5 Streams)", "SkelGym-Full", "fusion", "Cross-Paradigm SLSQP Ensemble", "1.91M")
+        ("Baseline LSTM (Mix 63-d)", "LSTM Baseline", ("individual", None), "Sequential Recurrent Model", "362K"),
+        ("Baseline BiLSTM (Mix 63-d)", "BiLSTM Baseline", ("individual", None), "Bidirectional Recurrent Model", "360K"),
+        ("Transformer (Mix 63-d, Clean)", "Transformer Clean", ("individual", None), "Self-Attention Baseline", "301K"),
+        ("Baseline ST-GCN (Rel 3D)", "ST-GCN Baseline", ("individual", None), "Rigid Static Graph ($A_{\\text{phys}}$)", "350K"),
+        ("Clean Baseline AAGCN (Bone 3D)", "AAGCN Clean", ("individual", None), "Adaptive Skeletal Graph (Unaugmented)", "378K"),
+        ("SkelGym-Aug AAGCN (Bone 3D)", "AAGCN Bone (Aug)", ("individual", None), "Adaptive Skeletal Graph + Augmentation", "378K"),
+        ("SkelGym-Aug Transformer (Mix 63-d)", "Transformer Mix (Aug)", ("individual", None), "Dual-Branch Transformer + Augmentation", "301K"),
+        ("Two-Stream AAGCN (Aug)", "Two-Stream AAGCN (Aug)", ("fusion", "Uniform Soft Voting"), "Joint + Bone Stream Fusion", "756K"),
+        ("Four-Stream AAGCN (Uniform)", "Four-Stream AAGCN (Aug)", ("fusion", "Uniform Soft Voting"), "4-Stream Graph Late Fusion (Zero-Param SOTA)", "1.51M"),
+        ("SkelGym-Lite (Uniform Soft Voting)", "SkelGym-Lite", ("fusion", "Uniform Soft Voting"), "Trans + Bone AAGCN (Efficient SOTA)", "679K"),
+        ("SkelGym-Full (Uniform Soft Voting)", "SkelGym-Full", ("fusion", "Uniform Soft Voting"), "5-Stream Cross-Paradigm (Zero-Param SOTA)", "1.81M"),
+        ("SkelGym-Full (Stacking Meta-Classifier)", "SkelGym-Full", ("fusion", "Stacking Meta-Classifier"), "5-Stream Supervised Meta-Classifier (Overall SOTA)", "1.81M")
     ]
     t7_data = {}
-    for row_name, source_key, category, modality, params in row_specs:
-        if category == "individual":
+    for row_name, source_key, cat_info, modality, params in row_specs:
+        cat_type, cat_method = cat_info
+        if cat_type == "individual":
             m = summary["individual"].get(source_key, {})
         else:
-            m = summary["fusion_methods"].get(source_key, {}).get("SLSQP Soft Voting", {})
+            method_k = cat_method or "Uniform Soft Voting"
+            m = summary["fusion_methods"].get(source_key, {}).get(method_k, {})
 
         is_single = (m.get("win_acc_sd") is None or m.get("n_seeds") == 1)
         w_acc = m.get("win_acc_mean", 0.0)
