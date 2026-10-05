@@ -529,7 +529,7 @@ def update_table7_consensus(content: str, json_path: Path) -> str:
         gain = entry.get("vid_gain", "")
         status = "Verified"
 
-        updates[row_name] = [
+        vals = [
             f"**{row_name}**",
             modality,
             params,
@@ -540,18 +540,27 @@ def update_table7_consensus(content: str, json_path: Path) -> str:
             gain,
             status
         ]
+        updates[row_name] = vals
         if "117-d" in row_name:
             alt_name = row_name.replace("117-d", "63-d")
             updates[alt_name] = [
-                f"**{alt_name}**",
-                modality,
-                params,
-                w_acc,
-                w_f1,
-                v_acc,
-                v_f1,
-                gain,
-                status
+                f"**{alt_name}**", modality, params, w_acc, w_f1, v_acc, v_f1, gain, status
+            ]
+        if "SkelGym-Aug Transformer" in row_name:
+            updates["SkelGym-Aug Transformer (Mix)"] = [
+                "**SkelGym-Aug Transformer (Mix)**", modality, params, w_acc, w_f1, v_acc, v_f1, gain, status
+            ]
+        if "Four-Stream AAGCN" in row_name:
+            updates["Four-Stream AAGCN (Aug)"] = [
+                "**Four-Stream AAGCN (Aug)**", modality, params, w_acc, w_f1, v_acc, v_f1, gain, status
+            ]
+        if "SkelGym-Lite" in row_name:
+            updates["SkelGym-Lite (2 Models)"] = [
+                "**SkelGym-Lite (2 Models)**", modality, params, w_acc, w_f1, v_acc, v_f1, gain, status
+            ]
+        if "SkelGym-Full (Uniform Soft Voting)" in row_name:
+            updates["SkelGym-Full (5 Streams)"] = [
+                "**SkelGym-Full (5 Streams)**", modality, params, w_acc, w_f1, v_acc, v_f1, gain, status
             ]
 
     return update_table_rows(content, "Table 7:", updates)

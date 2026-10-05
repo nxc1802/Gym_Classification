@@ -243,10 +243,15 @@ def main():
         for seed in SEEDS:
             all_tasks.append((var_name, aug_method, disp_name, domain, seed))
 
-    def process_task(task_tuple):
-        var_name, aug_method, disp_name, domain, seed = task_tuple
-        task_id = f"LOO_Trans_{var_name}_seed{seed}"
-        ckpt_path = train_one_task(
+    total_start = time.time()
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    # Phase 1: Training (Concurrent worker subprocesses)
+    print(f"\n[PHASE 1] Training {len(all_tasks)} tasks with {args.workers} concurrent workers on {args.device}...")
+    
+    def run_training_job(t):
+        var_name, aug_method, disp_name, domain, seed = t
+        return train_one_task(
             var_name=var_name,
             aug_method=aug_method,
             seed=seed,
@@ -255,6 +260,22 @@ def main():
             device=args.device,
             force_retrain=args.force_retrain
         )
+
+    if args.workers > 1:
+        with ThreadPoolExecutor(max_workers=args.workers) as executor:
+            futures = {executor.submit(run_training_job, t): t for t in all_tasks}
+            for fut in as_completed(futures):
+                t = futures[fut]
+                fut.result()
+    else:
+        for t in all_tasks:
+            run_training_job(t)
+
+    # Phase 2: Evaluation (Sequential on device to ensure zero resource conflict)
+    print(f"\n[PHASE 2] Evaluating all {len(all_tasks)} checkpoints on Validation and Held-out Test sets...")
+    for var_name, aug_method, disp_name, domain, seed in all_tasks:
+        task_id = f"LOO_Trans_{var_name}_seed{seed}"
+        ckpt_path = ROOT_DIR / "checkpoints" / "ablation_aug" / task_id / f"best_{task_id}.pt"
         metrics = evaluate_task(
             ckpt_path=ckpt_path,
             metadata_path=metadata_path,
@@ -263,46 +284,19 @@ def main():
             device=device
         )
         print(f"  [EVAL] {task_id} -> ValWin: {metrics['val_acc']}%, TestWin: {metrics['win_acc']:.2f}%, TestVid: {metrics['vid_acc']:.2f}%", flush=True)
-        return (task_id, var_name, disp_name, domain, aug_method, seed, ckpt_path, metrics)
-
-    total_start = time.time()
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-
-    if args.workers > 1:
-        print(f"\nLaunching {len(all_tasks)} tasks with {args.workers} concurrent workers on {args.device}...")
-        with ThreadPoolExecutor(max_workers=args.workers) as executor:
-            futures = {executor.submit(process_task, t): t for t in all_tasks}
-            for fut in as_completed(futures):
-                task_id, var_name, disp_name, domain, aug_method, seed, ckpt_path, metrics = fut.result()
-                loo_eval_results[var_name].append(metrics)
-                raw_tasks[task_id] = {
-                    "group": "Leave_One_Out",
-                    "variant": var_name,
-                    "display_name": disp_name,
-                    "domain": domain,
-                    "model": "Transformer",
-                    "feature": "mix_v2",
-                    "augment": aug_method,
-                    "seed": seed,
-                    "checkpoint_path": str(ckpt_path.relative_to(ROOT_DIR)),
-                    "metrics": metrics
-                }
-    else:
-        for t in all_tasks:
-            task_id, var_name, disp_name, domain, aug_method, seed, ckpt_path, metrics = process_task(t)
-            loo_eval_results[var_name].append(metrics)
-            raw_tasks[task_id] = {
-                "group": "Leave_One_Out",
-                "variant": var_name,
-                "display_name": disp_name,
-                "domain": domain,
-                "model": "Transformer",
-                "feature": "mix_v2",
-                "augment": aug_method,
-                "seed": seed,
-                "checkpoint_path": str(ckpt_path.relative_to(ROOT_DIR)),
-                "metrics": metrics
-            }
+        loo_eval_results[var_name].append(metrics)
+        raw_tasks[task_id] = {
+            "group": "Leave_One_Out",
+            "variant": var_name,
+            "display_name": disp_name,
+            "domain": domain,
+            "model": "Transformer",
+            "feature": "mix_v2",
+            "augment": aug_method,
+            "seed": seed,
+            "checkpoint_path": str(ckpt_path.relative_to(ROOT_DIR)),
+            "metrics": metrics
+        }
 
     # Now compute aggregated summary_leave_one_out
     summary_loo = {}
