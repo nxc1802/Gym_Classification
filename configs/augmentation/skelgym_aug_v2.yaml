@@ -1,0 +1,42 @@
+# Frozen SkelGym-Aug v2 Configuration
+# Empirically validated on Biomechanical WORLD mix_v2 (63-d) via Leave-One-Out Ablation (Table 4)
+# Peak Single Model SOTA: 83.55% ± 0.54% Test Video Acc / 0.8300 Macro-F1 (Window Acc: 73.59%)
+
+name: "skelgym_aug_v2"
+version: "2.0.0"
+feature_space: "mix_v2"
+feature_dim: 63
+num_operators: 4
+
+operators:
+  mirror:
+    enabled: true
+    probability: 0.5
+    description: "Bilateral ergonomic joint swap across 13 body landmarks with x-coordinate negation"
+  
+  yaw_rotate_3d:
+    enabled: true
+    max_degrees: 15.0
+    axis: "y"
+    description: "Spatial 3D yaw rotation around vertical Y-axis; invariant angles preserved"
+  
+  scale:
+    enabled: true
+    scale_min: 0.9
+    scale_max: 1.1
+    description: "Physiologically plausible anthropometric body scale variation"
+  
+  jitter:
+    enabled: true
+    std: 0.008
+    description: "Mild sensor noise injection preserving kinematic manifold topology"
+  
+  time_warp:
+    enabled: false
+    reason: "Permanently removed per LOO ablation (+1.58% gain over 5-op); prevents artificial execution pacing distortion"
+
+dataset_expansion:
+  variants_per_sample: 3
+  variant_1: "mirror"
+  variant_2: "yaw_rotate_3d + scale + jitter"
+  variant_3: "mirror + yaw_rotate_3d + scale"
