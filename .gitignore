@@ -53,6 +53,8 @@ mm-fit/
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+paper/*.log
+paper/*.spl
 
 # Outputs & Temporary Files
 outputs/**/*.png

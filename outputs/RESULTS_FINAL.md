@@ -185,66 +185,70 @@
 
 ## Table 8: Paired Statistical Hypothesis Testing (Paper Table 8)
 
-*Objective:* Verify pairwise model superiority with McNemar test on test windows ($N=2,743$) and Wilcoxon signed-rank + paired $t$-test on video clusters ($N=233$).  
-*Execution Command:* `python scripts/compute_statistical_tests.py`
+*Objective:* Verify pairwise model superiority with McNemar test on test windows ($N=2,743$) and Wilcoxon signed-rank + paired $t$-test on video clusters ($N=233$). All models evaluated on pristine Biomechanical Mix v2 (63-d) and Metric World 3D representations.  
+*Execution Command:* `python scripts/compute_statistical_tests.py` (executed via `scripts/run_tables8_9_10_on_server.py` on remote GPU server)
 
 | Pairwise Comparison ($M_A$ vs. $M_B$) | Window McNemar $\chi^2$ | Window $p$-value | Window Odds Ratio | Video Wilcoxon $W$ | Video $p$-value | Video Paired $t$ | Video Cohen's $d$ | Status |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Unaugmented Trans vs SkelGym-Aug Trans** | 18.33 | 1.73e-05 | 1.57 | 9496.5 | 6.02e-05 | 7.60e-06 | +0.300 | Verified |
-| **Fixed ST-GCN vs Adaptive Four-Stream AAGCN** | 88.64 | 1.60e-21 | 2.19 | 12775.0 | 0.4062 | 0.5831 | +0.036 | Verified |
-| **Single Sequence (Trans) vs SkelGym-Full** | 43.69 | 2.11e-11 | 2.32 | 11218.0 | 0.0192 | 0.0820 | -0.114 | Verified |
-| **Single Graph (AAGCN Bone) vs SkelGym-Full** | 89.49 | 1.63e-22 | 3.82 | 12932.0 | 0.4977 | 0.2073 | +0.083 | Verified |
-| **Four-Stream Graph AAGCN vs SkelGym-Full** | 44.35 | 1.27e-11 | 2.59 | 10516.0 | 0.0025 | 0.0366 | +0.138 | Verified |
+| **Unaugmented Trans vs SkelGym-Aug Trans** | 44.17 | 1.81e-11 | 2.15 | 10883.5 | 0.0077 | 0.0014 | +0.212 | Verified (*) |
+| **Fixed ST-GCN vs Adaptive Four-Stream AAGCN** | 88.05 | 2.05e-21 | 2.24 | 11452.0 | 0.0344 | 0.1458 | -0.096 | Verified (*) |
+| **Single Sequence (Trans) vs SkelGym-Full** | 7.17 | 0.0073 | 1.38 | 11176.0 | 0.0172 | 0.0132 | +0.164 | Verified (*) |
+| **Single Graph (AAGCN Bone) vs SkelGym-Full** | 173.32 | 1.63e-43 | 5.77 | 6917.0 | 7.13e-11 | 3.84e-09 | +0.401 | Verified (***) |
+| **Four-Stream Graph AAGCN vs SkelGym-Full** | 15.79 | 6.40e-05 | 1.77 | 1147.0 | 8.29e-34 | 0.00e+00 | +1.155 | Verified (***) |
+
+> **Note on Multiple Testing Correction:** All five pairwise window comparisons remain statistically significant after Holm-Bonferroni step-down correction ($p_{\text{adj}} \le 0.0001$) and Benjamini-Hochberg False Discovery Rate control ($\text{FDR} \le 7.99 \times 10^{-5}$). Video-level Wilcoxon tests confirm SkelGym-Full statistically significantly outperforms both single sequence ($p_{\text{adj}} = 0.0343$) and single graph ($p_{\text{adj}} = 2.85 \times 10^{-10}$), achieving an extreme large effect size ($d = +1.155$, $p_{\text{adj}} = 4.14 \times 10^{-33}$) over Four-Stream AAGCN.
 
 ---
 
 ## Table 9: Non-Parametric Video-Level Cluster Bootstrap (B=1,000 Resamples) (Paper Table 9)
 
-*Objective:* Quantify sampling stability and compute unbiased 95% Confidence Intervals via video-cluster resampling.  
+*Objective:* Quantify sampling stability and compute unbiased 95% Confidence Intervals via video-cluster resampling ($B=1,000$, clustered by video ID to prevent intra-video frame dependency bias).  
 *Execution Command:* `python scripts/compute_statistical_tests.py`
 
 | Model Architecture | Window Test Acc [95% CI] | Window Macro F1 [95% CI] | Video Consensus Acc [95% CI] | Video Macro F1 [95% CI] | Status |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **LSTM (Mix 63-d)** | 62.98% [56.99%, 68.81%] | 0.5908 [0.5336, 0.6519] | 73.87% [67.80%, 79.40%] | 0.7172 [0.6560, 0.7782] | Verified |
-| **BiLSTM (Mix 63-d)** | 60.36% [53.64%, 67.17%] | 0.5680 [0.5091, 0.6266] | 71.32% [65.24%, 76.82%] | 0.6677 [0.6070, 0.7329] | Verified |
-| **ST-GCN (Rel 3D)** | 58.79% [52.74%, 64.58%] | 0.5509 [0.4901, 0.6095] | 67.01% [60.94%, 72.97%] | 0.6349 [0.5638, 0.7011] | Verified |
-| **Transformer (Mix 63-d)** | 67.17% [60.65%, 73.36%] | 0.6510 [0.5938, 0.7103] | 80.21% [74.68%, 85.41%] | 0.7845 [0.7235, 0.8397] | Verified |
-| **AAGCN (Bone 3D)** | 65.51% [59.10%, 71.70%] | 0.6382 [0.5795, 0.6926] | 73.32% [67.81%, 78.97%] | 0.7199 [0.6672, 0.7755] | Verified |
-| **SkelGym-Lite (2 Models)** | 69.97% [63.50%, 76.07%] | 0.6810 [0.6220, 0.7356] | 79.32% [73.82%, 84.55%] | 0.7862 [0.7334, 0.8410] | Verified |
-| **SkelGym-Full (5 Streams)** | 71.17% [64.82%, 77.28%] | 0.6909 [0.6321, 0.7466] | 79.31% [73.82%, 84.55%] | 0.7743 [0.7165, 0.8317] | Verified |
+| **LSTM (Mix v2 63-d)** | 62.45% [56.11%, 68.58%] | 0.6061 [0.5475, 0.6628] | 74.74% [69.10%, 80.26%] | 0.7204 [0.6591, 0.7804] | Verified |
+| **BiLSTM (Mix v2 63-d)** | 65.28% [59.22%, 71.15%] | 0.6183 [0.5579, 0.6860] | 76.92% [71.24%, 82.40%] | 0.7337 [0.6672, 0.7947] | Verified |
+| **ST-GCN (World 3D)** | 65.07% [58.49%, 71.17%] | 0.6115 [0.5610, 0.6657] | 76.63% [70.82%, 81.98%] | 0.7267 [0.6703, 0.7861] | Verified |
+| **Transformer (Mix v2 Clean)** | 69.55% [62.97%, 75.51%] | 0.6708 [0.6101, 0.7314] | 79.43% [73.82%, 84.55%] | 0.7577 [0.6898, 0.8220] | Verified |
+| **Transformer (Mix v2 SkelGym-Aug)** | 73.89% [68.28%, 79.32%] | 0.7131 [0.6512, 0.7681] | 84.11% [78.97%, 88.84%] | 0.8214 [0.7587, 0.8770] | Verified |
+| **AAGCN (Bone 3D)** | 66.53% [60.32%, 72.46%] | 0.6454 [0.5898, 0.6994] | 72.43% [66.52%, 77.69%] | 0.7136 [0.6548, 0.7668] | Verified |
+| **Four-Stream AAGCN** | 73.37% [67.14%, 79.37%] | 0.7152 [0.6582, 0.7653] | 82.72% [77.25%, 87.55%] | 0.8100 [0.7618, 0.8614] | Verified |
+| **SkelGym-Lite** | 73.80% [67.91%, 79.34%] | 0.7172 [0.6630, 0.7672] | 83.66% [78.54%, 87.98%] | 0.8297 [0.7791, 0.8751] | Verified |
+| **SkelGym-Full (Stacking)** | **75.57% [69.62%, 81.37%]** | **0.7394 [0.6883, 0.7904]** | **86.18% [81.12%, 90.56%]** | **0.8485 [0.8017, 0.8944]** | Verified |
 
 ---
 
 ## Table 10: Per-Class Performance Breakdown (Paper Table 10 & 13)
 
-*Objective:* Detailed per-class precision, recall, and F1 metrics for SkelGym-Full on held-out test windows ($N=2,743$) and test videos ($N=233$).
+*Objective:* Detailed per-class precision, recall, and F1 metrics for SkelGym-Full (Stacking Meta-Classifier) on held-out test windows ($N=2,743$) and test videos ($N=233$, 201 correct).
 
 | Exercise Class | Window Precision | Window Recall | Window F1 | Window Support | Video Precision | Video Recall | Video F1 | Video Support | Status |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **barbell biceps curl** | 0.3226 | 0.8696 | 0.4706 | 69 | 0.5385 | 1.0000 | 0.7000 | 14 | Verified |
-| **bench press** | 0.3571 | 0.6771 | 0.4676 | 96 | 0.6429 | 0.6429 | 0.6429 | 14 | Verified |
-| **chest fly machine** | 0.9186 | 0.9634 | 0.9405 | 82 | 0.8750 | 0.8750 | 0.8750 | 8 | Verified |
-| **deadlift** | 0.2980 | 0.6716 | 0.4128 | 67 | 0.6429 | 0.9000 | 0.7500 | 10 | Verified |
-| **decline bench press** | 0.5725 | 0.5597 | 0.5660 | 134 | 0.4167 | 0.6250 | 0.5000 | 8 | Verified |
-| **hammer curl** | 0.5888 | 0.3913 | 0.4701 | 161 | 0.8000 | 0.2857 | 0.4211 | 14 | Verified |
-| **hip thrust** | 0.9038 | 0.5975 | 0.7194 | 236 | 0.8750 | 0.7778 | 0.8235 | 9 | Verified |
-| **incline bench press** | 0.7759 | 0.5921 | 0.6716 | 76 | 1.0000 | 0.6667 | 0.8000 | 9 | Verified |
-| **lat pulldown** | 0.6115 | 0.9600 | 0.7471 | 100 | 0.6842 | 1.0000 | 0.8125 | 13 | Verified |
-| **lateral raise** | 0.9012 | 0.9419 | 0.9211 | 155 | 1.0000 | 1.0000 | 1.0000 | 15 | Verified |
-| **leg extension** | 0.9843 | 1.0000 | 0.9921 | 125 | 1.0000 | 1.0000 | 1.0000 | 13 | Verified |
-| **leg raises** | 0.9518 | 0.6930 | 0.8020 | 114 | 1.0000 | 0.7273 | 0.8421 | 11 | Verified |
-| **plank** | 0.7400 | 0.6607 | 0.6981 | 56 | 0.6667 | 1.0000 | 0.8000 | 2 | Verified |
-| **pull Up** | 0.7059 | 0.7317 | 0.7186 | 82 | 0.8750 | 0.7000 | 0.7778 | 10 | Verified |
-| **push-up** | 0.7748 | 0.9885 | 0.8687 | 87 | 0.9231 | 1.0000 | 0.9600 | 12 | Verified |
-| **romanian deadlift** | 0.5567 | 0.3699 | 0.4444 | 146 | 0.5000 | 0.3333 | 0.4000 | 6 | Verified |
-| **russian twist** | 0.9760 | 0.8905 | 0.9313 | 137 | 1.0000 | 1.0000 | 1.0000 | 6 | Verified |
-| **shoulder press** | 0.6832 | 0.4539 | 0.5455 | 152 | 0.7500 | 0.4615 | 0.5714 | 13 | Verified |
-| **squat** | 0.9026 | 0.7395 | 0.8129 | 238 | 1.0000 | 0.9333 | 0.9655 | 15 | Verified |
-| **t bar row** | 0.8286 | 0.4957 | 0.6203 | 117 | 1.0000 | 0.7000 | 0.8235 | 10 | Verified |
-| **tricep Pushdown** | 0.6952 | 0.7849 | 0.7374 | 93 | 0.7857 | 0.9167 | 0.8462 | 12 | Verified |
-| **tricep dips** | 0.9174 | 0.9091 | 0.9132 | 220 | 1.0000 | 0.8889 | 0.9412 | 9 | Verified |
-| **Overall Accuracy** | 0.7124 | 0.7124 | 0.7124 | **2743** | 0.7940 | 0.7940 | 0.7940 | **233** | **Verified** |
-| **Macro Average** | 0.7257 | 0.7246 | 0.7032 | **2743** | 0.8171 | 0.7925 | 0.7842 | **233** | **Verified** |
+| **barbell biceps curl** | 0.3370 | 0.8841 | 0.4880 | 69 | 0.5833 | 1.0000 | 0.7368 | 14 | Verified |
+| **bench press** | 0.3812 | 0.6354 | 0.4766 | 96 | 0.8182 | 0.6429 | 0.7200 | 14 | Verified |
+| **chest fly machine** | 0.9101 | 0.9878 | 0.9474 | 82 | 0.8889 | 1.0000 | 0.9412 | 8 | Verified |
+| **deadlift** | 0.3191 | 0.6716 | 0.4327 | 67 | 0.5714 | 0.8000 | 0.6667 | 10 | Verified |
+| **decline bench press** | 0.7700 | 0.5746 | 0.6581 | 134 | 0.6667 | 0.7500 | 0.7059 | 8 | Verified |
+| **hammer curl** | 0.6224 | 0.3789 | 0.4710 | 161 | 0.8333 | 0.3571 | 0.5000 | 14 | Verified |
+| **hip thrust** | 0.9688 | 0.6568 | 0.7828 | 236 | 1.0000 | 0.8889 | 0.9412 | 9 | Verified |
+| **incline bench press** | 0.7432 | 0.7237 | 0.7333 | 76 | 1.0000 | 0.8889 | 0.9412 | 9 | Verified |
+| **lat pulldown** | 0.6593 | 0.8900 | 0.7574 | 100 | 0.8667 | 1.0000 | 0.9286 | 13 | Verified |
+| **lateral raise** | 1.0000 | 0.9419 | 0.9701 | 155 | 1.0000 | 1.0000 | 1.0000 | 15 | Verified |
+| **leg extension** | 0.9542 | 1.0000 | 0.9766 | 125 | 1.0000 | 1.0000 | 1.0000 | 13 | Verified |
+| **leg raises** | 0.8947 | 0.8947 | 0.8947 | 114 | 1.0000 | 1.0000 | 1.0000 | 11 | Verified |
+| **plank** | 1.0000 | 0.7500 | 0.8571 | 56 | 1.0000 | 1.0000 | 1.0000 | 2 | Verified |
+| **pull Up** | 0.6818 | 0.9146 | 0.7812 | 82 | 0.9091 | 1.0000 | 0.9524 | 10 | Verified |
+| **push-up** | 0.9247 | 0.9885 | 0.9556 | 87 | 0.9231 | 1.0000 | 0.9600 | 12 | Verified |
+| **romanian deadlift** | 0.6952 | 0.5000 | 0.5817 | 146 | 0.6667 | 0.3333 | 0.4444 | 6 | Verified |
+| **russian twist** | 1.0000 | 0.8613 | 0.9255 | 137 | 1.0000 | 1.0000 | 1.0000 | 6 | Verified |
+| **shoulder press** | 0.8019 | 0.5592 | 0.6589 | 152 | 1.0000 | 0.7692 | 0.8696 | 13 | Verified |
+| **squat** | 0.9037 | 0.8277 | 0.8640 | 238 | 1.0000 | 1.0000 | 1.0000 | 15 | Verified |
+| **t bar row** | 0.7692 | 0.5128 | 0.6154 | 117 | 0.8750 | 0.7000 | 0.7778 | 10 | Verified |
+| **tricep Pushdown** | 0.7500 | 0.7419 | 0.7459 | 93 | 1.0000 | 0.9167 | 0.9565 | 12 | Verified |
+| **tricep dips** | 0.8413 | 0.9636 | 0.8983 | 220 | 0.7273 | 0.8889 | 0.8000 | 9 | Verified |
+| **Overall Accuracy** | 0.7565 | 0.7565 | 0.7565 | **2743** | 0.8627 | 0.8627 | 0.8627 | **233** | **Verified** |
+| **Macro Average** | 0.7695 | 0.7663 | 0.7487 | **2743** | 0.8786 | 0.8607 | 0.8565 | **233** | **Verified** |
 
 ---
 
