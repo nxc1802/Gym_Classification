@@ -77,7 +77,8 @@ def train_ablation_run(
     seed: int,
     metadata_path: str,
     device: torch.device,
-    checkpoint_dir: Path
+    checkpoint_dir: Path,
+    resume: bool = False
 ) -> Dict[str, Any]:
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -138,9 +139,15 @@ def train_ablation_run(
         seed=seed
     )
 
-    # 4. Fit Model
-    history = trainer.fit(train_loader, val_loader, epochs=100)
-    train_time = time.time() - t_start
+    # 4. Fit Model or Resume
+    if resume and best_ckpt_path.exists():
+        print(f"  --> [Resuming] Found existing checkpoint {best_ckpt_path.name}, skipping training.")
+        checkpoint = torch.load(best_ckpt_path, map_location=device)
+        model.load_state_dict(checkpoint["model_state_dict"])
+        train_time = 0.0
+    else:
+        history = trainer.fit(train_loader, val_loader, epochs=100)
+        train_time = time.time() - t_start
 
     # 5. Evaluate on Validation
     y_val, _, val_probs = trainer.predict(val_loader)
@@ -209,11 +216,15 @@ def summarize_group(runs: List[Dict[str, Any]]) -> Dict[str, Any]:
 def main():
     parser = argparse.ArgumentParser(description="Phase 3: Table 4 & Table 5 Ablations on WORLD mix_v2")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--resume", action="store_true", default=True, help="Resume from existing checkpoints if available (default: True)")
+    parser.add_argument("--force-retrain", action="store_true", default=False, help="Force retrain even if checkpoints exist")
     args = parser.parse_args()
+
+    resume = args.resume and not args.force_retrain
 
     device = torch.device(args.device)
     print("=" * 80)
-    print(f"PHASE 3: Running Table 4 & 5 Ablations on WORLD mix_v2 ({device})")
+    print(f"PHASE 3: Running Table 4 & 5 Ablations on WORLD mix_v2 ({device}, resume={resume})")
     print("=" * 80)
 
     meta_cand = ROOT_DIR / "data" / "Final_dataset_metadata.csv"
@@ -242,7 +253,8 @@ def main():
                 seed=s,
                 metadata_path=str(meta_cand),
                 device=device,
-                checkpoint_dir=checkpoint_dir
+                checkpoint_dir=checkpoint_dir,
+                resume=resume
             )
             results_by_config[cfg_id].append(res)
 
