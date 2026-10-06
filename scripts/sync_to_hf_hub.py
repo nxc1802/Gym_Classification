@@ -29,7 +29,9 @@ def main():
     api = HfApi(token=token)
     print(f"Connecting to Hugging Face Hub repo: {HF_REPO}...")
 
-    # 1. Sync Report and Artifact Files
+    # 1. Sync Report and Artifact Files in a Single Batch Commit
+    from huggingface_hub import CommitOperationAdd
+    operations = []
     reports = [
         "outputs/RESULTS_FINAL.md",
         "outputs/MASTER_BENCHMARK_MATRIX.md",
@@ -46,15 +48,19 @@ def main():
     for r in reports:
         p = ROOT_DIR / r
         if p.exists():
-            print(f"Uploading {r} ({p.stat().st_size} bytes)...")
-            api.upload_file(
-                path_or_fileobj=str(p),
-                path_in_repo=r,
-                repo_id=HF_REPO,
-                repo_type="model"
-            )
+            print(f"Queueing {r} ({p.stat().st_size} bytes)...")
+            operations.append(CommitOperationAdd(path_in_repo=r, path_or_fileobj=str(p)))
 
-    # 2. Sync Checkpoint Directories
+    if operations:
+        print(f"Committing {len(operations)} reports in a single atomic commit...")
+        api.create_commit(
+            repo_id=HF_REPO,
+            repo_type="model",
+            operations=operations,
+            commit_message="Sync benchmark reports and JSON results"
+        )
+
+    # 2. Sync Checkpoint Directories via upload_folder (1 commit per directory)
     ckpt_dirs = [
         ROOT_DIR / "checkpoints" / "table2",
         ROOT_DIR / "checkpoints" / "ablation_v2",
@@ -62,16 +68,15 @@ def main():
     ]
     for cdir in ckpt_dirs:
         if cdir.exists():
-            for fp in sorted(cdir.rglob("*")):
-                if fp.is_file() and fp.suffix in [".pt", ".json"]:
-                    rel_p = fp.relative_to(ROOT_DIR)
-                    print(f"Uploading checkpoint: {rel_p} ({fp.stat().st_size/1e6:.2f} MB)...")
-                    api.upload_file(
-                        path_or_fileobj=str(fp),
-                        path_in_repo=str(rel_p),
-                        repo_id=HF_REPO,
-                        repo_type="model"
-                    )
+            rel_dir = str(cdir.relative_to(ROOT_DIR))
+            print(f"Uploading folder: {rel_dir} via upload_folder (single commit)...")
+            api.upload_folder(
+                folder_path=str(cdir),
+                path_in_repo=rel_dir,
+                repo_id=HF_REPO,
+                repo_type="model",
+                commit_message=f"Sync {rel_dir} checkpoints"
+            )
 
     print("\n[SUCCESS] All reports and checkpoints successfully uploaded to Hugging Face Hub!")
 
