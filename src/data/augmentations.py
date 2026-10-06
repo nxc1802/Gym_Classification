@@ -106,15 +106,84 @@ class LandmarkAugmenter:
 
         return angles.reshape(*orig_shape[:-1], 286)
 
+    def recompute_kinematic_angles_24(self, world_3d: torch.Tensor) -> torch.Tensor:
+        """
+        Vectorized recomputation of 24 biomechanical kinematic angles from 13 3D world joints.
+        world_3d shape: (..., 39) representing 13 MediaPipe joints (RAW_POINTS_13).
+        Returns: (..., 24)
+        """
+        orig_shape = world_3d.shape
+        coords = world_3d.reshape(-1, 13, 3)  # (N, 13, 3)
+
+        # 0: NOSE, 1: L_SH, 2: R_SH, 3: L_EL, 4: R_EL, 5: L_WR, 6: R_WR,
+        # 7: L_HIP, 8: R_HIP, 9: L_KN, 10: R_KN, 11: L_ANK, 12: R_ANK
+        mid_hip = (coords[:, 7, :] + coords[:, 8, :]) * 0.5        # (N, 3)
+        mid_sh = (coords[:, 1, :] + coords[:, 2, :]) * 0.5         # (N, 3)
+
+        def bone_elev(p1, p2):
+            d = p2 - p1
+            dx = d[..., 0]
+            dy = d[..., 1]
+            dz = d[..., 2]
+            ground = torch.clamp(torch.sqrt(dx * dx + dz * dz), min=1e-4)
+            return torch.atan2(dy, ground)
+
+        def joint_angle(pa, pb, pc):
+            v1 = pa - pb
+            v2 = pc - pb
+            dot = (v1 * v2).sum(dim=-1)
+            norm = torch.clamp(torch.norm(v1, dim=-1) * torch.norm(v2, dim=-1), min=1e-4)
+            cos_a = torch.clamp(dot / norm, -1.0, 1.0)
+            return torch.acos(cos_a)
+
+        angles = [
+            # 14 Bone elevations
+            bone_elev(coords[:, 1, :], coords[:, 3, :]),   # L_SH -> L_EL
+            bone_elev(coords[:, 2, :], coords[:, 4, :]),   # R_SH -> R_EL
+            bone_elev(coords[:, 3, :], coords[:, 5, :]),   # L_EL -> L_WR
+            bone_elev(coords[:, 4, :], coords[:, 6, :]),   # R_EL -> R_WR
+            bone_elev(coords[:, 7, :], coords[:, 9, :]),   # L_HIP -> L_KN
+            bone_elev(coords[:, 8, :], coords[:, 10, :]),  # R_HIP -> R_KN
+            bone_elev(coords[:, 9, :], coords[:, 11, :]),  # L_KN -> L_ANK
+            bone_elev(coords[:, 10, :], coords[:, 12, :]), # R_KN -> R_ANK
+            bone_elev(coords[:, 1, :], coords[:, 2, :]),   # L_SH -> R_SH
+            bone_elev(coords[:, 7, :], coords[:, 8, :]),   # L_HIP -> R_HIP
+            bone_elev(coords[:, 1, :], coords[:, 7, :]),   # L_SH -> L_HIP
+            bone_elev(coords[:, 2, :], coords[:, 8, :]),   # R_SH -> R_HIP
+            bone_elev(mid_hip, mid_sh),                    # MID_HIP -> MID_SH
+            bone_elev(mid_sh, coords[:, 0, :]),            # MID_SH -> NOSE
+
+            # 10 Joint articulation angles
+            joint_angle(coords[:, 1, :], coords[:, 3, :], coords[:, 5, :]),   # L_SH - L_EL - L_WR
+            joint_angle(coords[:, 2, :], coords[:, 4, :], coords[:, 6, :]),   # R_SH - R_EL - R_WR
+            joint_angle(coords[:, 7, :], coords[:, 1, :], coords[:, 3, :]),   # L_HIP - L_SH - L_EL
+            joint_angle(coords[:, 8, :], coords[:, 2, :], coords[:, 4, :]),   # R_HIP - R_SH - R_EL
+            joint_angle(coords[:, 1, :], coords[:, 7, :], coords[:, 9, :]),   # L_SH - L_HIP - L_KN
+            joint_angle(coords[:, 2, :], coords[:, 8, :], coords[:, 10, :]),  # R_SH - R_HIP - R_KN
+            joint_angle(coords[:, 7, :], coords[:, 9, :], coords[:, 11, :]),  # L_HIP - L_KN - L_ANK
+            joint_angle(coords[:, 8, :], coords[:, 10, :], coords[:, 12, :]), # R_HIP - R_KN - R_ANK
+            joint_angle(coords[:, 0, :], mid_sh, mid_hip),                    # NOSE - MID_SH - MID_HIP
+            joint_angle(coords[:, 3, :], mid_sh, coords[:, 4, :]),            # L_EL - MID_SH - R_EL
+        ]
+
+        out = torch.stack(angles, dim=-1)  # (N, 24)
+        return out.reshape(*orig_shape[:-1], 24)
+
     def jitter(self, x: torch.Tensor) -> torch.Tensor:
         """
         Adds zero-mean Gaussian noise to feature values while strictly preserving structure.
+        - mix_v2 (63 dims): coordinates receive jitter_sigma, kinematic angles recomputed.
         - mix (325 dims): coordinates receive jitter_sigma, angles receive jitter_sigma * 0.5.
         - triplet angles (286 dims) / pair angles (78 dims): light noise bounded in valid range.
         - 4-channel coordinates (52, 53, 132, 133): noise applied only to (x, y, z), visibility preserved.
         """
         dim = x.shape[-1]
-        if dim == 117:
+        if dim == 63:
+            noise_world = torch.randn_like(x[..., :39]) * self.jitter_sigma
+            jit_world = x[..., :39] + noise_world
+            recomp_ang = self.recompute_kinematic_angles_24(jit_world)
+            return torch.cat([jit_world, recomp_ang], dim=-1)
+        elif dim == 117:
             noise_rel = torch.randn_like(x[..., :39]) * self.jitter_sigma
             jittered_rel = x[..., :39] + noise_rel
             recomputed_angles = self.recompute_pair_angles_3d(jittered_rel)
@@ -174,7 +243,17 @@ class LandmarkAugmenter:
 
         x_rot = x.clone()
 
-        if dim in (117, 325):
+        if dim == 63:
+            for j in range(13):
+                idx_x = j * 3
+                idx_y = j * 3 + 1
+                px = x[..., idx_x]
+                py = x[..., idx_y]
+                x_rot[..., idx_x] = px * cos_a - py * sin_a
+                x_rot[..., idx_y] = px * sin_a + py * cos_a
+            recomp_ang = self.recompute_kinematic_angles_24(x_rot[..., :39])
+            return torch.cat([x_rot[..., :39], recomp_ang], dim=-1)
+        elif dim in (117, 325):
             # First 39 dims are rel_3d (13 joints * 3)
             for j in range(13):
                 idx_x = j * 3
@@ -222,7 +301,17 @@ class LandmarkAugmenter:
 
         x_rot = x.clone()
 
-        if dim == 117:
+        if dim == 63:
+            for j in range(13):
+                idx_x = j * 3
+                idx_z = j * 3 + 2
+                px = x[..., idx_x]
+                pz = x[..., idx_z]
+                x_rot[..., idx_x] = px * cos_a + pz * sin_a
+                x_rot[..., idx_z] = -px * sin_a + pz * cos_a
+            recomp_ang = self.recompute_kinematic_angles_24(x_rot[..., :39])
+            return torch.cat([x_rot[..., :39], recomp_ang], dim=-1)
+        elif dim == 117:
             # First 39 dims are rel_3d (stride 3: x, y, z)
             for j in range(13):
                 idx_x = j * 3
@@ -337,7 +426,10 @@ class LandmarkAugmenter:
 
         factor = torch.empty(1).uniform_(scale_min, scale_max).item()
 
-        if dim in (117, 325):
+        if dim == 63:
+            scaled_world = x[..., :39] * factor
+            return torch.cat([scaled_world, x[..., 39:]], dim=-1)
+        elif dim in (117, 325):
             scaled_rel = x[..., :39] * factor
             return torch.cat([scaled_rel, x[..., 39:]], dim=-1)
         elif dim in (52, 53, 132, 133) or (dim % 4 == 0 or (dim - 1) % 4 == 0):
@@ -358,6 +450,7 @@ class LandmarkAugmenter:
         - Triplet angles (286 dims): Swaps symmetric triplet channels without negating values.
         - Pair angles (78 dims): Swaps symmetric pair channels.
         - mix representation (325 dims): flips rel_3d and recomputes the 286 3D angles dynamically.
+        - mix_v2 representation (63 dims): flips world_3d and recomputes the 24 kinematic angles dynamically.
 
         Joint swap pairs for 13-joint layout (RAW_POINTS_13 order):
           idx 0: NOSE (no swap, x -> -x)
@@ -385,7 +478,23 @@ class LandmarkAugmenter:
 
         swap_pairs = [(1, 2), (3, 4), (5, 6), (7, 8), (9, 10), (11, 12)]
 
-        if dim == 117:
+        if dim == 63:
+            world = x[..., :39].clone()
+            stride = 3
+            for j_left, j_right in swap_pairs:
+                l_start = j_left * stride
+                l_end = l_start + stride
+                r_start = j_right * stride
+                r_end = r_start + stride
+                world[..., l_start:l_end], world[..., r_start:r_end] = (
+                    x[..., r_start:r_end].clone(), x[..., l_start:l_end].clone()
+                )
+            for j in range(13):
+                world[..., j * stride] = -world[..., j * stride]
+            recomp_ang = self.recompute_kinematic_angles_24(world)
+            return torch.cat([world, recomp_ang], dim=-1)
+
+        elif dim == 117:
             # Extract and mirror rel_3d (first 39 dims, stride 3)
             rel = x[..., :39].clone()
             stride = 3
@@ -537,25 +646,25 @@ class LandmarkAugmenter:
             return self.mirror(x)
         elif method == "speed_perturb":
             return self.speed_perturb(x)
-        elif method in ("skel_gym_aug", "combined", "skel_gym_aug_no_timewarp"):
+        elif method in ("skel_gym_aug", "combined", "skel_gym_aug_no_timewarp", "skel_gym_aug_4op", "candidate_minus_time", "candidate_minus_timewarp"):
             return self.skel_gym_aug(x, disable_timewarp=True)
-        elif method == "skel_gym_aug_legacy_5op":
+        elif method in ("skel_gym_aug_legacy_5op", "skel_gym_aug_5op", "candidate_full_5op", "candidate_full"):
             return self.skel_gym_aug(x, disable_timewarp=False)
-        elif method == "skel_gym_aug_no_mirror":
-            return self.skel_gym_aug(x, disable_mirror=True)
-        elif method == "skel_gym_aug_no_yaw":
-            return self.skel_gym_aug(x, disable_yaw=True)
-        elif method == "skel_gym_aug_no_scale":
-            return self.skel_gym_aug(x, disable_scale=True)
-        elif method == "skel_gym_aug_no_jitter":
-            return self.skel_gym_aug(x, disable_jitter=True)
+        elif method in ("skel_gym_aug_no_mirror", "candidate_minus_mirror"):
+            return self.skel_gym_aug(x, disable_mirror=True, disable_timewarp=False)
+        elif method in ("skel_gym_aug_no_yaw", "candidate_minus_yaw"):
+            return self.skel_gym_aug(x, disable_yaw=True, disable_timewarp=False)
+        elif method in ("skel_gym_aug_no_scale", "candidate_minus_scale"):
+            return self.skel_gym_aug(x, disable_scale=True, disable_timewarp=False)
+        elif method in ("skel_gym_aug_no_jitter", "candidate_minus_jitter"):
+            return self.skel_gym_aug(x, disable_jitter=True, disable_timewarp=False)
         elif method in ("single_mirror", "only_mirror"):
             return self.mirror(x) if torch.rand(1).item() < 0.5 else x
         elif method in ("single_yaw", "only_yaw"):
             return self.yaw_rotate_3d(x, max_yaw_degrees=self.max_yaw_degrees)
         elif method in ("single_scale", "only_scale"):
             return self.scale(x, scale_min=0.9, scale_max=1.1)
-        elif method in ("single_timewarp", "only_timewarp"):
+        elif method in ("single_timewarp", "only_timewarp", "single_time", "only_time"):
             return self.time_warp(x)
         elif method in ("single_jitter", "only_jitter"):
             return self.jitter(x)

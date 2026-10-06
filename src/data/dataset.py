@@ -20,7 +20,7 @@ from src.constants import (
     DEFAULT_TRAIN_STRIDE,
     DEFAULT_VAL_TEST_STRIDE
 )
-from src.data.features import extract_features_by_method
+from src.data.features import extract_features_by_method, is_world_feature
 from src.data.augmentations import LandmarkAugmenter
 
 def parse_segment_ranges(label_content: str, total_frames: int) -> List[Tuple[int, int]]:
@@ -448,13 +448,21 @@ def build_dataset_from_csvs(
         if landmark_dir:
             cand_paths.append(Path(landmark_dir) / split / action_name / f"{vid_name}.csv")
             cand_paths.append(Path(landmark_dir) / f"{vid_name}.csv")
-        # Standard repository search locations
-        default_dir = Path("data/landmarks")
-        cand_paths.append(default_dir / split / action_name / f"{vid_name}.csv")
-        cand_paths.append(default_dir / f"{vid_name}.csv")
-        root_default = Path(__file__).resolve().parent.parent.parent / "data" / "landmarks"
-        cand_paths.append(root_default / split / action_name / f"{vid_name}.csv")
-        cand_paths.append(root_default / f"{vid_name}.csv")
+        elif is_world_feature(feature_method):
+            world_dir = Path("data/world_landmarks")
+            cand_paths.append(world_dir / split / action_name / f"{vid_name}.csv")
+            cand_paths.append(world_dir / f"{vid_name}.csv")
+            root_world = Path(__file__).resolve().parent.parent.parent / "data" / "world_landmarks"
+            cand_paths.append(root_world / split / action_name / f"{vid_name}.csv")
+            cand_paths.append(root_world / f"{vid_name}.csv")
+        else:
+            # Standard repository search locations
+            default_dir = Path("data/landmarks")
+            cand_paths.append(default_dir / split / action_name / f"{vid_name}.csv")
+            cand_paths.append(default_dir / f"{vid_name}.csv")
+            root_default = Path(__file__).resolve().parent.parent.parent / "data" / "landmarks"
+            cand_paths.append(root_default / split / action_name / f"{vid_name}.csv")
+            cand_paths.append(root_default / f"{vid_name}.csv")
 
         for c in cand_paths:
             if c.exists():
@@ -521,7 +529,12 @@ def build_dataset_from_csvs(
     # 2. For single methods (jitter, rotate, etc.): Offline Dataset Expansion (1→4 total)
     dataset_aug = None
     if split == "train" and augment_method and augment_method != "none":
-        if augment_method.startswith("skel_gym_aug") or augment_method.startswith("single_") or augment_method.startswith("only_"):
+        if (
+            augment_method.startswith("skel_gym_aug")
+            or augment_method.startswith("candidate_")
+            or augment_method.startswith("single_")
+            or augment_method.startswith("only_")
+        ):
             # Dynamic On-the-Fly Augmentation: keep clean base samples in RAM, apply random pipeline on every fetch
             dataset_aug = augment_method
         else:

@@ -10,6 +10,30 @@ import pandas as pd
 
 from src.constants import RAW_POINTS_33, RAW_POINTS_13, REL_POINTS_12, HIP_MIDPOINT_JOINTS, KINEMATIC_TREE_13
 
+def is_world_feature(method: str) -> bool:
+    """
+    Returns True if the feature method operates on 3D world landmarks
+    (which reside in data/world_landmarks), False if standard image landmarks.
+    """
+    if not method:
+        return False
+    method = method.lower()
+    return (
+        method.startswith("world_")
+        or method.endswith("_world")
+        or method.endswith("_world_3d")
+        or method in (
+            "world_3d",
+            "world_13_3d",
+            "mix_v2",
+            "mix_63",
+            "biomechanical_mix_v2",
+            "mix_v2_world",
+            "world_joint_motion_3d",
+            "joint_motion_world_3d",
+        )
+    )
+
 def extract_raw_features(
     df: pd.DataFrame,
     points: List[str],
@@ -499,10 +523,19 @@ def extract_features_by_method(df: pd.DataFrame, method: str) -> Union[np.ndarra
         return extract_relative_norm_features(df, RAW_POINTS_13, ["x", "y", "z"])  # 39
     elif method in ("angle_kinematic_24", "kinematic_24", "angle_24"):
         return compute_kinematic_angles_24(df)  # 24
-    elif method in ("mix_v2", "mix_63", "biomechanical_mix_v2"):
-        rel_n = extract_relative_norm_features(df, RAW_POINTS_13, ["x", "y", "z"])
-        ang_24 = compute_kinematic_angles_24(df)
-        return np.concatenate([rel_n, ang_24], axis=1).astype(np.float32)  # 63
+    elif method in ("mix_v2", "mix_63", "biomechanical_mix_v2", "mix_v2_world"):
+        w_3d = extract_raw_features(df, RAW_POINTS_13, ["x", "y", "z"])  # 39 (pose_world_landmarks)
+        ang_24 = compute_kinematic_angles_24(df)  # 24
+        return np.concatenate([w_3d, ang_24], axis=1).astype(np.float32)  # 63
+    elif method in ("world_joint_motion_3d", "joint_motion_world_3d"):
+        w_pos = extract_raw_features(df, RAW_POINTS_13, ["x", "y", "z"])
+        n_frames = w_pos.shape[0]
+        if n_frames <= 1:
+            return np.zeros_like(w_pos, dtype=np.float32)
+        motion = np.zeros_like(w_pos, dtype=np.float32)
+        motion[:-1] = w_pos[1:] - w_pos[:-1]
+        motion[-1] = motion[-2]
+        return motion
 
     # Legacy support
     elif method == "full_4":
