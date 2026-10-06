@@ -668,6 +668,8 @@ class LandmarkAugmenter:
             return self.time_warp(x)
         elif method in ("single_jitter", "only_jitter"):
             return self.jitter(x)
+        elif method in ("mirror_yaw", "single_mirror_yaw", "pair_mirror_yaw", "mirror_plus_yaw"):
+            return self.skel_gym_aug(x, disable_scale=True, disable_timewarp=True, disable_jitter=True)
         elif method == "none" or not method:
             return x
         else:

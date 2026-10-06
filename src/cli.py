@@ -1312,7 +1312,8 @@ def create_parser() -> argparse.ArgumentParser:
             "none", "jitter", "rotate", "joint_dropout", "time_warp", "mirror", "speed_perturb",
             "skel_gym_aug", "skel_gym_aug_legacy_5op", "skel_gym_aug_no_mirror", "skel_gym_aug_no_yaw",
             "skel_gym_aug_no_scale", "skel_gym_aug_no_timewarp", "skel_gym_aug_no_jitter",
-            "single_mirror", "single_yaw", "single_scale", "single_timewarp", "single_jitter"
+            "single_mirror", "single_yaw", "single_scale", "single_timewarp", "single_jitter",
+            "mirror_yaw", "single_mirror_yaw", "pair_mirror_yaw"
         ],
         help="Augmentation method"
     )
