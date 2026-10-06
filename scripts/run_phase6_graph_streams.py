@@ -288,7 +288,7 @@ def main():
             logs[s] = (log_file, out_json)
 
             cmd = [
-                sys.executable, str(worker_script),
+                sys.executable, "-u", str(worker_script),
                 "--exp_id", eid,
                 "--model_type", spec["model"],
                 "--feature_method", spec["feat"],

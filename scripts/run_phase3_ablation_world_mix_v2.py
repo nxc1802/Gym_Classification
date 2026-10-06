@@ -109,7 +109,7 @@ def run_config_3seeds_parallel(
         logs[s] = (log_file, out_json)
 
         cmd = [
-            sys.executable, str(worker_script),
+            sys.executable, "-u", str(worker_script),
             "--cfg_id", cfg_id,
             "--aug", aug,
             "--seed", str(s),
