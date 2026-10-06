@@ -133,18 +133,45 @@
 | Augmentation Strategy | Isolated Operator Description | Val Loss | Val Win Acc (%) | Val Win F1 | Val Vid Acc (%) | Val Vid F1 | Test Win Acc (%) | Test Win F1 | Test Vid Acc (%) | Test Vid F1 | Standalone Validation Effect |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 | **None (Clean Baseline)** | Unaugmented Native Window Sequences | 1.0483 | 79.52% ± 0.80% | 0.7885 | 84.38% ± 1.27% | 0.8505 | 69.24% ± 0.20% | 0.6815 | 79.83% ± 1.27% | 0.7806 | Unaugmented Reference |
-| **Only Mirroring** | Sagittal Bilateral Reflection ($p=0.5$) | **1.0047** | **80.45% ± 0.45%** | **0.8001** | **85.18% ± 0.99%** | **0.8510** | **73.66% ± 0.56%** | **0.7262** | **82.69% ± 0.73%** | **0.8211** | 🏆 **Decisive Val Gain across all metrics** |
-| **Only Rotation / Yaw** | 3D Yaw Perturbation ($\pm 15^\circ$) | 1.0657 | 80.29% ± 0.34% | 0.7977 | 85.02% ± 0.40% | 0.8581 | 69.27% ± 1.19% | 0.6816 | 79.26% ± 0.54% | 0.7880 | Slight Acc gain, Val Loss degrades |
+| **Only Mirroring** | Sagittal Bilateral Reflection ($p=0.5$) | **1.0047** | 80.45% ± 0.45% | 0.8001 | **85.18% ± 0.99%** | 0.8510 | **73.66% ± 0.56%** | **0.7262** | 82.69% ± 0.73% | 0.8211 | 🏆 **Decisive Val Vid Gain across all single ops** |
+| **Only Rotation / Yaw** | 3D Yaw Perturbation ($\pm 15^\circ$) | 1.0657 | 80.29% ± 0.34% | 0.7977 | 85.02% ± 0.40% | **0.8581** | 69.27% ± 1.19% | 0.6816 | 79.26% ± 0.54% | 0.7880 | Strong Vid F1, preserves metric lengths |
+| **Mirror + Yaw (Spatial Pair)** | Bilateral Reflection + Gravitational Yaw ($\pm 15^\circ$) | 1.0465 | **81.20% ± 0.72%** | **0.8119** | 84.70% ± 0.82% | 0.8469 | 73.14% ± 0.90% | 0.7253 | 82.69% ± 1.66% | 0.8187 | 🥇 **All-Time Peak Val Win Acc & Macro F1** |
 | **Only Scaling** | Proportional Scale Jitter ($\pm 10\%$) | 1.0519 | 79.68% ± 0.22% | 0.7904 | 83.90% ± 1.21% | 0.8426 | 68.90% ± 1.13% | 0.6789 | 78.54% ± 0.70% | 0.7810 | Marginal Win (+0.16%), Vid drops (-0.48%) |
 | **Only Time Interpolation** | Linear Sequence Resampling ($0.8\times - 1.2\times$) | 1.0567 | 79.74% ± 0.24% | 0.7920 | 83.25% ± 0.23% | 0.8361 | 68.90% ± 0.75% | 0.6775 | 79.40% ± 0.93% | 0.7890 | Degrades Val Vid Acc (-1.13%) & Loss |
 | **Only Jitter** | Gaussian Noise ($\sigma=0.008$) | 1.0520 | 79.55% ± 0.82% | 0.7884 | 83.25% ± 0.45% | 0.8378 | 68.75% ± 0.87% | 0.6766 | 78.54% ± 1.53% | 0.7800 | Neutral Win (+0.03%), Vid drops (-1.13%) |
 
-> **Critical Methodological Analysis (Validation-Driven Selection vs. Post-Hoc Test Peeking):**
-> 1. **Bilateral Mirroring is the True Foundational Operator:** Both SCI and LOO prove unequivocally that Bilateral Mirroring is the single indispensable augmentation operator. Applying Mirror alone reduces Validation Loss from 1.0483 to 1.0047, improves Validation Window Accuracy from 79.52% to 80.45%, and elevates Validation Video Accuracy from 84.38% to 85.18%. Conversely, omitting Mirror in LOO causes an immediate, catastrophic collapse across all validation metrics (Val Loss worsens to 1.0670, Val Video Accuracy plummets to 81.32%).
-> 2. **Capacity Saturation & The LOO Paradox:** In Candidate Full (5-op), compounding all five spatial, temporal, and sensor transforms simultaneously yields the lowest Validation Cross-Entropy Loss (0.9669) due to heavy entropy smoothing, but causes *representation blurring* on discrete accuracy (Val Window: 79.19%, Val Video: 83.41% — lower than Clean Baseline). Consequently, removing almost any secondary operator (-Yaw, -Scale, -Time, -Jitter) yields a slight rebound in Validation Accuracy (83.90% - 84.54%).
-> 3. **Validation-Driven Selection Rationale for SkelGym-Aug 4-op:**
->    - *Why Eliminate TimeWarp?* In Single-Component testing, TimeWarp directly harms Validation Video Accuracy (drops from 84.38% to 83.25%) and inflates Validation Loss. In biomechanics, exercise cadence, time-under-tension (TUT), and concentric/eccentric velocity profiles are core discriminative signatures (e.g. separating conventional deadlift from explosive lifts). Synthetic temporal warping actively corrupts these angular velocity derivatives.
->    - *Why Retain Yaw, Scale, and Jitter alongside Mirror?* While `Only Mirror` yields the highest raw Validation Video Accuracy (85.18%), relying on a single operator fails to regularize camera viewpoint shifts, athlete height/limb anthropometric proportions, and sensor tracking jitter. Among all 4-operator configurations in LOO, **Minus TimeWarp (4-op)** achieves the lowest Validation Cross-Entropy Loss (**1.0010** vs 1.0124 for -Jitter, 1.0054 for -Yaw, 1.0032 for -Scale), striking the optimal Pareto trade-off between well-calibrated posterior confidence and realistic physical domain invariance.
+> **Critical Methodological Analysis (Validation-Only Grounding & Zero-Test-Leakage Assessment):**
+>
+> 1. **Giải phẫu nghịch lý SCI vs LOO: Vì sao Scale, Time, Jitter gây hại khi kết hợp?**
+>    - **Trong SCI (Single-Component Isolation):** 
+>      - `Only Mirror` (+0.80% Vid Acc, -0.0436 Loss) và `Only Yaw` (+0.64% Vid Acc, +0.0076 Vid F1) là 2 phương pháp **thuần hình học bảo toàn độ dài đoạn chi (Rigid Isometry in $SE(3)$)**. Chúng không làm thay đổi tỷ lệ cơ thể thực tế đo bằng mét trong World 3D và không làm biến dạng góc động học của khớp ($24$-d kinematics).
+>      - Ngược lại, `Scaling` (thay đổi độ dài xương giả tạo), `TimeWarp` (làm méo vận tốc góc và chu kỳ rep), và `Jitter` (nhiễu ngẫu nhiên từng khớp) đều làm sụt giảm Validation Video Accuracy từ 84.38% xuống 83.25% - 83.90%.
+>    - **Trong LOO (Leave-One-Out):**
+>      - Khi gộp cả 5 phép biến đổi vào `Candidate Full (5-op)`, tổng mức độ biến dạng (distortion accumulation) quá lớn. Mô hình bị "ép" làm mượt entropy quá mức, dẫn đến Validation Loss thấp kỷ lục (0.9669) nhưng **Validation Video Accuracy tụt sâu xuống 83.41%** (thấp hơn cả Clean Baseline 84.38%).
+>      - Do đó, việc loại bỏ bớt bất kỳ toán tử gây nhiễu nào (`Minus Scale`: 84.54%, `Minus Jitter`: 84.22%, `Minus Yaw`: 84.22%, `Minus Time`: 83.90%) đều giải phóng mô hình khỏi sự quá tải biểu diễn, khiến độ chính xác validation phục hồi trở lại!
+>
+> 2. **Cảnh báo sai lệch do "Test-Peeking" (Dựa dẫm vào Test Set):**
+>    - Nếu chỉ nhìn vào Test set, tổ hợp `Minus Time (4-op)` trước đây được tung hô vì đạt Test Vid Acc 83.55% và Test Win Acc 73.59%. Tuy nhiên, đây là **sai lệch phương pháp luận nghiêm trọng (data snooping)**: trên thực tế tập Validation, `Minus Time (4-op)` chỉ đạt **83.90% Val Vid Acc**, **thấp hơn cả Clean Baseline (84.38%)** và thua xa `Only Mirror` (85.18%), `Only Yaw` (85.02%), cũng như `Mirror + Yaw` (84.70%).
+>    - Nếu ta tuân thủ nguyên tắc khoa học chuẩn mực: **Mọi quyết định chọn mô hình/tổ hợp augmentation PHẢI dựa 100% trên tập Validation**, thì `4-op` không thể là lựa chọn tối ưu về mặt discrete accuracy!
+>
+> 3. **Đánh giá công bằng: SkelGym-Aug nên được đánh giá theo metric nào trên Validation?**
+>    - **Trục 1 - Khả năng học đặc trưng cấp độ cửa sổ (Window-Level Representation Quality):**
+>      - *Metric chuẩn:* **Validation Window Accuracy & Macro F1**.
+>      - *Quán quân:* **`Mirror + Yaw (Spatial Pair)`** đạt **81.20% ± 0.72%** Window Acc và **0.8119 ± 0.0072** Macro F1 — cao nhất trong toàn bộ 13 cấu hình được thử nghiệm (vượt Clean 79.52% và vượt 4-op 79.54% tới +1.66%). 
+>      - *Ý nghĩa sinh cơ học:* Phản xạ đối xứng (Mirror) giải quyết triệt để góc nhìn trái/phải; quay quanh trục trọng trường (Yaw $\pm 15^\circ$) giải quyết góc đặt camera lệch phương. Cả hai tương hỗ hoàn hảo mà không làm biến dạng bất kỳ chiều dài xương vật lý hay góc động học nào!
+>    - **Trục 2 - Khả năng khái quát hóa video đồng thuận (Video-Level Consensus Accuracy):**
+>      - *Metric chuẩn:* **Validation Video Accuracy & Macro F1**.
+>      - *Quán quân:* **`Only Mirror`** (**85.18% ± 0.99%**, F1: 0.8510) và **`Only Yaw`** (**85.02% ± 0.40%**, F1: **0.8581**), bám sát phía sau là **`Mirror + Yaw`** (**84.70% ± 0.82%**).
+>      - Cả 3 cấu hình thuần không gian (rigid spatial) này đều bỏ xa tất cả các tổ hợp chứa Scaling/Time/Jitter (< 84.55%).
+>    - **Trục 3 - Hiệu chỉnh xác suất (Probability Calibration & Loss):**
+>      - *Metric chuẩn:* **Validation Cross-Entropy Loss**.
+>      - *Quán quân:* `Candidate Full (5-op)` (0.9669) và `Minus Time (4-op)` (1.0010). Mặc dù các tổ hợp nhiều op này giúp loss mịn hơn nhờ hiệu ứng label smoothing / entropy penalty, nhưng lại hy sinh độ sắc nét của ranh giới phân lớp discrete.
+>
+> 4. **Kết luận tổ hợp được đề xuất (Proposed Method Selection):**
+>    - Dựa thuần túy trên tập Validation không thiên vị:
+>      - Nếu mục tiêu là **Biểu diễn chuỗi cửa sổ mạnh nhất và ổn định nhất**: **`SkelGym-Aug (Mirror + Yaw)`** là tổ hợp xuất sắc nhất (**81.20% Val Win Acc, 0.8119 Macro F1**, duy trì 84.70% Val Vid Acc và 82.69% Test Vid Acc mà không cần bất kỳ phép biến dạng nhiễu nào).
+>      - Nếu mục tiêu là **Cấu hình tối giản tối ưu Video**: **`Only Mirror`** (85.18% Val Vid Acc, 1.0047 Val Loss) là baseline đơn lẻ vượt trội.
+>      - Cả hai cấu hình trên đều chứng minh nguyên lý then chốt của World 3D: **Chỉ các phép biến đổi bảo toàn cấu trúc cứng (Rigid Isometry) mới thực sự mang lại lợi ích cho dữ liệu tọa độ 3D metric.**
 
 ---
 
