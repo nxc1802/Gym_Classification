@@ -29,13 +29,19 @@ def main():
     api = HfApi(token=token)
     print(f"Connecting to Hugging Face Hub repo: {HF_REPO}...")
 
-    # 1. Sync Report Files
+    # 1. Sync Report and Artifact Files
     reports = [
         "outputs/RESULTS_FINAL.md",
         "outputs/MASTER_BENCHMARK_MATRIX.md",
         "outputs/augmentation_ablation_results.json",
-        "outputs/consensus_gains.json",
-        "outputs/multi_seed_evaluation_results.json",
+        "outputs/table2_clean_sequences.json",
+        "outputs/table3_graph_streams_results.json",
+        "outputs/table4_loo_world_mix_v2.json",
+        "outputs/table5_single_world_mix_v2.json",
+        "outputs/table6_cross_paradigm_fusion.json",
+        "outputs/table7_unified_benchmark.json",
+        "artifacts/results/canonical_results_v2.json",
+        "configs/augmentation/skelgym_aug_v2.yaml",
     ]
     for r in reports:
         p = ROOT_DIR / r
@@ -48,19 +54,24 @@ def main():
                 repo_type="model"
             )
 
-    # 2. Sync LOO Checkpoints
-    ckpt_pattern = str(ROOT_DIR / "checkpoints" / "ablation_aug" / "LOO_Trans_*" / "*")
-    for f in glob.glob(ckpt_pattern):
-        fp = Path(f)
-        if fp.is_file() and fp.suffix in [".pt", ".json"]:
-            rel_p = fp.relative_to(ROOT_DIR)
-            print(f"Uploading checkpoint file: {rel_p} ({fp.stat().st_size/1e6:.2f} MB)...")
-            api.upload_file(
-                path_or_fileobj=str(fp),
-                path_in_repo=str(rel_p),
-                repo_id=HF_REPO,
-                repo_type="model"
-            )
+    # 2. Sync Checkpoint Directories
+    ckpt_dirs = [
+        ROOT_DIR / "checkpoints" / "table2",
+        ROOT_DIR / "checkpoints" / "ablation_v2",
+        ROOT_DIR / "checkpoints" / "graph_streams",
+    ]
+    for cdir in ckpt_dirs:
+        if cdir.exists():
+            for fp in sorted(cdir.rglob("*")):
+                if fp.is_file() and fp.suffix in [".pt", ".json"]:
+                    rel_p = fp.relative_to(ROOT_DIR)
+                    print(f"Uploading checkpoint: {rel_p} ({fp.stat().st_size/1e6:.2f} MB)...")
+                    api.upload_file(
+                        path_or_fileobj=str(fp),
+                        path_in_repo=str(rel_p),
+                        repo_id=HF_REPO,
+                        repo_type="model"
+                    )
 
     print("\n[SUCCESS] All reports and checkpoints successfully uploaded to Hugging Face Hub!")
 
