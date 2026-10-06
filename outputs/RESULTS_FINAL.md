@@ -44,28 +44,28 @@
 | **T1.3** | LSTM | Pairwise Joint Angles 2D | 286 | 0.1343 | — | 2.5289 | 66.12% ± 1.06% | — | 51.53% ± 1.57% | 0.4993 ± 0.0119 | Verified |
 | **T1.4** | LSTM | Adjacent Joint Angles 2D | 78 | 0.1327 | — | 2.3319 | 69.98% ± 0.79% | — | 55.73% ± 1.29% | 0.5412 ± 0.0147 | Verified |
 | **T1.5** | LSTM | Raw 3D Coordinates | 39 | 0.1183 | — | 2.0571 | 68.47% ± 1.67% | — | 53.53% ± 1.18% | 0.5117 ± 0.0133 | Verified |
-| **T1.6** | LSTM | Root-Relative 3D Coordinates | 39 | 0.1548 | — | 1.6984 | 73.09% ± 1.02% | — | 58.77% ± 1.38% | 0.5738 ± 0.0127 | Verified |
+| **T1.6** | LSTM | Metric World 3D Coordinates (world_3d) | 39 | — | — | 1.8250 | 73.64% ± 1.26% | — | 61.41% ± 0.80% | 0.6002 ± 0.0063 | Verified |
 | **T1.7** | LSTM | Pairwise Joint Angles 3D | 286 | 0.1426 | — | 2.3883 | 65.16% ± 0.97% | — | 50.68% ± 0.51% | 0.4923 ± 0.0040 | Verified |
 | **T1.8** | LSTM | Adjacent Joint Angles 3D | 78 | 0.0943 | — | 1.9178 | 72.84% ± 1.06% | — | 57.42% ± 0.62% | 0.5680 ± 0.0097 | Verified |
-| **T1.9** | LSTM | Hybrid Geometric Multi-Feature (mix_v2) | 63 | 0.0417 | — | 1.9940 | 77.78% ± 1.15% | — | 51.17% ± 13.08% | 0.5014 ± 0.1232 | Verified |
+| **T1.9** | LSTM | Hybrid Geometric Multi-Feature (mix_v2) | 63 | — | — | 1.7323 | 75.90% ± 1.60% | — | 62.80% ± 0.83% | 0.6171 ± 0.0089 | Verified |
 | **T1.10** | BiLSTM | Raw 2D Coordinates | 26 | 0.0747 | — | 2.2106 | 70.81% ± 0.73% | — | 54.28% ± 0.08% | 0.5338 ± 0.0033 | Verified |
 | **T1.11** | BiLSTM | Root-Relative 2D Coordinates | 26 | 0.0790 | — | 1.8599 | 75.21% ± 0.91% | — | 58.95% ± 0.84% | 0.5700 ± 0.0101 | Verified |
 | **T1.12** | BiLSTM | Pairwise Joint Angles 2D | 286 | 0.1284 | — | 2.5607 | 65.96% ± 0.47% | — | 52.37% ± 1.98% | 0.5043 ± 0.0206 | Verified |
 | **T1.13** | BiLSTM | Adjacent Joint Angles 2D | 78 | 0.0623 | — | 2.5136 | 71.08% ± 0.17% | — | 56.53% ± 0.29% | 0.5508 ± 0.0072 | Verified |
 | **T1.14** | BiLSTM | Raw 3D Coordinates | 39 | 0.1339 | — | 2.1974 | 68.19% ± 0.86% | — | 53.22% ± 0.90% | 0.5045 ± 0.0074 | Verified |
-| **T1.15** | BiLSTM | Root-Relative 3D Coordinates | 39 | 0.1059 | — | 1.9566 | 73.24% ± 0.83% | — | 58.43% ± 0.99% | 0.5634 ± 0.0034 | Verified |
+| **T1.15** | BiLSTM | Metric World 3D Coordinates (world_3d) | 39 | — | — | 1.9601 | 74.72% ± 0.19% | — | 62.45% ± 1.52% | 0.6119 ± 0.0128 | Verified |
 | **T1.16** | BiLSTM | Pairwise Joint Angles 3D | 286 | 0.1690 | — | 2.0893 | 64.47% ± 0.69% | — | 51.25% ± 1.82% | 0.4922 ± 0.0194 | Verified |
 | **T1.17** | BiLSTM | Adjacent Joint Angles 3D | 78 | 0.1432 | — | 1.6524 | 73.19% ± 0.67% | — | 57.90% ± 1.11% | 0.5719 ± 0.0098 | Verified |
-| **T1.18** | BiLSTM | Hybrid Geometric Multi-Feature (mix_v2) | 63 | 0.0828 | — | 1.6630 | 76.16% ± 2.19% | — | 49.75% ± 13.47% | 0.4921 ± 0.1297 | Verified |
+| **T1.18** | BiLSTM | Hybrid Geometric Multi-Feature (mix_v2) | 63 | — | — | 1.5067 | 76.90% ± 0.30% | — | 64.82% ± 0.37% | 0.6316 ± 0.0027 | Verified |
 | **T1.19** | Transformer | Raw 2D Coordinates | 26 | 0.3905 | — | 1.1568 | 77.75% ± 0.53% | — | 63.62% ± 1.06% | 0.6258 ± 0.0118 | Verified |
 | **T1.20** | Transformer | Root-Relative 2D Coordinates | 26 | 0.5088 | — | 1.2146 | 75.44% ± 0.79% | — | 61.22% ± 1.61% | 0.5981 ± 0.0172 | Verified |
 | **T1.21** | Transformer | Pairwise Joint Angles 2D | 286 | 0.4268 | — | 1.4610 | 69.85% ± 0.47% | — | 55.95% ± 0.74% | 0.5310 ± 0.0115 | Verified |
 | **T1.22** | Transformer | Adjacent Joint Angles 2D | 78 | 0.4115 | — | 1.4490 | 70.15% ± 1.19% | — | 55.12% ± 1.68% | 0.5407 ± 0.0205 | Verified |
 | **T1.23** | Transformer | Raw 3D Coordinates | 39 | 0.4239 | — | 1.1319 | 77.24% ± 0.59% | — | 62.87% ± 0.69% | 0.6202 ± 0.0097 | Verified |
-| **T1.24** | Transformer | Root-Relative 3D Coordinates | 39 | 0.4344 | — | 1.1740 | 77.88% ± 0.89% | — | 63.87% ± 0.73% | 0.6179 ± 0.0080 | Verified |
+| **T1.24** | Transformer | Metric World 3D Coordinates (world_3d) | 39 | 0.3735 | — | 1.1306 | 78.76% ± 0.46% | — | 65.33% ± 0.71% | 0.6406 ± 0.0035 | Verified |
 | **T1.25** | Transformer | Pairwise Joint Angles 3D | 286 | 0.4029 | — | 1.5516 | 69.51% ± 1.03% | — | 57.41% ± 0.54% | 0.5570 ± 0.0062 | Verified |
 | **T1.26** | Transformer | Adjacent Joint Angles 3D | 78 | 0.3812 | — | 1.4079 | 73.51% ± 1.10% | — | 59.56% ± 0.66% | 0.5922 ± 0.0054 | Verified |
-| **T1.27** | Transformer | Hybrid Geometric Multi-Feature (mix_v2) | 63 | 0.3777 | — | 1.0535 | 80.98% ± 0.80% | — | 58.57% ± 12.11% | 0.5830 ± 0.1145 | Verified |
+| **T1.27** | Transformer | Hybrid Geometric Multi-Feature (mix_v2) | 63 | — | — | 1.0483 | 79.52% ± 0.80% | — | 69.24% ± 0.20% | 0.6815 ± 0.0017 | Verified |
 
 ---
 
