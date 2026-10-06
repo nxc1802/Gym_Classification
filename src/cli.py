@@ -126,7 +126,7 @@ def build_model(
         n_head = 4 if (h_dim % 8 != 0 and h_dim % 4 == 0) else nhead
         drop = dropout if dropout is not None else 0.2
         variant = transformer_variant
-        if variant == "standard" and feature_method in ("mix_v2", "mix_63", "biomechanical_mix_v2"):
+        if variant == "standard" and feature_method in ("mix_v2", "mix_63", "biomechanical_mix_v2", "mix_v2_world"):
             variant = "dual_branch"
         return TransformerModel(feat_dim=feat_dim, num_classes=num_classes, d_model=h_dim, nhead=n_head, num_layers=n_layers, dim_feedforward=dim_ff, dropout=drop, variant=variant)
 
