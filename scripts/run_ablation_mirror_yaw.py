@@ -140,6 +140,11 @@ def main():
                 status_strs.append(f"Seed {s}: RUNNING")
         status_line = " | ".join(status_strs)
         print(f"  [{elapsed:6.1f}s] {status_line}", end="\r", flush=True)
+        try:
+            with open(ckpt_dir / "mirror_yaw_progress.txt", "w") as pf:
+                pf.write(f"[{elapsed:6.1f}s] {status_line}\n")
+        except Exception:
+            pass
 
         if all_done:
             break
