@@ -283,6 +283,7 @@ def main():
         logs = {}
 
         for s in SEEDS:
+            (checkpoint_dir / f"seed{s}").mkdir(parents=True, exist_ok=True)
             out_json = checkpoint_dir / f"seed{s}" / f"result_{eid}_seed{s}.json"
             log_file = checkpoint_dir / f"seed{s}" / f"train_{eid}_seed{s}.log"
             logs[s] = (log_file, out_json)
