@@ -19,10 +19,9 @@ Unique Configurations (12 total):
   11. single_time
   12. single_jitter
 
-Outputs:
-  - outputs/table4_loo_world_mix_v2.json
-  - outputs/table5_single_world_mix_v2.json
-  - outputs/augmentation_ablation_results.json
+Parallel Execution:
+  Executes all 3 seeds for each configuration simultaneously using independent worker processes,
+  optimizing the multi-core CPU (20 cores) and 96GB VRAM NVIDIA Blackwell GPU.
 """
 
 import os
@@ -30,21 +29,14 @@ import sys
 import time
 import json
 import argparse
+import subprocess
 from pathlib import Path
 from typing import Dict, List, Any
 
 import numpy as np
-import torch
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT_DIR))
-
-from src.constants import ACTIONS, ACTION_TO_IDX
-from src.data.dataset import get_dataloaders
-from src.cli import build_model
-from src.training.trainer import Trainer
-from src.training.metrics import compute_metrics
-from src.models.ensemble import aggregate_video_level_predictions
 
 SEEDS = [42, 123, 3407]
 
@@ -71,129 +63,6 @@ def send_marimo_toast(msg: str):
     except Exception:
         pass
 
-def train_ablation_run(
-    cfg_id: str,
-    aug_method: str,
-    seed: int,
-    metadata_path: str,
-    device: torch.device,
-    checkpoint_dir: Path,
-    resume: bool = False
-) -> Dict[str, Any]:
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
-
-    print(f"\n---> Training Transformer mix_v2 on {cfg_id} (aug: {aug_method}) [Seed {seed}]...")
-    t_start = time.time()
-
-    # 1. DataLoaders
-    # Note: augment_method is passed directly. dataset.py handles on-the-fly augmentation dynamically
-    train_loader, val_loader, test_loader = get_dataloaders(
-        metadata_path=metadata_path,
-        feature_method="mix_v2",
-        batch_size=16,
-        seq_len=32,
-        stride=16,
-        val_test_stride=32,
-        augment_method=aug_method if aug_method != "none" else None,
-        zero_frame_handling="interpolate",
-        landmark_dir=None,  # auto-detected data/world_landmarks
-        in_memory=True,
-        seed=seed,
-        save_norm_artifact=True,
-        strict_norm=False
-    )
-
-    # 2. Model: Dual-Branch Transformer (301K params)
-    model = build_model(
-        model_type="Transformer",
-        feature_method="mix_v2",
-        hidden_dim=112,
-        num_layers=3,
-        nhead=4,
-        dropout=0.2,
-        transformer_variant="dual_branch"
-    )
-
-    # 3. Setup Trainer
-    seed_ckpt_dir = checkpoint_dir / f"seed{seed}"
-    seed_ckpt_dir.mkdir(parents=True, exist_ok=True)
-    model_name = f"Transformer_mix_v2_{cfg_id}_seed{seed}"
-    best_ckpt_path = seed_ckpt_dir / f"best_{model_name}.pt"
-
-    trainer = Trainer(
-        model=model,
-        device=device,
-        lr=1e-4,
-        weight_decay=1e-4,
-        patience=10,
-        checkpoint_dir=str(seed_ckpt_dir),
-        model_name=model_name,
-        label_smoothing=0.05,
-        early_stopping_metric="val_macro_f1",
-        use_amp=torch.cuda.is_available(),
-        feature_method="mix_v2",
-        augment_method=aug_method,
-        seed=seed
-    )
-
-    # 4. Fit Model or Resume
-    if resume and best_ckpt_path.exists():
-        print(f"  --> [Resuming] Found existing checkpoint {best_ckpt_path.name}, skipping training.")
-        checkpoint = torch.load(best_ckpt_path, map_location=device)
-        model.load_state_dict(checkpoint["model_state_dict"])
-        train_time = 0.0
-    else:
-        history = trainer.fit(train_loader, val_loader, epochs=100)
-        train_time = time.time() - t_start
-
-    # 5. Evaluate on Validation
-    y_val, _, val_probs = trainer.predict(val_loader)
-    val_preds = np.argmax(val_probs, axis=1)
-    val_m = compute_metrics(y_val, val_preds)
-    _, _, _, val_vid_m = aggregate_video_level_predictions(val_probs, y_val, val_loader.dataset.video_ids)
-
-    # 6. Evaluate on Held-Out Test
-    y_test, _, test_probs = trainer.predict(test_loader)
-    test_preds = np.argmax(test_probs, axis=1)
-    test_m = compute_metrics(y_test, test_preds)
-    _, _, _, test_vid_m = aggregate_video_level_predictions(test_probs, y_test, test_loader.dataset.video_ids)
-
-    prov_file = best_ckpt_path.with_suffix(".provenance.json")
-    val_loss = None
-    best_epoch = None
-    if prov_file.exists():
-        try:
-            with open(prov_file) as pf:
-                pdata = json.load(pf)
-                val_loss = pdata.get("val_loss")
-                best_epoch = pdata.get("epoch")
-        except Exception:
-            pass
-
-    res = {
-        "cfg_id": cfg_id,
-        "aug_method": aug_method,
-        "seed": seed,
-        "train_time_s": round(train_time, 1),
-        "best_epoch": best_epoch or 0,
-        "val_loss": round(float(val_loss), 4) if val_loss is not None else 0.0,
-        "val_win_acc": round(float(val_m["accuracy"] * 100.0), 2),
-        "val_win_f1": round(float(val_m["macro_f1"]), 4),
-        "val_vid_acc": round(float(val_vid_m["accuracy"] * 100.0), 2),
-        "val_vid_f1": round(float(val_vid_m["macro_f1"]), 4),
-        "test_win_acc": round(float(test_m["accuracy"] * 100.0), 2),
-        "test_win_f1": round(float(test_m["macro_f1"]), 4),
-        "test_vid_acc": round(float(test_vid_m["accuracy"] * 100.0), 2),
-        "test_vid_f1": round(float(test_vid_m["macro_f1"]), 4),
-        "checkpoint": str(best_ckpt_path)
-    }
-
-    print(f"[{cfg_id} | Seed {seed}] Val Vid Acc: {res['val_vid_acc']}%, Val Vid F1: {res['val_vid_f1']} | Test Vid Acc: {res['test_vid_acc']}%, Test Vid F1: {res['test_vid_f1']}")
-    return res
-
 def summarize_group(runs: List[Dict[str, Any]]) -> Dict[str, Any]:
     val_w = [r["val_win_acc"] for r in runs]
     val_v = [r["val_vid_acc"] for r in runs]
@@ -213,8 +82,79 @@ def summarize_group(runs: List[Dict[str, Any]]) -> Dict[str, Any]:
         "runs": runs
     }
 
+def run_config_3seeds_parallel(
+    cfg_id: str,
+    aug: str,
+    checkpoint_dir: Path,
+    metadata_path: str,
+    device: str,
+    resume: bool = True
+) -> List[Dict[str, Any]]:
+    """
+    Executes all 3 seeds concurrently using subprocess workers.
+    """
+    print(f"\n================================================================================")
+    print(f"Executing Configuration: {cfg_id} (aug: {aug}) across 3 seeds concurrently...")
+    print(f"================================================================================")
+    send_marimo_toast(f"⚡ Phase 3 Parallel: Running {cfg_id} across 3 seeds concurrently!")
+
+    worker_script = ROOT_DIR / "scripts" / "train_single_ablation.py"
+    procs = []
+    logs = {}
+
+    for s in SEEDS:
+        out_json = checkpoint_dir / f"seed{s}" / f"result_{cfg_id}_seed{s}.json"
+        log_file = checkpoint_dir / f"seed{s}" / f"train_{cfg_id}_seed{s}.log"
+        logs[s] = (log_file, out_json)
+
+        cmd = [
+            sys.executable, str(worker_script),
+            "--cfg_id", cfg_id,
+            "--aug", aug,
+            "--seed", str(s),
+            "--device", device,
+            "--checkpoint_dir", str(checkpoint_dir),
+            "--metadata_path", metadata_path,
+            "--out_json", str(out_json)
+        ]
+        if resume:
+            cmd.append("--resume")
+
+        lf = open(log_file, "w")
+        p = subprocess.Popen(cmd, stdout=lf, stderr=subprocess.STDOUT, text=True)
+        procs.append((s, p, lf, out_json))
+
+    # Monitor parallel execution
+    t_start = time.time()
+    while True:
+        all_done = all(p.poll() is not None for _, p, _, _ in procs)
+        if all_done:
+            break
+        time.sleep(5)
+        elapsed = time.time() - t_start
+        status_str = " | ".join([f"Seed {s}: {'DONE' if p.poll() is not None else 'RUNNING'}" for s, p, _, _ in procs])
+        print(f"  [{elapsed:.0f}s elapsed] {cfg_id} -> {status_str}", end="\r", flush=True)
+
+    print(f"\nAll 3 seeds completed in {time.time() - t_start:.1f}s.")
+
+    # Collect and verify results
+    runs = []
+    for s, p, lf, out_json in procs:
+        lf.close()
+        if p.returncode != 0:
+            print(f"Warning: Worker for seed {s} exited with returncode {p.returncode}! Inspect {logs[s][0]}")
+        if out_json.exists():
+            with open(out_json) as f:
+                res = json.load(f)
+                runs.append(res)
+                print(f"  -> Seed {s}: Val Vid {res['val_vid_acc']}%, Test Vid {res['test_vid_acc']}% (F1: {res['test_vid_f1']})")
+        else:
+            raise RuntimeError(f"Output JSON missing for {cfg_id} seed {s}: {out_json}")
+
+    return runs
+
 def main():
-    parser = argparse.ArgumentParser(description="Phase 3: Table 4 & Table 5 Ablations on WORLD mix_v2")
+    parser = argparse.ArgumentParser(description="Phase 3: Table 4 & Table 5 Ablations on WORLD mix_v2 (Parallel)")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--resume", action="store_true", default=True, help="Resume from existing checkpoints if available (default: True)")
     parser.add_argument("--force-retrain", action="store_true", default=False, help="Force retrain even if checkpoints exist")
@@ -222,9 +162,8 @@ def main():
 
     resume = args.resume and not args.force_retrain
 
-    device = torch.device(args.device)
     print("=" * 80)
-    print(f"PHASE 3: Running Table 4 & 5 Ablations on WORLD mix_v2 ({device}, resume={resume})")
+    print(f"PHASE 3: Parallel Table 4 & 5 Ablations on WORLD mix_v2 ({args.device}, resume={resume})")
     print("=" * 80)
 
     meta_cand = ROOT_DIR / "data" / "Final_dataset_metadata.csv"
@@ -235,28 +174,24 @@ def main():
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
     results_by_config = {}
-    total_runs = len(ABLATION_CONFIGS) * len(SEEDS)
-    current_run = 0
+    total_configs = len(ABLATION_CONFIGS)
+    cfg_idx = 0
 
     for cfg in ABLATION_CONFIGS:
+        cfg_idx += 1
         cfg_id = cfg["id"]
         aug = cfg["aug"]
-        results_by_config[cfg_id] = []
+        print(f"\n[{cfg_idx}/{total_configs}] Processing Config: {cfg_id} ({cfg['desc']})...")
 
-        for s in SEEDS:
-            current_run += 1
-            print(f"\n[{current_run}/{total_runs}] Running {cfg_id} (Seed {s})...")
-            send_marimo_toast(f"Phase 3 [{current_run}/{total_runs}]: Training {cfg_id} (Seed {s})")
-            res = train_ablation_run(
-                cfg_id=cfg_id,
-                aug_method=aug,
-                seed=s,
-                metadata_path=str(meta_cand),
-                device=device,
-                checkpoint_dir=checkpoint_dir,
-                resume=resume
-            )
-            results_by_config[cfg_id].append(res)
+        runs = run_config_3seeds_parallel(
+            cfg_id=cfg_id,
+            aug=aug,
+            checkpoint_dir=checkpoint_dir,
+            metadata_path=str(meta_cand),
+            device=args.device,
+            resume=resume
+        )
+        results_by_config[cfg_id] = runs
 
     # 1. Compile Table 4: Leave-One-Out Ablation
     table4_results = {}
@@ -310,7 +245,7 @@ def main():
     with open(outputs_dir / "augmentation_ablation_results.json", "w") as f:
         json.dump(unified, f, indent=2)
 
-    send_marimo_toast("Phase 3 Complete: Table 4 & 5 Ablations finished successfully!")
+    send_marimo_toast("🎉 Phase 3 Complete: Table 4 & 5 Ablations finished successfully!")
     print(f"\nSaved all results to {outputs_dir / 'augmentation_ablation_results.json'}")
 
 if __name__ == "__main__":

@@ -273,21 +273,64 @@ def main():
         eid = spec["id"]
         runs = []
         stream_runs_by_id_and_seed[eid] = {}
+        print(f"\n================================================================================")
+        print(f"Executing Stream: {eid} ({spec['desc']}) across 3 seeds concurrently...")
+        print(f"================================================================================")
+        send_marimo_toast(f"⚡ Phase 6 Parallel: Training {eid} ({spec['desc']}) across 3 seeds!")
+
+        worker_script = ROOT_DIR / "scripts" / "train_single_graph_stream.py"
+        procs = []
+        logs = {}
+
         for s in SEEDS:
-            send_marimo_toast(f"Phase 6: Training {eid} ({spec['desc']}) Seed {s}")
-            res = train_graph_stream_run(
-                exp_id=eid,
-                model_type=spec["model"],
-                feature_method=spec["feat"],
-                aug_method=spec["aug"],
-                seed=s,
-                metadata_path=str(meta_cand),
-                device=device,
-                checkpoint_dir=checkpoint_dir,
-                resume=resume
-            )
-            runs.append(res)
-            stream_runs_by_id_and_seed[eid][s] = res
+            out_json = checkpoint_dir / f"seed{s}" / f"result_{eid}_seed{s}.json"
+            log_file = checkpoint_dir / f"seed{s}" / f"train_{eid}_seed{s}.log"
+            logs[s] = (log_file, out_json)
+
+            cmd = [
+                sys.executable, str(worker_script),
+                "--exp_id", eid,
+                "--model_type", spec["model"],
+                "--feature_method", spec["feat"],
+                "--aug_method", spec["aug"],
+                "--seed", str(s),
+                "--device", args.device,
+                "--checkpoint_dir", str(checkpoint_dir),
+                "--metadata_path", str(meta_cand),
+                "--out_json", str(out_json)
+            ]
+            if resume:
+                cmd.append("--resume")
+
+            lf = open(log_file, "w")
+            p = subprocess.Popen(cmd, stdout=lf, stderr=subprocess.STDOUT, text=True)
+            procs.append((s, p, lf, out_json))
+
+        # Wait for all 3 seeds to finish
+        t_start_stream = time.time()
+        while True:
+            all_done = all(p.poll() is not None for _, p, _, _ in procs)
+            if all_done:
+                break
+            time.sleep(4)
+            elapsed = time.time() - t_start_stream
+            status_str = " | ".join([f"Seed {s}: {'DONE' if p.poll() is not None else 'RUNNING'}" for s, p, _, _ in procs])
+            print(f"  [{elapsed:.0f}s elapsed] {eid} -> {status_str}", end="\r", flush=True)
+
+        print(f"\nAll 3 seeds for {eid} completed in {time.time() - t_start_stream:.1f}s.")
+
+        for s, p, lf, out_json in procs:
+            lf.close()
+            if p.returncode != 0:
+                print(f"Warning: Stream {eid} seed {s} exited with returncode {p.returncode}! Log: {logs[s][0]}")
+            if out_json.exists():
+                with open(out_json) as f:
+                    res = json.load(f)
+                    runs.append(res)
+                    stream_runs_by_id_and_seed[eid][s] = res
+                    print(f"  -> Seed {s}: Val Vid {res['val_vid_acc']}%, Test Vid {res['test_vid_acc']}% (F1: {res['test_vid_f1']})")
+            else:
+                raise RuntimeError(f"Output JSON missing for stream {eid} seed {s}: {out_json}")
 
         val_w = [r["val_win_acc"] for r in runs]
         val_v = [r["val_vid_acc"] for r in runs]
