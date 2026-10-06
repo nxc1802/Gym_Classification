@@ -42,6 +42,10 @@ def main():
         "outputs/table5_single_world_mix_v2.json",
         "outputs/table6_cross_paradigm_fusion.json",
         "outputs/table7_unified_benchmark.json",
+        "outputs/statistical_tests_report.json",
+        "outputs/bootstrap_confidence_intervals.json",
+        "outputs/per_class_results.json",
+        "outputs/world_3d_benchmark_results.json",
         "artifacts/results/canonical_results_v2.json",
         "configs/augmentation/skelgym_aug_v2.yaml",
     ]
