@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 """
 Phase 7: Table 6 Cross-Paradigm Fusion Protocols (SkelGym-Lite & SkelGym-Full).
-Evaluates 3 standard voting methods across 3 random seeds (42, 123, 3407):
+Evaluates 4 fusion protocols across 3 random seeds (42, 123, 3407):
   1. Hard Majority Voting (Discrete Baseline)
   2. Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K)
   3. Accuracy-Weighted Soft Voting (Validation-calibrated weights)
+  4. Stacking Meta-Classifier (Ridge/Logistic Regression SOTA, fit strictly on Val)
 
 Configurations:
   - SkelGym-Lite (2 Streams: Transformer + Bone AAGCN, ~679K params)
   - SkelGym-Full (5 Streams: Transformer + 4 AAGCN Streams, ~1.81M params)
 
-Zero-Leakage:
-  - Weights for Accuracy-Weighted Soft Voting are computed exclusively from the validation split.
-  - Test predictions are strictly aggregated without test supervision.
+Zero-Leakage Guarantee:
+  - Meta-classifiers and accuracy weights are calibrated strictly on the validation set.
+  - Test set features/probabilities are evaluated in inference mode with zero parameter updates.
 
-Outputs: outputs/table6_cross_paradigm_fusion.json
+Outputs:
+  - outputs/table6_cross_paradigm_fusion.json
 """
 
 import os
@@ -26,10 +28,15 @@ from typing import Dict, List, Any
 
 import numpy as np
 import torch
+from sklearn.linear_model import LogisticRegression
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT_DIR))
 
+from src.constants import ACTIONS, ACTION_TO_IDX
+from src.data.dataset import get_dataloaders
+from src.cli import build_model
+from src.training.trainer import Trainer
 from src.training.metrics import compute_metrics
 from src.models.ensemble import aggregate_video_level_predictions
 
@@ -43,9 +50,7 @@ def send_marimo_toast(msg: str):
         pass
 
 def hard_voting(prob_matrices: List[np.ndarray]) -> np.ndarray:
-    """
-    Hard majority voting: picks the argmax class with highest count across models.
-    """
+    """Hard majority voting across constituent classifiers."""
     preds = [np.argmax(p, axis=1) for p in prob_matrices]
     stacked = np.stack(preds, axis=0)  # (K, N)
     K, N = stacked.shape
@@ -56,13 +61,13 @@ def hard_voting(prob_matrices: List[np.ndarray]) -> np.ndarray:
         out[i] = vals[np.argmax(counts)]
     return out
 
-def evaluate_fusion_method(
+def evaluate_fusion_protocol(
     stream_runs_by_seed: Dict[int, List[Dict[str, Any]]],
     method: str
 ) -> Dict[str, Any]:
     """
-    Evaluates a specific fusion method across all 3 seeds.
-    method: 'hard', 'uniform_soft', 'accuracy_weighted_soft'
+    Evaluates a specific fusion protocol across all 3 seeds.
+    method: 'hard', 'uniform_soft', 'accuracy_weighted_soft', 'stacking'
     """
     seed_metrics = []
 
@@ -94,8 +99,19 @@ def evaluate_fusion_method(
             test_fused_prob = sum(w * p for w, p in zip(weights, test_probs))
             val_preds = np.argmax(val_fused_prob, axis=1)
             test_preds = np.argmax(test_fused_prob, axis=1)
+
+        elif method == "stacking":
+            X_val = np.concatenate(val_probs, axis=1)
+            X_test = np.concatenate(test_probs, axis=1)
+            clf = LogisticRegression(C=1.0, max_iter=1000, random_state=s)
+            clf.fit(X_val, val_targets)
+            
+            val_fused_prob = clf.predict_proba(X_val)
+            test_fused_prob = clf.predict_proba(X_test)
+            val_preds = np.argmax(val_fused_prob, axis=1)
+            test_preds = np.argmax(test_fused_prob, axis=1)
         else:
-            raise ValueError(f"Unknown method: {method}")
+            raise ValueError(f"Unknown fusion method: {method}")
 
         val_m = compute_metrics(val_targets, val_preds)
         test_m = compute_metrics(test_targets, test_preds)
@@ -125,6 +141,7 @@ def evaluate_fusion_method(
 
     return {
         "val_win_acc": f"{np.mean(val_w):.2f}% ± {np.std(val_w):.2f}%",
+        "val_win_f1": f"{np.mean(val_vf1):.4f} ± {np.std(val_vf1):.4f}",
         "val_vid_acc": f"{np.mean(val_v):.2f}% ± {np.std(val_v):.2f}%",
         "val_vid_f1": f"{np.mean(val_vf1):.4f} ± {np.std(val_vf1):.4f}",
         "test_win_acc": f"{np.mean(test_w):.2f}% ± {np.std(test_w):.2f}%",
@@ -134,33 +151,188 @@ def evaluate_fusion_method(
         "seeds": seed_metrics
     }
 
+def get_transformer_predictions(
+    seed: int,
+    proposed_aug_cfg_id: str,
+    checkpoint_dir: Path,
+    metadata_path: str,
+    device: torch.device
+) -> Dict[str, Any]:
+    """Loads Transformer mix_v2 checkpoint and computes prediction probabilities."""
+    model_name = f"Transformer_mix_v2_{proposed_aug_cfg_id}_seed{seed}"
+    ckpt_path = checkpoint_dir / f"seed{seed}" / f"best_{model_name}.pt"
+    if not ckpt_path.exists():
+        # Fallback check for candidate_minus_time
+        alt = checkpoint_dir / f"seed{seed}" / f"best_Transformer_mix_v2_candidate_minus_time_seed{seed}.pt"
+        if alt.exists():
+            ckpt_path = alt
+
+    _, val_loader, test_loader = get_dataloaders(
+        metadata_path=metadata_path,
+        feature_method="mix_v2",
+        batch_size=16,
+        seq_len=32,
+        stride=16,
+        val_test_stride=32,
+        augment_method=None,
+        in_memory=True,
+        seed=seed,
+        save_norm_artifact=False,
+        strict_norm=False
+    )
+
+    model = build_model(
+        model_type="Transformer",
+        feature_method="mix_v2",
+        hidden_dim=112,
+        num_layers=3,
+        nhead=4,
+        dropout=0.2,
+        transformer_variant="dual_branch"
+    )
+    checkpoint = torch.load(ckpt_path, map_location=device)
+    model.load_state_dict(checkpoint["model_state_dict"])
+    model.to(device)
+    model.eval()
+
+    trainer = Trainer(
+        model=model,
+        device=device,
+        model_name=model_name,
+        use_amp=torch.cuda.is_available()
+    )
+    y_val, _, val_probs = trainer.predict(val_loader)
+    val_preds = np.argmax(val_probs, axis=1)
+    val_m = compute_metrics(y_val, val_preds)
+    _, _, _, val_vid_m = aggregate_video_level_predictions(val_probs, y_val, val_loader.dataset.video_ids)
+
+    y_test, _, test_probs = trainer.predict(test_loader)
+    test_preds = np.argmax(test_probs, axis=1)
+    test_m = compute_metrics(y_test, test_preds)
+    _, _, _, test_vid_m = aggregate_video_level_predictions(test_probs, y_test, test_loader.dataset.video_ids)
+
+    return {
+        "val_win_acc": round(float(val_m["accuracy"] * 100.0), 2),
+        "val_win_f1": round(float(val_m["macro_f1"]), 4),
+        "val_vid_acc": round(float(val_vid_m["accuracy"] * 100.0), 2),
+        "val_vid_f1": round(float(val_vid_m["macro_f1"]), 4),
+        "test_win_acc": round(float(test_m["accuracy"] * 100.0), 2),
+        "test_win_f1": round(float(test_m["macro_f1"]), 4),
+        "test_vid_acc": round(float(test_vid_m["accuracy"] * 100.0), 2),
+        "test_vid_f1": round(float(test_vid_m["macro_f1"]), 4),
+        "val_probs": val_probs.tolist(),
+        "test_probs": test_probs.tolist(),
+        "val_targets": y_val.tolist(),
+        "test_targets": y_test.tolist(),
+        "val_video_ids": list(val_loader.dataset.video_ids),
+        "test_video_ids": list(test_loader.dataset.video_ids),
+        "checkpoint": str(ckpt_path)
+    }
+
 def main():
     parser = argparse.ArgumentParser(description="Phase 7: Table 6 Cross-Paradigm Fusion Protocols")
-    parser.add_argument("--trans_proposed_dir", type=str, default="checkpoints/ablation_v2")
-    parser.add_argument("--graph_streams_dir", type=str, default="checkpoints/graph_streams")
+    parser.add_argument("--proposed_aug_cfg_id", type=str, default="candidate_minus_time", help="Ablation config ID of proposed aug")
+    parser.add_argument("--trans_ckpt_dir", type=str, default="checkpoints/ablation_v2")
+    parser.add_argument("--graph_cache_file", type=str, default="outputs/table3_stream_predictions.pt")
+    parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
     args = parser.parse_args()
 
+    device = torch.device(args.device)
     print("=" * 80)
     print("PHASE 7: Rebuilding Table 6 (Cross-Paradigm Fusion Protocols)")
+    print(f"Device: {device} | Proposed Augment Config: {args.proposed_aug_cfg_id}")
     print("=" * 80)
 
-    # Load constituents
-    # Constituent 1: Transformer mix_v2 + Proposed Aug
-    # Constituent 2: AAGCN Bone + Proposed Aug (T3.4)
-    # Constituent 3: AAGCN World Joint + Proposed Aug (T3.5)
-    # Constituent 4: AAGCN World Joint Motion + Proposed Aug (T3.6)
-    # Constituent 5: AAGCN Bone Motion + Proposed Aug (T3.7)
+    meta_cand = ROOT_DIR / "data" / "Final_dataset_metadata.csv"
+    if not meta_cand.exists():
+        meta_cand = ROOT_DIR / "Final_dataset_metadata.csv"
 
-    # In Table 6 we evaluate:
-    # 1. SkelGym-Lite (2 Streams: Transformer + Bone AAGCN, 679K params)
-    # 2. SkelGym-Full (5 Streams: Transformer + 4 AAGCN Streams, 1.81M params)
-    # With 3 methods:
-    # - Hard Majority Voting
-    # - Uniform Average Soft Voting
-    # - Accuracy-Weighted Soft Voting
+    # 1. Load Graph Streams predictions from Phase 6
+    graph_cache_path = ROOT_DIR / args.graph_cache_file
+    if not graph_cache_path.exists():
+        raise FileNotFoundError(f"Could not find graph stream predictions at {graph_cache_path}. Run Phase 6 first!")
 
-    # We will build and save the summary to outputs/table6_cross_paradigm_fusion.json
-    print("Orchestrator ready for constituent predictions.")
+    print(f"Loading graph stream predictions from {graph_cache_path}...")
+    graph_stream_runs = torch.load(graph_cache_path, map_location="cpu")
+
+    # 2. Extract or Compute Transformer predictions
+    print(f"Extracting Transformer mix_v2 ({args.proposed_aug_cfg_id}) predictions across 3 seeds...")
+    trans_runs_by_seed = {}
+    trans_ckpt_dir = ROOT_DIR / args.trans_ckpt_dir
+
+    for s in SEEDS:
+        print(f"  --> Transformer seed {s}...")
+        t_res = get_transformer_predictions(
+            seed=s,
+            proposed_aug_cfg_id=args.proposed_aug_cfg_id,
+            checkpoint_dir=trans_ckpt_dir,
+            metadata_path=str(meta_cand),
+            device=device
+        )
+        trans_runs_by_seed[s] = t_res
+
+    # 3. Assemble Constituents for Lite and Full
+    # Lite: Transformer (mix_v2) + AAGCN Bone 3D (T3.4)
+    # Full: Transformer (mix_v2) + T3.4 + T3.5 + T3.6 + T3.7
+    lite_constituents_by_seed = {}
+    full_constituents_by_seed = {}
+
+    for s in SEEDS:
+        t_pred = trans_runs_by_seed[s]
+        bone_pred = graph_stream_runs["T3.4"][s]
+        joint_pred = graph_stream_runs["T3.5"][s]
+        jmotion_pred = graph_stream_runs["T3.6"][s]
+        bmotion_pred = graph_stream_runs["T3.7"][s]
+
+        lite_constituents_by_seed[s] = [t_pred, bone_pred]
+        full_constituents_by_seed[s] = [t_pred, bone_pred, joint_pred, jmotion_pred, bmotion_pred]
+
+    protocols = [
+        ("hard", "Hard Majority Voting (Discrete Baseline)"),
+        ("accuracy_weighted_soft", "Accuracy-Weighted Soft Voting (Validation-calibrated weights)"),
+        ("uniform_soft", "Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K)"),
+        ("stacking", "Stacking Meta-Classifier (Ridge/Logistic Regression SOTA)")
+    ]
+
+    results_table6 = {
+        "SkelGym-Lite": {},
+        "SkelGym-Full": {}
+    }
+
+    print("\nEvaluating SkelGym-Lite (2 Streams: Trans + Bone AAGCN, 679K params)...")
+    for method_key, method_desc in protocols:
+        res = evaluate_fusion_protocol(lite_constituents_by_seed, method_key)
+        res["description"] = method_desc
+        results_table6["SkelGym-Lite"][method_key] = res
+        print(f"  [{method_key}] Val Vid Acc: {res['val_vid_acc']} | Test Vid Acc: {res['test_vid_acc']} (F1: {res['test_vid_f1']})")
+
+    print("\nEvaluating SkelGym-Full (5 Streams: Trans + 4 AAGCN Streams, 1.81M params)...")
+    for method_key, method_desc in protocols:
+        res = evaluate_fusion_protocol(full_constituents_by_seed, method_key)
+        res["description"] = method_desc
+        results_table6["SkelGym-Full"][method_key] = res
+        print(f"  [{method_key}] Val Vid Acc: {res['val_vid_acc']} | Test Vid Acc: {res['test_vid_acc']} (F1: {res['test_vid_f1']})")
+
+    # 4. Print Formatted Table
+    print("\n" + "=" * 100)
+    print("## TABLE 6: CROSS-PARADIGM FUSION PROTOCOLS STANDARDIZED BENCHMARK")
+    print("=" * 100)
+    print("| Paradigm / Architecture | Fusion Protocol | Val Vid Acc (%) | Val Vid F1 | Test Win Acc (%) | Test Win F1 | Test Vid Acc (%) | Test Vid F1 |")
+    print("| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |")
+
+    for arch, methods in results_table6.items():
+        for m_key, m_rep in methods.items():
+            print(f"| **{arch}** | {m_rep['description']} | {m_rep['val_vid_acc']} | {m_rep['val_vid_f1']} | {m_rep['test_win_acc']} | {m_rep['test_win_f1']} | **{m_rep['test_vid_acc']}** | **{m_rep['test_vid_f1']}** |")
+
+    print("=" * 100)
+
+    # 5. Save Output
+    out_file = ROOT_DIR / "outputs" / "table6_cross_paradigm_fusion.json"
+    with open(out_file, "w") as f:
+        json.dump(results_table6, f, indent=2)
+
+    send_marimo_toast("Phase 7 Complete: Table 6 Cross-Paradigm Fusion Protocols evaluated successfully!")
+    print(f"\nSaved Table 6 results to {out_file}")
 
 if __name__ == "__main__":
     main()

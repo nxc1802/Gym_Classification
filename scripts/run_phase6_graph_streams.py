@@ -54,7 +54,8 @@ def train_graph_stream_run(
     seed: int,
     metadata_path: str,
     device: torch.device,
-    checkpoint_dir: Path
+    checkpoint_dir: Path,
+    resume: bool = True
 ) -> Dict[str, Any]:
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -104,8 +105,14 @@ def train_graph_stream_run(
         seed=seed
     )
 
-    history = trainer.fit(train_loader, val_loader, epochs=100)
-    train_time = time.time() - t_start
+    if resume and best_ckpt_path.exists():
+        print(f"  --> [Resuming] Found existing checkpoint {best_ckpt_path.name}, skipping training.")
+        checkpoint = torch.load(best_ckpt_path, map_location=device)
+        model.load_state_dict(checkpoint["model_state_dict"])
+        train_time = 0.0
+    else:
+        history = trainer.fit(train_loader, val_loader, epochs=100)
+        train_time = time.time() - t_start
 
     # Evaluate on Validation
     y_val, _, val_probs = trainer.predict(val_loader)
@@ -230,11 +237,15 @@ def main():
     parser = argparse.ArgumentParser(description="Phase 6: Table 3 Graph Kinematic Streams")
     parser.add_argument("--aug_method", type=str, default="skel_gym_aug", help="Proposed SkelGym-Aug method name")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--resume", action="store_true", default=True, help="Resume from existing checkpoints if available (default: True)")
+    parser.add_argument("--force-retrain", action="store_true", default=False, help="Force retrain even if checkpoints exist")
     args = parser.parse_args()
+
+    resume = args.resume and not args.force_retrain
 
     device = torch.device(args.device)
     print("=" * 80)
-    print(f"PHASE 6: Running Table 3 Graph Kinematic Streams ({device})")
+    print(f"PHASE 6: Running Table 3 Graph Kinematic Streams ({device}, resume={resume})")
     print(f"Proposed Augmentation: {args.aug_method}")
     print("=" * 80)
 
@@ -272,7 +283,8 @@ def main():
                 seed=s,
                 metadata_path=str(meta_cand),
                 device=device,
-                checkpoint_dir=checkpoint_dir
+                checkpoint_dir=checkpoint_dir,
+                resume=resume
             )
             runs.append(res)
             stream_runs_by_id_and_seed[eid][s] = res
@@ -330,6 +342,10 @@ def main():
     out_file = ROOT_DIR / "outputs" / "table3_graph_streams_results.json"
     with open(out_file, "w") as f:
         json.dump(stream_results_by_id, f, indent=2)
+
+    pred_cache_file = ROOT_DIR / "outputs" / "table3_stream_predictions.pt"
+    torch.save(stream_runs_by_id_and_seed, pred_cache_file)
+    print(f"Saved stream predictions cache to {pred_cache_file}")
 
     send_marimo_toast("Phase 6 Complete: Table 3 Graph Streams benchmark finished successfully!")
     print(f"\nSaved results to {out_file}")
