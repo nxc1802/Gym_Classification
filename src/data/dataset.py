@@ -463,6 +463,13 @@ def build_dataset_from_csvs(
             root_default = Path(__file__).resolve().parent.parent.parent / "data" / "landmarks"
             cand_paths.append(root_default / split / action_name / f"{vid_name}.csv")
             cand_paths.append(root_default / f"{vid_name}.csv")
+            # Support when split folders (train/val/test) reside directly under data/
+            data_dir = Path("data")
+            cand_paths.append(data_dir / split / action_name / f"{vid_name}.csv")
+            cand_paths.append(data_dir / f"{vid_name}.csv")
+            root_data = Path(__file__).resolve().parent.parent.parent / "data"
+            cand_paths.append(root_data / split / action_name / f"{vid_name}.csv")
+            cand_paths.append(root_data / f"{vid_name}.csv")
 
         for c in cand_paths:
             if c.exists():
