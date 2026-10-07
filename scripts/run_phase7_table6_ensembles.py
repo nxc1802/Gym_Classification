@@ -62,6 +62,28 @@ def hard_voting(prob_matrices: List[np.ndarray]) -> np.ndarray:
         out[i] = vals[np.argmax(counts)]
     return out
 
+def aggregate_hard_voting_video(preds: np.ndarray, targets: np.ndarray, video_ids: List[str]) -> Tuple[float, float]:
+    """Computes discrete video-level majority voting metrics."""
+    from collections import Counter
+    vid_to_preds = {}
+    vid_to_target = {}
+    for p, y, vid in zip(preds, targets, video_ids):
+        if vid not in vid_to_preds:
+            vid_to_preds[vid] = []
+            vid_to_target[vid] = y
+        vid_to_preds[vid].append(p)
+
+    y_true_v = []
+    y_pred_v = []
+    for vid, p_list in vid_to_preds.items():
+        c = Counter(p_list)
+        majority_class = c.most_common(1)[0][0]
+        y_pred_v.append(majority_class)
+        y_true_v.append(vid_to_target[vid])
+
+    m = compute_metrics(np.array(y_true_v), np.array(y_pred_v))
+    return float(m["accuracy"] * 100.0), float(m["macro_f1"])
+
 def evaluate_fusion_protocol(
     stream_runs_by_seed: Dict[int, List[Dict[str, Any]]],
     method: str
@@ -84,31 +106,47 @@ def evaluate_fusion_protocol(
         if method == "hard":
             val_preds = hard_voting(val_probs)
             test_preds = hard_voting(test_probs)
-            val_fused_prob = np.mean(val_probs, axis=0)
-            test_fused_prob = np.mean(test_probs, axis=0)
+            val_vid_acc, val_vid_f1 = aggregate_hard_voting_video(val_preds, val_targets, val_vids)
+            test_vid_acc, test_vid_f1 = aggregate_hard_voting_video(test_preds, test_targets, test_vids)
 
         elif method == "uniform_soft":
             val_fused_prob = np.mean(val_probs, axis=0)
             test_fused_prob = np.mean(test_probs, axis=0)
             val_preds = np.argmax(val_fused_prob, axis=1)
             test_preds = np.argmax(test_fused_prob, axis=1)
+            _, _, _, val_vid_m = aggregate_video_level_predictions(val_fused_prob, val_targets, val_vids)
+            _, _, _, test_vid_m = aggregate_video_level_predictions(test_fused_prob, test_targets, test_vids)
+            val_vid_acc = float(val_vid_m["accuracy"] * 100.0)
+            val_vid_f1 = float(val_vid_m["macro_f1"])
+            test_vid_acc = float(test_vid_m["accuracy"] * 100.0)
+            test_vid_f1 = float(test_vid_m["macro_f1"])
 
         elif method == "accuracy_weighted_soft":
-            val_accs = np.array([float(r["val_vid_acc"]) for r in runs])
+            val_accs = np.array([float(r["val_win_acc"]) for r in runs])
             weights = val_accs / np.sum(val_accs)
             val_fused_prob = sum(w * p for w, p in zip(weights, val_probs))
             test_fused_prob = sum(w * p for w, p in zip(weights, test_probs))
             val_preds = np.argmax(val_fused_prob, axis=1)
             test_preds = np.argmax(test_fused_prob, axis=1)
+            _, _, _, val_vid_m = aggregate_video_level_predictions(val_fused_prob, val_targets, val_vids)
+            _, _, _, test_vid_m = aggregate_video_level_predictions(test_fused_prob, test_targets, test_vids)
+            val_vid_acc = float(val_vid_m["accuracy"] * 100.0)
+            val_vid_f1 = float(val_vid_m["macro_f1"])
+            test_vid_acc = float(test_vid_m["accuracy"] * 100.0)
+            test_vid_f1 = float(test_vid_m["macro_f1"])
 
         elif method == "stacking":
             X_val = np.concatenate(val_probs, axis=1)
             X_test = np.concatenate(test_probs, axis=1)
             
-            # Stacking trained STRICTLY on TRAIN SET ONLY
+            # Stacking trained STRICTLY on TRAIN SET ONLY with row-by-row correspondence safeguards
             if "train_probs" in runs[0] and runs[0]["train_probs"] is not None:
                 train_probs = [np.array(r["train_probs"]) for r in runs]
                 train_targets = np.array(runs[0]["train_targets"])
+                for idx_run, r_check in enumerate(runs[1:], start=1):
+                    t_check = np.array(r_check["train_targets"])
+                    assert len(t_check) == len(train_targets), f"Train targets length mismatch: {len(train_targets)} vs {len(t_check)}"
+                    assert np.array_equal(train_targets, t_check), f"Train targets values mismatch between streams 0 and {idx_run}"
                 X_train = np.concatenate(train_probs, axis=1)
                 clf = LogisticRegression(C=1.0, max_iter=1000, random_state=s)
                 clf.fit(X_train, train_targets)
@@ -119,28 +157,32 @@ def evaluate_fusion_protocol(
             test_fused_prob = clf.predict_proba(X_test)
             val_preds = np.argmax(val_fused_prob, axis=1)
             test_preds = np.argmax(test_fused_prob, axis=1)
+            _, _, _, val_vid_m = aggregate_video_level_predictions(val_fused_prob, val_targets, val_vids)
+            _, _, _, test_vid_m = aggregate_video_level_predictions(test_fused_prob, test_targets, test_vids)
+            val_vid_acc = float(val_vid_m["accuracy"] * 100.0)
+            val_vid_f1 = float(val_vid_m["macro_f1"])
+            test_vid_acc = float(test_vid_m["accuracy"] * 100.0)
+            test_vid_f1 = float(test_vid_m["macro_f1"])
         else:
             raise ValueError(f"Unknown fusion method: {method}")
 
         val_m = compute_metrics(val_targets, val_preds)
         test_m = compute_metrics(test_targets, test_preds)
 
-        _, _, _, val_vid_m = aggregate_video_level_predictions(val_fused_prob, val_targets, val_vids)
-        _, _, _, test_vid_m = aggregate_video_level_predictions(test_fused_prob, test_targets, test_vids)
-
         seed_metrics.append({
             "seed": s,
             "val_win_acc": round(float(val_m["accuracy"] * 100.0), 2),
             "val_win_f1": round(float(val_m["macro_f1"]), 4),
-            "val_vid_acc": round(float(val_vid_m["accuracy"] * 100.0), 2),
-            "val_vid_f1": round(float(val_vid_m["macro_f1"]), 4),
+            "val_vid_acc": round(float(val_vid_acc), 2),
+            "val_vid_f1": round(float(val_vid_f1), 4),
             "test_win_acc": round(float(test_m["accuracy"] * 100.0), 2),
             "test_win_f1": round(float(test_m["macro_f1"]), 4),
-            "test_vid_acc": round(float(test_vid_m["accuracy"] * 100.0), 2),
-            "test_vid_f1": round(float(test_vid_m["macro_f1"]), 4),
+            "test_vid_acc": round(float(test_vid_acc), 2),
+            "test_vid_f1": round(float(test_vid_f1), 4),
         })
 
     val_w = [r["val_win_acc"] for r in seed_metrics]
+    val_wf1 = [r["val_win_f1"] for r in seed_metrics]
     val_v = [r["val_vid_acc"] for r in seed_metrics]
     val_vf1 = [r["val_vid_f1"] for r in seed_metrics]
     test_w = [r["test_win_acc"] for r in seed_metrics]
@@ -150,7 +192,7 @@ def evaluate_fusion_protocol(
 
     return {
         "val_win_acc": f"{np.mean(val_w):.2f}% ± {np.std(val_w):.2f}%",
-        "val_win_f1": f"{np.mean(val_vf1):.4f} ± {np.std(val_vf1):.4f}",
+        "val_win_f1": f"{np.mean(val_wf1):.4f} ± {np.std(val_wf1):.4f}",
         "val_vid_acc": f"{np.mean(val_v):.2f}% ± {np.std(val_v):.2f}%",
         "val_vid_f1": f"{np.mean(val_vf1):.4f} ± {np.std(val_vf1):.4f}",
         "test_win_acc": f"{np.mean(test_w):.2f}% ± {np.std(test_w):.2f}%",
@@ -389,19 +431,19 @@ def main():
         results_table6["SkelGym-Full"][method_key] = res
         print(f"  [{method_key}] Val Vid Acc: {res['val_vid_acc']} | Test Vid Acc: {res['test_vid_acc']} (F1: {res['test_vid_f1']})")
 
-    # 4. Compute Validation Winners
+    # 4. Compute Validation Winners strictly based on Validation Window Metrics (Primary: val_win_f1, Secondary: val_win_acc)
     winner_lite = max(
         results_table6["SkelGym-Lite"].keys(),
         key=lambda k: (
-            float(results_table6["SkelGym-Lite"][k]["val_vid_acc"].split("%")[0]),
-            float(results_table6["SkelGym-Lite"][k]["val_vid_f1"].split(" ")[0])
+            float(results_table6["SkelGym-Lite"][k]["val_win_f1"].split(" ")[0]),
+            float(results_table6["SkelGym-Lite"][k]["val_win_acc"].split("%")[0])
         )
     )
     winner_full = max(
         results_table6["SkelGym-Full"].keys(),
         key=lambda k: (
-            float(results_table6["SkelGym-Full"][k]["val_vid_acc"].split("%")[0]),
-            float(results_table6["SkelGym-Full"][k]["val_vid_f1"].split(" ")[0])
+            float(results_table6["SkelGym-Full"][k]["val_win_f1"].split(" ")[0]),
+            float(results_table6["SkelGym-Full"][k]["val_win_acc"].split("%")[0])
         )
     )
     results_table6["winners"] = {

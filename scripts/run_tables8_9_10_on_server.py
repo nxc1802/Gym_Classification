@@ -162,7 +162,15 @@ def main():
         vprob_aug_trans, tprob_aug_trans = get_sequence_predictions("Transformer", ckpt_trans_aug, device, val_loader, test_loader)
         train_prob_aug_trans = None
 
-    vprob_clean_trans, tprob_clean_trans = get_sequence_predictions("Transformer", ckpt_trans_clean, device, val_loader, test_loader)
+    npz_clean = checkpoints_dir / "ablation_v2" / "seed42" / "probs_clean_seed42.npz"
+    if npz_clean.exists():
+        print(f"Loading precomputed clean probabilities from {npz_clean}...")
+        npz_c = np.load(npz_clean, allow_pickle=True)
+        vprob_clean_trans = np.array(npz_c["val_probs"])
+        tprob_clean_trans = np.array(npz_c["test_probs"])
+    else:
+        vprob_clean_trans, tprob_clean_trans = get_sequence_predictions("Transformer", ckpt_trans_clean, device, val_loader, test_loader)
+
     vprob_lstm, tprob_lstm = get_sequence_predictions("LSTM", ckpt_lstm, device, val_loader, test_loader)
     vprob_bilstm, tprob_bilstm = get_sequence_predictions("BiLSTM", ckpt_bilstm, device, val_loader, test_loader)
 
@@ -190,27 +198,67 @@ def main():
     if "train_targets" in stream_data["T3.4"][42]:
         train_targets = np.array(stream_data["T3.4"][42]["train_targets"])
 
+    # Load Table 6 validation winners
+    t6_file = outputs_dir / "table6_cross_paradigm_fusion.json"
+    w_lite = "accuracy_weighted_soft"
+    w_full = "uniform_soft"
+    if t6_file.exists():
+        try:
+            with open(t6_file) as f:
+                t6_json = json.load(f)
+            w_lite = t6_json.get("winners", {}).get("SkelGym-Lite", w_lite)
+            w_full = t6_json.get("winners", {}).get("SkelGym-Full", w_full)
+        except Exception as e:
+            print(f"Warning loading Table 6 winners: {e}")
+    print(f"Table 6 Validation Winners -> Lite: '{w_lite}', Full: '{w_full}'")
+
     # Ensembles
     # 1. Four-Stream AAGCN (Uniform Soft)
     tprob_4stream = (tprob_joint + tprob_bone + tprob_jmot + tprob_bmot) / 4.0
     p_4stream_w = np.argmax(tprob_4stream, axis=1)
     _, p_4stream_v, prob_4stream_v, _ = aggregate_video_level_predictions(tprob_4stream, y_test_t, test_vids)
 
-    # 2. SkelGym-Lite (Stacking trained strictly on train set)
-    X_train_lite = np.concatenate([train_prob_aug_trans, train_prob_bone], axis=1)
-    X_test_lite = np.concatenate([tprob_aug_trans, tprob_bone], axis=1)
-    clf_lite = LogisticRegression(C=1.0, max_iter=1000, random_state=42)
-    clf_lite.fit(X_train_lite, train_targets)
-    tprob_skel_lite = clf_lite.predict_proba(X_test_lite)
+    # 2. SkelGym-Lite (Evaluated using Table 6 Winner)
+    if w_lite == "accuracy_weighted_soft":
+        val_acc_trans = float(np.mean(np.argmax(vprob_aug_trans, axis=1) == val_targets))
+        val_acc_bone = float(np.mean(np.argmax(vprob_bone, axis=1) == val_targets))
+        w_l = np.array([val_acc_trans, val_acc_bone])
+        w_l = w_l / np.sum(w_l)
+        tprob_skel_lite = w_l[0] * tprob_aug_trans + w_l[1] * tprob_bone
+    elif w_lite == "uniform_soft":
+        tprob_skel_lite = (tprob_aug_trans + tprob_bone) / 2.0
+    elif w_lite == "stacking":
+        X_train_lite = np.concatenate([train_prob_aug_trans, train_prob_bone], axis=1)
+        X_test_lite = np.concatenate([tprob_aug_trans, tprob_bone], axis=1)
+        clf_lite = LogisticRegression(C=1.0, max_iter=1000, random_state=42)
+        clf_lite.fit(X_train_lite, train_targets)
+        tprob_skel_lite = clf_lite.predict_proba(X_test_lite)
+    else:
+        tprob_skel_lite = (tprob_aug_trans + tprob_bone) / 2.0
     p_skel_lite_w = np.argmax(tprob_skel_lite, axis=1)
     _, p_skel_lite_v, prob_skel_lite_v, _ = aggregate_video_level_predictions(tprob_skel_lite, y_test_t, test_vids)
 
-    # 3. SkelGym-Full (Stacking Meta-Classifier trained strictly on train set)
-    X_train_full = np.concatenate([train_prob_aug_trans, train_prob_joint, train_prob_bone, train_prob_jmot, train_prob_bmot], axis=1)
-    X_test_full = np.concatenate([tprob_aug_trans, tprob_joint, tprob_bone, tprob_jmot, tprob_bmot], axis=1)
-    clf_full = LogisticRegression(C=1.0, max_iter=1000, random_state=42)
-    clf_full.fit(X_train_full, train_targets)
-    tprob_skel_full = clf_full.predict_proba(X_test_full)
+    # 3. SkelGym-Full (Evaluated using Table 6 Winner)
+    if w_full == "uniform_soft":
+        tprob_skel_full = (tprob_aug_trans + tprob_joint + tprob_bone + tprob_jmot + tprob_bmot) / 5.0
+    elif w_full == "accuracy_weighted_soft":
+        val_accs_f = np.array([
+            float(np.mean(np.argmax(vprob_aug_trans, axis=1) == val_targets)),
+            float(np.mean(np.argmax(vprob_joint, axis=1) == val_targets)),
+            float(np.mean(np.argmax(vprob_bone, axis=1) == val_targets)),
+            float(np.mean(np.argmax(vprob_jmot, axis=1) == val_targets)),
+            float(np.mean(np.argmax(vprob_bmot, axis=1) == val_targets))
+        ])
+        w_f = val_accs_f / np.sum(val_accs_f)
+        tprob_skel_full = sum(w * p for w, p in zip(w_f, [tprob_aug_trans, tprob_joint, tprob_bone, tprob_jmot, tprob_bmot]))
+    elif w_full == "stacking":
+        X_train_full = np.concatenate([train_prob_aug_trans, train_prob_joint, train_prob_bone, train_prob_jmot, train_prob_bmot], axis=1)
+        X_test_full = np.concatenate([tprob_aug_trans, tprob_joint, tprob_bone, tprob_jmot, tprob_bmot], axis=1)
+        clf_full = LogisticRegression(C=1.0, max_iter=1000, random_state=42)
+        clf_full.fit(X_train_full, train_targets)
+        tprob_skel_full = clf_full.predict_proba(X_test_full)
+    else:
+        tprob_skel_full = (tprob_aug_trans + tprob_joint + tprob_bone + tprob_jmot + tprob_bmot) / 5.0
     p_skel_full_w = np.argmax(tprob_skel_full, axis=1)
     _, p_skel_full_v, prob_skel_full_v, _ = aggregate_video_level_predictions(tprob_skel_full, y_test_t, test_vids)
 
@@ -291,6 +339,7 @@ def main():
     print(f"TABLE 9: NON-PARAMETRIC VIDEO-LEVEL CLUSTER BOOTSTRAP (B={args.b_samples})")
     print("=" * 80)
 
+    full_label = f"SkelGym-Full ({'Uniform Soft' if w_full == 'uniform_soft' else w_full.replace('_', ' ').title()})"
     models_boot = [
         ("LSTM (Mix v2 63-d)", p_lstm_w, p_lstm_v),
         ("BiLSTM (Mix v2 63-d)", p_bilstm_w, p_bilstm_v),
@@ -300,7 +349,7 @@ def main():
         ("AAGCN (Bone 3D)", p_bone_w, p_bone_v),
         ("Four-Stream AAGCN", p_4stream_w, p_4stream_v),
         ("SkelGym-Lite", p_skel_lite_w, p_skel_lite_v),
-        ("SkelGym-Full (Stacking)", p_skel_full_w, p_skel_full_v),
+        (full_label, p_skel_full_w, p_skel_full_v),
     ]
 
     t9_data = {}
