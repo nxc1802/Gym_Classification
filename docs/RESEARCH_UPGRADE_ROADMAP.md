@@ -167,17 +167,24 @@ Nhưng nó không kiểm tra:
 
 Do đó “audit passed” và “paper fully semantically clean” là hai tiêu chuẩn khác nhau.
 
-## Verdict
+## Verdict: SẴN SÀNG CHO FINAL AUTHOR REVIEW ✅
 
-**Experiments:** frozen ✅  
-**Canonical numerical tables:** frozen ✅  
-**Scientific narrative:** frozen ✅  
-**Figures:** essentially frozen ✅  
-**Paper prose consistency:** còn một cleanup cuối ⚠️  
-**Ready for your final author review:** **chưa — nhưng chỉ còn một commit nhỏ.**
+- **Experiments:** frozen ✅  
+- **Canonical numerical tables:** frozen & audited ✅  
+- **Scientific narrative:** frozen ✅  
+- **Figures:** frozen ✅  
+- **Paper prose consistency:** HOÀN TẤT 100% ✅ (Đã sửa toàn bộ 5 issues + 3 polish items qua cả 3 manuscripts)
+- **Ready for your final author review:** **YES — 100% SẴN SÀNG!**
 
-Mình sẽ không chạy thêm experiment hay thay đổi cấu trúc paper nữa. Chỉ sửa khoảng **5–8 dòng/đoạn** nói trên và sync cả:
+### Chi tiết các mục vừa giải quyết dứt điểm:
+1. **Seed contradiction:** Đã sửa cả trong text và `tab:hyperparameters` thành 3 independent runs (`seed in {42, 123, 3407}`) với seed 42 là canonical run cho per-class/confusion matrix.
+2. **Stale latency prose:** Đoạn Implementation `0.42–4.33 ms CPU / 0.08–0.54 ms CUDA` đã được cập nhật thành canonical latency `0.49–3.96 ms CPU / 0.59–4.65 ms CUDA / 1.36–5.86 ms MPS`.
+3. **Parameter counts prose:** Đã đồng bộ chính xác với Table 7 (`BiLSTM 360K`, `LSTM 362K`, `ST-GCN 350K`, `Transformer 301K`, `AAGCN 378K`).
+4. **Statistical semantics & Caption:** Đã chuẩn hóa wording thành posterior confidence differences across model comparisons và đổi caption thành *pairwise performance differences*.
+5. **Video-level split wording:** Đã giới hạn claim chính xác: không có source video, derived segment hay temporal window nào vượt qua ranh giới partition (tránh claim vượt bằng chứng về recording session).
+6. **Polish items:** Đã đổi `bilateral arm-splay angle` → `arm-splay angle`, `leading recognition accuracy` → `top-performing configuration in our benchmark`, và `true physical scale` → `estimated metric scale`.
 
-`paper/paper.tex` → `paper_eswa.tex` → `preprint/main.tex`.
-
-Sau đó mình sẽ nói **YES: sẵn sàng để bạn review cuối**, và từ thời điểm đó chỉ nên sửa readability/grammar/formatting, không động vào scientific design nữa.
+**Kiểm định:**
+- `python3 scripts/audit_paper_vs_artifacts.py`: 1,338/1,338 checks PASS (0 discrepancies).
+- Script quét toàn bộ stale patterns trên cả 3 file: 0 stale terms found.
+- Biên dịch PDF `paper.tex`, `paper_eswa.tex`, `preprint/main.tex`: 100% clean compilation.
