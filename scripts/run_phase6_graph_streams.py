@@ -328,9 +328,17 @@ def main():
             if out_json.exists():
                 with open(out_json) as f:
                     res = json.load(f)
-                    runs.append(res)
-                    stream_runs_by_id_and_seed[eid][s] = res
-                    print(f"  -> Seed {s}: Val Vid {res['val_vid_acc']}%, Test Vid {res['test_vid_acc']}% (F1: {res['test_vid_f1']})")
+                probs_npz = checkpoint_dir / f"seed{s}" / f"probs_{eid}_seed{s}.npz"
+                if probs_npz.exists():
+                    try:
+                        pdata = np.load(probs_npz, allow_pickle=True)
+                        res["train_probs"] = pdata["train_probs"].tolist()
+                        res["train_targets"] = pdata["train_targets"].tolist()
+                    except Exception:
+                        pass
+                runs.append(res)
+                stream_runs_by_id_and_seed[eid][s] = res
+                print(f"  -> Seed {s}: Val Vid {res['val_vid_acc']}%, Test Vid {res['test_vid_acc']}% (F1: {res['test_vid_f1']})")
             else:
                 raise RuntimeError(f"Output JSON missing for stream {eid} seed {s}: {out_json}")
 
