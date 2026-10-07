@@ -70,7 +70,8 @@
         "test_vid_f1": 0.5443,
         "checkpoint": "/marimo/Gym_Classification/checkpoints/graph_streams/seed3407/best_STGCN_T3.1_raw_3d_seed3407.pt"
       }
-    ]
+    ],
+    "val_win_f1": "0.6255 \u00b1 0.0224"
   },
   "T3.2": {
     "exp_id": "T3.2",
@@ -143,7 +144,8 @@
         "test_vid_f1": 0.6907,
         "checkpoint": "/marimo/Gym_Classification/checkpoints/graph_streams/seed3407/best_STGCN_T3.2_world_3d_seed3407.pt"
       }
-    ]
+    ],
+    "val_win_f1": "0.7332 \u00b1 0.0154"
   },
   "T3.3": {
     "exp_id": "T3.3",
@@ -216,7 +218,8 @@
         "test_vid_f1": 0.7408,
         "checkpoint": "/marimo/Gym_Classification/checkpoints/graph_streams/seed3407/best_AAGCN_T3.3_bone_3d_seed3407.pt"
       }
-    ]
+    ],
+    "val_win_f1": "0.7542 \u00b1 0.0037"
   },
   "T3.4": {
     "exp_id": "T3.4",
@@ -289,7 +292,8 @@
         "test_vid_f1": 0.7351,
         "checkpoint": "/marimo/Gym_Classification/checkpoints/graph_streams/seed3407/best_AAGCN_T3.4_bone_3d_seed3407.pt"
       }
-    ]
+    ],
+    "val_win_f1": "0.7858 \u00b1 0.0032"
   },
   "T3.5": {
     "exp_id": "T3.5",
@@ -362,7 +366,8 @@
         "test_vid_f1": 0.7998,
         "checkpoint": "/marimo/Gym_Classification/checkpoints/graph_streams/seed3407/best_AAGCN_T3.5_world_3d_seed3407.pt"
       }
-    ]
+    ],
+    "val_win_f1": "0.7856 \u00b1 0.0024"
   },
   "T3.6": {
     "exp_id": "T3.6",
@@ -435,7 +440,8 @@
         "test_vid_f1": 0.6958,
         "checkpoint": "/marimo/Gym_Classification/checkpoints/graph_streams/seed3407/best_AAGCN_T3.6_world_joint_motion_3d_seed3407.pt"
       }
-    ]
+    ],
+    "val_win_f1": "0.6464 \u00b1 0.0083"
   },
   "T3.7": {
     "exp_id": "T3.7",
@@ -508,7 +514,8 @@
         "test_vid_f1": 0.7212,
         "checkpoint": "/marimo/Gym_Classification/checkpoints/graph_streams/seed3407/best_AAGCN_T3.7_bone_motion_3d_seed3407.pt"
       }
-    ]
+    ],
+    "val_win_f1": "0.6362 \u00b1 0.0107"
   },
   "T3.8": {
     "fusion_name": "Two-Stream AAGCN (World Joint + Bone)",
@@ -557,7 +564,8 @@
         "test_vid_acc": 81.97,
         "test_vid_f1": 0.813
       }
-    ]
+    ],
+    "val_win_f1": "0.8179 \u00b1 0.0036"
   },
   "T3.9": {
     "fusion_name": "Four-Stream AAGCN (Full)",
@@ -608,6 +616,7 @@
         "test_vid_acc": 83.69,
         "test_vid_f1": 0.813
       }
-    ]
+    ],
+    "val_win_f1": "0.8414 \u00b1 0.0030"
   }
 }

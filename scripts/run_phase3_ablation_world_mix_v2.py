@@ -48,7 +48,7 @@ ABLATION_CONFIGS = [
     {"id": "candidate_minus_mirror", "aug": "candidate_minus_mirror", "desc": "Minus Mirror", "in_table4": True, "in_table5": False},
     {"id": "candidate_minus_yaw", "aug": "candidate_minus_yaw", "desc": "Minus Yaw", "in_table4": True, "in_table5": False},
     {"id": "candidate_minus_scale", "aug": "candidate_minus_scale", "desc": "Minus Scale", "in_table4": True, "in_table5": False},
-    {"id": "candidate_minus_time", "aug": "candidate_minus_time", "desc": "Minus TimeWarp (Proposed 4-op)", "in_table4": True, "in_table5": False},
+    {"id": "candidate_minus_time", "aug": "candidate_minus_time", "desc": "Minus TimeWarp", "in_table4": True, "in_table5": False},
     {"id": "candidate_minus_jitter", "aug": "candidate_minus_jitter", "desc": "Minus Jitter", "in_table4": True, "in_table5": False},
     {"id": "single_mirror", "aug": "single_mirror", "desc": "Only Mirror", "in_table4": False, "in_table5": True},
     {"id": "single_yaw", "aug": "single_yaw", "desc": "Only Yaw", "in_table4": False, "in_table5": True},
@@ -66,6 +66,7 @@ def send_marimo_toast(msg: str):
 
 def summarize_group(runs: List[Dict[str, Any]]) -> Dict[str, Any]:
     val_w = [r["val_win_acc"] for r in runs]
+    val_wf1 = [r["val_win_f1"] for r in runs]
     val_v = [r["val_vid_acc"] for r in runs]
     val_vf1 = [r["val_vid_f1"] for r in runs]
     test_w = [r["test_win_acc"] for r in runs]
@@ -74,6 +75,7 @@ def summarize_group(runs: List[Dict[str, Any]]) -> Dict[str, Any]:
     test_vf1 = [r["test_vid_f1"] for r in runs]
     return {
         "val_win_acc": f"{np.mean(val_w):.2f}% ± {np.std(val_w):.2f}%",
+        "val_win_f1": f"{np.mean(val_wf1):.4f} ± {np.std(val_wf1):.4f}",
         "val_vid_acc": f"{np.mean(val_v):.2f}% ± {np.std(val_v):.2f}%",
         "val_vid_f1": f"{np.mean(val_vf1):.4f} ± {np.std(val_vf1):.4f}",
         "test_win_acc": f"{np.mean(test_w):.2f}% ± {np.std(test_w):.2f}%",

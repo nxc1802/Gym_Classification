@@ -106,7 +106,8 @@
           "test_vid_f1": 0.7208,
           "checkpoint": "/marimo/Gym_Classification/checkpoints/table2/seed3407/best_LSTM_world_3d_seed3407.pt"
         }
-      ]
+      ],
+      "val_win_f1": "0.7244 \u00b1 0.0128"
     },
     "LSTM_mix_v2": {
       "model": "LSTM",
@@ -170,7 +171,8 @@
           "test_vid_f1": 0.7043,
           "checkpoint": "/marimo/Gym_Classification/checkpoints/table2/seed3407/best_LSTM_mix_v2_seed3407.pt"
         }
-      ]
+      ],
+      "val_win_f1": "0.7541 \u00b1 0.0173"
     },
     "BiLSTM_world_3d": {
       "model": "BiLSTM",
@@ -234,7 +236,8 @@
           "test_vid_f1": 0.7408,
           "checkpoint": "/marimo/Gym_Classification/checkpoints/table2/seed3407/best_BiLSTM_world_3d_seed3407.pt"
         }
-      ]
+      ],
+      "val_win_f1": "0.7341 \u00b1 0.0020"
     },
     "BiLSTM_mix_v2": {
       "model": "BiLSTM",
@@ -298,7 +301,8 @@
           "test_vid_f1": 0.7138,
           "checkpoint": "/marimo/Gym_Classification/checkpoints/table2/seed3407/best_BiLSTM_mix_v2_seed3407.pt"
         }
-      ]
+      ],
+      "val_win_f1": "0.7599 \u00b1 0.0050"
     },
     "Transformer_world_3d": {
       "model": "Transformer",
@@ -359,7 +363,8 @@
           "test_vid_acc": 76.39,
           "test_vid_f1": 0.7455
         }
-      ]
+      ],
+      "val_win_f1": "0.7781 \u00b1 0.0053"
     }
   },
   "table3_graph_streams": {
@@ -434,7 +439,8 @@
           "test_vid_f1": 0.5443,
           "checkpoint": "/marimo/Gym_Classification/checkpoints/graph_streams/seed3407/best_STGCN_T3.1_raw_3d_seed3407.pt"
         }
-      ]
+      ],
+      "val_win_f1": "0.6255 \u00b1 0.0224"
     },
     "T3.2": {
       "exp_id": "T3.2",
@@ -507,7 +513,8 @@
           "test_vid_f1": 0.6907,
           "checkpoint": "/marimo/Gym_Classification/checkpoints/graph_streams/seed3407/best_STGCN_T3.2_world_3d_seed3407.pt"
         }
-      ]
+      ],
+      "val_win_f1": "0.7332 \u00b1 0.0154"
     },
     "T3.3": {
       "exp_id": "T3.3",
@@ -580,7 +587,8 @@
           "test_vid_f1": 0.7408,
           "checkpoint": "/marimo/Gym_Classification/checkpoints/graph_streams/seed3407/best_AAGCN_T3.3_bone_3d_seed3407.pt"
         }
-      ]
+      ],
+      "val_win_f1": "0.7542 \u00b1 0.0037"
     },
     "T3.4": {
       "exp_id": "T3.4",
@@ -653,7 +661,8 @@
           "test_vid_f1": 0.7351,
           "checkpoint": "/marimo/Gym_Classification/checkpoints/graph_streams/seed3407/best_AAGCN_T3.4_bone_3d_seed3407.pt"
         }
-      ]
+      ],
+      "val_win_f1": "0.7858 \u00b1 0.0032"
     },
     "T3.5": {
       "exp_id": "T3.5",
@@ -726,7 +735,8 @@
           "test_vid_f1": 0.7998,
           "checkpoint": "/marimo/Gym_Classification/checkpoints/graph_streams/seed3407/best_AAGCN_T3.5_world_3d_seed3407.pt"
         }
-      ]
+      ],
+      "val_win_f1": "0.7856 \u00b1 0.0024"
     },
     "T3.6": {
       "exp_id": "T3.6",
@@ -799,7 +809,8 @@
           "test_vid_f1": 0.6958,
           "checkpoint": "/marimo/Gym_Classification/checkpoints/graph_streams/seed3407/best_AAGCN_T3.6_world_joint_motion_3d_seed3407.pt"
         }
-      ]
+      ],
+      "val_win_f1": "0.6464 \u00b1 0.0083"
     },
     "T3.7": {
       "exp_id": "T3.7",
@@ -872,7 +883,8 @@
           "test_vid_f1": 0.7212,
           "checkpoint": "/marimo/Gym_Classification/checkpoints/graph_streams/seed3407/best_AAGCN_T3.7_bone_motion_3d_seed3407.pt"
         }
-      ]
+      ],
+      "val_win_f1": "0.6362 \u00b1 0.0107"
     },
     "T3.8": {
       "fusion_name": "Two-Stream AAGCN (World Joint + Bone)",
@@ -921,7 +933,8 @@
           "test_vid_acc": 81.97,
           "test_vid_f1": 0.813
         }
-      ]
+      ],
+      "val_win_f1": "0.8179 \u00b1 0.0036"
     },
     "T3.9": {
       "fusion_name": "Four-Stream AAGCN (Full)",
@@ -972,7 +985,8 @@
           "test_vid_acc": 83.69,
           "test_vid_f1": 0.813
         }
-      ]
+      ],
+      "val_win_f1": "0.8414 \u00b1 0.0030"
     }
   },
   "table4_leave_one_out": {
@@ -1037,7 +1051,8 @@
           "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_clean_seed3407.pt"
         }
       ],
-      "description": "Clean Baseline (No Aug)"
+      "description": "Clean Baseline (No Aug)",
+      "val_win_f1": "0.7885 \u00b1 0.0101"
     },
     "candidate_full_5op": {
       "val_win_acc": "79.19% \u00b1 1.26%",
@@ -1100,7 +1115,8 @@
           "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_candidate_full_5op_seed3407.pt"
         }
       ],
-      "description": "Candidate Full 5-op"
+      "description": "Candidate Full 5-op",
+      "val_win_f1": "0.7882 \u00b1 0.0152"
     },
     "candidate_minus_mirror": {
       "val_win_acc": "78.78% \u00b1 1.44%",
@@ -1163,7 +1179,8 @@
           "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_candidate_minus_mirror_seed3407.pt"
         }
       ],
-      "description": "Minus Mirror"
+      "description": "Minus Mirror",
+      "val_win_f1": "0.7757 \u00b1 0.0197"
     },
     "candidate_minus_yaw": {
       "val_win_acc": "80.06% \u00b1 0.32%",
@@ -1226,7 +1243,8 @@
           "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_candidate_minus_yaw_seed3407.pt"
         }
       ],
-      "description": "Minus Yaw"
+      "description": "Minus Yaw",
+      "val_win_f1": "0.7964 \u00b1 0.0026"
     },
     "candidate_minus_scale": {
       "val_win_acc": "80.13% \u00b1 0.13%",
@@ -1289,7 +1307,8 @@
           "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_candidate_minus_scale_seed3407.pt"
         }
       ],
-      "description": "Minus Scale"
+      "description": "Minus Scale",
+      "val_win_f1": "0.7985 \u00b1 0.0022"
     },
     "candidate_minus_time": {
       "val_win_acc": "79.54% \u00b1 0.57%",
@@ -1352,7 +1371,8 @@
           "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_candidate_minus_time_seed3407.pt"
         }
       ],
-      "description": "Minus TimeWarp (Proposed 4-op)"
+      "description": "Minus TimeWarp (Proposed 4-op)",
+      "val_win_f1": "0.7926 \u00b1 0.0060"
     },
     "candidate_minus_jitter": {
       "val_win_acc": "79.68% \u00b1 0.22%",
@@ -1415,7 +1435,8 @@
           "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_candidate_minus_jitter_seed3407.pt"
         }
       ],
-      "description": "Minus Jitter"
+      "description": "Minus Jitter",
+      "val_win_f1": "0.7937 \u00b1 0.0048"
     }
   },
   "table5_single_operator": {
@@ -1480,7 +1501,8 @@
           "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_clean_seed3407.pt"
         }
       ],
-      "description": "Clean Baseline (No Aug)"
+      "description": "Clean Baseline (No Aug)",
+      "val_win_f1": "0.7885 \u00b1 0.0101"
     },
     "single_mirror": {
       "val_win_acc": "80.45% \u00b1 0.45%",
@@ -1543,7 +1565,8 @@
           "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_single_mirror_seed3407.pt"
         }
       ],
-      "description": "Only Mirror"
+      "description": "Only Mirror",
+      "val_win_f1": "0.8001 \u00b1 0.0067"
     },
     "single_yaw": {
       "val_win_acc": "80.29% \u00b1 0.34%",
@@ -1606,7 +1629,8 @@
           "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_single_yaw_seed3407.pt"
         }
       ],
-      "description": "Only Yaw"
+      "description": "Only Yaw",
+      "val_win_f1": "0.7977 \u00b1 0.0031"
     },
     "single_scale": {
       "val_win_acc": "79.68% \u00b1 0.22%",
@@ -1669,7 +1693,8 @@
           "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_single_scale_seed3407.pt"
         }
       ],
-      "description": "Only Scale"
+      "description": "Only Scale",
+      "val_win_f1": "0.7904 \u00b1 0.0066"
     },
     "single_time": {
       "val_win_acc": "79.74% \u00b1 0.24%",
@@ -1732,7 +1757,8 @@
           "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_single_time_seed3407.pt"
         }
       ],
-      "description": "Only TimeWarp"
+      "description": "Only TimeWarp",
+      "val_win_f1": "0.7920 \u00b1 0.0039"
     },
     "single_jitter": {
       "val_win_acc": "79.55% \u00b1 0.82%",
@@ -1795,7 +1821,8 @@
           "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_single_jitter_seed3407.pt"
         }
       ],
-      "description": "Only Jitter"
+      "description": "Only Jitter",
+      "val_win_f1": "0.7884 \u00b1 0.0093"
     },
     "pair_mirror_yaw": {
       "val_loss": "1.0465 \u00b1 0.0327",
@@ -2255,6 +2282,7 @@
         "model": "LSTM (World 3D Clean)",
         "params": "362K",
         "val_win_acc": "73.64% \u00b1 1.26%",
+        "val_win_f1": "0.7244 \u00b1 0.0128",
         "val_vid_acc": "76.97% \u00b1 2.63%",
         "test_win_acc": "61.41% \u00b1 0.80%",
         "test_win_f1": "0.6002 \u00b1 0.0063",
@@ -2265,6 +2293,7 @@
         "model": "LSTM (Biomechanical Mix v2)",
         "params": "362K",
         "val_win_acc": "75.90% \u00b1 1.60%",
+        "val_win_f1": "0.7541 \u00b1 0.0173",
         "val_vid_acc": "80.19% \u00b1 2.09%",
         "test_win_acc": "62.80% \u00b1 0.83%",
         "test_win_f1": "0.6171 \u00b1 0.0089",
@@ -2275,6 +2304,7 @@
         "model": "BiLSTM (Biomechanical Mix v2)",
         "params": "360K",
         "val_win_acc": "76.90% \u00b1 0.30%",
+        "val_win_f1": "0.7599 \u00b1 0.0050",
         "val_vid_acc": "80.68% \u00b1 1.97%",
         "test_win_acc": "64.82% \u00b1 0.37%",
         "test_win_f1": "0.6316 \u00b1 0.0027",
@@ -2285,6 +2315,7 @@
         "model": "Transformer (Biomechanical Mix v2 Clean)",
         "params": "301K",
         "val_win_acc": "79.52% \u00b1 0.80%",
+        "val_win_f1": "0.7885 \u00b1 0.0101",
         "val_vid_acc": "84.38% \u00b1 1.27%",
         "test_win_acc": "69.24% \u00b1 0.20%",
         "test_win_f1": "0.6815 \u00b1 0.0017",
@@ -2295,6 +2326,7 @@
         "model": "Transformer (Biomechanical Mix v2 + SkelGym-Aug)",
         "params": "301K",
         "val_win_acc": "81.20% \u00b1 0.72%",
+        "val_win_f1": "0.8119 \u00b1 0.0072",
         "val_vid_acc": "84.70% \u00b1 0.82%",
         "test_win_acc": "73.14% \u00b1 0.90%",
         "test_win_f1": "0.7253 \u00b1 0.0106",
@@ -2305,6 +2337,7 @@
         "model": "ST-GCN (Raw 3D Clean)",
         "params": "350K",
         "val_win_acc": "63.01% \u00b1 1.86%",
+        "val_win_f1": "0.6255 \u00b1 0.0224",
         "val_vid_acc": "69.08% \u00b1 1.42%",
         "test_win_acc": "48.35% \u00b1 0.94%",
         "test_win_f1": "0.4701 \u00b1 0.0141",
@@ -2315,6 +2348,7 @@
         "model": "AAGCN (Bone 3D + SkelGym-Aug)",
         "params": "378K",
         "val_win_acc": "79.30% \u00b1 0.22%",
+        "val_win_f1": "0.7858 \u00b1 0.0032",
         "val_vid_acc": "82.77% \u00b1 1.49%",
         "test_win_acc": "66.36% \u00b1 1.41%",
         "test_win_f1": "0.6548 \u00b1 0.0173",
@@ -2325,6 +2359,7 @@
         "model": "Four-Stream AAGCN (Uniform Soft Voting)",
         "params": "1.51M",
         "val_win_acc": "84.34% \u00b1 0.26%",
+        "val_win_f1": "0.8414 \u00b1 0.0030",
         "val_vid_acc": "87.92% \u00b1 1.42%",
         "test_win_acc": "74.50% \u00b1 0.65%",
         "test_win_f1": "0.7341 \u00b1 0.0048",
@@ -2335,6 +2370,7 @@
         "model": "SkelGym-Lite (2 Streams, Accuracy-Weighted Soft Voting (Validation-calibrated weights))",
         "params": "679K",
         "val_win_acc": "83.47% \u00b1 0.14%",
+        "val_win_f1": "0.8351 \u00b1 0.0021",
         "val_vid_acc": "85.67% \u00b1 1.14%",
         "test_win_acc": "73.74% \u00b1 0.63%",
         "test_win_f1": "0.7310 \u00b1 0.0058",
@@ -2345,6 +2381,7 @@
         "model": "SkelGym-Full (5 Streams, Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K))",
         "params": "1.81M",
         "val_win_acc": "85.05% \u00b1 0.47%",
+        "val_win_f1": "0.8487 \u00b1 0.0046",
         "val_vid_acc": "87.92% \u00b1 1.37%",
         "test_win_acc": "76.19% \u00b1 0.16%",
         "test_win_f1": "0.7537 \u00b1 0.0014",

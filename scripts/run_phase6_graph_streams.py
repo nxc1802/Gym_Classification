@@ -214,6 +214,7 @@ def evaluate_multi_stream_fusion(
         })
 
     val_w = [r["val_win_acc"] for r in seed_fusions]
+    val_wf1 = [r["val_win_f1"] for r in seed_fusions]
     val_v = [r["val_vid_acc"] for r in seed_fusions]
     val_vf1 = [r["val_vid_f1"] for r in seed_fusions]
     test_w = [r["test_win_acc"] for r in seed_fusions]
@@ -225,6 +226,7 @@ def evaluate_multi_stream_fusion(
         "fusion_name": fusion_name,
         "streams": stream_keys,
         "val_win_acc": f"{np.mean(val_w):.2f}% ± {np.std(val_w):.2f}%",
+        "val_win_f1": f"{np.mean(val_wf1):.4f} ± {np.std(val_wf1):.4f}",
         "val_vid_acc": f"{np.mean(val_v):.2f}% ± {np.std(val_v):.2f}%",
         "val_vid_f1": f"{np.mean(val_vf1):.4f} ± {np.std(val_vf1):.4f}",
         "test_win_acc": f"{np.mean(test_w):.2f}% ± {np.std(test_w):.2f}%",
@@ -345,6 +347,7 @@ def main():
                 raise RuntimeError(f"Output JSON missing for stream {eid} seed {s}: {out_json}")
 
         val_w = [r["val_win_acc"] for r in runs]
+        val_wf1 = [r["val_win_f1"] for r in runs]
         val_v = [r["val_vid_acc"] for r in runs]
         val_vf1 = [r["val_vid_f1"] for r in runs]
         test_w = [r["test_win_acc"] for r in runs]
@@ -362,6 +365,7 @@ def main():
             "feature": spec["feat"],
             "aug": spec["aug"],
             "val_win_acc": f"{np.mean(val_w):.2f}% ± {np.std(val_w):.2f}%",
+            "val_win_f1": f"{np.mean(val_wf1):.4f} ± {np.std(val_wf1):.4f}",
             "val_vid_acc": f"{np.mean(val_v):.2f}% ± {np.std(val_v):.2f}%",
             "val_vid_f1": f"{np.mean(val_vf1):.4f} ± {np.std(val_vf1):.4f}",
             "test_win_acc": f"{np.mean(test_w):.2f}% ± {np.std(test_w):.2f}%",

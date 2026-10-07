@@ -5,14 +5,15 @@ Evaluates 4 fusion protocols across 3 random seeds (42, 123, 3407):
   1. Hard Majority Voting (Discrete Baseline)
   2. Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K)
   3. Accuracy-Weighted Soft Voting (Validation-calibrated weights)
-  4. Stacking Meta-Classifier (Ridge/Logistic Regression SOTA, fit strictly on Val)
+  4. Stacking Meta-Classifier (Logistic Regression, fit strictly on Train)
 
 Configurations:
   - SkelGym-Lite (2 Streams: Transformer + Bone AAGCN, ~679K params)
   - SkelGym-Full (5 Streams: Transformer + 4 AAGCN Streams, ~1.81M params)
 
 Zero-Leakage Guarantee:
-  - Meta-classifiers and accuracy weights are calibrated strictly on the validation set.
+  - Stacking meta-classifiers are trained strictly on training set base predictions.
+  - Accuracy weights are calibrated strictly on validation window accuracy.
   - Test set features/probabilities are evaluated in inference mode with zero parameter updates.
 
 Outputs:
@@ -409,7 +410,7 @@ def main():
         ("hard", "Hard Majority Voting (Discrete Baseline)"),
         ("accuracy_weighted_soft", "Accuracy-Weighted Soft Voting (Validation-calibrated weights)"),
         ("uniform_soft", "Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K)"),
-        ("stacking", "Stacking Meta-Classifier (Ridge/Logistic Regression SOTA)")
+        ("stacking", "Stacking Meta-Classifier (Logistic Regression, train-set fit)")
     ]
 
     results_table6 = {

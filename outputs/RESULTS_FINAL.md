@@ -7,11 +7,11 @@
 
 | Architecture / Model | Input Modality | Dim | Params | Val Loss | Val Win Acc (%) | Val Win F1 | Validation Status |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **LSTM (world_3d)** | world_3d | 39-d | 362K | N/A | 73.64% ± 1.26% | N/A | Verified |
-| **LSTM (mix_v2)** | mix_v2 | 63-d | 362K | N/A | 75.90% ± 1.60% | N/A | Verified |
-| **BiLSTM (world_3d)** | world_3d | 39-d | 362K | N/A | 74.72% ± 0.19% | N/A | Verified |
-| **BiLSTM (mix_v2)** | mix_v2 | 63-d | 362K | N/A | 76.90% ± 0.30% | N/A | Verified |
-| **Transformer (world_3d)** | world_3d | 39-d | 301K | N/A | 78.76% ± 0.46% | N/A | Verified |
+| **LSTM (world_3d)** | world_3d | 39-d | 362K | N/A | 73.64% ± 1.26% | 0.7244 ± 0.0128 | Verified |
+| **LSTM (mix_v2)** | mix_v2 | 63-d | 362K | N/A | 75.90% ± 1.60% | 0.7541 ± 0.0173 | Verified |
+| **BiLSTM (world_3d)** | world_3d | 39-d | 362K | N/A | 74.72% ± 0.19% | 0.7341 ± 0.0020 | Verified |
+| **BiLSTM (mix_v2)** | mix_v2 | 63-d | 362K | N/A | 76.90% ± 0.30% | 0.7599 ± 0.0050 | Verified |
+| **Transformer (world_3d)** | world_3d | 39-d | 301K | N/A | 78.76% ± 0.46% | 0.7781 ± 0.0053 | Verified |
 
 ---
 
@@ -22,15 +22,15 @@
 
 | Stream ID | Stream / Configuration | Model Backbone | Input Modality | Val Win Acc (%) | Val Win F1 | Validation Status |
 | :--- | :--- | :--- | :--- | :---: | :---: | :--- |
-| **T3.1** | Raw 3D Joint (ST-GCN Clean) | STGCN | raw_3d | 63.01% ± 1.86% | N/A | Verified |
-| **T3.2** | World 3D Joint (ST-GCN Clean) | STGCN | world_3d | 73.75% ± 1.86% | N/A | Verified |
-| **T3.3** | Bone 3D Stream (AAGCN Clean) | AAGCN | bone_3d | 76.00% ± 0.35% | N/A | Verified |
-| **T3.4** | Bone 3D Stream (AAGCN + Aug) | AAGCN | bone_3d | 79.30% ± 0.22% | N/A | Verified |
-| **T3.5** | World Joint Stream (AAGCN + Aug) | AAGCN | world_3d | 78.86% ± 0.31% | N/A | Verified |
-| **T3.6** | World Joint Motion (Delta X) | AAGCN | world_joint_motion_3d | 64.19% ± 1.61% | N/A | Verified |
-| **T3.7** | Bone Motion (Delta B) | AAGCN | bone_motion_3d | 61.93% ± 1.56% | N/A | Verified |
-| **T3.8** | Two-Stream AAGCN (World Joint + Bone) | AAGCN | Graph | 82.03% ± 0.41% | N/A | Verified |
-| **T3.9** | Four-Stream AAGCN (Full) | AAGCN | Graph | 84.34% ± 0.26% | N/A | Verified |
+| **T3.1** | Raw 3D Joint (ST-GCN Clean) | STGCN | raw_3d | 63.01% ± 1.86% | 0.6255 ± 0.0224 | Verified |
+| **T3.2** | World 3D Joint (ST-GCN Clean) | STGCN | world_3d | 73.75% ± 1.86% | 0.7332 ± 0.0154 | Verified |
+| **T3.3** | Bone 3D Stream (AAGCN Clean) | AAGCN | bone_3d | 76.00% ± 0.35% | 0.7542 ± 0.0037 | Verified |
+| **T3.4** | Bone 3D Stream (AAGCN + Aug) | AAGCN | bone_3d | 79.30% ± 0.22% | 0.7858 ± 0.0032 | Verified |
+| **T3.5** | World Joint Stream (AAGCN + Aug) | AAGCN | world_3d | 78.86% ± 0.31% | 0.7856 ± 0.0024 | Verified |
+| **T3.6** | World Joint Motion (Delta X) | AAGCN | world_joint_motion_3d | 64.19% ± 1.61% | 0.6464 ± 0.0083 | Verified |
+| **T3.7** | Bone Motion (Delta B) | AAGCN | bone_motion_3d | 61.93% ± 1.56% | 0.6362 ± 0.0107 | Verified |
+| **T3.8** | Two-Stream AAGCN (World Joint + Bone) | AAGCN | Graph | 82.03% ± 0.41% | 0.8179 ± 0.0036 | Verified |
+| **T3.9** | Four-Stream AAGCN (Full) | AAGCN | Graph | 84.34% ± 0.26% | 0.8414 ± 0.0030 | Verified |
 
 ---
 
@@ -41,13 +41,13 @@
 
 | Augmentation Configuration | Excluded Operator / Domain | Val Loss | Val Win Acc (%) | Val Win F1 | Validation Verdict |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| **Clean** | All Operators Excluded | N/A | 79.52% ± 0.80% | N/A | Baseline Control |
-| **Candidate Full 5Op** | None (Reference Suite) | N/A | 79.19% ± 1.26% | N/A | Lowest Loss, Acc Saturated |
-| **Candidate Minus Mirror** | Sagittal Horizontal Flip (p=0.5) | N/A | 78.78% ± 1.44% | N/A | 🚨 Severe Collapse (-3.06% Vid) |
-| **Candidate Minus Yaw** | Gravitational Yaw Rotation (±15°) | N/A | 80.06% ± 0.32% | N/A | Moderate Val Acc gain |
-| **Candidate Minus Scale** | Proportional Scale Variation (±10%) | N/A | 80.13% ± 0.13% | N/A | Peak Val Acc in LOO |
-| **Candidate Minus Time** | Temporal Resampling (0.8x - 1.2x) | N/A | 79.54% ± 0.57% | N/A | Lowest 4-op Val Loss (1.0010) |
-| **Candidate Minus Jitter** | Gaussian Coordinate Jitter (σ=0.008) | N/A | 79.68% ± 0.22% | N/A | Minor Acc gain (+0.49% Win) |
+| **Clean** | All Operators Excluded | N/A | 79.52% ± 0.80% | 0.7885 ± 0.0101 | Unaugmented Baseline Control |
+| **Candidate Full 5Op** | None (Reference 5-Op Suite) | N/A | 79.19% ± 1.26% | 0.7882 ± 0.0152 | Reference 5-Operator Suite (Val Win F1: 0.7882) |
+| **Candidate Minus Mirror** | Sagittal Bilateral Reflection (p=0.5) | N/A | 78.78% ± 1.44% | 0.7757 ± 0.0197 | 🚨 Weakest LOO window performance (-1.25% Win F1) |
+| **Candidate Minus Yaw** | Gravitational Yaw Rotation (±15°) | N/A | 80.06% ± 0.32% | 0.7964 ± 0.0026 | Moderate window gain over 5-op (+0.82% Win F1) |
+| **Candidate Minus Scale** | Proportional Scale Variation (±10%) | N/A | 80.13% ± 0.13% | 0.7985 ± 0.0022 | Peak window gain in LOO (+1.03% Win F1) |
+| **Candidate Minus Time** | Temporal Resampling (0.8x - 1.2x) | N/A | 79.54% ± 0.57% | 0.7926 ± 0.0060 | Lowest 4-op Val Loss (1.0010, +0.44% Win F1) |
+| **Candidate Minus Jitter** | Gaussian Coordinate Jitter (σ=0.008) | N/A | 79.68% ± 0.22% | 0.7937 ± 0.0048 | Minor window gain (+0.55% Win F1) |
 
 ---
 
@@ -58,18 +58,18 @@
 
 | Augmentation Strategy | Isolated Operator Description | Val Loss | Val Win Acc (%) | Val Win F1 | Standalone Validation Effect |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| **Clean** | Unaugmented Native Window Sequences | N/A | 79.52% ± 0.80% | N/A | Unaugmented Reference |
-| **Single Mirror** | Sagittal Bilateral Reflection (p=0.5) | N/A | 80.45% ± 0.45% | N/A | 🏆 Decisive Val Gain across all single ops |
-| **Single Yaw** | 3D Yaw Perturbation (±15°) | N/A | 80.29% ± 0.34% | N/A | Strong Vid F1, preserves metric lengths |
-| **Pair Mirror Yaw** | Bilateral Reflection + Gravitational Yaw (±15°) | 1.0465 ± 0.0327 | 81.20% ± 0.72% | 0.8119 ± 0.0072 | 🥇 **All-Time Peak Val Win Acc & Macro F1** |
-| **Single Scale** | Proportional Scale Jitter (±10%) | N/A | 79.68% ± 0.22% | N/A | Marginal Win (+0.16%), Vid drops (-0.48%) |
-| **Single Time** | Linear Sequence Resampling (0.8x - 1.2x) | N/A | 79.74% ± 0.24% | N/A | Degrades Val Vid Acc (-1.13%) & Loss |
-| **Single Jitter** | Gaussian Noise (σ=0.008) | N/A | 79.55% ± 0.82% | N/A | Neutral Win (+0.03%), Vid drops (-1.13%) |
+| **Clean** | Unaugmented Native Window Sequences | N/A | 79.52% ± 0.80% | 0.7885 ± 0.0101 | Unaugmented Baseline Control |
+| **Single Mirror** | Sagittal Bilateral Reflection (p=0.5) | N/A | 80.45% ± 0.45% | 0.8001 ± 0.0067 | 🏆 Decisive window gain across single ops (+1.16% Win F1) |
+| **Single Yaw** | 3D Yaw Perturbation (±15°) | N/A | 80.29% ± 0.34% | 0.7977 ± 0.0031 | Strong standalone window gain (+0.92% Win F1) |
+| **Pair Mirror Yaw** | Bilateral Reflection + Gravitational Yaw (±15°) | 1.0465 ± 0.0327 | 81.20% ± 0.72% | 0.8119 ± 0.0072 | 🥇 **All-Time Peak Val Win Acc & Macro F1 (+2.34% Win F1)** |
+| **Single Scale** | Proportional Scale Jitter (±10%) | N/A | 79.68% ± 0.22% | 0.7904 ± 0.0066 | Marginal window gain (+0.19% Win F1) |
+| **Single Time** | Linear Sequence Resampling (0.8x - 1.2x) | N/A | 79.74% ± 0.24% | 0.7920 ± 0.0039 | Marginal window gain over clean (+0.35% Win F1) |
+| **Single Jitter** | Gaussian Noise (σ=0.008) | N/A | 79.55% ± 0.82% | 0.7884 ± 0.0093 | Neutral window performance (-0.01% Win F1) |
 
 > **Critical Methodological Rationale (Validation-Driven Grounding):**
-> 1. **Rigid Isometry in $SE(3)$:** Bilateral Mirroring and Gravitational Yaw ($\pm 15^\circ$) are the only two operators that strictly preserve physical limb lengths (measured in meters in World 3D) and kinematic joint angles.
-> 2. **Peak Representation Learning:** The paired configuration **Mirror + Yaw** achieves the highest Validation Window Accuracy (**81.20% ± 0.72%**) and Macro F1 (**0.8119**) across all 13 experimental configurations tested (+1.68% over Clean Baseline).
-> 3. **Non-Rigid Distortion Elimination:** Scaling, Jitter, and TimeWarp corrupt metric proportions and velocity profiles, explaining why discrete validation accuracy drops when compounding them in multi-operator suites.
+> 1. **Distance-Preserving Euclidean Transformations:** Bilateral Reflection and Gravitational Yaw ($\pm 15^\circ$) strictly preserve physical metric dimensions (measured in meters in World 3D) and kinematic joint angles. While Yaw rotation belongs to the proper rotation group $SO(3) \subset SE(3)$, bilateral reflection acts as an improper Euclidean isometry ($\det = -1$) that exploits anatomical bilateral symmetry across the sagittal plane in bilateral resistance training exercises.
+> 2. **Peak Representation Learning:** The paired configuration **Mirror + Yaw** achieves the highest Validation Window Accuracy (**81.20% ± 0.72%**) and Macro F1 (**0.8119 ± 0.0072**) across all 13 experimental configurations tested (+1.68% Win Acc, +0.0234 Win F1 over Clean Baseline).
+> 3. **Non-Rigid Dynamics & Metric Distortion Elimination:** Jitter introduces high-frequency sensor noise, Scale alters anatomical limb proportions, and TimeWarp disrupts exercise tempo and velocity profiles, explaining why combining all five operators in a monolithic suite degrades validation window representations.
 
 ---
 
@@ -98,18 +98,18 @@
 *Objective:* Quantify consensus pooling accuracy gains and compare total trainable parameters across all audited architectures.  
 *Execution Command:* `python scripts/run_phase8_10_evaluation_and_reports.py`
 
-| Model Architecture | Input Modality / Paradigm | Trainable Params | Test Win Acc (%) | Test Win Macro F1 | Test Vid Acc (%) | Test Vid Macro F1 | Status |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **LSTM (World 3D Clean)** | Skeletal Motion | 362K | 61.41% ± 0.80% | 0.6002 ± 0.0063 | **71.10% ± 2.33%** | **0.6941 ± 0.0294** | Verified |
-| **LSTM (Biomechanical Mix v2)** | Skeletal Motion | 362K | 62.80% ± 0.83% | 0.6171 ± 0.0089 | **72.39% ± 1.76%** | **0.7077 ± 0.0172** | Verified |
-| **BiLSTM (Biomechanical Mix v2)** | Skeletal Motion | 360K | 64.82% ± 0.37% | 0.6316 ± 0.0027 | **75.39% ± 1.46%** | **0.7342 ± 0.0144** | Verified |
-| **Transformer (Biomechanical Mix v2 Clean)** | Skeletal Motion | 301K | 69.24% ± 0.20% | 0.6815 ± 0.0017 | **79.83% ± 1.27%** | **0.7806 ± 0.0214** | Verified |
-| **Transformer (Biomechanical Mix v2 + SkelGym-Aug)** | Skeletal Motion | 301K | 73.14% ± 0.90% | 0.7253 ± 0.0106 | **82.69% ± 1.66%** | **0.8187 ± 0.0196** | Verified |
-| **ST-GCN (Raw 3D Clean)** | Skeletal Motion | 350K | 48.35% ± 0.94% | 0.4701 ± 0.0141 | **58.65% ± 1.76%** | **0.5432 ± 0.0208** | Verified |
-| **AAGCN (Bone 3D + SkelGym-Aug)** | Skeletal Motion | 378K | 66.36% ± 1.41% | 0.6548 ± 0.0173 | **75.39% ± 2.33%** | **0.7440 ± 0.0335** | Verified |
-| **Four-Stream AAGCN (Uniform Soft Voting)** | Skeletal Motion | 1.51M | 74.50% ± 0.65% | 0.7341 ± 0.0048 | **84.41% ± 1.01%** | **0.8308 ± 0.0179** | Verified |
-| **SkelGym-Lite (2 Streams, Accuracy-Weighted Soft Voting (Validation-calibrated weights))** | Skeletal Motion | 679K | 73.74% ± 0.63% | 0.7310 ± 0.0058 | **82.12% ± 0.40%** | **0.8198 ± 0.0030** | Verified |
-| **SkelGym-Full (5 Streams, Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K))** | Skeletal Motion | 1.81M | 76.19% ± 0.16% | 0.7537 ± 0.0014 | **85.27% ± 0.41%** | **0.8386 ± 0.0075** | Verified |
+| Model Architecture | Input Modality / Paradigm | Trainable Params | Val Win Acc (%) | Val Win F1 | Test Win Acc (%) | Test Win Macro F1 | Test Vid Acc (%) | Test Vid Macro F1 | Status |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **LSTM (World 3D Clean)** | Skeletal Motion | 362K | 73.64% ± 1.26% | 0.7244 ± 0.0128 | 61.41% ± 0.80% | 0.6002 ± 0.0063 | **71.10% ± 2.33%** | **0.6941 ± 0.0294** | Verified |
+| **LSTM (Biomechanical Mix v2)** | Skeletal Motion | 362K | 75.90% ± 1.60% | 0.7541 ± 0.0173 | 62.80% ± 0.83% | 0.6171 ± 0.0089 | **72.39% ± 1.76%** | **0.7077 ± 0.0172** | Verified |
+| **BiLSTM (Biomechanical Mix v2)** | Skeletal Motion | 360K | 76.90% ± 0.30% | 0.7599 ± 0.0050 | 64.82% ± 0.37% | 0.6316 ± 0.0027 | **75.39% ± 1.46%** | **0.7342 ± 0.0144** | Verified |
+| **Transformer (Biomechanical Mix v2 Clean)** | Skeletal Motion | 301K | 79.52% ± 0.80% | 0.7885 ± 0.0101 | 69.24% ± 0.20% | 0.6815 ± 0.0017 | **79.83% ± 1.27%** | **0.7806 ± 0.0214** | Verified |
+| **Transformer (Biomechanical Mix v2 + SkelGym-Aug)** | Skeletal Motion | 301K | 81.20% ± 0.72% | 0.8119 ± 0.0072 | 73.14% ± 0.90% | 0.7253 ± 0.0106 | **82.69% ± 1.66%** | **0.8187 ± 0.0196** | Verified |
+| **ST-GCN (Raw 3D Clean)** | Skeletal Motion | 350K | 63.01% ± 1.86% | 0.6255 ± 0.0224 | 48.35% ± 0.94% | 0.4701 ± 0.0141 | **58.65% ± 1.76%** | **0.5432 ± 0.0208** | Verified |
+| **AAGCN (Bone 3D + SkelGym-Aug)** | Skeletal Motion | 378K | 79.30% ± 0.22% | 0.7858 ± 0.0032 | 66.36% ± 1.41% | 0.6548 ± 0.0173 | **75.39% ± 2.33%** | **0.7440 ± 0.0335** | Verified |
+| **Four-Stream AAGCN (Uniform Soft Voting)** | Skeletal Motion | 1.51M | 84.34% ± 0.26% | 0.8414 ± 0.0030 | 74.50% ± 0.65% | 0.7341 ± 0.0048 | **84.41% ± 1.01%** | **0.8308 ± 0.0179** | Verified |
+| **SkelGym-Lite (2 Streams, Accuracy-Weighted Soft Voting (Validation-calibrated weights))** | Skeletal Motion | 679K | 83.47% ± 0.14% | 0.8351 ± 0.0021 | 73.74% ± 0.63% | 0.7310 ± 0.0058 | **82.12% ± 0.40%** | **0.8198 ± 0.0030** | Verified |
+| **SkelGym-Full (5 Streams, Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K))** | Skeletal Motion | 1.81M | 85.05% ± 0.47% | 0.8487 ± 0.0046 | 76.19% ± 0.16% | 0.7537 ± 0.0014 | **85.27% ± 0.41%** | **0.8386 ± 0.0075** | Verified |
 
 ---
 
@@ -126,7 +126,7 @@
 | **Single Graph (AAGCN Bone) vs SkelGym-Full** | 137.47 | 5.60e-34 | 4.21 | 11026.0 | 0.0115 | 0.2098 | -0.082 | Verified (*) |
 | **Four-Stream Graph AAGCN vs SkelGym-Full** | 15.82 | 5.88e-05 | 2.12 | 6086.0 | 2.39e-13 | 2.12e-11 | +0.461 | Verified (***) |
 
-> **Note on Multiple Testing Correction:** All five pairwise window comparisons remain statistically significant after Holm-Bonferroni step-down correction ($p_{\text{adj}} \le 0.0001$) and Benjamini-Hochberg False Discovery Rate control ($\text{FDR} \le 7.99 \times 10^{-5}$).
+> **Note on Multiple Testing Correction & Statistical Semantics:** All five pairwise window comparisons remain statistically significant after Holm-Bonferroni step-down correction ($p_{\text{adj}} \le 0.0001$) and Benjamini-Hochberg False Discovery Rate control ($\text{FDR} \le 5.88 \times 10^{-5}$). Video-level Wilcoxon signed-rank and paired $t$-tests evaluate paired differences in ground-truth class posterior probabilities (confidence) across video clusters ($N=233$), quantifying confidence calibration rather than discrete video classification differences.
 
 ---
 
@@ -149,9 +149,9 @@
 
 ---
 
-## Table 10: Per-Class Performance Breakdown (Paper Table 10 & 13)
+## Table 10: Per-Class Performance Breakdown — SkelGym-Full (Uniform Soft SOTA) (Paper Table 10 & 13)
 
-*Objective:* Detailed per-class precision, recall, and F1 metrics for SkelGym-Full on held-out test windows ($N=2,743$) and test videos ($N=233$, 201 correct).
+*Objective:* Detailed per-class precision, recall, and F1 metrics for SkelGym-Full (Uniform Soft SOTA) on held-out test windows ($N=2,743$) and test videos ($N=233$, 200 correct, 85.84% accuracy).
 
 | Exercise Class | Window Precision | Window Recall | Window F1 | Window Support | Video Precision | Video Recall | Video F1 | Video Support | Status |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |

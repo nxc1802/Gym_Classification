@@ -147,13 +147,13 @@ def update_results_final_markdown():
         "| :--- | :--- | :---: | :---: | :---: | :--- |"
     ]
     loo_descriptions = {
-        "candidate_full_5op": ("None (Reference Suite)", "Lowest Loss, Acc Saturated"),
-        "candidate_minus_jitter": ("Gaussian Coordinate Jitter (σ=0.008)", "Minor Acc gain (+0.49% Win)"),
-        "candidate_minus_mirror": ("Sagittal Horizontal Flip (p=0.5)", "🚨 Severe Collapse (-3.06% Vid)"),
-        "candidate_minus_yaw": ("Gravitational Yaw Rotation (±15°)", "Moderate Val Acc gain"),
-        "candidate_minus_scale": ("Proportional Scale Variation (±10%)", "Peak Val Acc in LOO"),
-        "candidate_minus_time": ("Temporal Resampling (0.8x - 1.2x)", "Lowest 4-op Val Loss (1.0010)"),
-        "clean": ("All Operators Excluded", "Baseline Control")
+        "candidate_full_5op": ("None (Reference 5-Op Suite)", "Reference 5-Operator Suite (Val Win F1: 0.7882)"),
+        "candidate_minus_jitter": ("Gaussian Coordinate Jitter (σ=0.008)", "Minor window gain (+0.55% Win F1)"),
+        "candidate_minus_mirror": ("Sagittal Bilateral Reflection (p=0.5)", "🚨 Weakest LOO window performance (-1.25% Win F1)"),
+        "candidate_minus_yaw": ("Gravitational Yaw Rotation (±15°)", "Moderate window gain over 5-op (+0.82% Win F1)"),
+        "candidate_minus_scale": ("Proportional Scale Variation (±10%)", "Peak window gain in LOO (+1.03% Win F1)"),
+        "candidate_minus_time": ("Temporal Resampling (0.8x - 1.2x)", "Lowest 4-op Val Loss (1.0010, +0.44% Win F1)"),
+        "clean": ("All Operators Excluded", "Unaugmented Baseline Control")
     }
     for k, v in t4.items():
         op_info, verdict = loo_descriptions.get(k, ("Ablated Operator", "Verified"))
@@ -171,13 +171,13 @@ def update_results_final_markdown():
         "| :--- | :--- | :---: | :---: | :---: | :--- |"
     ]
     t5_desc = {
-        "clean": ("Unaugmented Native Window Sequences", "Unaugmented Reference"),
-        "single_mirror": ("Sagittal Bilateral Reflection (p=0.5)", "🏆 Decisive Val Gain across all single ops"),
-        "single_yaw": ("3D Yaw Perturbation (±15°)", "Strong Vid F1, preserves metric lengths"),
-        "pair_mirror_yaw": ("Bilateral Reflection + Gravitational Yaw (±15°)", "🥇 **All-Time Peak Val Win Acc & Macro F1**"),
-        "single_scale": ("Proportional Scale Jitter (±10%)", "Marginal Win (+0.16%), Vid drops (-0.48%)"),
-        "single_time": ("Linear Sequence Resampling (0.8x - 1.2x)", "Degrades Val Vid Acc (-1.13%) & Loss"),
-        "single_jitter": ("Gaussian Noise (σ=0.008)", "Neutral Win (+0.03%), Vid drops (-1.13%)")
+        "clean": ("Unaugmented Native Window Sequences", "Unaugmented Baseline Control"),
+        "single_mirror": ("Sagittal Bilateral Reflection (p=0.5)", "🏆 Decisive window gain across single ops (+1.16% Win F1)"),
+        "single_yaw": ("3D Yaw Perturbation (±15°)", "Strong standalone window gain (+0.92% Win F1)"),
+        "pair_mirror_yaw": ("Bilateral Reflection + Gravitational Yaw (±15°)", "🥇 **All-Time Peak Val Win Acc & Macro F1 (+2.34% Win F1)**"),
+        "single_scale": ("Proportional Scale Jitter (±10%)", "Marginal window gain (+0.19% Win F1)"),
+        "single_time": ("Linear Sequence Resampling (0.8x - 1.2x)", "Marginal window gain over clean (+0.35% Win F1)"),
+        "single_jitter": ("Gaussian Noise (σ=0.008)", "Neutral window performance (-0.01% Win F1)")
     }
     for k, (op_desc, effect) in t5_desc.items():
         if k in t5:
@@ -191,8 +191,8 @@ def update_results_final_markdown():
 
     # --- Render Table 6 ---
     # Keep Video-level metrics for all protocols, but reveal Test metrics ONLY for Validation Winners of Lite and Full
-    winner_lite = t6.get("winners", {}).get("SkelGym-Lite", "uniform_soft")
-    winner_full = t6.get("winners", {}).get("SkelGym-Full", "stacking")
+    winner_lite = t6.get("winners", {}).get("SkelGym-Lite", "accuracy_weighted_soft")
+    winner_full = t6.get("winners", {}).get("SkelGym-Full", "uniform_soft")
 
     t6_rows = [
         "| Architecture / Configuration | Fusion Protocol & Weighting | Val Win Acc (%) | Val Win F1 | Val Vid Acc (%) | Val Vid F1 | Test Win Acc (%) | Test Win F1 | Test Vid Acc (%) | Test Vid F1 | Status |",
@@ -217,11 +217,11 @@ def update_results_final_markdown():
 
     # --- Render Table 7 ---
     t7_rows = [
-        "| Model Architecture | Input Modality / Paradigm | Trainable Params | Test Win Acc (%) | Test Win Macro F1 | Test Vid Acc (%) | Test Vid Macro F1 | Status |",
-        "| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |"
+        "| Model Architecture | Input Modality / Paradigm | Trainable Params | Val Win Acc (%) | Val Win F1 | Test Win Acc (%) | Test Win Macro F1 | Test Vid Acc (%) | Test Vid Macro F1 | Status |",
+        "| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |"
     ]
     for r in t7.get("table7_rows", []):
-        t7_rows.append(f"| **{r['model']}** | {r.get('input', 'Skeletal Motion')} | {r['params']} | {r['test_win_acc']} | {r['test_win_f1']} | **{r['test_vid_acc']}** | **{r['test_vid_f1']}** | Verified |")
+        t7_rows.append(f"| **{r['model']}** | {r.get('input', 'Skeletal Motion')} | {r['params']} | {r.get('val_win_acc', '-')} | {r.get('val_win_f1', '-')} | {r['test_win_acc']} | {r['test_win_f1']} | **{r['test_vid_acc']}** | **{r['test_vid_f1']}** | Verified |")
     t7_text = "\n".join(t7_rows)
 
     # --- Render Table 8 ---
@@ -294,9 +294,9 @@ def update_results_final_markdown():
 {t5_text}
 
 > **Critical Methodological Rationale (Validation-Driven Grounding):**
-> 1. **Rigid Isometry in $SE(3)$:** Bilateral Mirroring and Gravitational Yaw ($\pm 15^\circ$) are the only two operators that strictly preserve physical limb lengths (measured in meters in World 3D) and kinematic joint angles.
-> 2. **Peak Representation Learning:** The paired configuration **Mirror + Yaw** achieves the highest Validation Window Accuracy (**81.20% ± 0.72%**) and Macro F1 (**0.8119**) across all 13 experimental configurations tested (+1.68% over Clean Baseline).
-> 3. **Non-Rigid Distortion Elimination:** Scaling, Jitter, and TimeWarp corrupt metric proportions and velocity profiles, explaining why discrete validation accuracy drops when compounding them in multi-operator suites.
+> 1. **Distance-Preserving Euclidean Transformations:** Bilateral Reflection and Gravitational Yaw ($\\pm 15^\\circ$) strictly preserve physical metric dimensions (measured in meters in World 3D) and kinematic joint angles. While Yaw rotation belongs to the proper rotation group $SO(3) \\subset SE(3)$, bilateral reflection acts as an improper Euclidean isometry ($\\det = -1$) that exploits anatomical bilateral symmetry across the sagittal plane in bilateral resistance training exercises.
+> 2. **Peak Representation Learning:** The paired configuration **Mirror + Yaw** achieves the highest Validation Window Accuracy (**81.20% ± 0.72%**) and Macro F1 (**0.8119 ± 0.0072**) across all 13 experimental configurations tested (+1.68% Win Acc, +0.0234 Win F1 over Clean Baseline).
+> 3. **Non-Rigid Dynamics & Metric Distortion Elimination:** Jitter introduces high-frequency sensor noise, Scale alters anatomical limb proportions, and TimeWarp disrupts exercise tempo and velocity profiles, explaining why combining all five operators in a monolithic suite degrades validation window representations.
 
 ---
 
@@ -326,7 +326,7 @@ def update_results_final_markdown():
 
 {t8_text}
 
-> **Note on Multiple Testing Correction:** All five pairwise window comparisons remain statistically significant after Holm-Bonferroni step-down correction ($p_{{\\text{{adj}}}} \\le 0.0001$) and Benjamini-Hochberg False Discovery Rate control ($\\text{{FDR}} \\le 7.99 \\times 10^{{-5}}$).
+> **Note on Multiple Testing Correction & Statistical Semantics:** All five pairwise window comparisons remain statistically significant after Holm-Bonferroni step-down correction ($p_{{\\text{{adj}}}} \\le 0.0001$) and Benjamini-Hochberg False Discovery Rate control ($\\text{{FDR}} \\le 5.88 \\times 10^{{-5}}$). Video-level Wilcoxon signed-rank and paired $t$-tests evaluate paired differences in ground-truth class posterior probabilities (confidence) across video clusters ($N=233$), quantifying confidence calibration rather than discrete video classification differences.
 
 ---
 
@@ -339,9 +339,9 @@ def update_results_final_markdown():
 
 ---
 
-## Table 10: Per-Class Performance Breakdown (Paper Table 10 & 13)
+## Table 10: Per-Class Performance Breakdown — SkelGym-Full (Uniform Soft SOTA) (Paper Table 10 & 13)
 
-*Objective:* Detailed per-class precision, recall, and F1 metrics for SkelGym-Full on held-out test windows ($N=2,743$) and test videos ($N=233$, 201 correct).
+*Objective:* Detailed per-class precision, recall, and F1 metrics for SkelGym-Full (Uniform Soft SOTA) on held-out test windows ($N=2,743$) and test videos ($N=233$, 200 correct, 85.84% accuracy).
 
 {t10_text}
 

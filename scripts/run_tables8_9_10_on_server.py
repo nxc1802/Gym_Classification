@@ -385,7 +385,7 @@ def main():
     print(f"Saved Table 9 report to {t9_path}")
 
     print("\n" + "=" * 80)
-    print("TABLE 10: PER-CLASS GRANULAR BREAKDOWN (SKELGYM-FULL STACKING SOTA)")
+    print("TABLE 10: PER-CLASS GRANULAR BREAKDOWN (SKELGYM-FULL — UNIFORM SOFT SOTA)")
     print("=" * 80)
 
     p_w, r_w, f1_w, s_w = precision_recall_fscore_support(y_test_t, p_skel_full_w, labels=list(range(NUM_CLASSES)), zero_division=0)

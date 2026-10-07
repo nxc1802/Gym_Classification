@@ -227,6 +227,7 @@ def main():
     for key, seed_runs in all_results.items():
         m_type, f_type = key.split("_", 1)
         val_w = [r["val_win_acc"] for r in seed_runs]
+        val_wf1 = [r["val_win_f1"] for r in seed_runs]
         val_v = [r["val_vid_acc"] for r in seed_runs]
         test_w = [r["test_win_acc"] for r in seed_runs]
         test_wf1 = [r["test_win_f1"] for r in seed_runs]
@@ -238,6 +239,7 @@ def main():
             "feature": f_type,
             "dim": 39 if f_type == "world_3d" else 63,
             "val_win_acc": f"{np.mean(val_w):.2f}% ± {np.std(val_w):.2f}%",
+            "val_win_f1": f"{np.mean(val_wf1):.4f} ± {np.std(val_wf1):.4f}",
             "val_vid_acc": f"{np.mean(val_v):.2f}% ± {np.std(val_v):.2f}%",
             "test_win_acc": f"{np.mean(test_w):.2f}% ± {np.std(test_w):.2f}%",
             "test_win_f1": f"{np.mean(test_wf1):.4f} ± {np.std(test_wf1):.4f}",

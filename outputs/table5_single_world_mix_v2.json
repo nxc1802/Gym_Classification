@@ -60,7 +60,8 @@
         "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_clean_seed3407.pt"
       }
     ],
-    "description": "Clean Baseline (No Aug)"
+    "description": "Clean Baseline (No Aug)",
+    "val_win_f1": "0.7885 \u00b1 0.0101"
   },
   "single_mirror": {
     "val_win_acc": "80.45% \u00b1 0.45%",
@@ -123,7 +124,8 @@
         "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_single_mirror_seed3407.pt"
       }
     ],
-    "description": "Only Mirror"
+    "description": "Only Mirror",
+    "val_win_f1": "0.8001 \u00b1 0.0067"
   },
   "single_yaw": {
     "val_win_acc": "80.29% \u00b1 0.34%",
@@ -186,7 +188,8 @@
         "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_single_yaw_seed3407.pt"
       }
     ],
-    "description": "Only Yaw"
+    "description": "Only Yaw",
+    "val_win_f1": "0.7977 \u00b1 0.0031"
   },
   "single_scale": {
     "val_win_acc": "79.68% \u00b1 0.22%",
@@ -249,7 +252,8 @@
         "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_single_scale_seed3407.pt"
       }
     ],
-    "description": "Only Scale"
+    "description": "Only Scale",
+    "val_win_f1": "0.7904 \u00b1 0.0066"
   },
   "single_time": {
     "val_win_acc": "79.74% \u00b1 0.24%",
@@ -312,7 +316,8 @@
         "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_single_time_seed3407.pt"
       }
     ],
-    "description": "Only TimeWarp"
+    "description": "Only TimeWarp",
+    "val_win_f1": "0.7920 \u00b1 0.0039"
   },
   "single_jitter": {
     "val_win_acc": "79.55% \u00b1 0.82%",
@@ -375,7 +380,8 @@
         "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_single_jitter_seed3407.pt"
       }
     ],
-    "description": "Only Jitter"
+    "description": "Only Jitter",
+    "val_win_f1": "0.7884 \u00b1 0.0093"
   },
   "pair_mirror_yaw": {
     "val_loss": "1.0465 \u00b1 0.0327",

@@ -60,7 +60,8 @@
         "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_clean_seed3407.pt"
       }
     ],
-    "description": "Clean Baseline (No Aug)"
+    "description": "Clean Baseline (No Aug)",
+    "val_win_f1": "0.7885 \u00b1 0.0101"
   },
   "candidate_full_5op": {
     "val_win_acc": "79.19% \u00b1 1.26%",
@@ -123,7 +124,8 @@
         "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_candidate_full_5op_seed3407.pt"
       }
     ],
-    "description": "Candidate Full 5-op"
+    "description": "Candidate Full 5-op",
+    "val_win_f1": "0.7882 \u00b1 0.0152"
   },
   "candidate_minus_mirror": {
     "val_win_acc": "78.78% \u00b1 1.44%",
@@ -186,7 +188,8 @@
         "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_candidate_minus_mirror_seed3407.pt"
       }
     ],
-    "description": "Minus Mirror"
+    "description": "Minus Mirror",
+    "val_win_f1": "0.7757 \u00b1 0.0197"
   },
   "candidate_minus_yaw": {
     "val_win_acc": "80.06% \u00b1 0.32%",
@@ -249,7 +252,8 @@
         "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_candidate_minus_yaw_seed3407.pt"
       }
     ],
-    "description": "Minus Yaw"
+    "description": "Minus Yaw",
+    "val_win_f1": "0.7964 \u00b1 0.0026"
   },
   "candidate_minus_scale": {
     "val_win_acc": "80.13% \u00b1 0.13%",
@@ -312,7 +316,8 @@
         "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_candidate_minus_scale_seed3407.pt"
       }
     ],
-    "description": "Minus Scale"
+    "description": "Minus Scale",
+    "val_win_f1": "0.7985 \u00b1 0.0022"
   },
   "candidate_minus_time": {
     "val_win_acc": "79.54% \u00b1 0.57%",
@@ -375,7 +380,8 @@
         "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_candidate_minus_time_seed3407.pt"
       }
     ],
-    "description": "Minus TimeWarp (Proposed 4-op)"
+    "description": "Minus TimeWarp (Proposed 4-op)",
+    "val_win_f1": "0.7926 \u00b1 0.0060"
   },
   "candidate_minus_jitter": {
     "val_win_acc": "79.68% \u00b1 0.22%",
@@ -438,6 +444,7 @@
         "checkpoint": "/marimo/Gym_Classification/checkpoints/ablation_v2/seed3407/best_Transformer_mix_v2_candidate_minus_jitter_seed3407.pt"
       }
     ],
-    "description": "Minus Jitter"
+    "description": "Minus Jitter",
+    "val_win_f1": "0.7937 \u00b1 0.0048"
   }
 }

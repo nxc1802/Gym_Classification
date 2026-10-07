@@ -69,6 +69,7 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t5: Dict, t6: Dict) -> Dict[st
             "model": "LSTM (World 3D Clean)",
             "params": AUDITED_PARAMS["LSTM"],
             "val_win_acc": r["val_win_acc"],
+            "val_win_f1": r.get("val_win_f1", "-"),
             "val_vid_acc": r["val_vid_acc"],
             "test_win_acc": r["test_win_acc"],
             "test_win_f1": r["test_win_f1"],
@@ -81,6 +82,7 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t5: Dict, t6: Dict) -> Dict[st
             "model": "LSTM (Biomechanical Mix v2)",
             "params": AUDITED_PARAMS["LSTM"],
             "val_win_acc": r["val_win_acc"],
+            "val_win_f1": r.get("val_win_f1", "-"),
             "val_vid_acc": r["val_vid_acc"],
             "test_win_acc": r["test_win_acc"],
             "test_win_f1": r["test_win_f1"],
@@ -93,6 +95,7 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t5: Dict, t6: Dict) -> Dict[st
             "model": "BiLSTM (Biomechanical Mix v2)",
             "params": AUDITED_PARAMS["BiLSTM"],
             "val_win_acc": r["val_win_acc"],
+            "val_win_f1": r.get("val_win_f1", "-"),
             "val_vid_acc": r["val_vid_acc"],
             "test_win_acc": r["test_win_acc"],
             "test_win_f1": r["test_win_f1"],
@@ -107,6 +110,7 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t5: Dict, t6: Dict) -> Dict[st
             "model": "Transformer (Biomechanical Mix v2 Clean)",
             "params": AUDITED_PARAMS["Transformer"],
             "val_win_acc": r["val_win_acc"],
+            "val_win_f1": r.get("val_win_f1", "-"),
             "val_vid_acc": r["val_vid_acc"],
             "test_win_acc": r["test_win_acc"],
             "test_win_f1": r["test_win_f1"],
@@ -119,6 +123,7 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t5: Dict, t6: Dict) -> Dict[st
             "model": "Transformer (Biomechanical Mix v2 + SkelGym-Aug)",
             "params": AUDITED_PARAMS["Transformer"],
             "val_win_acc": r["val_win_acc"],
+            "val_win_f1": r.get("val_win_f1", "-"),
             "val_vid_acc": r["val_vid_acc"],
             "test_win_acc": r["test_win_acc"],
             "test_win_f1": r["test_win_f1"],
@@ -131,6 +136,7 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t5: Dict, t6: Dict) -> Dict[st
             "model": "Transformer (Biomechanical Mix v2 + SkelGym-Aug)",
             "params": AUDITED_PARAMS["Transformer"],
             "val_win_acc": r["val_win_acc"],
+            "val_win_f1": r.get("val_win_f1", "-"),
             "val_vid_acc": r["val_vid_acc"],
             "test_win_acc": r["test_win_acc"],
             "test_win_f1": r["test_win_f1"],
@@ -145,6 +151,7 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t5: Dict, t6: Dict) -> Dict[st
             "model": "ST-GCN (Raw 3D Clean)",
             "params": AUDITED_PARAMS["ST-GCN"],
             "val_win_acc": r["val_win_acc"],
+            "val_win_f1": r.get("val_win_f1", "-"),
             "val_vid_acc": r["val_vid_acc"],
             "test_win_acc": r["test_win_acc"],
             "test_win_f1": r["test_win_f1"],
@@ -157,6 +164,7 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t5: Dict, t6: Dict) -> Dict[st
             "model": "AAGCN (Bone 3D + SkelGym-Aug)",
             "params": AUDITED_PARAMS["AAGCN"],
             "val_win_acc": r["val_win_acc"],
+            "val_win_f1": r.get("val_win_f1", "-"),
             "val_vid_acc": r["val_vid_acc"],
             "test_win_acc": r["test_win_acc"],
             "test_win_f1": r["test_win_f1"],
@@ -169,6 +177,7 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t5: Dict, t6: Dict) -> Dict[st
             "model": "Four-Stream AAGCN (Uniform Soft Voting)",
             "params": AUDITED_PARAMS["Four-Stream AAGCN"],
             "val_win_acc": r["val_win_acc"],
+            "val_win_f1": r.get("val_win_f1", "-"),
             "val_vid_acc": r["val_vid_acc"],
             "test_win_acc": r["test_win_acc"],
             "test_win_f1": r["test_win_f1"],
@@ -178,8 +187,8 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t5: Dict, t6: Dict) -> Dict[st
 
     # 4. Ensembles from Table 6 (Validation Winners)
     winners = t6.get("winners", {})
-    w_lite = winners.get("SkelGym-Lite", "uniform_soft")
-    w_full = winners.get("SkelGym-Full", "stacking")
+    w_lite = winners.get("SkelGym-Lite", "accuracy_weighted_soft")
+    w_full = winners.get("SkelGym-Full", "uniform_soft")
 
     if "SkelGym-Lite" in t6 and w_lite in t6["SkelGym-Lite"]:
         r = t6["SkelGym-Lite"][w_lite]
@@ -188,6 +197,7 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t5: Dict, t6: Dict) -> Dict[st
             "model": f"SkelGym-Lite (2 Streams, {desc})",
             "params": AUDITED_PARAMS["SkelGym-Lite"],
             "val_win_acc": r["val_win_acc"],
+            "val_win_f1": r.get("val_win_f1", "-"),
             "val_vid_acc": r["val_vid_acc"],
             "test_win_acc": r["test_win_acc"],
             "test_win_f1": r["test_win_f1"],
@@ -201,6 +211,7 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t5: Dict, t6: Dict) -> Dict[st
             "model": f"SkelGym-Full (5 Streams, {desc})",
             "params": AUDITED_PARAMS["SkelGym-Full"],
             "val_win_acc": r["val_win_acc"],
+            "val_win_f1": r.get("val_win_f1", "-"),
             "val_vid_acc": r["val_vid_acc"],
             "test_win_acc": r["test_win_acc"],
             "test_win_f1": r["test_win_f1"],
@@ -212,11 +223,11 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t5: Dict, t6: Dict) -> Dict[st
 
 def generate_markdown_table7(t7_data: Dict[str, Any]) -> str:
     lines = [
-        "| Architecture / Model | Params | Val Vid Acc (%) | Test Win Acc (%) | Test Win F1 | Test Vid Acc (%) | Test Vid F1 |",
-        "| :--- | :---: | :---: | :---: | :---: | :---: | :---: |"
+        "| Architecture / Model | Params | Val Win Acc (%) | Val Win F1 | Val Vid Acc (%) | Test Win Acc (%) | Test Win F1 | Test Vid Acc (%) | Test Vid F1 |",
+        "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |"
     ]
     for r in t7_data["table7_rows"]:
-        lines.append(f"| **{r['model']}** | {r['params']} | {r['val_vid_acc']} | {r['test_win_acc']} | {r['test_win_f1']} | **{r['test_vid_acc']}** | **{r['test_vid_f1']}** |")
+        lines.append(f"| **{r['model']}** | {r['params']} | {r['val_win_acc']} | {r.get('val_win_f1', '-')} | {r['val_vid_acc']} | {r['test_win_acc']} | {r['test_win_f1']} | **{r['test_vid_acc']}** | **{r['test_vid_f1']}** |")
     return "\n".join(lines)
 
 def main():
