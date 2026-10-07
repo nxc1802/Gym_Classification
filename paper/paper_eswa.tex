@@ -558,8 +558,8 @@ To address diverse edge computing constraints, we establish two canonical deploy
     \begin{equation}
         P_{\text{lite}}(w) = w_{\text{trans}} P_{\text{trans}}(w) + w_{\text{bone}} P_{\text{bone}}(w), \quad w_m = \frac{\text{Acc}_m^{\text{val}}}{\sum_{j} \text{Acc}_j^{\text{val}}}.
     \end{equation}
-    This edge tier provides a lightweight footprint of only 679K parameters and 210.57 MFLOPs.
-    \item \textbf{SkelGym-Full (Canonical Cross-Paradigm Ensemble):} Integrates all five complementary backbones (Transformer Mix + Joint + Bone + Joint-Motion + Bone-Motion). Rather than employing fragile meta-classifiers (such as Stacking) or constrained non-linear optimization (such as SLSQP) that risk overfitting validation partitions, SkelGym-Full employs \textbf{Zero-Parameter Uniform Average Soft Voting}:
+    This edge tier provides a lightweight footprint of only 679K parameters and 221.72 MFLOPs.
+    \item \textbf{SkelGym-Full (Canonical Cross-Paradigm Ensemble):} Integrates all five complementary backbones (Transformer Mix + Joint + Bone + Joint-Motion + Bone-Motion). Rather than tuning complex parameterized meta-classifiers or constrained non-linear optimization weights that risk overfitting validation partitions, SkelGym-Full employs \textbf{Zero-Parameter Uniform Average Soft Voting}:
     \begin{equation}
     \label{eq:uniform_soft}
         P_{\text{full}}(w) = \frac{1}{5} \left( P_{\text{trans}}(w) + P_{\text{joint}}(w) + P_{\text{bone}}(w) + P_{\text{j-mot}}(w) + P_{\text{b-mot}}(w) \right).
@@ -757,7 +757,7 @@ Table~\ref{tab:table5} evaluates cross-paradigm ensemble configurations coupling
 \end{enumerate}
 
 \paragraph{Effectiveness of Parameter-Free Cross-Paradigm Fusion.}
-While prior works often attempt parameterized meta-classifiers (such as Stacking) or non-linear optimization (such as SLSQP), these methods introduce additional learnable parameters that risk overfitting validation splits. In contrast, zero-parameter uniform averaging treats all five complementary kinematic perspectives equally. Because sequence self-attention captures long-range temporal phase progression across coordinates and angles while adaptive graph convolutions capture instantaneous topological limb interactions, their prediction errors are largely uncorrelated. Combining them via uniform probability averaging provides a robust regularizing effect that eliminates meta-parameter estimation variance.
+While prior ensemble frameworks often attempt parameterized meta-classifiers or constrained non-linear optimization weighting, such approaches introduce additional parameter complexity that can risk overfitting validation splits. In contrast, zero-parameter uniform averaging treats all five complementary kinematic perspectives equally. Because sequence self-attention captures long-range temporal phase progression across coordinates and angles while adaptive graph convolutions capture instantaneous topological limb interactions, their prediction errors are largely uncorrelated. Combining them via uniform probability averaging provides a robust regularizing effect that eliminates meta-parameter estimation variance.
 
 \begin{table*}[!t]
 \centering
