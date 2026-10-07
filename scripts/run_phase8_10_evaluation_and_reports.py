@@ -35,10 +35,11 @@ from src.utils.statistics import (
     get_significance_stars,
 )
 
-def send_marimo_toast(msg: str):
+def send_marimo_toast(msg: str, *args, **kwargs):
     try:
         import marimo as mo
-        mo.status.toast(msg)
+        kind = kwargs.get("kind", "info")
+        mo.status.toast(msg, kind=kind)
     except Exception:
         pass
 
