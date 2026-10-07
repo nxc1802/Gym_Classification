@@ -103,8 +103,16 @@ def evaluate_fusion_protocol(
         elif method == "stacking":
             X_val = np.concatenate(val_probs, axis=1)
             X_test = np.concatenate(test_probs, axis=1)
-            clf = LogisticRegression(C=1.0, max_iter=1000, random_state=s)
-            clf.fit(X_val, val_targets)
+            
+            # Stacking trained STRICTLY on TRAIN SET ONLY
+            if "train_probs" in runs[0] and runs[0]["train_probs"] is not None:
+                train_probs = [np.array(r["train_probs"]) for r in runs]
+                train_targets = np.array(runs[0]["train_targets"])
+                X_train = np.concatenate(train_probs, axis=1)
+                clf = LogisticRegression(C=1.0, max_iter=1000, random_state=s)
+                clf.fit(X_train, train_targets)
+            else:
+                raise RuntimeError(f"Seed {s}: train_probs not found in runs! Stacking requires train_probs for unbiased validation evaluation.")
             
             val_fused_prob = clf.predict_proba(X_val)
             test_fused_prob = clf.predict_proba(X_test)
@@ -167,7 +175,47 @@ def get_transformer_predictions(
         if alt.exists():
             ckpt_path = alt
 
-    _, val_loader, test_loader = get_dataloaders(
+    # Check if precomputed probs npz exists
+    probs_npz = checkpoint_dir / f"seed{seed}" / f"probs_{proposed_aug_cfg_id}_seed{seed}.npz"
+    if probs_npz.exists():
+        data = np.load(probs_npz, allow_pickle=True)
+        val_probs = data["val_probs"]
+        y_val = data["val_targets"]
+        test_probs = data["test_probs"]
+        y_test = data["test_targets"]
+        train_probs = data["train_probs"]
+        y_train = data["train_targets"]
+        val_vids = data["val_video_ids"].tolist()
+        test_vids = data["test_video_ids"].tolist()
+
+        val_preds = np.argmax(val_probs, axis=1)
+        val_m = compute_metrics(y_val, val_preds)
+        _, _, _, val_vid_m = aggregate_video_level_predictions(val_probs, y_val, val_vids)
+        test_preds = np.argmax(test_probs, axis=1)
+        test_m = compute_metrics(y_test, test_preds)
+        _, _, _, test_vid_m = aggregate_video_level_predictions(test_probs, y_test, test_vids)
+
+        return {
+            "val_win_acc": round(float(val_m["accuracy"] * 100.0), 2),
+            "val_win_f1": round(float(val_m["macro_f1"]), 4),
+            "val_vid_acc": round(float(val_vid_m["accuracy"] * 100.0), 2),
+            "val_vid_f1": round(float(val_vid_m["macro_f1"]), 4),
+            "test_win_acc": round(float(test_m["accuracy"] * 100.0), 2),
+            "test_win_f1": round(float(test_m["macro_f1"]), 4),
+            "test_vid_acc": round(float(test_vid_m["accuracy"] * 100.0), 2),
+            "test_vid_f1": round(float(test_vid_m["macro_f1"]), 4),
+            "train_probs": train_probs.tolist(),
+            "train_targets": y_train.tolist(),
+            "val_probs": val_probs.tolist(),
+            "val_targets": y_val.tolist(),
+            "test_probs": test_probs.tolist(),
+            "test_targets": y_test.tolist(),
+            "val_video_ids": val_vids,
+            "test_video_ids": test_vids,
+            "checkpoint": str(ckpt_path)
+        }
+
+    train_loader, val_loader, test_loader = get_dataloaders(
         metadata_path=metadata_path,
         feature_method="mix_v2",
         batch_size=16,
@@ -201,6 +249,17 @@ def get_transformer_predictions(
         model_name=model_name,
         use_amp=torch.cuda.is_available()
     )
+
+    # Predict Train (unshuffled)
+    from torch.utils.data import DataLoader
+    eval_train_loader = DataLoader(
+        train_loader.dataset,
+        batch_size=val_loader.batch_size,
+        shuffle=False,
+        num_workers=0
+    )
+    y_train, _, train_probs = trainer.predict(eval_train_loader)
+
     y_val, _, val_probs = trainer.predict(val_loader)
     val_preds = np.argmax(val_probs, axis=1)
     val_m = compute_metrics(y_val, val_preds)
@@ -211,6 +270,20 @@ def get_transformer_predictions(
     test_m = compute_metrics(y_test, test_preds)
     _, _, _, test_vid_m = aggregate_video_level_predictions(test_probs, y_test, test_loader.dataset.video_ids)
 
+    # Cache npz
+    probs_npz.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(
+        probs_npz,
+        train_probs=train_probs,
+        train_targets=y_train,
+        val_probs=val_probs,
+        val_targets=y_val,
+        test_probs=test_probs,
+        test_targets=y_test,
+        val_video_ids=np.array(val_loader.dataset.video_ids),
+        test_video_ids=np.array(test_loader.dataset.video_ids)
+    )
+
     return {
         "val_win_acc": round(float(val_m["accuracy"] * 100.0), 2),
         "val_win_f1": round(float(val_m["macro_f1"]), 4),
@@ -220,6 +293,8 @@ def get_transformer_predictions(
         "test_win_f1": round(float(test_m["macro_f1"]), 4),
         "test_vid_acc": round(float(test_vid_m["accuracy"] * 100.0), 2),
         "test_vid_f1": round(float(test_vid_m["macro_f1"]), 4),
+        "train_probs": train_probs.tolist(),
+        "train_targets": y_train.tolist(),
         "val_probs": val_probs.tolist(),
         "test_probs": test_probs.tolist(),
         "val_targets": y_val.tolist(),
@@ -313,25 +388,52 @@ def main():
         results_table6["SkelGym-Full"][method_key] = res
         print(f"  [{method_key}] Val Vid Acc: {res['val_vid_acc']} | Test Vid Acc: {res['test_vid_acc']} (F1: {res['test_vid_f1']})")
 
-    # 4. Print Formatted Table
-    print("\n" + "=" * 100)
-    print("## TABLE 6: CROSS-PARADIGM FUSION PROTOCOLS STANDARDIZED BENCHMARK")
-    print("=" * 100)
-    print("| Paradigm / Architecture | Fusion Protocol | Val Vid Acc (%) | Val Vid F1 | Test Win Acc (%) | Test Win F1 | Test Vid Acc (%) | Test Vid F1 |")
-    print("| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |")
+    # 4. Compute Validation Winners
+    winner_lite = max(
+        results_table6["SkelGym-Lite"].keys(),
+        key=lambda k: (
+            float(results_table6["SkelGym-Lite"][k]["val_vid_acc"].split("%")[0]),
+            float(results_table6["SkelGym-Lite"][k]["val_vid_f1"].split(" ")[0])
+        )
+    )
+    winner_full = max(
+        results_table6["SkelGym-Full"].keys(),
+        key=lambda k: (
+            float(results_table6["SkelGym-Full"][k]["val_vid_acc"].split("%")[0]),
+            float(results_table6["SkelGym-Full"][k]["val_vid_f1"].split(" ")[0])
+        )
+    )
+    results_table6["winners"] = {
+        "SkelGym-Lite": winner_lite,
+        "SkelGym-Full": winner_full
+    }
 
-    for arch, methods in results_table6.items():
-        for m_key, m_rep in methods.items():
-            print(f"| **{arch}** | {m_rep['description']} | {m_rep['val_vid_acc']} | {m_rep['val_vid_f1']} | {m_rep['test_win_acc']} | {m_rep['test_win_f1']} | **{m_rep['test_vid_acc']}** | **{m_rep['test_vid_f1']}** |")
+    # 5. Print Formatted Table with Strict Zero-Leakage (Test metrics revealed ONLY for validation winners)
+    print("\n" + "=" * 110)
+    print("## TABLE 6: CROSS-PARADIGM FUSION PROTOCOLS (TEST METRICS REVEALED ONLY FOR VALIDATION WINNERS)")
+    print("=" * 110)
+    print("| Paradigm / Architecture | Fusion Protocol | Val Win Acc (%) | Val Win F1 | Val Vid Acc (%) | Val Vid F1 | Test Win Acc (%) | Test Win F1 | Test Vid Acc (%) | Test Vid F1 | Status |")
+    print("| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |")
 
-    print("=" * 100)
+    for arch in ["SkelGym-Lite", "SkelGym-Full"]:
+        w_key = winner_lite if arch == "SkelGym-Lite" else winner_full
+        for m_key, m_rep in results_table6[arch].items():
+            is_w = (m_key == w_key)
+            test_w = m_rep['test_win_acc'] if is_w else "-"
+            test_wf1 = m_rep['test_win_f1'] if is_w else "-"
+            test_v = f"**{m_rep['test_vid_acc']}**" if is_w else "-"
+            test_vf1 = f"**{m_rep['test_vid_f1']}**" if is_w else "-"
+            st = f"🏆 Validation Winner ({arch})" if is_w else "Verified"
+            print(f"| **{arch}** | {m_rep['description']} | {m_rep['val_win_acc']} | {m_rep['val_win_f1']} | {m_rep['val_vid_acc']} | {m_rep['val_vid_f1']} | {test_w} | {test_wf1} | {test_v} | {test_vf1} | {st} |")
 
-    # 5. Save Output
+    print("=" * 110)
+
+    # 6. Save Output
     out_file = ROOT_DIR / "outputs" / "table6_cross_paradigm_fusion.json"
     with open(out_file, "w") as f:
         json.dump(results_table6, f, indent=2)
 
-    send_marimo_toast("Phase 7 Complete: Table 6 Cross-Paradigm Fusion Protocols evaluated successfully!")
+    send_marimo_toast(f"Phase 7 Complete! Lite Winner: {winner_lite}, Full Winner: {winner_full}", kind="success")
     print(f"\nSaved Table 6 results to {out_file}")
 
 if __name__ == "__main__":

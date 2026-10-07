@@ -125,17 +125,41 @@ def main():
         history = trainer.fit(train_loader, val_loader, epochs=100)
         train_time = time.time() - t_start
 
-    # 4. Evaluate Validation
+    # 4. Predict Train (unshuffled for Stacking meta-classifier)
+    from torch.utils.data import DataLoader
+    eval_train_loader = DataLoader(
+        train_loader.dataset,
+        batch_size=val_loader.batch_size,
+        shuffle=False,
+        num_workers=0
+    )
+    y_train, _, train_probs = trainer.predict(eval_train_loader)
+
+    # 5. Evaluate Validation
     y_val, _, val_probs = trainer.predict(val_loader)
     val_preds = np.argmax(val_probs, axis=1)
     val_m = compute_metrics(y_val, val_preds)
     _, _, _, val_vid_m = aggregate_video_level_predictions(val_probs, y_val, val_loader.dataset.video_ids)
 
-    # 5. Evaluate Test
+    # 6. Evaluate Test
     y_test, _, test_probs = trainer.predict(test_loader)
     test_preds = np.argmax(test_probs, axis=1)
     test_m = compute_metrics(y_test, test_preds)
     _, _, _, test_vid_m = aggregate_video_level_predictions(test_probs, y_test, test_loader.dataset.video_ids)
+
+    # Save complete prediction tensors to compressed npz
+    probs_npz = seed_ckpt_dir / f"probs_{args.cfg_id}_seed{args.seed}.npz"
+    np.savez_compressed(
+        probs_npz,
+        train_probs=train_probs,
+        train_targets=y_train,
+        val_probs=val_probs,
+        val_targets=y_val,
+        test_probs=test_probs,
+        test_targets=y_test,
+        val_video_ids=np.array(val_loader.dataset.video_ids),
+        test_video_ids=np.array(test_loader.dataset.video_ids)
+    )
 
     prov_file = best_ckpt_path.with_suffix(".provenance.json")
     val_loss = None

@@ -111,7 +111,19 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t6: Dict) -> Dict[str, Any]:
             "test_vid_acc": r["test_vid_acc"],
             "test_vid_f1": r["test_vid_f1"]
         })
-    if "candidate_minus_time" in t4:
+    if "pair_mirror_yaw" in t5:
+        r = t5["pair_mirror_yaw"]
+        rows.append({
+            "model": "Transformer (Biomechanical Mix v2 + SkelGym-Aug)",
+            "params": AUDITED_PARAMS["Transformer"],
+            "val_win_acc": r["val_win_acc"],
+            "val_vid_acc": r["val_vid_acc"],
+            "test_win_acc": r["test_win_acc"],
+            "test_win_f1": r["test_win_f1"],
+            "test_vid_acc": r["test_vid_acc"],
+            "test_vid_f1": r["test_vid_f1"]
+        })
+    elif "candidate_minus_time" in t4:
         r = t4["candidate_minus_time"]
         rows.append({
             "model": "Transformer (Biomechanical Mix v2 + SkelGym-Aug)",
@@ -162,11 +174,16 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t6: Dict) -> Dict[str, Any]:
             "test_vid_f1": r["test_vid_f1"]
         })
 
-    # 4. Ensembles from Table 6
-    if "SkelGym-Lite" in t6 and "uniform_soft" in t6["SkelGym-Lite"]:
-        r = t6["SkelGym-Lite"]["uniform_soft"]
+    # 4. Ensembles from Table 6 (Validation Winners)
+    winners = t6.get("winners", {})
+    w_lite = winners.get("SkelGym-Lite", "uniform_soft")
+    w_full = winners.get("SkelGym-Full", "stacking")
+
+    if "SkelGym-Lite" in t6 and w_lite in t6["SkelGym-Lite"]:
+        r = t6["SkelGym-Lite"][w_lite]
+        desc = r.get("description", f"Lite ({w_lite})")
         rows.append({
-            "model": "SkelGym-Lite (2 Streams: Trans + Bone, Uniform Soft)",
+            "model": f"SkelGym-Lite (2 Streams, {desc})",
             "params": AUDITED_PARAMS["SkelGym-Lite"],
             "val_win_acc": r["val_win_acc"],
             "val_vid_acc": r["val_vid_acc"],
@@ -175,22 +192,11 @@ def generate_table7(t2: Dict, t3: Dict, t4: Dict, t6: Dict) -> Dict[str, Any]:
             "test_vid_acc": r["test_vid_acc"],
             "test_vid_f1": r["test_vid_f1"]
         })
-    if "SkelGym-Full" in t6 and "uniform_soft" in t6["SkelGym-Full"]:
-        r = t6["SkelGym-Full"]["uniform_soft"]
+    if "SkelGym-Full" in t6 and w_full in t6["SkelGym-Full"]:
+        r = t6["SkelGym-Full"][w_full]
+        desc = r.get("description", f"Full ({w_full})")
         rows.append({
-            "model": "SkelGym-Full (5 Streams, Uniform Soft Voting)",
-            "params": AUDITED_PARAMS["SkelGym-Full"],
-            "val_win_acc": r["val_win_acc"],
-            "val_vid_acc": r["val_vid_acc"],
-            "test_win_acc": r["test_win_acc"],
-            "test_win_f1": r["test_win_f1"],
-            "test_vid_acc": r["test_vid_acc"],
-            "test_vid_f1": r["test_vid_f1"]
-        })
-    if "SkelGym-Full" in t6 and "stacking" in t6["SkelGym-Full"]:
-        r = t6["SkelGym-Full"]["stacking"]
-        rows.append({
-            "model": "SkelGym-Full (5 Streams, Stacking Meta-Classifier)",
+            "model": f"SkelGym-Full (5 Streams, {desc})",
             "params": AUDITED_PARAMS["SkelGym-Full"],
             "val_win_acc": r["val_win_acc"],
             "val_vid_acc": r["val_vid_acc"],
