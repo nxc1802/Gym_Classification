@@ -187,13 +187,13 @@
 
 | Model Architecture | Parameters | FLOPs per Window | RTX PRO 6000 (CUDA) | Apple M4 (MPS) | Apple M4 (CPU) | Status |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Transformer Mix v2 (63-d)** | 301K | 7.71 MFLOPs | 0.59 ms (1685 FPS) | — | — | Verified |
-| **AAGCN Joint Stream** | 378K | 202.86 MFLOPs | 1.29 ms (777 FPS) | 1.89 ms (530 FPS) | 0.90 ms (1115 FPS) | Verified |
-| **AAGCN Bone Stream** | 378K | 202.86 MFLOPs | 0.97 ms (1027 FPS) | 1.72 ms (581 FPS) | 0.88 ms (1138 FPS) | Verified |
-| **AAGCN Joint-Motion Stream** | 378K | 202.86 MFLOPs | 0.96 ms (1038 FPS) | 1.90 ms (527 FPS) | 1.02 ms (978 FPS) | Verified |
-| **AAGCN Bone-Motion Stream** | 378K | 202.86 MFLOPs | 0.98 ms (1022 FPS) | 1.90 ms (527 FPS) | 1.03 ms (975 FPS) | Verified |
-| **SkelGym-Lite (Transformer + Bone)** | 679K | 210.57 MFLOPs | 1.75 ms (572 FPS) | 2.55 ms (393 FPS) | 1.49 ms (671 FPS) | Verified |
-| **SkelGym-Full (Transformer + 4 AAGCN)** | 1.81M | 819.13 MFLOPs | 4.63 ms (216 FPS) | 5.86 ms (171 FPS) | 3.96 ms (253 FPS) | Verified |
+| **Transformer Mix v2 (63-d)** | 301K | 18.87 MFLOPs | 0.59 ms (1685 FPS) | 1.36 ms (738 FPS) | 0.49 ms (2041 FPS) | Verified |
+| **AAGCN Joint Stream** | 378K | 202.86 MFLOPs | 1.01 ms (987 FPS) | 1.89 ms (530 FPS) | 0.90 ms (1115 FPS) | Verified |
+| **AAGCN Bone Stream** | 378K | 202.86 MFLOPs | 1.02 ms (976 FPS) | 1.72 ms (581 FPS) | 0.88 ms (1138 FPS) | Verified |
+| **AAGCN Joint-Motion Stream** | 378K | 202.86 MFLOPs | 1.01 ms (990 FPS) | 1.90 ms (527 FPS) | 1.02 ms (978 FPS) | Verified |
+| **AAGCN Bone-Motion Stream** | 378K | 202.86 MFLOPs | 1.02 ms (980 FPS) | 1.90 ms (527 FPS) | 1.03 ms (975 FPS) | Verified |
+| **SkelGym-Lite (Transformer + Bone)** | 679K | 221.72 MFLOPs | 1.66 ms (603 FPS) | 2.55 ms (393 FPS) | 1.49 ms (671 FPS) | Verified |
+| **SkelGym-Full (Transformer + 4 AAGCN)** | 1.81M | 830.29 MFLOPs | 4.65 ms (215 FPS) | 5.86 ms (171 FPS) | 3.96 ms (253 FPS) | Verified |
 
 ---
 

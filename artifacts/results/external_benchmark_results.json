@@ -1,64 +1,70 @@
 {
-  "dataset": "mmfit",
+  "dataset": "deyzel_sc_subset",
   "pose_protocol": "mediapipe",
   "class_set": "core4",
   "num_records": 54,
-  "num_windows": 878,
+  "num_windows": 529,
+  "classes": [
+    "squat",
+    "deadlift",
+    "barbell biceps curl",
+    "lateral raise"
+  ],
   "models": {
     "ST-GCN (Rel 3D)": {
-      "open_win_acc": 37.93,
-      "open_vid_acc": 38.89,
-      "closed_win_acc": 67.43,
-      "closed_vid_acc": 70.37,
-      "closed_vid_f1": 0.6524,
-      "status": "Verified"
-    },
-    "LSTM (Mix 117-d)": {
-      "open_win_acc": 61.96,
-      "open_vid_acc": 77.78,
-      "closed_win_acc": 87.02,
-      "closed_vid_acc": 90.74,
-      "closed_vid_f1": 0.8904,
-      "status": "Verified"
-    },
-    "BiLSTM (Mix 117-d)": {
-      "open_win_acc": 61.16,
+      "open_win_acc": 59.74,
       "open_vid_acc": 68.52,
-      "closed_win_acc": 80.41,
-      "closed_vid_acc": 83.33,
-      "closed_vid_f1": 0.7775,
+      "closed_win_acc": 82.61,
+      "closed_vid_acc": 85.19,
+      "closed_vid_f1": 0.8563,
       "status": "Verified"
     },
-    "Transformer (Mix)": {
-      "open_win_acc": 55.47,
-      "open_vid_acc": 61.11,
-      "closed_win_acc": 83.71,
-      "closed_vid_acc": 85.19,
-      "closed_vid_f1": 0.8092,
+    "LSTM (Mix 63-d)": {
+      "open_win_acc": 64.08,
+      "open_vid_acc": 85.19,
+      "closed_win_acc": 78.64,
+      "closed_vid_acc": 90.74,
+      "closed_vid_f1": 0.9071,
+      "status": "Verified"
+    },
+    "BiLSTM (Mix 63-d)": {
+      "open_win_acc": 71.64,
+      "open_vid_acc": 85.19,
+      "closed_win_acc": 84.12,
+      "closed_vid_acc": 90.74,
+      "closed_vid_f1": 0.9126,
       "status": "Verified"
     },
     "AAGCN (Bone 3D)": {
-      "open_win_acc": 58.88,
-      "open_vid_acc": 62.96,
-      "closed_win_acc": 74.26,
-      "closed_vid_acc": 77.78,
-      "closed_vid_f1": 0.6667,
+      "open_win_acc": 72.02,
+      "open_vid_acc": 85.19,
+      "closed_win_acc": 87.90,
+      "closed_vid_acc": 92.59,
+      "closed_vid_f1": 0.9281,
+      "status": "Verified"
+    },
+    "Transformer (Mix 63-d)": {
+      "open_win_acc": 77.88,
+      "open_vid_acc": 85.19,
+      "closed_win_acc": 96.03,
+      "closed_vid_acc": 98.15,
+      "closed_vid_f1": 0.9788,
       "status": "Verified"
     },
     "SkelGym-Lite": {
-      "open_win_acc": 63.55,
-      "open_vid_acc": 66.67,
-      "closed_win_acc": 79.95,
-      "closed_vid_acc": 81.48,
-      "closed_vid_f1": 0.7433,
+      "open_win_acc": 84.12,
+      "open_vid_acc": 94.44,
+      "closed_win_acc": 95.84,
+      "closed_vid_acc": 98.15,
+      "closed_vid_f1": 0.9782,
       "status": "Verified"
     },
     "SkelGym-Full": {
-      "open_win_acc": 66.86,
-      "open_vid_acc": 74.07,
-      "closed_win_acc": 95.9,
-      "closed_vid_acc": 100.0,
-      "closed_vid_f1": 1.0,
+      "open_win_acc": 80.72,
+      "open_vid_acc": 96.30,
+      "closed_win_acc": 93.01,
+      "closed_vid_acc": 96.30,
+      "closed_vid_f1": 0.9626,
       "status": "Verified"
     }
   }
