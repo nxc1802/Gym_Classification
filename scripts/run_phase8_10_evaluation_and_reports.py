@@ -55,7 +55,7 @@ AUDITED_PARAMS = {
     "SkelGym-Full": "1.81M"
 }
 
-def generate_table7(t2: Dict, t3: Dict, t4: Dict, t6: Dict) -> Dict[str, Any]:
+def generate_table7(t2: Dict, t3: Dict, t4: Dict, t5: Dict, t6: Dict) -> Dict[str, Any]:
     """
     Builds Table 7: Unified Master Benchmark across all canonical architectures.
     """
@@ -256,7 +256,7 @@ def main():
 
     # 1. Compile Table 7
     print("\n---> Compiling Table 7 (Unified Master Benchmark Matrix)...")
-    t7 = generate_table7(t2, t3, t4, t6)
+    t7 = generate_table7(t2, t3, t4, t5, t6)
     with open(outputs_dir / "table7_unified_benchmark.json", "w") as f:
         json.dump(t7, f, indent=2)
     print(generate_markdown_table7(t7))
