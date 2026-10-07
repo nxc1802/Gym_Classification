@@ -4,7 +4,7 @@ Master E2E Rebuild Pipeline for SkelGym.
 Orchestrates:
   - Stage 1: Retrain Transformer Mix with Proposed SkelGym-Aug (Mirror + Yaw) across seeds 42, 123, 3407 in parallel.
   - Stage 2: Retrain/Verify Graph Kinematic Streams (T3.1 - T3.7) with Mirror + Yaw across seeds 42, 123, 3407 in parallel.
-  - Stage 3: Rebuild Table 6 Cross-Paradigm Fusion with Stacking trained STRICTLY on TRAIN SET ONLY using Logistic Regression.
+  - Stage 3: Rebuild Table 6 Cross-Paradigm Fusion (Zero-Parameter & Calibrated Soft Voting).
   - Stage 4: Run Table 7, 8, 9, 10 downstream evaluations and statistical tests.
   - Stage 5: Re-render RESULTS_FINAL.md with strict formatting:
       * Tables 2, 3, 4, 5: Hide Test metrics and Video-level metrics (show only Validation Window-level metrics).
@@ -206,6 +206,8 @@ def update_results_final_markdown():
     for arch in ["SkelGym-Lite", "SkelGym-Full"]:
         w_key = winner_lite if arch == "SkelGym-Lite" else winner_full
         for m_key, m_rep in t6[arch].items():
+            if m_key == "stacking":
+                continue
             is_winner = (m_key == w_key)
             test_w = m_rep['test_win_acc'] if is_winner else "-"
             test_wf1 = m_rep['test_win_f1'] if is_winner else "-"
@@ -302,8 +304,8 @@ def update_results_final_markdown():
 
 ## Table 6: Multi-Stream Cross-Paradigm Ensemble Comparison (Paper Table 6)
 
-*Objective:* Benchmark 4 standardized fusion methods across multi-stream configurations and multi-seed downstream consistency across seeds $42, 123, 3407$.  
-*Methodological Guarantee:* Stacking Meta-Classifier is trained **STRICTLY on the TRAIN SET ONLY using Logistic Regression** to guarantee 100% fair validation evaluation. Test metrics are **revealed ONLY for the Validation Winners** of SkelGym-Lite and SkelGym-Full; all other rows remain hidden to preserve strict post-validation test separation.  
+*Objective:* Benchmark 3 standardized fusion methods across multi-stream configurations and multi-seed downstream consistency across seeds $42, 123, 3407$.  
+*Methodological Guarantee:* Test metrics are **revealed ONLY for the Validation Winners** of SkelGym-Lite and SkelGym-Full; all other rows remain hidden to preserve strict post-validation test separation.  
 *Execution Command:* `python scripts/run_phase7_table6_ensembles.py --proposed_aug_cfg_id pair_mirror_yaw`
 
 {t6_text}
@@ -416,10 +418,10 @@ def main():
     else:
         print("⏩ Skipping Stage 2 (already trained).")
 
-    # STAGE 3: Table 6 Cross-Paradigm Fusion (with Train-set only Stacking)
+    # STAGE 3: Table 6 Cross-Paradigm Fusion
     run_stage(
         [sys.executable, "-u", str(ROOT_DIR / "scripts" / "run_phase7_table6_ensembles.py"), "--proposed_aug_cfg_id", "pair_mirror_yaw", "--device", args.device],
-        "Table 6 Cross-Paradigm Fusion (Train-Set-Only Stacking)",
+        "Table 6 Cross-Paradigm Fusion",
         3,
         t_pipeline_start,
         120.0

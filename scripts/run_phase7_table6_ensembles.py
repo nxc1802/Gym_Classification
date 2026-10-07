@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 """
 Phase 7: Table 6 Cross-Paradigm Fusion Protocols (SkelGym-Lite & SkelGym-Full).
-Evaluates 4 fusion protocols across 3 random seeds (42, 123, 3407):
+Evaluates 3 standardized fusion protocols across 3 random seeds (42, 123, 3407):
   1. Hard Majority Voting (Discrete Baseline)
-  2. Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K)
-  3. Accuracy-Weighted Soft Voting (Validation-calibrated weights)
-  4. Stacking Meta-Classifier (Logistic Regression, fit strictly on Train)
+  2. Accuracy-Weighted Soft Voting (Validation-calibrated weights)
+  3. Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K)
 
 Configurations:
   - SkelGym-Lite (2 Streams: Transformer + Bone AAGCN, ~679K params)
   - SkelGym-Full (5 Streams: Transformer + 4 AAGCN Streams, ~1.81M params)
 
 Zero-Leakage Guarantee:
-  - Stacking meta-classifiers are trained strictly on training set base predictions.
   - Accuracy weights are calibrated strictly on validation window accuracy.
   - Test set features/probabilities are evaluated in inference mode with zero parameter updates.
 
@@ -409,8 +407,7 @@ def main():
     protocols = [
         ("hard", "Hard Majority Voting (Discrete Baseline)"),
         ("accuracy_weighted_soft", "Accuracy-Weighted Soft Voting (Validation-calibrated weights)"),
-        ("uniform_soft", "Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K)"),
-        ("stacking", "Stacking Meta-Classifier (Logistic Regression, train-set fit)")
+        ("uniform_soft", "Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K)")
     ]
 
     results_table6 = {

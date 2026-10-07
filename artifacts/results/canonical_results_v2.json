@@ -2037,52 +2037,6 @@
           }
         ],
         "description": "Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K)"
-      },
-      "stacking": {
-        "val_win_acc": "83.05% \u00b1 0.53%",
-        "val_win_f1": "0.8294 \u00b1 0.0069",
-        "val_vid_acc": "85.02% \u00b1 1.04%",
-        "val_vid_f1": "0.8619 \u00b1 0.0114",
-        "test_win_acc": "71.93% \u00b1 0.90%",
-        "test_win_f1": "0.7130 \u00b1 0.0097",
-        "test_vid_acc": "80.69% \u00b1 0.61%",
-        "test_vid_f1": "0.8059 \u00b1 0.0085",
-        "seeds": [
-          {
-            "seed": 42,
-            "val_win_acc": 83.13,
-            "val_win_f1": 0.8303,
-            "val_vid_acc": 84.06,
-            "val_vid_f1": 0.8531,
-            "test_win_acc": 71.86,
-            "test_win_f1": 0.7117,
-            "test_vid_acc": 80.26,
-            "test_vid_f1": 0.798
-          },
-          {
-            "seed": 123,
-            "val_win_acc": 82.36,
-            "val_win_f1": 0.8205,
-            "val_vid_acc": 84.54,
-            "val_vid_f1": 0.8546,
-            "test_win_acc": 70.87,
-            "test_win_f1": 0.7018,
-            "test_vid_acc": 80.26,
-            "test_vid_f1": 0.8019
-          },
-          {
-            "seed": 3407,
-            "val_win_acc": 83.66,
-            "val_win_f1": 0.8374,
-            "val_vid_acc": 86.47,
-            "val_vid_f1": 0.878,
-            "test_win_acc": 73.06,
-            "test_win_f1": 0.7255,
-            "test_vid_acc": 81.55,
-            "test_vid_f1": 0.8177
-          }
-        ],
-        "description": "Stacking Meta-Classifier (Ridge/Logistic Regression SOTA)"
       }
     },
     "SkelGym-Full": {
@@ -2223,52 +2177,6 @@
           }
         ],
         "description": "Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K)"
-      },
-      "stacking": {
-        "val_win_acc": "84.58% \u00b1 0.31%",
-        "val_win_f1": "0.8442 \u00b1 0.0036",
-        "val_vid_acc": "86.96% \u00b1 1.43%",
-        "val_vid_f1": "0.8759 \u00b1 0.0123",
-        "test_win_acc": "75.87% \u00b1 0.18%",
-        "test_win_f1": "0.7512 \u00b1 0.0009",
-        "test_vid_acc": "84.69% \u00b1 0.54%",
-        "test_vid_f1": "0.8378 \u00b1 0.0091",
-        "seeds": [
-          {
-            "seed": 42,
-            "val_win_acc": 84.14,
-            "val_win_f1": 0.8392,
-            "val_vid_acc": 85.02,
-            "val_vid_f1": 0.8617,
-            "test_win_acc": 76.01,
-            "test_win_f1": 0.7524,
-            "test_vid_acc": 85.41,
-            "test_vid_f1": 0.8447
-          },
-          {
-            "seed": 123,
-            "val_win_acc": 84.72,
-            "val_win_f1": 0.8468,
-            "val_vid_acc": 88.41,
-            "val_vid_f1": 0.8918,
-            "test_win_acc": 75.61,
-            "test_win_f1": 0.7512,
-            "test_vid_acc": 84.12,
-            "test_vid_f1": 0.8249
-          },
-          {
-            "seed": 3407,
-            "val_win_acc": 84.87,
-            "val_win_f1": 0.8467,
-            "val_vid_acc": 87.44,
-            "val_vid_f1": 0.8742,
-            "test_win_acc": 75.98,
-            "test_win_f1": 0.7501,
-            "test_vid_acc": 84.55,
-            "test_vid_f1": 0.8438
-          }
-        ],
-        "description": "Stacking Meta-Classifier (Ridge/Logistic Regression SOTA)"
       }
     },
     "winners": {

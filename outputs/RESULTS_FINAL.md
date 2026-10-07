@@ -75,8 +75,8 @@
 
 ## Table 6: Multi-Stream Cross-Paradigm Ensemble Comparison (Paper Table 6)
 
-*Objective:* Benchmark 4 standardized fusion methods across multi-stream configurations and multi-seed downstream consistency across seeds $42, 123, 3407$.  
-*Methodological Guarantee:* Stacking Meta-Classifier is trained **STRICTLY on the TRAIN SET ONLY using Logistic Regression** to guarantee 100% fair validation evaluation. Test metrics are **revealed ONLY for the Validation Winners** of SkelGym-Lite and SkelGym-Full; all other rows remain hidden to preserve strict post-validation test separation.  
+*Objective:* Benchmark 3 standardized fusion methods across multi-stream configurations and multi-seed downstream consistency across seeds $42, 123, 3407$.  
+*Methodological Guarantee:* Test metrics are **revealed ONLY for the Validation Winners** of SkelGym-Lite and SkelGym-Full; all other rows remain hidden to preserve strict post-validation test separation.  
 *Execution Command:* `python scripts/run_phase7_table6_ensembles.py --proposed_aug_cfg_id pair_mirror_yaw`
 
 | Architecture / Configuration | Fusion Protocol & Weighting | Val Win Acc (%) | Val Win F1 | Val Vid Acc (%) | Val Vid F1 | Test Win Acc (%) | Test Win F1 | Test Vid Acc (%) | Test Vid F1 | Status |
@@ -85,11 +85,9 @@
 | **SkelGym-Lite** | Hard Majority Voting (Discrete Baseline) | 79.47% ± 0.81% | 0.7883 ± 0.0084 | 82.93% ± 0.60% | 0.8277 ± 0.0065 | - | - | - | - | Verified |
 | **SkelGym-Lite** | Accuracy-Weighted Soft Voting (Validation-calibrated weights) | 83.47% ± 0.14% | 0.8351 ± 0.0021 | 85.67% ± 1.14% | 0.8634 ± 0.0066 | 73.74% ± 0.63% | 0.7310 ± 0.0058 | **82.12% ± 0.40%** | **0.8198 ± 0.0030** | 🏆 Validation Winner (SkelGym-Lite) |
 | **SkelGym-Lite** | Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K) | 83.26% ± 0.06% | 0.8327 ± 0.0008 | 85.67% ± 1.14% | 0.8634 ± 0.0066 | - | - | - | - | Verified |
-| **SkelGym-Lite** | Stacking Meta-Classifier (Ridge/Logistic Regression SOTA) | 83.05% ± 0.53% | 0.8294 ± 0.0069 | 85.02% ± 1.04% | 0.8619 ± 0.0114 | - | - | - | - | Verified |
 | **SkelGym-Full** | Hard Majority Voting (Discrete Baseline) | 84.11% ± 0.30% | 0.8411 ± 0.0041 | 86.15% ± 1.21% | 0.8660 ± 0.0090 | - | - | - | - | Verified |
 | **SkelGym-Full** | Accuracy-Weighted Soft Voting (Validation-calibrated weights) | 84.85% ± 0.29% | 0.8475 ± 0.0024 | 87.28% ± 1.27% | 0.8821 ± 0.0113 | - | - | - | - | Verified |
 | **SkelGym-Full** | Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K) | 85.05% ± 0.47% | 0.8487 ± 0.0046 | 87.92% ± 1.37% | 0.8886 ± 0.0126 | 76.19% ± 0.16% | 0.7537 ± 0.0014 | **85.27% ± 0.41%** | **0.8386 ± 0.0075** | 🏆 Validation Winner (SkelGym-Full) |
-| **SkelGym-Full** | Stacking Meta-Classifier (Ridge/Logistic Regression SOTA) | 84.58% ± 0.31% | 0.8442 ± 0.0036 | 86.96% ± 1.43% | 0.8759 ± 0.0123 | - | - | - | - | Verified |
 
 ---
 
