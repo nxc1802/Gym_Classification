@@ -303,6 +303,8 @@ def main():
             ]
             if resume:
                 cmd.append("--resume")
+            else:
+                cmd.append("--force-retrain")
 
             lf = open(log_file, "w")
             p = subprocess.Popen(cmd, stdout=lf, stderr=subprocess.STDOUT, text=True)
