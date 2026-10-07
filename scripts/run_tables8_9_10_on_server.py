@@ -140,12 +140,28 @@ def main():
     # 3. Extract predictions for Sequence models (seed 42)
     print("Extracting predictions for Transformer, LSTM, BiLSTM...")
     ckpt_trans_clean = checkpoints_dir / "ablation_v2" / "seed42" / "best_Transformer_mix_v2_clean_seed42.pt"
-    ckpt_trans_aug = checkpoints_dir / "ablation_v2" / "seed42" / "best_Transformer_mix_v2_candidate_minus_time_seed42.pt"
+    if not ckpt_trans_clean.exists():
+        ckpt_trans_clean = checkpoints_dir / "upgrade_mix" / "mix_v2" / "seed42" / "best_Transformer_mix_v2.pt"
+
     ckpt_lstm = checkpoints_dir / "table2" / "seed42" / "best_LSTM_mix_v2_seed42.pt"
     ckpt_bilstm = checkpoints_dir / "table2" / "seed42" / "best_BiLSTM_mix_v2_seed42.pt"
 
+    npz_aug = checkpoints_dir / "ablation_v2" / "seed42" / "probs_pair_mirror_yaw_seed42.npz"
+    if npz_aug.exists():
+        print(f"Loading precomputed probabilities from {npz_aug}...")
+        npz_data = np.load(npz_aug, allow_pickle=True)
+        vprob_aug_trans = np.array(npz_data["val_probs"])
+        tprob_aug_trans = np.array(npz_data["test_probs"])
+        train_prob_aug_trans = np.array(npz_data["train_probs"])
+        train_targets = np.array(npz_data["train_targets"])
+    else:
+        ckpt_trans_aug = checkpoints_dir / "ablation_v2" / "seed42" / "best_Transformer_mix_v2_pair_mirror_yaw_seed42.pt"
+        if not ckpt_trans_aug.exists():
+            ckpt_trans_aug = checkpoints_dir / "ablation_v2" / "seed42" / "best_Transformer_mix_v2_candidate_minus_time_seed42.pt"
+        vprob_aug_trans, tprob_aug_trans = get_sequence_predictions("Transformer", ckpt_trans_aug, device, val_loader, test_loader)
+        train_prob_aug_trans = None
+
     vprob_clean_trans, tprob_clean_trans = get_sequence_predictions("Transformer", ckpt_trans_clean, device, val_loader, test_loader)
-    vprob_aug_trans, tprob_aug_trans = get_sequence_predictions("Transformer", ckpt_trans_aug, device, val_loader, test_loader)
     vprob_lstm, tprob_lstm = get_sequence_predictions("LSTM", ckpt_lstm, device, val_loader, test_loader)
     vprob_bilstm, tprob_bilstm = get_sequence_predictions("BiLSTM", ckpt_bilstm, device, val_loader, test_loader)
 
@@ -154,17 +170,24 @@ def main():
     tprob_stgcn_world = np.array(stream_data["T3.2"][42]["test_probs"])
     vprob_stgcn_world = np.array(stream_data["T3.2"][42]["val_probs"])
 
+    train_prob_bone = np.array(stream_data["T3.4"][42].get("train_probs", vprob_aug_trans))
     vprob_bone = np.array(stream_data["T3.4"][42]["val_probs"])
     tprob_bone = np.array(stream_data["T3.4"][42]["test_probs"])
 
+    train_prob_joint = np.array(stream_data["T3.5"][42].get("train_probs", vprob_aug_trans))
     vprob_joint = np.array(stream_data["T3.5"][42]["val_probs"])
     tprob_joint = np.array(stream_data["T3.5"][42]["test_probs"])
 
+    train_prob_jmot = np.array(stream_data["T3.6"][42].get("train_probs", vprob_aug_trans))
     vprob_jmot = np.array(stream_data["T3.6"][42]["val_probs"])
     tprob_jmot = np.array(stream_data["T3.6"][42]["test_probs"])
 
+    train_prob_bmot = np.array(stream_data["T3.7"][42].get("train_probs", vprob_aug_trans))
     vprob_bmot = np.array(stream_data["T3.7"][42]["val_probs"])
     tprob_bmot = np.array(stream_data["T3.7"][42]["test_probs"])
+
+    if "train_targets" in stream_data["T3.4"][42]:
+        train_targets = np.array(stream_data["T3.4"][42]["train_targets"])
 
     # Ensembles
     # 1. Four-Stream AAGCN (Uniform Soft)
@@ -172,20 +195,20 @@ def main():
     p_4stream_w = np.argmax(tprob_4stream, axis=1)
     _, p_4stream_v, prob_4stream_v, _ = aggregate_video_level_predictions(tprob_4stream, y_test_t, test_vids)
 
-    # 2. SkelGym-Lite (Stacking)
-    X_val_lite = np.concatenate([vprob_aug_trans, vprob_bone], axis=1)
+    # 2. SkelGym-Lite (Stacking trained strictly on train set)
+    X_train_lite = np.concatenate([train_prob_aug_trans, train_prob_bone], axis=1)
     X_test_lite = np.concatenate([tprob_aug_trans, tprob_bone], axis=1)
     clf_lite = LogisticRegression(C=1.0, max_iter=1000, random_state=42)
-    clf_lite.fit(X_val_lite, val_targets)
+    clf_lite.fit(X_train_lite, train_targets)
     tprob_skel_lite = clf_lite.predict_proba(X_test_lite)
     p_skel_lite_w = np.argmax(tprob_skel_lite, axis=1)
     _, p_skel_lite_v, prob_skel_lite_v, _ = aggregate_video_level_predictions(tprob_skel_lite, y_test_t, test_vids)
 
-    # 3. SkelGym-Full (Stacking Meta-Classifier)
-    X_val_full = np.concatenate([vprob_aug_trans, vprob_joint, vprob_bone, vprob_jmot, vprob_bmot], axis=1)
+    # 3. SkelGym-Full (Stacking Meta-Classifier trained strictly on train set)
+    X_train_full = np.concatenate([train_prob_aug_trans, train_prob_joint, train_prob_bone, train_prob_jmot, train_prob_bmot], axis=1)
     X_test_full = np.concatenate([tprob_aug_trans, tprob_joint, tprob_bone, tprob_jmot, tprob_bmot], axis=1)
     clf_full = LogisticRegression(C=1.0, max_iter=1000, random_state=42)
-    clf_full.fit(X_val_full, val_targets)
+    clf_full.fit(X_train_full, train_targets)
     tprob_skel_full = clf_full.predict_proba(X_test_full)
     p_skel_full_w = np.argmax(tprob_skel_full, axis=1)
     _, p_skel_full_v, prob_skel_full_v, _ = aggregate_video_level_predictions(tprob_skel_full, y_test_t, test_vids)

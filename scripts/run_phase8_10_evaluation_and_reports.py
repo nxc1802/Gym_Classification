@@ -281,7 +281,12 @@ def main():
     sot_path = artifacts_dir / "canonical_results_v2.json"
     with open(sot_path, "w") as f:
         json.dump(canonical_sot, f, indent=2)
-    print(f"\nCanonical Single Source of Truth saved to {sot_path}")
+    # 3. Run Table 8, 9, 10 Statistical Tests & Bootstrap
+    print("\n---> Running Table 8, 9, 10 Statistical Hypothesis Testing and Bootstrap...")
+    cmd_t810 = [sys.executable, "-u", str(ROOT_DIR / "scripts" / "run_tables8_9_10_on_server.py"), "--device", args.device]
+    res_t810 = subprocess.run(cmd_t810)
+    if res_t810.returncode != 0:
+        print(f"Warning: run_tables8_9_10_on_server.py exited with code {res_t810.returncode}")
 
     send_marimo_toast("Phase 8-10 Complete: Canonical SOT & Reports successfully generated!")
 
