@@ -1,302 +1,75 @@
-Chưa nên **freeze paper**, nhưng mình nghĩ bạn đã đủ gần để bắt đầu chỉnh **Methods / Experimental Protocol / Architecture**. Riêng **Results + Discussion + claims cuối** thì nên chờ thêm một vòng sửa pipeline/reporting.
+Được. Từ đây mình sẽ coi **experiment đã freeze** và chuyển trọng tâm sang paper, không tiếp tục “đẻ” thêm thí nghiệm trừ khi phát hiện một lỗi khoa học thực sự.
 
-Commit mới nhất mình kiểm tra là `40553a2e2ed5b7cc59c627f64910cb2f5f3baaee` — `complete full rebuild with Mirror+Yaw, train-set stacking, and zero-leakage display rules`. Hướng tổng thể đã đúng hơn rất nhiều: WORLD `mix_v2`, SkelGym-Aug = Mirror+Yaw, graph streams đã rerun, Stacking chuyển sang train-set, có canonical SOT và downstream statistics.
+Mình đã rà manuscript hiện tại và có một kết luận rõ: **`paper/paper.tex` nên được xem là scientific master**, còn `paper_eswa.tex` / `paper_llncs.tex` nên sync sau. `GYM_Publication/manuscript.tex` quá cũ để làm nền chính.
 
-## Những phần mình đánh giá đã ổn
+Hiện `paper/paper.tex` chưa chỉ cần “polish”; nó cần một lượt **scientific synchronization** lớn. Ngay Abstract và Introduction vẫn còn:
 
-**SkelGym-Aug hiện có thể freeze về mặt method.** `mix_v2` hiện thực sự dùng 39-d WORLD + 24 kinematic angles. Augmenter có xử lý riêng 63-d; Mirror/Yaw biến đổi 39 tọa độ WORLD rồi recompute 24 angles, và augmentation xảy ra trước z-score. Với proposed method chỉ gồm Mirror+Yaw, lỗi làm hỏng angle channels trước đây về cơ bản đã được giải quyết.
+- Mix v2 = scale-normalized relative 3D → phải đổi thành **39-d metric WORLD 3D + 24-d kinematic angles**.
+- SkelGym-Aug = 4 operators → phải đổi thành **Mirror + Yaw**.
+- SLSQP fusion → phải đổi thành **Uniform Soft cho SkelGym-Full**, Accuracy-Weighted cho Lite.
+- Transformer `3L, 8H, ~399K` → hiện canonical là **3 layers, 4 heads, 301K**.
+- kết quả `69.74% / 79.11%` → final Full hiện là **76.19 ± 0.16% window**, **85.27 ± 0.41% video**, F1 **0.7537 / 0.8386**.
+- latency `0.42–4.33 ms CPU` và FLOPs cũ cũng cần đồng bộ SOT mới.
+- Conclusion vẫn nói Mirror + Yaw + Scale + Jitter.
+- Related Work / Ensemble section vẫn xây narrative quanh SLSQP.
+- Fig. 1 vẫn có node “SLSQP Calibration” và các số cũ.
 
-Kết quả downstream cũng cho thấy Mirror+Yaw không chỉ là một experiment riêng lẻ. Ví dụ AAGCN Bone tăng lên `66.36%` test-window, World Joint `70.99%`, Joint Motion `57.70%`, Bone Motion `57.83%`; tức augmentation mới đã thực sự được propagate sang graph pipeline.
+Quan trọng hơn, paper hiện có một số section phân tích sâu như Deyzel subset, biomechanical confusion/error analysis với các con số từ hệ thống cũ. Với các phần này mình sẽ áp nguyên tắc rất nghiêm:
 
-**Stacking mới hợp lý hơn bản cũ.** Code hiện train Logistic Regression trên `train_probs + train_targets`, rồi evaluate trên Val/Test. Vì vậy vấn đề “train Stacking trên Val rồi tự chấm Val” đã biến mất. Đây là một comparison hợp lệ với Uniform/Hard trên validation. Việc train_probs là in-sample của base models vẫn là một limitation so với OOF stacking, nhưng không phải leakage Val/Test và không phải blocker.
+> **Nếu số liệu không còn trace được tới canonical artifact hiện tại, hoặc không được regenerate theo final system, thì không giữ claim định lượng đó trong main paper.**
 
-**SOT direction đã đúng.** `artifacts/results/canonical_results_v2.json` đã trở thành nơi gom Table 2–7 và downstream artifacts được sinh lại. Đây chính là kiến trúc code → artifacts → paper mà ta muốn.
+Không nên để một paper có Table 7 dùng final Uniform Soft nhưng Discussion lại phân tích một ensemble SLSQP cũ.
 
----
+Mình đề xuất sửa theo thứ tự này:
 
-# Nhưng hiện còn 4 blocker lớn
+1. **Abstract + Contributions + Fig. 1**  
+   Chốt scientific story mới của paper.
+2. **Methodology**  
+   WORLD Mix v2 → Mirror+Yaw → sequence/graph streams → fusion protocol → video consensus.
+3. **Experimental protocol**  
+   Làm rõ selection chỉ dựa trên Validation Window Macro-F1/Accuracy; video metrics là downstream/final evaluation.
+4. **Results tables 1–10**  
+   Đồng bộ trực tiếp từ `RESULTS_FINAL.md`/canonical SOT.
+5. **Results narrative + statistical claims**  
+   Không dùng test để giải thích lựa chọn method.
+6. **Discussion / limitations / biomechanical analysis**  
+   Giữ những gì được evidence support, bỏ mechanistic overclaim.
+7. **Conclusion + Abstract lần cuối**.
+8. Cuối cùng mới làm **language compression, redundancy, venue formatting**.
 
-## 1. Table 6 đang có bug `Val Win F1`
-
-Trong `run_phase7_table6_ensembles.py`:
-
-```python
-val_vf1 = [r["val_vid_f1"] for r in seed_metrics]
-
-...
-
-"val_win_f1": f"{np.mean(val_vf1):.4f} ..."
-```
-
-Tức là **Val Window F1 đang lấy nhầm Video F1**.
-
-Ví dụ JSON hiện ghi cho SkelGym-Full Uniform:
-
-```text
-Val Win F1 = 0.8886
-```
-
-nhưng từ ba seed thực tế:
-
-```text
-0.8435
-0.8481
-0.8546
-```
-
-mean đúng khoảng:
-
-> **0.8487**, không phải `0.8886`.
-
-Các giá trị đúng từ per-seed hiện tại:
-
-| Fusion | Lite Val Win F1 | Full Val Win F1 |
-|---|---:|---:|
-| Hard | .7883 | .8411 |
-| Accuracy-weighted | **.8341** | **.8487** |
-| Uniform Soft | .8327 | **.8487** |
-| Stacking | .8294 | .8442 |
-
-Đây là lỗi phải sửa trước paper.
-
----
-
-## 2. Fusion winner hiện đang chọn bằng **Video metric**, trái protocol mà ta vừa thống nhất
-
-Code hiện:
-
-```python
-winner_full = max(...,
-    key=lambda k: (
-        val_vid_acc,
-        val_vid_f1
-    )
-)
-```
-
-Trong khi hướng methodology chúng ta vừa thống nhất là:
-
-> intermediate method selection → Validation Window Macro-F1 primary.
-
-Do đó Full hiện bị chọn thành:
-
-> **Hard Voting**
-
-nhưng đó không phải winner theo Window-level criterion.
-
-Với số hiện tại:
-
-- Accuracy Weighted: Val Win F1 ≈ `.8487`, Win Acc `84.99`
-- Uniform: Val Win F1 ≈ `.8487`, Win Acc **85.05**
-- Hard: Val Win F1 `.8411`, Win Acc `84.11`
-
-Nếu rule là:
-
-> Primary Val Win Macro-F1 → Secondary Val Win Acc
-
-thì **SkelGym-Full phải nghiêng về Uniform Soft**, không phải Hard.
-
-Lite thì Accuracy-Weighted vẫn có vẻ là winner.
-
-Còn một chi tiết nữa: Accuracy-Weighted hiện tính weight từ:
-
-```python
-r["val_vid_acc"]
-```
-
-Nếu bạn thực sự muốn protocol **window-only cho design selection**, nó cũng nên chuyển thành `val_win_acc` hoặc một criterion window-level đã freeze.
-
----
-
-## 3. Tables 8–10 đang đánh giá **Stacking**, không phải hệ thống winner ở Table 6
-
-Đây là blocker nghiêm trọng nhất về consistency.
-
-`run_tables8_9_10_on_server.py` hard-code:
-
-```python
-# SkelGym-Lite
-LogisticRegression(...)
-
-# SkelGym-Full
-LogisticRegression(...)
-```
-
-rồi Table 8, 9, 10 đều dùng các predictions này.
-
-Thành ra hiện tại:
+Scientific story mới của paper theo mình nên rất đơn giản:
 
 ```text
-Table 6/7:
-SkelGym-Full = Hard Voting
-
-Table 8/9/10:
-SkelGym-Full = Stacking
+Metric WORLD skeleton
+        ↓
+Biomechanical Mix v2
+WORLD XYZ (39) + kinematic angles (24)
+        ↓
+Mirror + Yaw SkelGym-Aug
+(selected only by validation-window evidence)
+        ↓
+Transformer sequence stream
++
+4 complementary AAGCN streams
+        ↓
+simple late probability fusion
+        ↓
+SkelGym-Full = Uniform Soft
+        ↓
+video consensus
 ```
 
-Đây là hai hệ thống khác nhau.
+Điểm hay là paper giờ **sạch hơn bản cũ rất nhiều**: không còn SLSQP, không còn Stacking, không còn phải biện minh cho Scale/Jitter/TimeWarp trong proposed augmentation. Contribution chính trở nên dễ hiểu hơn.
 
-Table 9 thậm chí ghi rõ:
+Mình sẽ coi các số sau là “paper anchors” từ giờ:
 
-> `SkelGym-Full (Stacking)`
+- **SkelGym-Aug:** Mirror + Yaw
+- Val Win: **81.20 ± 0.72%, F1 0.8119 ± 0.0072**
+- Transformer + Aug Test: **73.14 ± 0.90%, F1 0.7253**
+- Four-stream AAGCN Test: **74.50 ± 0.65%, F1 0.7341**
+- SkelGym-Lite: **73.74 ± 0.63% / 82.12 ± 0.40% video**
+- **SkelGym-Full Uniform Soft:** **76.19 ± 0.16% Win Acc, 0.7537 ± 0.0014 Win F1, 85.27 ± 0.41% Video Acc, 0.8386 ± 0.0075 Video F1**
+- Final model size: **1.81M**
+- canonical seeds: **42, 123, 3407**
 
-và Table 10 cũng được generate từ `p_skel_full_*` của Stacking.
-
-Nếu sau khi sửa criterion Full winner thành Uniform thì downstream lại càng lệch.
-
-**Tables 8–10 phải đọc `t6["winners"]` và dựng đúng predictions của system đã freeze.**
-
-Không cần retrain model; chủ yếu regenerate fusion predictions + statistics.
-
----
-
-## 4. Table 9 có một kết quả rõ ràng sai/stale
-
-Table 7:
-
-> Transformer Mix v2 Clean = **69.24% Test Win Acc**
-
-nhưng Table 9 bootstrap:
-
-> Transformer Mix v2 Clean = **36.45%**
-
-Hai số này không thể cùng đúng cho cùng một model/test set.
-
-Script Table 9 đang tự load lại clean checkpoint và inference lại, nên khả năng cao có mismatch ở:
-
-- checkpoint;
-- normalization artifact;
-- feature-version;
-- hoặc fallback checkpoint.
-
-Đây là dấu hiệu provenance chưa khóa hoàn toàn.
-
-Trước khi viết Results, cần bắt buộc đạt invariant:
-
-```text
-point estimate từ bootstrap
-≈ direct metric của chính prediction artifact
-≈ Table 7 metric
-```
-
-Chênh lệch do bootstrap mean có thể nhỏ, nhưng không thể `69% → 36%`.
-
----
-
-# Một số lỗi nhỏ nhưng nên sửa trước paper
-
-`RESULTS_FINAL.md` vẫn chứa vài wording cũ/mâu thuẫn:
-
-- Table 4 nói “hide video metrics” nhưng verdict vẫn ghi `Severe Collapse (-3.06% Vid)`.
-- Table 5 vẫn ghi `Strong Vid F1`, `Vid drops ...`.
-- nhiều `Val Win F1 = N/A` dù run-level JSON có sẵn F1.
-- `candidate_minus_time` trong Phase 3 script vẫn còn comment `identical to proposed 4-op`.
-- `run_phase7...` docstring vẫn nói Stacking “fit strictly on Val”, trong khi code đã chuyển sang Train.
-- mô tả `Ridge/Logistic Regression` trong khi thực tế hiện chỉ dùng `LogisticRegression`.
-
-Ngoài ra câu:
-
-> “Mirror and Yaw are rigid isometries in SE(3)”
-
-không đúng toán học. **Yaw rotation** thuộc rotation/rigid-motion group, nhưng **reflection/mirroring không thuộc SE(3)** vì reflection có determinant `-1`. Trong paper nên dùng kiểu:
-
-> “distance-preserving Euclidean transformations”
-
-hoặc phân biệt:
-
-> Yaw rotation + bilateral reflection.
-
-Và câu “Scale/Jitter/TimeWarp corrupt metric proportions and velocity profiles” cũng quá gộp. Uniform Scale không làm thay đổi joint angles hay tỷ lệ hình học nội tại; TimeWarp mới trực tiếp làm thay đổi temporal dynamics.
-
----
-
-# Có một bug khác ở Hard Voting video metrics
-
-Trong branch Hard:
-
-```python
-val_preds = hard_voting(val_probs)
-val_fused_prob = np.mean(val_probs, axis=0)
-```
-
-Sau đó Video metric lại được tính từ:
-
-```python
-aggregate_video_level_predictions(val_fused_prob, ...)
-```
-
-Tức:
-
-> Window metric = Hard Voting  
-> Video metric = thực chất Uniform Soft probabilities
-
-Đó là lý do Hard và Uniform có Video metrics giống nhau trong Table 6.
-
-Nếu vẫn report Video metric cho từng fusion method, phải định nghĩa lại semantics. Nếu mục tiêu của bạn là window-only selection thì đơn giản nhất là **không dùng Video columns ở Table 6 selection**, rồi final video evaluation chỉ chạy trên winner.
-
----
-
-# Stacking còn một safeguard nên thêm
-
-Train-set Stacking hiện concatenate:
-
-```python
-Transformer train_probs
-Bone train_probs
-Joint train_probs
-...
-```
-
-nhưng chưa thấy assertion kiểu:
-
-```python
-assert np.array_equal(train_targets_stream1,
-                      train_targets_stream2)
-```
-
-Các dataset có vẻ được tạo deterministic và eval-train đều `shuffle=False`, nên khả năng alignment đúng khá cao.
-
-Nhưng vì Stacking phụ thuộc **row-by-row correspondence**, nên trước paper nên thêm assertion cho:
-
-- same number of train samples;
-- identical train_targets;
-- nếu có thể, identical sample/video/window IDs.
-
-Đây là một guard nhỏ nhưng rất đáng có.
-
----
-
-# Verdict của mình
-
-### Methods / System Design
-**Sẵn sàng khoảng 90%.**
-
-Bạn có thể bắt đầu chỉnh:
-- WORLD representation;
-- mix_v2;
-- SkelGym-Aug Mirror+Yaw;
-- Transformer/AAGCN architectures;
-- augmentation rationale;
-- train-set Stacking methodology;
-- dataset/protocol.
-
-### Results / Discussion
-**Chưa sẵn sàng freeze.**
-
-Cần xử lý bốn blocker:
-
-1. sửa `val_win_f1`;
-2. freeze fusion selection criterion theo Window metric;
-3. regenerate Tables 7–10 từ đúng validation winner;
-4. xử lý mismatch Transformer Clean `69.24 ↔ 36.45`.
-
-### Experiment training
-Khả năng cao **không cần một vòng retrain lớn nữa**.
-
-Phần lớn việc còn lại là:
-
-> fix metric aggregation → refusion → regenerate downstream statistics → consistency audit.
-
-Chỉ retrain nếu điều tra `36.45%` cho thấy checkpoint Clean thật sự stale/incompatible.
-
-Sau khi bốn điểm đó pass, mình sẽ xem repository **đủ ổn để chuyển sang phase chỉnh paper toàn diện và dùng canonical SOT làm nguồn duy nhất**.
+Bước tiếp theo hợp lý nhất là mình bắt đầu từ **Abstract + 4 Contributions + mô tả Fig. 1**, vì ba phần đó sẽ khóa narrative cho toàn bộ phần còn lại. Sau khi chúng đúng, Methodology và Results sẽ dễ sửa hơn rất nhiều.

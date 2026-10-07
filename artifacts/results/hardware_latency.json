@@ -1,14 +1,8 @@
 {
   "models": {
-    "Transformer Mix (117-d)": {
-      "params_k": 400,
-      "mflops": 10.7,
-      "cuda_mean_ms": 0.5,
-      "cuda_fps": 1999,
-      "mps_mean_ms": 1.24,
-      "mps_fps": 809,
-      "cpu_mean_ms": 0.42,
-      "cpu_fps": 2406
+    "Transformer Mix v2 (63-d)": {
+      "params_k": 301,
+      "mflops": 18.87
     },
     "AAGCN Joint Stream": {
       "params_k": 378,
@@ -51,8 +45,8 @@
       "cpu_fps": 975
     },
     "SkelGym-Lite (Transformer + Bone)": {
-      "params_k": 778,
-      "mflops": 213.56,
+      "params_k": 679,
+      "mflops": 221.72,
       "cuda_mean_ms": 1.66,
       "cuda_fps": 603,
       "mps_mean_ms": 2.55,
@@ -61,9 +55,9 @@
       "cpu_fps": 671
     },
     "SkelGym-Full (Transformer + 4 AAGCN)": {
-      "params": "1.91M",
-      "params_k": 1913,
-      "mflops": 822.14,
+      "params": "1.81M",
+      "params_k": 1814,
+      "mflops": 830.29,
       "cuda_mean_ms": 4.65,
       "cuda_fps": 215,
       "mps_mean_ms": 5.86,
