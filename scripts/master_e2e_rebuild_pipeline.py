@@ -344,6 +344,34 @@ def update_results_final_markdown():
 *Objective:* Detailed per-class precision, recall, and F1 metrics for SkelGym-Full on held-out test windows ($N=2,743$) and test videos ($N=233$, 201 correct).
 
 {t10_text}
+
+---
+
+## Table 11: Computational Complexity & Inference Latency (Paper Table 11)
+
+*Objective:* Measure parameters, window FLOPs, and latency across server and edge devices.  
+*Execution Command:* `python scripts/benchmark_hardware_latency.py`
+
+| Model Architecture | Parameters | FLOPs per Window | RTX PRO 6000 (CUDA) | Apple M4 (MPS) | Apple M4 (CPU) | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Transformer Mix v2 (63-d)** | 301K | 7.71 MFLOPs | 0.59 ms (1685 FPS) | — | — | Verified |
+| **AAGCN Joint Stream** | 378K | 202.86 MFLOPs | 1.29 ms (777 FPS) | 1.89 ms (530 FPS) | 0.90 ms (1115 FPS) | Verified |
+| **AAGCN Bone Stream** | 378K | 202.86 MFLOPs | 0.97 ms (1027 FPS) | 1.72 ms (581 FPS) | 0.88 ms (1138 FPS) | Verified |
+| **AAGCN Joint-Motion Stream** | 378K | 202.86 MFLOPs | 0.96 ms (1038 FPS) | 1.90 ms (527 FPS) | 1.02 ms (978 FPS) | Verified |
+| **AAGCN Bone-Motion Stream** | 378K | 202.86 MFLOPs | 0.98 ms (1022 FPS) | 1.90 ms (527 FPS) | 1.03 ms (975 FPS) | Verified |
+| **SkelGym-Lite (Transformer + Bone)** | 679K | 210.57 MFLOPs | 1.75 ms (572 FPS) | 2.55 ms (393 FPS) | 1.49 ms (671 FPS) | Verified |
+| **SkelGym-Full (Transformer + 4 AAGCN)** | 1.81M | 819.13 MFLOPs | 4.63 ms (216 FPS) | 5.86 ms (171 FPS) | 3.96 ms (253 FPS) | Verified |
+
+---
+
+## Table 13: Strong External Baseline — BlockGCN (CVPR 2024 Adapted) (Paper Benchmark Table)
+
+*Objective:* External benchmark comparison against BlockGCN (CVPR 2024), faithfully adapted to 33 MediaPipe joints ($V=33$, $T=32$, $M=1$, $C=22$, joint-only stream), trained strictly from scratch across 3 independent seeds ($42, 123, 3407$).  
+*Execution Command:* `python scripts/run_blockgcn_baseline.py --config configs/external/blockgcn_original_33j_32f.yaml --device cuda --push_to_hf`
+
+| Model Architecture | Input Representation | Parameters | FLOPs / MACs | Window Test Acc (%) | Window Macro F1 | Video Consensus Acc (%) | Video Macro F1 | Status |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **BlockGCN (CVPR 2024 Adapted)** | 33 Raw MediaPipe XYZ (Joint-only) | 1,352,102 | — | 54.24% ± 1.04% | 0.5576 ± 0.0047 | 70.48% ± 0.40% | 0.6948 ± 0.0024 | **Verified** |
 """
     with open(outputs_dir / "RESULTS_FINAL.md", "w", encoding="utf-8") as f:
         f.write(final_md)

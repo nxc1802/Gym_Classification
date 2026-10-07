@@ -1,0 +1,378 @@
+{
+  "SkelGym-Lite": {
+    "hard": {
+      "val_win_acc": "79.47% \u00b1 0.81%",
+      "val_win_f1": "0.8634 \u00b1 0.0066",
+      "val_vid_acc": "85.67% \u00b1 1.14%",
+      "val_vid_f1": "0.8634 \u00b1 0.0066",
+      "test_win_acc": "67.31% \u00b1 0.46%",
+      "test_win_f1": "0.6799 \u00b1 0.0030",
+      "test_vid_acc": "82.12% \u00b1 0.40%",
+      "test_vid_f1": "0.8198 \u00b1 0.0030",
+      "seeds": [
+        {
+          "seed": 42,
+          "val_win_acc": 80.58,
+          "val_win_f1": 0.7996,
+          "val_vid_acc": 84.06,
+          "val_vid_f1": 0.8541,
+          "test_win_acc": 67.77,
+          "test_win_f1": 0.6812,
+          "test_vid_acc": 82.4,
+          "test_vid_f1": 0.8178
+        },
+        {
+          "seed": 123,
+          "val_win_acc": 78.65,
+          "val_win_f1": 0.7796,
+          "val_vid_acc": 86.47,
+          "val_vid_f1": 0.868,
+          "test_win_acc": 67.48,
+          "test_win_f1": 0.6828,
+          "test_vid_acc": 82.4,
+          "test_vid_f1": 0.824
+        },
+        {
+          "seed": 3407,
+          "val_win_acc": 79.18,
+          "val_win_f1": 0.7856,
+          "val_vid_acc": 86.47,
+          "val_vid_f1": 0.8682,
+          "test_win_acc": 66.68,
+          "test_win_f1": 0.6757,
+          "test_vid_acc": 81.55,
+          "test_vid_f1": 0.8175
+        }
+      ],
+      "description": "Hard Majority Voting (Discrete Baseline)"
+    },
+    "accuracy_weighted_soft": {
+      "val_win_acc": "83.41% \u00b1 0.20%",
+      "val_win_f1": "0.8636 \u00b1 0.0044",
+      "val_vid_acc": "85.67% \u00b1 0.82%",
+      "val_vid_f1": "0.8636 \u00b1 0.0044",
+      "test_win_acc": "73.58% \u00b1 0.76%",
+      "test_win_f1": "0.7296 \u00b1 0.0064",
+      "test_vid_acc": "82.26% \u00b1 0.53%",
+      "test_vid_f1": "0.8212 \u00b1 0.0027",
+      "seeds": [
+        {
+          "seed": 42,
+          "val_win_acc": 83.57,
+          "val_win_f1": 0.8348,
+          "val_vid_acc": 84.54,
+          "val_vid_f1": 0.8576,
+          "test_win_acc": 73.75,
+          "test_win_f1": 0.7288,
+          "test_vid_acc": 82.83,
+          "test_vid_f1": 0.822
+        },
+        {
+          "seed": 123,
+          "val_win_acc": 83.13,
+          "val_win_f1": 0.8309,
+          "val_vid_acc": 85.99,
+          "val_vid_f1": 0.8649,
+          "test_win_acc": 72.58,
+          "test_win_f1": 0.7221,
+          "test_vid_acc": 82.4,
+          "test_vid_f1": 0.824
+        },
+        {
+          "seed": 3407,
+          "val_win_acc": 83.52,
+          "val_win_f1": 0.8366,
+          "val_vid_acc": 86.47,
+          "val_vid_f1": 0.8682,
+          "test_win_acc": 74.41,
+          "test_win_f1": 0.7378,
+          "test_vid_acc": 81.55,
+          "test_vid_f1": 0.8175
+        }
+      ],
+      "description": "Accuracy-Weighted Soft Voting (Validation-calibrated weights)"
+    },
+    "uniform_soft": {
+      "val_win_acc": "83.26% \u00b1 0.06%",
+      "val_win_f1": "0.8634 \u00b1 0.0066",
+      "val_vid_acc": "85.67% \u00b1 1.14%",
+      "val_vid_f1": "0.8634 \u00b1 0.0066",
+      "test_win_acc": "73.44% \u00b1 0.65%",
+      "test_win_f1": "0.7284 \u00b1 0.0058",
+      "test_vid_acc": "82.12% \u00b1 0.40%",
+      "test_vid_f1": "0.8198 \u00b1 0.0030",
+      "seeds": [
+        {
+          "seed": 42,
+          "val_win_acc": 83.18,
+          "val_win_f1": 0.8317,
+          "val_vid_acc": 84.06,
+          "val_vid_f1": 0.8541,
+          "test_win_acc": 73.39,
+          "test_win_f1": 0.7262,
+          "test_vid_acc": 82.4,
+          "test_vid_f1": 0.8178
+        },
+        {
+          "seed": 123,
+          "val_win_acc": 83.28,
+          "val_win_f1": 0.8328,
+          "val_vid_acc": 86.47,
+          "val_vid_f1": 0.868,
+          "test_win_acc": 72.66,
+          "test_win_f1": 0.7226,
+          "test_vid_acc": 82.4,
+          "test_vid_f1": 0.824
+        },
+        {
+          "seed": 3407,
+          "val_win_acc": 83.33,
+          "val_win_f1": 0.8337,
+          "val_vid_acc": 86.47,
+          "val_vid_f1": 0.8682,
+          "test_win_acc": 74.26,
+          "test_win_f1": 0.7363,
+          "test_vid_acc": 81.55,
+          "test_vid_f1": 0.8175
+        }
+      ],
+      "description": "Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K)"
+    },
+    "stacking": {
+      "val_win_acc": "83.05% \u00b1 0.53%",
+      "val_win_f1": "0.8619 \u00b1 0.0114",
+      "val_vid_acc": "85.02% \u00b1 1.04%",
+      "val_vid_f1": "0.8619 \u00b1 0.0114",
+      "test_win_acc": "71.93% \u00b1 0.90%",
+      "test_win_f1": "0.7130 \u00b1 0.0097",
+      "test_vid_acc": "80.69% \u00b1 0.61%",
+      "test_vid_f1": "0.8059 \u00b1 0.0085",
+      "seeds": [
+        {
+          "seed": 42,
+          "val_win_acc": 83.13,
+          "val_win_f1": 0.8303,
+          "val_vid_acc": 84.06,
+          "val_vid_f1": 0.8531,
+          "test_win_acc": 71.86,
+          "test_win_f1": 0.7117,
+          "test_vid_acc": 80.26,
+          "test_vid_f1": 0.798
+        },
+        {
+          "seed": 123,
+          "val_win_acc": 82.36,
+          "val_win_f1": 0.8205,
+          "val_vid_acc": 84.54,
+          "val_vid_f1": 0.8546,
+          "test_win_acc": 70.87,
+          "test_win_f1": 0.7018,
+          "test_vid_acc": 80.26,
+          "test_vid_f1": 0.8019
+        },
+        {
+          "seed": 3407,
+          "val_win_acc": 83.66,
+          "val_win_f1": 0.8374,
+          "val_vid_acc": 86.47,
+          "val_vid_f1": 0.878,
+          "test_win_acc": 73.06,
+          "test_win_f1": 0.7255,
+          "test_vid_acc": 81.55,
+          "test_vid_f1": 0.8177
+        }
+      ],
+      "description": "Stacking Meta-Classifier (Ridge/Logistic Regression SOTA)"
+    }
+  },
+  "SkelGym-Full": {
+    "hard": {
+      "val_win_acc": "84.11% \u00b1 0.30%",
+      "val_win_f1": "0.8886 \u00b1 0.0126",
+      "val_vid_acc": "87.92% \u00b1 1.37%",
+      "val_vid_f1": "0.8886 \u00b1 0.0126",
+      "test_win_acc": "74.07% \u00b1 0.11%",
+      "test_win_f1": "0.7371 \u00b1 0.0011",
+      "test_vid_acc": "85.27% \u00b1 0.41%",
+      "test_vid_f1": "0.8386 \u00b1 0.0075",
+      "seeds": [
+        {
+          "seed": 42,
+          "val_win_acc": 83.71,
+          "val_win_f1": 0.8355,
+          "val_vid_acc": 85.99,
+          "val_vid_f1": 0.8708,
+          "test_win_acc": 74.23,
+          "test_win_f1": 0.7385,
+          "test_vid_acc": 85.84,
+          "test_vid_f1": 0.8491
+        },
+        {
+          "seed": 123,
+          "val_win_acc": 84.19,
+          "val_win_f1": 0.8423,
+          "val_vid_acc": 88.89,
+          "val_vid_f1": 0.8971,
+          "test_win_acc": 74.01,
+          "test_win_f1": 0.737,
+          "test_vid_acc": 84.98,
+          "test_vid_f1": 0.8343
+        },
+        {
+          "seed": 3407,
+          "val_win_acc": 84.43,
+          "val_win_f1": 0.8454,
+          "val_vid_acc": 88.89,
+          "val_vid_f1": 0.8978,
+          "test_win_acc": 73.97,
+          "test_win_f1": 0.7358,
+          "test_vid_acc": 84.98,
+          "test_vid_f1": 0.8323
+        }
+      ],
+      "description": "Hard Majority Voting (Discrete Baseline)"
+    },
+    "accuracy_weighted_soft": {
+      "val_win_acc": "84.99% \u00b1 0.28%",
+      "val_win_f1": "0.8863 \u00b1 0.0112",
+      "val_vid_acc": "87.76% \u00b1 1.27%",
+      "val_vid_f1": "0.8863 \u00b1 0.0112",
+      "test_win_acc": "76.18% \u00b1 0.18%",
+      "test_win_f1": "0.7531 \u00b1 0.0010",
+      "test_vid_acc": "85.41% \u00b1 0.35%",
+      "test_vid_f1": "0.8423 \u00b1 0.0069",
+      "seeds": [
+        {
+          "seed": 42,
+          "val_win_acc": 84.67,
+          "val_win_f1": 0.8451,
+          "val_vid_acc": 85.99,
+          "val_vid_f1": 0.8708,
+          "test_win_acc": 76.41,
+          "test_win_f1": 0.7538,
+          "test_vid_acc": 85.84,
+          "test_vid_f1": 0.8491
+        },
+        {
+          "seed": 123,
+          "val_win_acc": 84.96,
+          "val_win_f1": 0.8498,
+          "val_vid_acc": 88.89,
+          "val_vid_f1": 0.8971,
+          "test_win_acc": 75.98,
+          "test_win_f1": 0.7539,
+          "test_vid_acc": 85.41,
+          "test_vid_f1": 0.845
+        },
+        {
+          "seed": 3407,
+          "val_win_acc": 85.35,
+          "val_win_f1": 0.8513,
+          "val_vid_acc": 88.41,
+          "val_vid_f1": 0.891,
+          "test_win_acc": 76.16,
+          "test_win_f1": 0.7517,
+          "test_vid_acc": 84.98,
+          "test_vid_f1": 0.8328
+        }
+      ],
+      "description": "Accuracy-Weighted Soft Voting (Validation-calibrated weights)"
+    },
+    "uniform_soft": {
+      "val_win_acc": "85.05% \u00b1 0.47%",
+      "val_win_f1": "0.8886 \u00b1 0.0126",
+      "val_vid_acc": "87.92% \u00b1 1.37%",
+      "val_vid_f1": "0.8886 \u00b1 0.0126",
+      "test_win_acc": "76.19% \u00b1 0.16%",
+      "test_win_f1": "0.7537 \u00b1 0.0014",
+      "test_vid_acc": "85.27% \u00b1 0.41%",
+      "test_vid_f1": "0.8386 \u00b1 0.0075",
+      "seeds": [
+        {
+          "seed": 42,
+          "val_win_acc": 84.58,
+          "val_win_f1": 0.8435,
+          "val_vid_acc": 85.99,
+          "val_vid_f1": 0.8708,
+          "test_win_acc": 76.41,
+          "test_win_f1": 0.7534,
+          "test_vid_acc": 85.84,
+          "test_vid_f1": 0.8491
+        },
+        {
+          "seed": 123,
+          "val_win_acc": 84.87,
+          "val_win_f1": 0.8481,
+          "val_vid_acc": 88.89,
+          "val_vid_f1": 0.8971,
+          "test_win_acc": 76.05,
+          "test_win_f1": 0.7556,
+          "test_vid_acc": 84.98,
+          "test_vid_f1": 0.8343
+        },
+        {
+          "seed": 3407,
+          "val_win_acc": 85.69,
+          "val_win_f1": 0.8546,
+          "val_vid_acc": 88.89,
+          "val_vid_f1": 0.8978,
+          "test_win_acc": 76.12,
+          "test_win_f1": 0.7521,
+          "test_vid_acc": 84.98,
+          "test_vid_f1": 0.8323
+        }
+      ],
+      "description": "Uniform Average Soft Voting (Zero-parameter heuristic SOTA, w_i = 1/K)"
+    },
+    "stacking": {
+      "val_win_acc": "84.58% \u00b1 0.31%",
+      "val_win_f1": "0.8759 \u00b1 0.0123",
+      "val_vid_acc": "86.96% \u00b1 1.43%",
+      "val_vid_f1": "0.8759 \u00b1 0.0123",
+      "test_win_acc": "75.87% \u00b1 0.18%",
+      "test_win_f1": "0.7512 \u00b1 0.0009",
+      "test_vid_acc": "84.69% \u00b1 0.54%",
+      "test_vid_f1": "0.8378 \u00b1 0.0091",
+      "seeds": [
+        {
+          "seed": 42,
+          "val_win_acc": 84.14,
+          "val_win_f1": 0.8392,
+          "val_vid_acc": 85.02,
+          "val_vid_f1": 0.8617,
+          "test_win_acc": 76.01,
+          "test_win_f1": 0.7524,
+          "test_vid_acc": 85.41,
+          "test_vid_f1": 0.8447
+        },
+        {
+          "seed": 123,
+          "val_win_acc": 84.72,
+          "val_win_f1": 0.8468,
+          "val_vid_acc": 88.41,
+          "val_vid_f1": 0.8918,
+          "test_win_acc": 75.61,
+          "test_win_f1": 0.7512,
+          "test_vid_acc": 84.12,
+          "test_vid_f1": 0.8249
+        },
+        {
+          "seed": 3407,
+          "val_win_acc": 84.87,
+          "val_win_f1": 0.8467,
+          "val_vid_acc": 87.44,
+          "val_vid_f1": 0.8742,
+          "test_win_acc": 75.98,
+          "test_win_f1": 0.7501,
+          "test_vid_acc": 84.55,
+          "test_vid_f1": 0.8438
+        }
+      ],
+      "description": "Stacking Meta-Classifier (Ridge/Logistic Regression SOTA)"
+    }
+  },
+  "winners": {
+    "SkelGym-Lite": "accuracy_weighted_soft",
+    "SkelGym-Full": "hard"
+  }
+}

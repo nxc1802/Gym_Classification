@@ -1,0 +1,104 @@
+{
+  "table7_rows": [
+    {
+      "model": "LSTM (World 3D Clean)",
+      "params": "362K",
+      "val_win_acc": "73.64% \u00b1 1.26%",
+      "val_vid_acc": "76.97% \u00b1 2.63%",
+      "test_win_acc": "61.41% \u00b1 0.80%",
+      "test_win_f1": "0.6002 \u00b1 0.0063",
+      "test_vid_acc": "71.10% \u00b1 2.33%",
+      "test_vid_f1": "0.6941 \u00b1 0.0294"
+    },
+    {
+      "model": "LSTM (Biomechanical Mix v2)",
+      "params": "362K",
+      "val_win_acc": "75.90% \u00b1 1.60%",
+      "val_vid_acc": "80.19% \u00b1 2.09%",
+      "test_win_acc": "62.80% \u00b1 0.83%",
+      "test_win_f1": "0.6171 \u00b1 0.0089",
+      "test_vid_acc": "72.39% \u00b1 1.76%",
+      "test_vid_f1": "0.7077 \u00b1 0.0172"
+    },
+    {
+      "model": "BiLSTM (Biomechanical Mix v2)",
+      "params": "360K",
+      "val_win_acc": "76.90% \u00b1 0.30%",
+      "val_vid_acc": "80.68% \u00b1 1.97%",
+      "test_win_acc": "64.82% \u00b1 0.37%",
+      "test_win_f1": "0.6316 \u00b1 0.0027",
+      "test_vid_acc": "75.39% \u00b1 1.46%",
+      "test_vid_f1": "0.7342 \u00b1 0.0144"
+    },
+    {
+      "model": "Transformer (Biomechanical Mix v2 Clean)",
+      "params": "301K",
+      "val_win_acc": "79.52% \u00b1 0.80%",
+      "val_vid_acc": "84.38% \u00b1 1.27%",
+      "test_win_acc": "69.24% \u00b1 0.20%",
+      "test_win_f1": "0.6815 \u00b1 0.0017",
+      "test_vid_acc": "79.83% \u00b1 1.27%",
+      "test_vid_f1": "0.7806 \u00b1 0.0214"
+    },
+    {
+      "model": "Transformer (Biomechanical Mix v2 + SkelGym-Aug)",
+      "params": "301K",
+      "val_win_acc": "81.20% \u00b1 0.72%",
+      "val_vid_acc": "84.70% \u00b1 0.82%",
+      "test_win_acc": "73.14% \u00b1 0.90%",
+      "test_win_f1": "0.7253 \u00b1 0.0106",
+      "test_vid_acc": "82.69% \u00b1 1.66%",
+      "test_vid_f1": "0.8187 \u00b1 0.0196"
+    },
+    {
+      "model": "ST-GCN (Raw 3D Clean)",
+      "params": "350K",
+      "val_win_acc": "63.01% \u00b1 1.86%",
+      "val_vid_acc": "69.08% \u00b1 1.42%",
+      "test_win_acc": "48.35% \u00b1 0.94%",
+      "test_win_f1": "0.4701 \u00b1 0.0141",
+      "test_vid_acc": "58.65% \u00b1 1.76%",
+      "test_vid_f1": "0.5432 \u00b1 0.0208"
+    },
+    {
+      "model": "AAGCN (Bone 3D + SkelGym-Aug)",
+      "params": "378K",
+      "val_win_acc": "79.30% \u00b1 0.22%",
+      "val_vid_acc": "82.77% \u00b1 1.49%",
+      "test_win_acc": "66.36% \u00b1 1.41%",
+      "test_win_f1": "0.6548 \u00b1 0.0173",
+      "test_vid_acc": "75.39% \u00b1 2.33%",
+      "test_vid_f1": "0.7440 \u00b1 0.0335"
+    },
+    {
+      "model": "Four-Stream AAGCN (Uniform Soft Voting)",
+      "params": "1.51M",
+      "val_win_acc": "84.34% \u00b1 0.26%",
+      "val_vid_acc": "87.92% \u00b1 1.42%",
+      "test_win_acc": "74.50% \u00b1 0.65%",
+      "test_win_f1": "0.7341 \u00b1 0.0048",
+      "test_vid_acc": "84.41% \u00b1 1.01%",
+      "test_vid_f1": "0.8308 \u00b1 0.0179"
+    },
+    {
+      "model": "SkelGym-Lite (2 Streams, Accuracy-Weighted Soft Voting (Validation-calibrated weights))",
+      "params": "679K",
+      "val_win_acc": "83.41% \u00b1 0.20%",
+      "val_vid_acc": "85.67% \u00b1 0.82%",
+      "test_win_acc": "73.58% \u00b1 0.76%",
+      "test_win_f1": "0.7296 \u00b1 0.0064",
+      "test_vid_acc": "82.26% \u00b1 0.53%",
+      "test_vid_f1": "0.8212 \u00b1 0.0027"
+    },
+    {
+      "model": "SkelGym-Full (5 Streams, Hard Majority Voting (Discrete Baseline))",
+      "params": "1.81M",
+      "val_win_acc": "84.11% \u00b1 0.30%",
+      "val_vid_acc": "87.92% \u00b1 1.37%",
+      "test_win_acc": "74.07% \u00b1 0.11%",
+      "test_win_f1": "0.7371 \u00b1 0.0011",
+      "test_vid_acc": "85.27% \u00b1 0.41%",
+      "test_vid_f1": "0.8386 \u00b1 0.0075"
+    }
+  ]
+}
