@@ -1,4 +1,61 @@
-# Master Audit and Final Results: SkelGym Benchmark Suite
+# SkelGym: Master Benchmark Suite & Comprehensive Experimental Results
+
+- **Feature Pipeline Version:** `mix_v2_world_63d`
+- **Random Seeds (Multi-seed downstream consistency):** `[42, 123, 3407]`
+- **Target Dataset Metadata:** `Final_dataset_metadata.csv` (22 Exercise Classes)
+- **Status:** 🏆 **100% Comprehensive Paper-Freeze Canonical Benchmark Single Source of Truth**
+
+### Trainable Parameter Footprints
+
+| Architecture Family | Model Name / Variant | Trainable Parameters | Paradigm / Modality |
+| :--- | :--- | :---: | :--- |
+| **LSTM** | LSTM (World 3D / Mix v2) | **362K** | Recurrent Sequential |
+| **BiLSTM** | BiLSTM (World 3D / Mix v2) | **360K** | Bidirectional Recurrent |
+| **Transformer** | Transformer Backbone (mix_v2) | **301K** | Self-Attention Sequential |
+| **ST-GCN** | ST-GCN (Raw 3D / World 3D) | **350K** | Fixed Graph Convolutional |
+| **AAGCN** | AAGCN (Per Kinematic Stream) | **378K** | Adaptive Graph Convolutional |
+| **SkelGym-Lite** | SkelGym-Lite (Trans + Bone AAGCN) | **679K** | Compact Cross-Paradigm (2 Streams) |
+| **Four-Stream AAGCN** | Four-Stream AAGCN (Joint+Bone+2 Motions) | **1.51M** | Unified Graph Ensemble (4 Streams) |
+| **SkelGym-Full** | SkelGym-Full (Trans + 4 AAGCN Streams) | **1.81M** | Full Cross-Paradigm Ensemble (5 Streams) |
+
+---
+
+## Table 1: Systematic Exploration of Kinematic Encodings (Preliminary Feature Screening — 27 Experiments)
+
+*Objective:* Evaluate 3 temporal sequence models (LSTM, BiLSTM, Dual-Branch Transformer) across 9 kinematic feature representations on held-out validation and test sets. Mean ± SD across 3 random seeds (42, 123, 3407).  
+*Key Takeaway:* Demonstrates that 3D metric and composite biomechanical features consistently outperform 2D and uncoupled angular encodings, motivating the standard 63-d Biomechanical Mix v2 representation.
+
+| Exp ID | Model Backbone | Feature Representation | Dim | Val Win Acc (%) | Val Win Macro F1 | Test Win Acc (%) | Test Win Macro F1 | Status |
+| :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **T1.1** | LSTM | Raw 2D Coordinates | 26 | 67.49% ± 0.75% | 0.6556 ± 0.0075 | 52.80% ± 1.04% | 0.5143 ± 0.0138 | Verified |
+| **T1.2** | LSTM | Relative 2D (Mid-Hip) | 26 | 72.40% ± 1.07% | 0.7131 ± 0.0110 | 56.13% ± 0.66% | 0.5501 ± 0.0082 | Verified |
+| **T1.3** | LSTM | Angle 2D (Triplets) | 286 | 64.74% ± 2.62% | 0.6310 ± 0.0278 | 50.45% ± 1.59% | 0.4896 ± 0.0166 | Verified |
+| **T1.4** | LSTM | Angle2 2D (Pairs) | 78 | 65.88% ± 1.61% | 0.6468 ± 0.0142 | 52.25% ± 0.70% | 0.5132 ± 0.0028 | Verified |
+| **T1.5** | LSTM | Raw 3D Coordinates | 39 | 65.32% ± 2.25% | 0.6323 ± 0.0293 | 52.77% ± 1.77% | 0.5041 ± 0.0250 | Verified |
+| **T1.6** | LSTM | Relative 3D (Mid-Hip) | 39 | 72.24% ± 0.99% | 0.7096 ± 0.0097 | 59.28% ± 0.77% | 0.5786 ± 0.0079 | Verified |
+| **T1.7** | LSTM | Angle 3D (Triplets) | 286 | 65.73% ± 1.02% | 0.6398 ± 0.0083 | 50.45% ± 0.82% | 0.4886 ± 0.0086 | Verified |
+| **T1.8** | LSTM | Angle2 3D (Pair Elevation) | 78 | 70.31% ± 3.35% | 0.6901 ± 0.0408 | 55.29% ± 1.49% | 0.5495 ± 0.0190 | Verified |
+| **T1.9** | LSTM | **Biomechanical Mix (Ours)** | 117 | **74.28% ± 0.50%** | **0.7348 ± 0.0063** | **59.35% ± 0.19%** | **0.5827 ± 0.0015** | Verified |
+| **T1.10** | BiLSTM | Raw 2D Coordinates | 26 | 65.12% ± 3.22% | 0.6272 ± 0.0331 | 51.48% ± 0.71% | 0.4901 ± 0.0184 | Verified |
+| **T1.11** | BiLSTM | Relative 2D (Mid-Hip) | 26 | 64.98% ± 6.30% | 0.6411 ± 0.0516 | 54.51% ± 2.33% | 0.5247 ± 0.0290 | Verified |
+| **T1.12** | BiLSTM | Angle 2D (Triplets) | 286 | 65.82% ± 0.63% | 0.6523 ± 0.0046 | 52.73% ± 1.58% | 0.5068 ± 0.0175 | Verified |
+| **T1.13** | BiLSTM | Angle2 2D (Pairs) | 78 | 69.59% ± 2.28% | 0.6929 ± 0.0223 | 55.35% ± 1.80% | 0.5379 ± 0.0188 | Verified |
+| **T1.14** | BiLSTM | Raw 3D Coordinates | 39 | 67.63% ± 0.11% | 0.6659 ± 0.0039 | 53.25% ± 0.88% | 0.5120 ± 0.0087 | Verified |
+| **T1.15** | BiLSTM | Relative 3D (Mid-Hip) | 39 | 72.47% ± 1.39% | 0.7172 ± 0.0103 | 58.09% ± 1.46% | 0.5595 ± 0.0089 | Verified |
+| **T1.16** | BiLSTM | Angle 3D (Triplets) | 286 | 64.37% ± 0.83% | 0.6293 ± 0.0075 | 50.51% ± 1.57% | 0.4846 ± 0.0201 | Verified |
+| **T1.17** | BiLSTM | Angle2 3D (Pair Elevation) | 78 | 72.58% ± 1.06% | 0.7204 ± 0.0087 | 58.56% ± 0.67% | 0.5773 ± 0.0046 | Verified |
+| **T1.18** | BiLSTM | **Biomechanical Mix (Ours)** | 117 | **74.39% ± 0.26%** | **0.7371 ± 0.0043** | **60.19% ± 1.14%** | **0.5896 ± 0.0126** | Verified |
+| **T1.19** | Transformer | Raw 2D Coordinates | 26 | 77.82% ± 0.22% | 0.7700 ± 0.0008 | 63.51% ± 0.80% | 0.6323 ± 0.0094 | Verified |
+| **T1.20** | Transformer | Relative 2D (Mid-Hip) | 26 | 76.45% ± 0.41% | 0.7539 ± 0.0033 | 63.06% ± 2.61% | 0.6159 ± 0.0244 | Verified |
+| **T1.21** | Transformer | Angle 2D (Triplets) | 286 | 71.78% ± 0.55% | 0.7107 ± 0.0077 | 57.37% ± 0.20% | 0.5437 ± 0.0060 | Verified |
+| **T1.22** | Transformer | Angle2 2D (Pairs) | 78 | 69.65% ± 0.68% | 0.6877 ± 0.0111 | 55.27% ± 1.47% | 0.5402 ± 0.0155 | Verified |
+| **T1.23** | Transformer | Raw 3D Coordinates | 39 | 79.65% ± 0.80% | 0.7888 ± 0.0080 | 65.01% ± 0.27% | 0.6375 ± 0.0027 | Verified |
+| **T1.24** | Transformer | Relative 3D (Mid-Hip) | 39 | 77.69% ± 0.69% | 0.7692 ± 0.0107 | 63.52% ± 1.18% | 0.6151 ± 0.0126 | Verified |
+| **T1.25** | Transformer | Angle 3D (Triplets) | 286 | 70.33% ± 1.10% | 0.6842 ± 0.0096 | 56.86% ± 1.09% | 0.5567 ± 0.0081 | Verified |
+| **T1.26** | Transformer | Angle2 3D (Pair Elevation) | 78 | 73.61% ± 0.66% | 0.7325 ± 0.0083 | 59.27% ± 1.32% | 0.5826 ± 0.0132 | Verified |
+| **T1.27** | Transformer | **Biomechanical Mix (Dual-Branch)** | 117 | **78.14% ± 0.61%** | **0.7774 ± 0.0071** | **66.14% ± 0.11%** | **0.6516 ± 0.0028** | Verified |
+
+---
 
 ## Table 2: Clean Sequences Temporal Architecture Comparison (Paper Table 1)
 
@@ -7,11 +64,11 @@
 
 | Architecture / Model | Input Modality | Dim | Params | Val Loss | Val Win Acc (%) | Val Win F1 | Validation Status |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **LSTM (world_3d)** | world_3d | 39-d | 362K | N/A | 73.64% ± 1.26% | 0.7244 ± 0.0128 | Verified |
-| **LSTM (mix_v2)** | mix_v2 | 63-d | 362K | N/A | 75.90% ± 1.60% | 0.7541 ± 0.0173 | Verified |
-| **BiLSTM (world_3d)** | world_3d | 39-d | 362K | N/A | 74.72% ± 0.19% | 0.7341 ± 0.0020 | Verified |
-| **BiLSTM (mix_v2)** | mix_v2 | 63-d | 362K | N/A | 76.90% ± 0.30% | 0.7599 ± 0.0050 | Verified |
-| **Transformer (world_3d)** | world_3d | 39-d | 301K | N/A | 78.76% ± 0.46% | 0.7781 ± 0.0053 | Verified |
+| **LSTM (world_3d)** | world_3d | 39-d | 362K | 1.8250 ± 0.6646 | 73.64% ± 1.26% | 0.7244 ± 0.0128 | Verified |
+| **LSTM (mix_v2)** | mix_v2 | 63-d | 362K | 1.7323 ± 0.1621 | 75.90% ± 1.60% | 0.7541 ± 0.0173 | Verified |
+| **BiLSTM (world_3d)** | world_3d | 39-d | 362K | 1.9601 ± 0.3499 | 74.72% ± 0.19% | 0.7341 ± 0.0020 | Verified |
+| **BiLSTM (mix_v2)** | mix_v2 | 63-d | 362K | 1.5067 ± 0.2692 | 76.90% ± 0.30% | 0.7599 ± 0.0050 | Verified |
+| **Transformer (world_3d)** | world_3d | 39-d | 301K | 1.1306 ± 0.0049 | 78.76% ± 0.46% | 0.7781 ± 0.0053 | Verified |
 
 ---
 
@@ -41,13 +98,13 @@
 
 | Augmentation Configuration | Excluded Operator / Domain | Val Loss | Val Win Acc (%) | Val Win F1 | Validation Verdict |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| **Clean** | All Operators Excluded | N/A | 79.52% ± 0.80% | 0.7885 ± 0.0101 | Unaugmented Baseline Control |
-| **Candidate Full 5Op** | None (Reference 5-Op Suite) | N/A | 79.19% ± 1.26% | 0.7882 ± 0.0152 | Reference 5-Operator Suite (Val Win F1: 0.7882) |
-| **Candidate Minus Mirror** | Sagittal Bilateral Reflection (p=0.5) | N/A | 78.78% ± 1.44% | 0.7757 ± 0.0197 | 🚨 Weakest LOO window performance (-1.25% Win F1) |
-| **Candidate Minus Yaw** | Gravitational Yaw Rotation (±15°) | N/A | 80.06% ± 0.32% | 0.7964 ± 0.0026 | Moderate window gain over 5-op (+0.82% Win F1) |
-| **Candidate Minus Scale** | Proportional Scale Variation (±10%) | N/A | 80.13% ± 0.13% | 0.7985 ± 0.0022 | Peak window gain in LOO (+1.03% Win F1) |
-| **Candidate Minus Time** | Temporal Resampling (0.8x - 1.2x) | N/A | 79.54% ± 0.57% | 0.7926 ± 0.0060 | Lowest 4-op Val Loss (1.0010, +0.44% Win F1) |
-| **Candidate Minus Jitter** | Gaussian Coordinate Jitter (σ=0.008) | N/A | 79.68% ± 0.22% | 0.7937 ± 0.0048 | Minor window gain (+0.55% Win F1) |
+| **Clean** | All Operators Excluded | 1.0483 ± 0.0084 | 79.52% ± 0.80% | 0.7885 ± 0.0101 | Unaugmented Baseline Control |
+| **Candidate Full 5Op** | None (Reference 5-Op Suite) | 0.9669 ± 0.0175 | 79.19% ± 1.26% | 0.7882 ± 0.0152 | Reference 5-Operator Suite (Val Win F1: 0.7882) |
+| **Candidate Minus Mirror** | Sagittal Bilateral Reflection (p=0.5) | 1.0670 ± 0.0316 | 78.78% ± 1.44% | 0.7757 ± 0.0197 | 🚨 Weakest LOO window performance (-1.25% Win F1) |
+| **Candidate Minus Yaw** | Gravitational Yaw Rotation (±15°) | 1.0054 ± 0.0197 | 80.06% ± 0.32% | 0.7964 ± 0.0026 | Moderate window gain over 5-op (+0.82% Win F1) |
+| **Candidate Minus Scale** | Proportional Scale Variation (±10%) | 1.0032 ± 0.0228 | 80.13% ± 0.13% | 0.7985 ± 0.0022 | Peak window gain in LOO (+1.03% Win F1) |
+| **Candidate Minus Time** | Temporal Resampling (0.8x - 1.2x) | 1.0010 ± 0.0160 | 79.54% ± 0.57% | 0.7926 ± 0.0060 | Lowest 4-op Val Loss (1.0010, +0.44% Win F1) |
+| **Candidate Minus Jitter** | Gaussian Coordinate Jitter (σ=0.008) | 1.0124 ± 0.0240 | 79.68% ± 0.22% | 0.7937 ± 0.0048 | Minor window gain (+0.55% Win F1) |
 
 ---
 
@@ -58,13 +115,13 @@
 
 | Augmentation Strategy | Isolated Operator Description | Val Loss | Val Win Acc (%) | Val Win F1 | Standalone Validation Effect |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| **Clean** | Unaugmented Native Window Sequences | N/A | 79.52% ± 0.80% | 0.7885 ± 0.0101 | Unaugmented Baseline Control |
-| **Single Mirror** | Sagittal Bilateral Reflection (p=0.5) | N/A | 80.45% ± 0.45% | 0.8001 ± 0.0067 | 🏆 Decisive window gain across single ops (+1.16% Win F1) |
-| **Single Yaw** | 3D Yaw Perturbation (±15°) | N/A | 80.29% ± 0.34% | 0.7977 ± 0.0031 | Strong standalone window gain (+0.92% Win F1) |
+| **Clean** | Unaugmented Native Window Sequences | 1.0483 ± 0.0084 | 79.52% ± 0.80% | 0.7885 ± 0.0101 | Unaugmented Baseline Control |
+| **Single Mirror** | Sagittal Bilateral Reflection (p=0.5) | 1.0047 ± 0.0188 | 80.45% ± 0.45% | 0.8001 ± 0.0067 | 🏆 Decisive window gain across single ops (+1.16% Win F1) |
+| **Single Yaw** | 3D Yaw Perturbation (±15°) | 1.0657 ± 0.0236 | 80.29% ± 0.34% | 0.7977 ± 0.0031 | Strong standalone window gain (+0.92% Win F1) |
 | **Pair Mirror Yaw** | Bilateral Reflection + Gravitational Yaw (±15°) | 1.0465 ± 0.0327 | 81.20% ± 0.72% | 0.8119 ± 0.0072 | 🥇 **All-Time Peak Val Win Acc & Macro F1 (+2.34% Win F1)** |
-| **Single Scale** | Proportional Scale Jitter (±10%) | N/A | 79.68% ± 0.22% | 0.7904 ± 0.0066 | Marginal window gain (+0.19% Win F1) |
-| **Single Time** | Linear Sequence Resampling (0.8x - 1.2x) | N/A | 79.74% ± 0.24% | 0.7920 ± 0.0039 | Marginal window gain over clean (+0.35% Win F1) |
-| **Single Jitter** | Gaussian Noise (σ=0.008) | N/A | 79.55% ± 0.82% | 0.7884 ± 0.0093 | Neutral window performance (-0.01% Win F1) |
+| **Single Scale** | Proportional Scale Jitter (±10%) | 1.0519 ± 0.0030 | 79.68% ± 0.22% | 0.7904 ± 0.0066 | Marginal window gain (+0.19% Win F1) |
+| **Single Time** | Linear Sequence Resampling (0.8x - 1.2x) | 1.0567 ± 0.0225 | 79.74% ± 0.24% | 0.7920 ± 0.0039 | Marginal window gain over clean (+0.35% Win F1) |
+| **Single Jitter** | Gaussian Noise (σ=0.008) | 1.0520 ± 0.0262 | 79.55% ± 0.82% | 0.7884 ± 0.0093 | Neutral window performance (-0.01% Win F1) |
 
 > **Critical Methodological Rationale (Validation-Driven Grounding):**
 > 1. **Distance-Preserving Euclidean Transformations:** Bilateral Reflection and Gravitational Yaw ($\pm 15^\circ$) strictly preserve physical metric dimensions (measured in meters in World 3D) and kinematic joint angles. While Yaw rotation belongs to the proper rotation group $SO(3) \subset SE(3)$, bilateral reflection acts as an improper Euclidean isometry ($\det = -1$) that exploits anatomical bilateral symmetry across the sagittal plane in bilateral resistance training exercises.
@@ -76,7 +133,7 @@
 ## Table 6: Multi-Stream Cross-Paradigm Ensemble Comparison (Paper Table 6)
 
 *Objective:* Benchmark 3 standardized fusion methods across multi-stream configurations and multi-seed downstream consistency across seeds $42, 123, 3407$.  
-*Methodological Guarantee:* Test metrics are **revealed ONLY for the Validation Winners** of SkelGym-Lite and SkelGym-Full; all other rows remain hidden to preserve strict post-validation test separation.  
+*Methodological Guarantee:* Test metrics are **revealed ONLY for the Validation Winners** of SkelGym-Lite and SkelGym-Full; all other rows remain hidden to preserve strict post-validation test separation. Stacking meta-classifier is excluded following zero-leakage and parameter-free fusion principles.  
 *Execution Command:* `python scripts/run_phase7_table6_ensembles.py --proposed_aug_cfg_id pair_mirror_yaw`
 
 | Architecture / Configuration | Fusion Protocol & Weighting | Val Win Acc (%) | Val Win F1 | Val Vid Acc (%) | Val Vid F1 | Test Win Acc (%) | Test Win F1 | Test Vid Acc (%) | Test Vid F1 | Status |
@@ -185,15 +242,32 @@
 *Objective:* Measure parameters, window FLOPs, and latency across server and edge devices.  
 *Execution Command:* `python scripts/benchmark_hardware_latency.py`
 
-| Model Architecture | Parameters | FLOPs per Window | RTX PRO 6000 (CUDA) | Apple M4 (MPS) | Apple M4 (CPU) | Status |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Transformer Mix v2 (63-d)** | 301K | 18.87 MFLOPs | 0.59 ms (1685 FPS) | 1.36 ms (738 FPS) | 0.49 ms (2041 FPS) | Verified |
-| **AAGCN Joint Stream** | 378K | 202.86 MFLOPs | 1.01 ms (987 FPS) | 1.89 ms (530 FPS) | 0.90 ms (1115 FPS) | Verified |
-| **AAGCN Bone Stream** | 378K | 202.86 MFLOPs | 1.02 ms (976 FPS) | 1.72 ms (581 FPS) | 0.88 ms (1138 FPS) | Verified |
-| **AAGCN Joint-Motion Stream** | 378K | 202.86 MFLOPs | 1.01 ms (990 FPS) | 1.90 ms (527 FPS) | 1.02 ms (978 FPS) | Verified |
-| **AAGCN Bone-Motion Stream** | 378K | 202.86 MFLOPs | 1.02 ms (980 FPS) | 1.90 ms (527 FPS) | 1.03 ms (975 FPS) | Verified |
-| **SkelGym-Lite (Transformer + Bone)** | 679K | 221.72 MFLOPs | 1.66 ms (603 FPS) | 2.55 ms (393 FPS) | 1.49 ms (671 FPS) | Verified |
-| **SkelGym-Full (Transformer + 4 AAGCN)** | 1.81M | 830.29 MFLOPs | 4.65 ms (215 FPS) | 5.86 ms (171 FPS) | 3.96 ms (253 FPS) | Verified |
+| Architecture / Stream | Parameters | MFLOPs / Win | Server GPU Latency (ms) | GPU FPS | Apple M4 MPS Latency (ms) | M4 FPS | Edge CPU Latency (ms) | CPU FPS | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Transformer Mix v2 (63-d)** | 301K | 18.87 | 0.59 ms | 1685 | 1.36 ms | 738 | 0.49 ms | 2041 | Verified |
+| **AAGCN Joint Stream** | 378K | 202.86 | 1.01 ms | 987 | 1.89 ms | 530 | 0.90 ms | 1115 | Verified |
+| **AAGCN Bone Stream** | 378K | 202.86 | 1.02 ms | 976 | 1.72 ms | 581 | 0.88 ms | 1138 | Verified |
+| **AAGCN Joint-Motion Stream** | 378K | 202.86 | 1.01 ms | 990 | 1.90 ms | 527 | 1.02 ms | 978 | Verified |
+| **AAGCN Bone-Motion Stream** | 378K | 202.86 | 1.02 ms | 980 | 1.90 ms | 527 | 1.03 ms | 975 | Verified |
+| **SkelGym-Lite (Transformer + Bone)** | 679K | 221.72 | 1.66 ms | 603 | 2.55 ms | 393 | 1.49 ms | 671 | Verified |
+| **SkelGym-Full (Transformer + 4 AAGCN)** | 1.81M | 830.29 | 4.65 ms | 215 | 5.86 ms | 171 | 3.96 ms | 253 | Verified |
+
+---
+
+## Table 12: External S&C Comparative Evaluation (Deyzel et al. 4-Exercise Benchmark) (Paper Table 12)
+
+*Objective:* Evaluate cross-dataset generalization on the Deyzel et al. Strength & Conditioning 4-exercise core subset (squat, deadlift, barbell biceps curl, lateral raise) across open-set and closed-set regimes ($N=54$ videos, $N=529$ windows).  
+*Execution Command:* `python scripts/evaluate_external_benchmark.py`
+
+| Model Architecture | Open-Set Win Acc (%) | Open-Set Vid Acc (%) | Closed-Set Win Acc (%) | Closed-Set Vid Acc (%) | Closed-Set Vid F1 | Status |
+| :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| ST-GCN (Rel 3D) | 59.74% | 68.52% | 82.61% | 85.19% | 0.8563 | Verified |
+| LSTM (Mix 63-d) | 64.08% | 85.19% | 78.64% | 90.74% | 0.9071 | Verified |
+| BiLSTM (Mix 63-d) | 71.64% | 85.19% | 84.12% | 90.74% | 0.9126 | Verified |
+| AAGCN (Bone 3D) | 72.02% | 85.19% | 87.90% | 92.59% | 0.9281 | Verified |
+| Transformer (Mix 63-d) | 77.88% | 85.19% | 96.03% | 98.15% | 0.9788 | Verified |
+| **SkelGym-Lite** | 84.12% | 94.44% | **95.84%** | **98.15%** | **0.9782** | Verified |
+| **SkelGym-Full** | 80.72% | 96.30% | **93.01%** | **96.30%** | **0.9626** | Verified |
 
 ---
 
@@ -204,4 +278,4 @@
 
 | Model Architecture | Input Representation | Parameters | FLOPs / MACs | Window Test Acc (%) | Window Macro F1 | Video Consensus Acc (%) | Video Macro F1 | Status |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **BlockGCN (CVPR 2024 Adapted)** | 33 Raw MediaPipe XYZ (Joint-only) | 1,352,102 | — | 54.24% ± 1.04% | 0.5576 ± 0.0047 | 70.48% ± 0.40% | 0.6948 ± 0.0024 | **Verified** |
+| **BlockGCN (CVPR 2024 Adapted)** | 33 Raw MediaPipe XYZ (Joint-only) | 1,352,102 | 212.4 MFLOPs | 54.24% ± 1.04% | 0.5576 ± 0.0047 | 70.48% ± 0.40% | 0.6948 ± 0.0024 | **Verified** |
