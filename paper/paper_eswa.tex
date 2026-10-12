@@ -19,6 +19,8 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc,fit,backgrounds}
 
+\newcommand{\rv}[1]{{\color{red}#1}}
+
 \hypersetup{
     colorlinks=true,
     linkcolor=blue,
@@ -55,7 +57,7 @@
             country={Viet Nam}}
 
 \begin{abstract}
-Automated gym exercise recognition is critical for developing intelligent virtual personal trainer systems capable of monitoring workout execution, tracking training volume, and mitigating musculoskeletal injury risks. However, traditional RGB video approaches incur prohibitive computational costs, suffer from environmental background overfitting, and raise severe privacy concerns when streaming from home environments. We evaluate on a curated corpus of 1,024 in-the-wild videos spanning 22 fine-grained resistance exercises under strict video-level partitioning with no source-video overlap across train, validation, and test sets. We present \textbf{SkelGym}, a lightweight, privacy-aware intelligent exercise recognition framework operating exclusively on 3D skeletal coordinates extracted via monocular pose estimation. SkelGym introduces four primary technical contributions: (1) a curated, multi-source 3D skeletal benchmark spanning 1,024 videos across 22 resistance exercises under strict video-level partitioning with zero source-video overlap across train, validation, and test sets; (2) a 63-dimensional \textit{Biomechanical Compound Representation} (Biomechanical Mix v2) fusing pelvic-centered metric World 3D coordinates (39-d) with domain-selected kinematic angles (24-d) via dual-branch projection; (3) \textit{SkelGym-Aug}, an empirically selected, task-oriented augmentation configuration restricted to distance-preserving Euclidean transformations (sagittal bilateral reflection and gravitational yaw rotation) selected strictly on validation-window evidence; and (4) a cross-paradigm ensemble coupling a self-attention Transformer with a four-stream Adaptive Graph Convolutional Network via zero-parameter uniform average soft voting (SkelGym-Full) and validation-calibrated accuracy-weighted soft voting (SkelGym-Lite), achieving real-time low-latency edge classification. Evaluated across three independent random seeds under fixed splits ($N=2,743$ test windows from 233 held-out videos), SkelGym achieves \textbf{76.19\% $\pm$ 0.16\% window-level accuracy} (Window Macro F1: \textbf{0.7537 $\pm$ 0.0014}) and \textbf{85.27\% $\pm$ 0.41\% video-level consensus accuracy} (Video Macro F1: \textbf{0.8386 $\pm$ 0.0075}, with 200 of 233 held-out videos correctly classified, achieving 85.84\% accuracy on the canonical test run). All pairwise architectural transitions are verified via paired statistical hypothesis testing (window-level McNemar $p \le 5.88 \times 10^{-5}$ across all transitions; video-level posterior confidence differences confirmed across sequence-to-ensemble transitions). With an ultra-low classifier inference latency of merely \textbf{0.49--3.96~ms} on host CPU (0.59--4.65~ms on CUDA, where individual backbones execute in 0.49--1.03~ms and the full five-stream ensemble executes in 3.96~ms at 253 FPS) per 32-frame window, SkelGym enables real-time, privacy-aware exercise recognition suitable for smart mirrors, mobile devices, and embedded gym displays. All source code, extracted skeletal representations, metadata, and pretrained checkpoints used for reproducibility are publicly available at \url{https://huggingface.co/Cuong2004/gym-exercise-classification}.
+Automated gym exercise recognition is critical for developing intelligent virtual personal trainer systems capable of monitoring workout execution, tracking training volume, and mitigating musculoskeletal injury risks. However, traditional RGB video approaches incur prohibitive computational costs, suffer from environmental background overfitting, and raise severe privacy concerns when streaming from home environments. We evaluate on a curated corpus of 1,024 in-the-wild videos spanning 22 fine-grained resistance exercises under strict video-level partitioning with no source-video overlap across train, validation, and test sets. We present \textbf{SkelGym}, a lightweight, privacy-aware intelligent exercise recognition framework operating exclusively on 3D skeletal coordinates extracted via monocular pose estimation. SkelGym introduces four primary technical contributions: (1) a curated, multi-source 3D skeletal benchmark spanning 1,024 videos across 22 resistance exercises under strict video-level partitioning with zero split leakage; (2) a 63-dimensional \textit{Biomechanical Compound Representation} (Biomechanical Mix v2) fusing pelvic-centered metric World 3D coordinates (39-d) with 24 domain-selected kinematic angles (14 segment elevation and 10 joint articulation angles) via dual-branch projection; (3) \textit{SkelGym-Aug}, an empirically selected, task-oriented augmentation configuration restricted to distance-preserving Euclidean transformations (sagittal bilateral reflection and gravitational yaw rotation) selected strictly on validation-window evidence; and (4) a cross-paradigm ensemble coupling a self-attention Transformer with a four-stream Adaptive Graph Convolutional Network via zero-parameter uniform average soft voting (SkelGym-Full) and validation-calibrated accuracy-weighted soft voting (SkelGym-Lite), achieving real-time low-latency edge classification. Evaluated across three independent random seeds under fixed splits ($N=2,743$ test windows from 233 held-out videos), SkelGym achieves \textbf{76.19\% $\pm$ 0.16\% window-level accuracy} (Window Macro F1: \textbf{0.7537 $\pm$ 0.0014}) and \textbf{85.27\% $\pm$ 0.41\% video-level consensus accuracy} (Video Macro F1: \textbf{0.8386 $\pm$ 0.0075}, correctly classifying 200 of 233 held-out videos, achieving 85.84\% accuracy on the canonical test run). All pairwise architectural transitions are verified via paired statistical hypothesis testing (window-level McNemar $p \le 5.88 \times 10^{-5}$ across all transitions; video-level posterior confidence differences confirmed across sequence-to-ensemble transitions). With an ultra-low classifier inference latency of merely \textbf{0.49--3.96~ms} on host CPU (0.59--4.65~ms on CUDA, where individual backbones execute in 0.49--1.03~ms and the full five-stream ensemble executes in 3.96~ms at 253 FPS) per 32-frame window, SkelGym enables real-time, privacy-aware exercise recognition suitable for smart mirrors, mobile devices, and embedded gym displays. All source code, extracted skeletal representations, metadata, and pretrained checkpoints used for reproducibility are publicly available at \url{https://huggingface.co/Cuong2004/gym-exercise-classification} \rv{co the phai chuyen link sang github}.
 \end{abstract}
 
 \begin{keyword}
@@ -66,11 +68,16 @@ Gym exercise classification \sep Skeleton-based action recognition \sep Adaptive
 
 \section{Introduction}
 
-Regular physical resistance training and structured exercise play an essential role in improving cardiovascular health, metabolic longevity, muscular hypertrophy, and psychological well-being \cite{schoenfeld2010}. With modern demanding lifestyles and remote working environments, a rapidly growing population conducts workouts in home settings rather than commercial fitness centers. However, exercising without the supervision of certified strength and conditioning coaches frequently leads to improper kinetic execution, sub-optimal muscular recruitment, and elevated risks of acute or repetitive strain injuries (such as lumbar disc herniation, rotator cuff impingement, and patellar tendinopathy) \cite{riccio2024}. Consequently, there is an urgent demand for automated, intelligent virtual personal trainers capable of identifying exercise types in real-time, monitoring execution repetitions, and providing instantaneous biomechanical feedback \cite{garciadevilla2022}.
+Regular physical resistance training and structured exercise play an essential role in improving cardiovascular health, metabolic longevity, muscular hypertrophy, and psychological well-being \cite{schoenfeld2010}.
+With modern demanding lifestyles and remote working environments, a rapidly growing population conducts workouts in home settings rather than commercial fitness centers. 
+However, exercising without the supervision of certified strength and conditioning coaches frequently leads to improper kinetic execution, sub-optimal muscular recruitment, and elevated risks of acute or repetitive strain injuries (such as lumbar disc herniation, rotator cuff impingement, and patellar tendinopathy) \cite{riccio2024}. 
+Consequently, there is an urgent demand for automated, intelligent virtual personal trainers capable of identifying exercise types in real time, monitoring execution repetitions, and providing instantaneous biomechanical feedback \cite{garciadevilla2022}.
 
-Early computer vision frameworks for resistance exercise and action recognition were predominantly built upon appearance-based RGB video models, such as 2D/3D CNNs \cite{donahue2015,carreira2017,feichtenhofer2019} and spatiotemporal Vision Transformers (e.g., ViViT \cite{arnab2021}, TimeSformer \cite{bertasius2021}, Video Swin \cite{liu2022video}). While dense RGB representations capture visual cues such as gym equipment and barbells \cite{ng2015}, they exhibit three critical operational drawbacks in practical deployments.
-
-First, dense spatio-temporal convolutions incur heavy computational overhead (often exceeding hundreds of GFLOPs), which precludes real-time execution on resource-constrained mobile phones, smart displays, or edge hardware. Second, appearance-based networks readily memorize spurious background correlations---including flooring patterns, studio lighting, bench upholstery, and athletic apparel---resulting in severe performance collapse when evaluated in novel domestic workout environments. Third, cloud-centric video architectures necessitate continuously transmitting unconstrained high-definition RGB video streams from private living spaces to remote servers, introducing network bandwidth bottlenecks and user privacy vulnerabilities.
+Early computer vision frameworks for resistance exercise and action recognition were proposed upon appearance-based RGB video models, such as 2D/3D CNNs \cite{donahue2015,carreira2017,feichtenhofer2019} and spatiotemporal Vision Transformers (e.g., ViViT \cite{arnab2021}, TimeSformer \cite{bertasius2021}, Video Swin \cite{liu2022video}). 
+While dense RGB representations capture visual cues such as gym equipment and barbells \cite{ng2015}, they exhibit three critical operational drawbacks in practical deployments.
+First, dense spatio-temporal convolutions impose heavy computational overhead (often exceeding hundreds of GFLOPs), preventing real-time execution on resource-constrained edge devices or mobile hardware. 
+Second, appearance-based networks are readily dominated by background visual cues, flooring textures, and athletic apparel, causing severe performance degradation when evaluated in novel domestic workout environments. 
+Third, cloud-centric video architectures require continuous transmission of high-definition RGB video streams from private living spaces to remote servers, introducing network bandwidth bottlenecks and acute user privacy risks.
 
 \begin{figure*}[!t]
 \centering
@@ -154,58 +161,74 @@ First, dense spatio-temporal convolutions incur heavy computational overhead (of
 \label{fig:pipeline_full}
 \end{figure*}
 
-Skeleton-based human action recognition offers an elegant solution to these challenges by abstracting human bodily movement into sparse, lightweight 3D keypoint coordinates. With real-time pose estimation frameworks such as Google MediaPipe \cite{chuankun2019,bazarevsky2020}, OpenPose \cite{cao2019}, and AlphaPose \cite{fang2022}, 3D skeletal tracking can be executed on commodity webcams and mobile chipsets at sub-millisecond latencies. However, translating skeletal tracking into accurate, multi-class gym exercise recognition introduces four fundamental scientific hurdles:
+To address these challenges, skeleton-based human action recognition offers an elegant solution by abstracting human bodily movement into sparse, lightweight 3D keypoint coordinates. 
+With real-time pose estimation frameworks such as Google MediaPipe \cite{chuankun2019,bazarevsky2020}, OpenPose \cite{cao2019}, and AlphaPose \cite{fang2022}, 3D skeletal tracking can be executed on edge devices and commodity hardware at sub-millisecond latencies. 
+However, translating skeletal tracking into accurate, multi-class gym exercise recognition introduces three fundamental scientific challenges:
 
-The first hurdle is the scarcity of standardized, fine-grained 3D skeletal gym benchmarks with strict source-video partitioning. Existing fitness datasets are either restricted to trivial 3--5 exercises or employ random temporal window splits that permit subtle data leakage between training and testing partitions, while also lacking multi-source in-the-wild recording diversity.
+The first challenge is balancing biomechanical redundancy against kinematic expressiveness. Distinguishing fine-grained exercise variants (such as flat, incline, and decline bench presses, or differentiating conventional deadlifts from Romanian deadlifts) requires capturing subtle joint-angle dynamics and limb orientations. However, exhaustive geometric angle formulations---such as computing all three-joint triplets---incur a combinatorial feature explosion ($\binom{13}{3} = 286$), introducing high dimensional multicollinearity, gradient singularities at joint lockouts, and severe overfitting risks.
 
-The second hurdle concerns biomechanical redundancy versus kinematic expressiveness. Resistance exercises frequently involve fine-grained differences in limb trajectories and joint angles, as demonstrated when distinguishing flat, incline, and decline bench presses, or differentiating conventional deadlifts from Romanian deadlifts. While exhaustive geometric angle formulations---such as computing all three-joint triplets---might capture these subtle distinctions, they incur a combinatorial explosion of features ($\binom{13}{3} = 286$), introducing dimensional multicollinearity, gradient singularities at joint lockouts, and an acute risk of overfitting.
+The second challenge stems from physiologically invalid data augmentation. While data augmentation is standard in general action recognition, applying unconstrained spatial or temporal transformations naively to resistance training distorts invariant anatomical bone lengths, violates gravitational verticality, or corrupts movement execution cadence and velocity profiles that define distinct exercise classes.
 
-The third hurdle stems from the lack of task-oriented validation for skeletal data augmentation. While spatial and temporal transformations (such as rotation, mirroring, scaling, time warping, and jitter) are well-established in general action recognition, applying them naively to resistance training risks altering fixed anatomical bone lengths, violating gravitational verticality, or distorting repetition cadence and velocity profiles that define distinct exercise classes.
+Finally, the third challenge lies in achieving true cross-paradigm model complementarity while strictly preventing data contamination. Temporal sequence architectures, such as LSTMs \cite{hochreiter1997long,graves2005} and Transformers \cite{vaswani2017}, excel at modeling long-range phase transitions. Whereas spatio-temporal graph convolutional networks, such as ST-GCN \cite{yan2018}, 2S-AGCN \cite{shi2019two}, and CTR-GCN \cite{chen2021channel}, explicitly exploit physical musculoskeletal topology. Prior works often combine these paradigms naively, rely on heavy pre-trained backbones unsuitable for edge hardware, or tune ensemble fusion weights directly on test partitions, inducing optimistic reporting bias.
 
-Finally, the fourth hurdle lies in achieving true cross-paradigm model complementarity and real-time edge execution while strictly preventing data contamination. Temporal sequence architectures (such as LSTMs \cite{hochreiter1997long,graves2005} and Transformers \cite{vaswani2017}) excel at modeling long-range phase transitions, whereas spatial-temporal graph convolutional networks (such as ST-GCN \cite{yan2018}, 2S-AGCN \cite{shi2019two}, and CTR-GCN \cite{chen2021channel}) explicitly exploit physical musculoskeletal topology. Prior works often combine these paradigms naively, rely on heavy pre-trained backbones unsuitable for edge hardware, or tune ensemble fusion weights directly on test partitions, inducing optimistic reporting bias.
-
-To systematically resolve these challenges, we introduce \textbf{SkelGym} (illustrated in Fig.~\ref{fig:pipeline_full}), an end-to-end intelligent exercise recognition system that transforms raw monocular video into actionable exercise labels through a fully automated pipeline: \textit{Video $\rightarrow$ MediaPipe 3D Skeleton $\rightarrow$ 63-d Biomechanical Representation $\rightarrow$ SkelGym-Aug $\rightarrow$ Cross-Paradigm Classifiers $\rightarrow$ Late Probability Fusion $\rightarrow$ Video Consensus $\rightarrow$ Edge Deployment}. Specifically, this work provides four primary technical contributions:
-
-\paragraph{C1: Multi-Source 3D Skeletal Landmark Benchmark with Leakage-Free Partitioning.} We curate and release a fine-grained 3D skeletal dataset derived from 1,024 multi-camera in-the-wild videos spanning 22 resistance training exercises across three provenance streams (public repositories, stock media, and 128 ethical author-recorded gymnasium videos). Pre-extracted into 13 load-bearing 3D landmark trajectories (1,108 action segments) in JSON, NPY, and HDF5 formats under CC~BY~4.0 and MIT licenses, our benchmark establishes a strict video-level partitioning protocol (6:2:2) with zero source-video overlap, completely eliminating temporal window-level data leakage: no frames, windows, or action segments from the same source video cross partition boundaries.
-
-\paragraph{C2: Biomechanical Compound Representation (63-d Mix v2).} We design an upgraded kinematic descriptor fusing metric World 3D coordinates (39-d) with 24-d kinematic joint articulation and limb elevation angles. Spatial coordinates are expressed in estimated physical metric dimensions (meters) centered at the pelvic mid-hip origin anchor. The angular branch distills 24 anatomically calibrated angles (14 limb segment orientation angles relative to gravity and 10 3D joint articulation triplets), resolving collinearity and gradient singularities while providing intrinsic invariance to horizontal camera yaw rotation.
-
-\paragraph{C3: Empirically Selected Task-Oriented Augmentation Configuration (SkelGym-Aug).} Rather than claiming novel mathematical transformation operators, we evaluate a candidate pool of established skeletal augmentations categorized into geometric (sagittal reflection, gravitational yaw rotation, proportional scaling), temporal (time warping), and noise-based (sensor jitter) domains. Through systematic Leave-One-Out (LOO) and isolated ablations evaluated strictly on validation-window metrics across three independent random seeds, we demonstrate that unconstrained scaling and jitter distort physical metric proportions and velocity profiles, while temporal time warping disrupts exercise tempo and cadence. We thus isolate an optimal, task-oriented 2-operator configuration---Bilateral Sagittal Reflection and Gravitational Yaw Rotation ($\pm 15^\circ$)---that strictly preserves physical Euclidean distances and gravitational verticality, achieving peak representation learning (Validation Window Accuracy: 81.20\% $\pm$ 0.72\%, Macro F1: 0.8119 $\pm$ 0.0072) with zero test-time data corruption.
-
-\paragraph{C4: Cross-Paradigm Fusion, Rigorous Benchmarking, and Real-Time Edge Deployment.} We engineer custom lightweight backbones ($\approx 301\text{K}$--$378\text{K}$ parameters each, trained entirely from scratch) spanning self-attention sequence Transformers and four-stream Adaptive Graph Convolutional Networks (AAGCN), unified via transparent late probability fusion: zero-parameter uniform average soft voting for the full cross-paradigm ensemble (SkelGym-Full) and validation-calibrated accuracy-weighted soft voting for the two-stream edge variant (SkelGym-Lite). Through multi-seed evaluations across three independent random seeds ($42, 123, 3407$) and paired statistical hypothesis testing (window-level McNemar $p \le 5.88 \times 10^{-5}$ across all transitions; video-level posterior confidence differences confirmed across sequence-to-ensemble transitions), SkelGym attains \textbf{76.19\% $\pm$ 0.16\% window accuracy} (Window Macro F1: \textbf{0.7537 $\pm$ 0.0014}) and \textbf{85.27\% $\pm$ 0.41\% video consensus accuracy} (Video Macro F1: \textbf{0.8386 $\pm$ 0.0075}, correctly classifying 200 of 233 held-out test videos) across 22 resistance exercises. Delivering an ultra-low single-window classifier latency of merely \textbf{0.49--3.96~ms} on host CPU (0.59--4.65~ms on CUDA, where individual backbones execute in 0.49--1.03~ms and the full 5-stream ensemble executes in 3.96~ms at 253 FPS), SkelGym demonstrates practical real-time feasibility for privacy-aware edge deployment without persistent video streaming.
+To systematically resolve these challenges, SkelGym (illustrated in Fig.~\ref{fig:pipeline_full}), a scientifically grounded cross-paradigm skeletal classification framework, is proposed. SkelGym transforms raw monocular video into actionable exercise labels through a fully automated pipeline: \textit{Video $\rightarrow$ MediaPipe 3D Skeleton $\rightarrow$ 63-d Biomechanical Representation $\rightarrow$ SkelGym-Aug $\rightarrow$ Cross-Paradigm Classifiers $\rightarrow$ Late Probability Fusion $\rightarrow$ Video Consensus $\rightarrow$ Edge Deployment}. Specifically, the primary technical contributions of this work are as follows:
+\begin{itemize}
+    \item \textbf{C1: Multi-Source 3D Skeletal Landmark Benchmark with Leakage-Free Partitioning.} We curate and release a fine-grained 3D skeletal dataset derived from 1,024 multi-camera in-the-wild videos spanning 22 resistance training exercises across three provenance streams: public repositories, licensed stock media, and 128 ethically collected author-recorded gym recordings. Pre-extracted into 13 load-bearing 3D landmark trajectories (1,108 action segments) in JSON, NPY, and HDF5 formats under CC~BY~4.0 and MIT licenses, our benchmark establishes a strict video-level partitioning protocol (6:2:2 train/val/test split) ensuring zero cross-split source video overlap, completely eliminating temporal window-level data leakage across partitions.
+    \item \textbf{C2: Biomechanical Compound Representation (63-d Mix v2).} We design an upgraded kinematic descriptor fusing pelvic-centered metric World 3D coordinates (39-d) with 24 domain-selected kinematic angles. Spatial coordinates are expressed in estimated physical metric dimensions (meters) centered at the pelvic mid-hip origin anchor. The angular branch distills 24 anatomically decisive angles (14 limb segment orientation angles relative to gravity and 10 3D joint articulation triplets), resolving collinearity and gradient singularities while providing intrinsic invariance to horizontal camera yaw rotation.
+    \item \textbf{C3: Empirically Selected Task-Oriented Augmentation Configuration (SkelGym-Aug).} Rather than claiming novel mathematical transformation operators, we evaluate a candidate pool of established skeletal augmentations categorized into geometric, temporal, and noise-based domains. Through systematic Leave-One-Out (LOO) and isolated ablations evaluated strictly on validation-window evidence, we demonstrate that unconstrained scaling and jitter distort physical metric proportions and velocity profiles, while temporal time warping disrupts exercise cadence. Consequently, we isolate an optimal, task-oriented 2-operator configuration---Bilateral Sagittal Reflection and Gravitational Yaw Rotation ($\pm 15^\circ$)---that strictly preserves physical Euclidean distances and gravitational verticality, achieving peak representation learning (Validation Window Accuracy: 81.20\% $\pm$ 0.72\%, Macro F1: 0.8119 $\pm$ 0.0072) with zero test-time data corruption.
+    \item \textbf{C4: Cross-Paradigm Fusion, Rigorous Benchmarking, and Real-Time Edge Deployment.} We engineer custom lightweight backbones ($\approx 301\text{K}$--$378\text{K}$ parameters each, trained entirely from scratch) spanning self-attention sequence Transformers and four-stream Adaptive Graph Convolutional Networks (AAGCN), unified via transparent late probability fusion: zero-parameter uniform average soft voting for the full cross-paradigm ensemble (SkelGym-Full) and validation-calibrated accuracy-weighted soft voting for the two-stream edge variant (SkelGym-Lite). Evaluated across three independent random seeds ($42, 123, 3407$) and paired statistical tests (window-level McNemar $p \le 5.88 \times 10^{-5}$ across all transitions; video-level posterior confidence differences confirmed across sequence-to-ensemble transitions), SkelGym attains \textbf{76.19\% $\pm$ 0.16\% window accuracy} (Window Macro F1: \textbf{0.7537 $\pm$ 0.0014}) and \textbf{85.27\% $\pm$ 0.41\% video consensus accuracy} (Video Macro F1: \textbf{0.8386 $\pm$ 0.0075}, correctly classifying 200 of 233 held-out test videos). Delivering an ultra-low single-window classifier latency of merely \textbf{0.49--3.96~ms} on host CPU (0.59--4.65~ms on CUDA, where individual backbones execute in 0.49--1.03~ms and the full 5-stream ensemble executes in 3.96~ms at 253 FPS), SkelGym demonstrates practical real-time feasibility for privacy-aware edge deployment without persistent video streaming.
+\end{itemize}
 
 \section{Related Work}
 
 \subsection{Skeletal Action Recognition}
-Extracting human pose from monocular RGB video has matured rapidly with lightweight real-time estimators such as OpenPose \cite{cao2019}, AlphaPose \cite{fang2022}, and Google MediaPipe Pose \cite{chuankun2019,bazarevsky2020}. Early landmark-based action recognition utilized Recurrent Neural Networks (RNNs) and Long Short-Term Memory (LSTM) networks \cite{hochreiter1997long,graves2005,li2017} to model skeletal temporal dynamics. However, pure recurrent models treat skeletons as unorganized coordinate vectors, ignoring the inherent topological structure of the human musculoskeletal system.
-
-To overcome this, Yan et al. \cite{yan2018} pioneered Spatial Temporal Graph Convolutional Networks (ST-GCN), constructing a spatio-temporal graph where human joints form vertices and physical bones form fixed spatial edges. Shi et al. \cite{shi2019two} introduced Two-Stream Adaptive Graph Convolutional Networks (2S-AGCN), parameterizing the adjacency matrix with learnable and data-driven components. Subsequent advances---including multi-stream AAGCN \cite{shi2020skeleton}, CTR-GCN \cite{chen2021channel}, InfoGCN \cite{chi2022infogcn}, HD-GCN \cite{lee2023hdgcn}, and SkateFormer \cite{zheng2024skateformer}---progressively integrated channel attention, information-theoretic representation learning, hierarchical graph decomposition, and partition-specific transformer attention. In parallel, Duan et al. \cite{duan2022} introduced PoseConv3D, mapping 3D skeleton keypoints to spatiotemporal heatmap volumes to exploit 3D convolutional architectures, while Yin et al. \cite{yin2023} designed an efficient multi-stream depthwise separable convolutional network for skeleton action recognition. However, these modern architectures were predominantly tuned around large-scale benchmarks like NTU RGB+D (60/120 classes) with parameter footprints of $1.3\text{M}$--$5.2\text{M}$ and high GFLOP demands. In resistance exercise tracking, peripheral joints suffer severe occlusion by barbells and machine frames. SkelGym prunes the skeleton to $V=13$ load-bearing joints and designs custom lightweight backbones ($\approx 350\text{K}$ parameters per stream) trained from scratch, delivering real-time edge execution.
+Early landmark-based action recognition utilized Recurrent Neural Networks (RNNs) and Long Short-Term Memory (LSTM) networks \cite{hochreiter1997long,graves2005,li2017} to model skeletal temporal dynamics. 
+However, pure recurrent models treat skeletons as unorganized coordinate vectors, ignoring the inherent topological structure of the human musculoskeletal system.
+To overcome this, Yan et al. \cite{yan2018} pioneered Spatial Temporal Graph Convolutional Networks (ST-GCN), constructing a spatio-temporal graph where human joints form vertices and physical bones form fixed spatial edges. 
+Shi et al. \cite{shi2019two} introduced Two-Stream Adaptive Graph Convolutional Networks (2S-AGCN), parameterizing the adjacency matrix with learnable and data-driven components. 
+Subsequent advances, including multi-stream AAGCN \cite{shi2020skeleton}, CTR-GCN \cite{chen2021channel}, InfoGCN \cite{chi2022infogcn}, HD-GCN \cite{lee2023hdgcn}, and SkateFormer \cite{zheng2024skateformer}, progressively integrated channel attention, information-theoretic representation learning, hierarchical graph decomposition, and partition-specific transformer attention. 
+In parallel, Duan et al. \cite{duan2022} introduced PoseConv3D, mapping 3D skeleton keypoints to spatiotemporal heatmap volumes to exploit 3D convolutional architectures, while Yin et al. \cite{yin2023} designed an efficient multi-stream depthwise separable convolutional network for skeleton action recognition. 
+However, these modern architectures were predominantly tuned around large-scale benchmarks like NTU RGB+D (60/120 classes) with parameter footprints of $1.3\text{M}$--$5.2\text{M}$ and high GFLOP demands. 
+In resistance exercise tracking, peripheral joints suffer severe occlusion by barbells and machine frames. 
+SkelGym prunes the skeleton to $V=13$ load-bearing joints and designs custom lightweight backbones ($\approx 350\text{K}$ parameters per stream) trained from scratch, delivering real-time edge execution.
 
 \subsection{Kinematic Sequence Modeling and Skeletal Transformers}
-Following the dominance of self-attention in NLP and computer vision (e.g., Vaswani et al. \cite{vaswani2017}, ViViT \cite{arnab2021}, TimeSformer \cite{bertasius2021}, Video Swin \cite{liu2022video}), transformers have been extended to skeletal motion (e.g., ST-TR \cite{plizzari2021sttr}). While transformers possess global receptive fields, they are data-hungry and prone to overfitting on limited skeletal training cohorts. We demonstrate that when fed with our 63-d Biomechanical Mix v2 Representation and regularized by SkelGym-Aug, a compact 3-layer Transformer achieves competitive performance, functioning as an ideal complement to graph convolutions.
+Following the success of self-attention in natural language processing and computer vision \cite{vaswani2017,arnab2021,bertasius2021,liu2022video}, transformers have been adapted for skeletal motion \cite{plizzari2021sttr}. 
+However, despite global receptive fields, transformers are data-hungry and prone to overfitting on small skeletal datasets. 
+We demonstrate that when fed with our 63-d Biomechanical Mix v2 Representation and regularized by SkelGym-Aug, a compact 3-layer Transformer (301K parameters) achieves competitive performance, functioning as an ideal complement to graph convolutions.
 
 \subsection{Skeletal Data Augmentation in Action Recognition}
-Data augmentation is a foundational mechanism for mitigating overfitting in deep skeleton-based recognition, particularly when training cohorts are constrained \cite{yan2018,shi2020skeleton}. Candidate augmentation operators across prior literature can be broadly categorized into spatial-geometric transformations (e.g., random 3D rotations, sagittal axis flipping, coordinate scaling), temporal manipulations (e.g., temporal cropping, time warping, speed perturbation), and noise injection (e.g., additive Gaussian coordinate jitter) \cite{xin2024augmentation}. While these generic transformations improve general action recognition, they are frequently applied without considering domain-specific biomechanical validity: unconstrained 3D rotations alter gravitational alignment, non-uniform scaling distorts fixed biological bone lengths, and arbitrary time warping can destroy execution tempo.
-
-In this work, we do not claim operator-level novelty for these mathematical transformations, which are established in the literature. Rather, our contribution lies in formulating a disciplined candidate pool across geometric, temporal, and noise-based domains, and conducting systematic Leave-One-Out (LOO) and isolated single-component ablations evaluated strictly on validation-window evidence. This analysis reveals that while distance-preserving Euclidean isometries (bilateral sagittal reflection and gravitational yaw rotation) supply essential viewpoint and bilateral invariance, non-rigid operators (scaling, coordinate jitter, and temporal time warping) alter anatomical proportions and cadence, degrading representation quality. The resulting empirically selected \textit{SkelGym-Aug} configuration (Mirror + Yaw) provides a tailored, biomechanically grounded regularizer for gymnasium motion analysis.
-
-\subsection{Ensemble Learning for Skeleton-Based Recognition}
-Multi-stream fusion has emerged as a dominant paradigm in skeleton-based action recognition. Shi et al. \cite{shi2020skeleton} and Yin et al. \cite{yin2023} demonstrated that combining joint, bone, joint-motion, and bone-motion streams via late fusion substantially improves recognition accuracy by capturing complementary kinematic perspectives. However, existing multi-stream approaches typically rely on manually tuned heuristic weights, complex meta-classifiers, or optimization objectives prone to validation overfitting \cite{wolpert1992stacking}. Furthermore, when ensemble calibration involves test partition data---whether explicitly or implicitly through iterative hyperparameter sweeps---the resulting accuracy estimates suffer from optimistic reporting bias. SkelGym addresses these limitations by pairing inherently complementary learning paradigms---a global self-attention sequence Transformer and a four-stream Adaptive Graph Convolutional Network---unified via zero-parameter uniform average soft voting ($w_i = 1/5$). This zero-parameter formulation eliminates meta-model overfitting risks, enforces strict test-separation integrity, and establishes the top-performing configuration in our benchmark.
+Data augmentation is essential for mitigating overfitting in deep skeleton-based action recognition, particularly under constrained training regimes \cite{yan2018,shi2020skeleton}.
+Existing augmentation strategies in the literature typically fall into three broad categories: spatial-geometric transformations (random 3D rotations, sagittal flipping, coordinate scaling) \cite{yan2018,shi2020skeleton}, temporal manipulations (temporal cropping, time warping, speed perturbation) \cite{song2023constructing}, and noise injection (additive Gaussian coordinate jitter) \cite{xin2024augmentation}.
+Although these general transformations enhance model robustness in generic action recognition, they often ignore domain-specific biomechanical constraints: unconstrained 3D rotations disrupt gravitational alignment, non-uniform spatial scaling distorts invariant anatomical bone proportions, and arbitrary temporal manipulation risks corrupting movement execution dynamics and cadence. 
+In this work, we formulate a disciplined candidate pool across these three categories and conduct systematic Leave-One-Out (LOO) and isolated single-component ablations evaluated strictly on validation-window evidence. This analysis reveals that while distance-preserving Euclidean isometries (bilateral sagittal reflection and gravitational yaw rotation) supply essential viewpoint and bilateral invariance, non-rigid operators (scaling, coordinate jitter, and temporal time warping) alter anatomical proportions and cadence, degrading representation quality. The resulting empirically selected \textit{SkelGym-Aug} configuration (Mirror + Yaw) provides a tailored, biomechanically grounded regularizer for gymnasium motion analysis.
 
 \subsection{Fitness and Resistance Exercise Recognition}
-Automated exercise tracking has attracted growing attention in sports science, rehabilitation, and ubiquitous computing. Garc\'{i}a-de-Villa et al. \cite{garciadevilla2022} developed an expert system for simultaneous exercise recognition and evaluation in prescribed fitness routines for virtual coaches. Str\"{o}mb\"{a}ck et al. \cite{stromback2020} created MM-Fit, a multimodal benchmark unifying 3D pose, multi-view RGB-D video, and wearable inertial sensors across free-weight exercises (e.g., squats, lunges, and curls), demonstrating the utility of multi-sensor tracking. Riccio \cite{riccio2024} implemented real-time exercise classification and repetition counting using a BiLSTM over geometric joint angles. Ding et al. \cite{ding2022repcount} developed the RepCount benchmark for repetition counting in diverse fitness environments. Deyzel et al. \cite{deyzel2023} proposed one-shot skeleton-based recognition for strength and conditioning exercises on the SU-EMD dataset (5 exercises), revealing critical confusion between squats and deadlifts due to kinematic overlap. While general benchmarks (UCF101 \cite{soomro2012ucf101}, Kinetics-400 \cite{kay2017kinetics}) feature broad athletic activities, they lack fine-grained biomechanical resolution. Existing fitness datasets are either restricted to trivial 3--5 exercises or employ random temporal window splits that permit data leakage. In contrast, SkelGym benchmarks a demanding 22-class resistance exercise taxonomy under a strictly segregated video-level split protocol, advancing beyond laboratory-controlled settings to in-the-wild multi-camera gym environments.
+Recently, automated exercise tracking systems have attracted growing attention in sports science, rehabilitation, and ubiquitous computing. 
+Garc\'{i}a-de-Villa et al. \cite{garciadevilla2022} developed an expert system for simultaneous exercise recognition and evaluation in prescribed fitness routines for virtual coaches. 
+Str\"{o}mb\"{a}ck et al. \cite{stromback2020} created MM-Fit, a multimodal benchmark unifying 3D pose, multi-view RGB-D video, and wearable inertial sensors across free-weight exercises, demonstrating the utility of multi-sensor tracking. 
+Riccio \cite{riccio2024} implemented real-time exercise classification and repetition counting using a BiLSTM over geometric joint angles. 
+Ding et al. \cite{ding2022repcount} developed the RepCount benchmark for repetition counting in diverse fitness environments. 
+Deyzel et al. \cite{deyzel2023} proposed one-shot skeleton-based recognition for strength and conditioning exercises on the SU-EMD dataset, revealing critical confusion between squats and deadlifts due to kinematic overlap. 
+While general benchmarks (UCF101 \cite{soomro2012ucf101}, Kinetics-400 \cite{kay2017kinetics}) feature broad athletic activities, they lack fine-grained biomechanical resolution. 
+Existing fitness datasets are either restricted to trivial 3--5 exercises or employ random temporal window splits that permit data leakage. 
+In contrast, SkelGym benchmarks a demanding 22-class resistance exercise taxonomy under a strictly segregated video-level split protocol, advancing beyond laboratory-controlled settings to in-the-wild multi-camera gym environments.
 
 \begin{figure*}[!t]
 \centering
 \includegraphics[width=1.0\textwidth]{images/Dataset.png}
-\caption{Taxonomy and sample distributions across the 22 resistance exercises in the benchmark dataset.}
+\caption{Taxonomy and sample distributions across the 22 resistance exercises in the benchmark dataset. \rv{kiem tra cac hinh nay o trong dataset da duoc publish, chu khong o trong dataset lay tu youtube}}
 \label{fig:dataset_samples}
 \end{figure*}
 
 \section{Dataset and Experimental Protocol}
 
 \subsection{Data Source, Provenance, and Ethical Compliance}
-Our experimental corpus consists of 1,024 clean, un-shuffled video recordings across 22 resistance training exercises: \textit{barbell biceps curl, bench press, chest fly machine, deadlift, decline bench press, hammer curl, hip thrust, incline bench press, lat pulldown, lateral raise, leg extension, leg raises, plank, pull-up, push-up, Romanian deadlift, Russian twist, shoulder press, squat, t-bar row, tricep dips, and tricep pushdown} (Fig.~\ref{fig:dataset_samples}). To ensure high diversity in environmental backgrounds, camera angles, lighting conditions, and athlete anthropometry, the corpus unifies three distinct provenance streams: (1) \textit{public video repositories}, comprising 652 videos recovered from the open Workout/Exercise Video Dataset \cite{abdillah2023}; (2) \textit{curated online media}, including 103 high-definition clips collected from YouTube fitness channels, 65 clips from Pexels, and 76 clips from Freepik acquired under open research and stock licenses; and (3) \textit{author-recorded footage}, consisting of 128 supplementary videos captured by the authors in a gymnasium across all 22 exercise classes with two athletic models, employing both static tripod viewpoints and dynamic moving-camera angles to capture multi-perspective kinetic execution.
+The experimental dataset consists of 3D skeletal landmarks extracted from 1,024 clean, un-shuffled video recordings across 22 resistance training exercises: \textit{barbell biceps curl, bench press, chest fly machine, deadlift, decline bench press, hammer curl, hip thrust, incline bench press, lat pulldown, lateral raise, leg extension, leg raises, plank, pull-up, push-up, Romanian deadlift, Russian twist, shoulder press, squat, t-bar row, tricep dips, and tricep pushdown} (Fig.~\ref{fig:dataset_samples}). 
+To ensure high diversity across environmental backgrounds, camera perspectives, illumination conditions, and athlete anthropometry, the dataset unifies three distinct provenance streams: 
+(1) public video repositories, comprising 652 videos recovered from the open Workout/Exercise Video Dataset \cite{abdillah2023}; 
+(2) curated online media, including 103 high-definition clips collected from YouTube fitness channels, 65 clips from Pexels, and 76 clips from Freepik acquired under open research and stock licenses; 
+and (3) author-recorded footage, consisting of 128 supplementary videos captured by the authors in a gymnasium across all 22 exercise classes with two athletic models, employing both static tripod viewpoints and dynamic moving-camera angles to capture multi-perspective kinetic execution.
 
 \begin{table*}[!t]
 \centering
@@ -234,15 +257,15 @@ Recording Environments                  & Commercial gymnasiums, domestic home w
 }
 \end{table*}
 
-\paragraph{Subject Statistics and Ethical Compliance.} To provide both high-precision kinematic reference baselines and expansive real-world diversity, the dataset incorporates two complementary subject cohorts. For the 128 self-recorded gymnasium videos, volunteer participants executed all 22 resistance movements under controlled multi-angle camera setups, providing kinematically disciplined execution benchmarks under formal written informed consent following the Declaration of Helsinki. For the remaining 896 web-sourced videos, recordings capture hundreds of diverse athletes spanning unconstrained body builds, athletic apparel, and training experience across international fitness facilities, home gyms, and outdoor parks. Crucially, the dataset does not annotate explicit participant demographic or gender identifiers, ensuring that model training and evaluation remain strictly posture-driven and invariant to demographic bias. Furthermore, the video-level partition ensures that 100\% of source videos, derived action segments, and temporal windows reside entirely within a single split, guaranteeing zero source-video overlap and eliminating temporal window leakage across train, validation, and test sets. We note that while web-sourced video repositories lack explicit biometric participant identifiers, isolating all segmented windows strictly by source video guarantees that models cannot memorize repetitive background context, camera calibration artifacts, or session-specific clothing.
+\paragraph{Ethical Standards, Subject Diversity, and Data Integrity.}
+The benchmark combines two complementary data streams: 128 ethically collected gymnasium videos recorded under controlled multi-angle setups with written informed consent (Declaration of Helsinki), and 896 web-sourced videos capturing diverse athletes across unconstrained environments. To prevent demographic bias, the dataset explicitly omits participant identity and demographic annotations, ensuring strictly posture-driven modeling. Furthermore, video-level partitioning guarantees that all segments and temporal windows from a given source video reside entirely within a single split, guaranteeing zero source-video overlap and eliminating temporal window leakage across training, validation, and test sets. For author-recorded videos, written informed consent was formally obtained from all participants prior to filming in strict adherence to institutional ethical standards and the Declaration of Helsinki. For web-sourced data, collection complied strictly with platform Terms of Service without harvesting private personal identifiers.
 
 \paragraph{Source Statistics and Video Formats.} As summarized in Table~\ref{tab:dataset_specs}, the 1,024 video corpus totals 10,225.37~MB ($\approx 10.2$~GB) in storage, distributed between MP4 (964 videos, 94.1\%) and MOV (60 videos, 5.9\%) containers using H.264 compression. All videos operate at 30 frames per second. Video resolution was verified via \texttt{ffprobe}, encompassing 33 distinct resolutions dominated by standard high-definition formats: 1280$\times$720 (385 videos, 37.6\%), 1920$\times$1080 (315 videos, 30.8\%), and portrait mobile video 720$\times$1280 (130 videos, 12.7\%), with 35 videos at 854$\times$480, 28 at 640$\times$360, 23 at 3840$\times$2160 (4K), and 108 videos distributed across 27 minor resolutions ($\le 20$ videos each).
 
-\paragraph{Ethical Standards and Informed Consent.} For the 128 self-recorded videos, written informed consent was formally obtained from all participating human subjects prior to filming. The data recording protocol was conducted in strict adherence to institutional ethical standards and the Declaration of Helsinki. For data harvested from public online platforms, collection adhered strictly to platform Terms of Service and redistribution guidelines, gathering only publicly disseminated content without collecting private personal identifying information.
+\paragraph{Data Licensing and Artifact Availability.} To respect the intellectual property and terms of external video hosting platforms (YouTube, Pexels, and Freepik), original raw third-party video recordings are not redistributed. Their original source identifiers, attribution information, and manual segmentation boundaries are retained within the metadata manifests. Instead, to guarantee 100\% scientific reproducibility, all derived scientific artifacts---including extracted 3D skeletal landmark coordinate tensors, manual action segmentation boundaries, preprocessed kinematic features, and metadata manifests---are publicly released under the Creative Commons Attribution 4.0 International license (CC BY 4.0). All neural network architectures, training routines, and pre-trained checkpoints are openly provided under the permissive MIT License at \url{https://huggingface.co/Cuong2004/gym-exercise-classification}. \rv{xem lai phan nay}
 
-\paragraph{Data Licensing and Artifact Availability.} To respect the intellectual property and terms of external video hosting platforms (YouTube, Pexels, and Freepik), original raw third-party video recordings are not redistributed. Their original source identifiers, attribution information, and manual segmentation boundaries are retained within the metadata manifests. Instead, to guarantee 100\% scientific reproducibility, all derived scientific artifacts---including extracted 3D skeletal landmark coordinate tensors, manual action segmentation boundaries, preprocessed kinematic features, and metadata manifests---are publicly released under the Creative Commons Attribution 4.0 International license (CC BY 4.0). All neural network architectures, training routines, and pre-trained checkpoints are openly provided under the permissive MIT License at \url{https://huggingface.co/Cuong2004/gym-exercise-classification}.
-
-\paragraph{Video Inclusion and Exclusion Criteria.} To ensure high-quality skeletal extraction and biomechanically meaningful training samples, we applied the following curation protocol. Videos were \textit{included} if they (i)~depicted a clearly identifiable single athlete performing one of the 22 target exercises, (ii)~were recorded at a frame rate of $\geq 25$~FPS, (iii)~contained at least one complete repetition cycle with visible concentric and eccentric phases, and (iv)~maintained sufficient camera framing such that hip and shoulder joints remained visible for $\geq 80\%$ of the active exercise duration. Conversely, videos were \textit{excluded} if they exhibited (a)~near-complete occlusion of both hip or both shoulder joints throughout the exercise segment (e.g., extreme close-up shots of isolated limbs), (b)~a native frame rate below 25~FPS (resulting in temporal aliasing during 30~FPS resampling), (c)~an active exercise duration shorter than one full repetition cycle ($< 32$ frames after trimming), or (d)~severe motion blur or compression artifacts rendering MediaPipe Pose landmark detection unreliable (landmark visibility confidence $< 0.3$ for $> 50\%$ of frames). This protocol yielded the final curated corpus of 1,024 videos described above.
+\paragraph{Video Inclusion Criteria.}
+To ensure high-quality skeletal extraction and biomechanically meaningful training samples, we applied the following curation protocol. A video is selected if it simultaneously satisfies four conditions: (i)~it depicts a clearly identifiable single athlete performing one of the 22 target exercises; (ii)~it is recorded at a frame rate of greater than or equal to $25$~frames per second; (iii)~it contains at least one complete repetition cycle with visible concentric and eccentric phases; and (iv)~it maintains sufficient camera framing such that hip and shoulder joints remain visible for $\ge 80\%$ of the active exercise duration.
 
 \begin{figure*}[!t]
 \centering
@@ -258,7 +281,7 @@ Recording Environments                  & Commercial gymnasiums, domestic home w
     \caption{Barbell biceps curl}
     \label{fig:pose_barbell}
 \end{subfigure}
-\caption{Full-body 3D pose landmark detection results across representative exercise video frames using Google MediaPipe Pose: (a) hammer curl and (b) barbell biceps curl.}
+\caption{Full-body 3D pose landmark detection results across representative exercise video frames using Google MediaPipe Pose: (a) hammer curl and (b) barbell biceps curl. \rv{co the chi show phan landmark thoi do ban quyen hoac hinh anh cua cac em}}
 \label{fig:pose_detection}
 \end{figure*}
 
@@ -307,14 +330,12 @@ Tricep dips             & 25 &  9 &  9 & 43  & 43 & 10 & 25 & 78 \\
 }
 \end{table*}
 
-\paragraph{Class Imbalance and Metric Selection.} Table~\ref{tab:class_distribution} details the distribution of videos and action segments across all 22 classes. As shown, natural gym workout data exhibits significant class imbalance: highly popular compound movements such as \textit{barbell biceps curl} ($N=84$ videos) and \textit{bench press} ($N=84$ videos) possess large sample representations, whereas specialized exercises such as \textit{plank} ($N=9$ videos total: 5 train, 2 val, 2 test) are relatively scarce. To prevent models from artificially inflating overall accuracy by predicting majority classes, we adopt \textbf{Macro-averaged F1 score} alongside Accuracy as the primary evaluation benchmark.
-
-\paragraph{Data and Code Availability.} To promote open science and persistent reproducibility, all extracted 3D pose landmark sequences (in JSON, NPY, and HDF5 tensor formats), action segmentations (\texttt{.txt}), partition manifests, and Python code are publicly hosted on Hugging Face Hub at \url{https://huggingface.co/Cuong2004/gym-exercise-classification}. Distributing pre-extracted coordinates circumvents vulnerability to third-party URL link rot common in video scraping, protects athlete privacy, and ensures permanent deterministic reproducibility. Raw third-party internet video recordings are withheld in adherence to platform Terms of Service, while the 128 author-recorded gymnasium clips and complete skeletal tensors are freely accessible for non-commercial academic research (see Appendix~\ref{app:open_science}). \textbf{Licensing:} The extracted 3D landmark coordinate tensors (NPY, JSON, HDF5), action segmentation boundaries, and partition manifests are released under the \textbf{Creative Commons Attribution 4.0 International (CC~BY~4.0)} license. All source code, training scripts, evaluation pipelines, and configuration files are released under the \textbf{MIT License}.
+\paragraph{Class Imbalance.} Table~\ref{tab:class_distribution} details the distribution of videos and action segments across all 22 classes. As shown, natural gym workout data exhibits significant class imbalance: highly popular compound movements such as \textit{barbell biceps curl} ($N=84$ videos) and \textit{bench press} ($N=84$ videos) possess large sample representations, whereas specialized exercises such as \textit{plank} ($N=9$ videos total: 5 train, 2 val, 2 test) are relatively scarce. 
 
 \subsection{Landmark Extraction and Anatomical Joint Selection}
 Every video frame is processed through Google MediaPipe Pose Heavy (complexity level 2) \cite{chuankun2019,bazarevsky2020}, extracting 33 full-body 3D landmarks $(x_i, y_i, z_i, \text{vis}_i)$ normalized relative to bounding box and depth dimensions, as illustrated on representative workout frames in Fig.~\ref{fig:pose_detection}. Because facial landmarks and fine-grained finger points contribute negligible kinetic leverage to compound resistance exercises while introducing tracking jitter, we filter the skeleton to $V=13$ major anatomical joints (detailed in Table~\ref{tab:landmark_mapping}): nose (cranial orientation tracking), left/right shoulders, left/right elbows, left/right wrists, left/right hips (pelvic centroid / origin anchor), left/right knees, and left/right ankles.
 
-\section{Proposed Methodology}
+\section{Methodology}
 \label{sec:methodology}
 
 The overall architectural workflow of \textbf{SkelGym} is illustrated in Fig.~\ref{fig:pipeline_full}, while Fig.~\ref{fig:feat_extraction_pipeline} details the underlying biomechanical feature extraction and kinematic tensor decomposition. Below, we formally derive each mathematical component of our framework.
@@ -479,7 +500,7 @@ The candidate augmentation pool spans five operators across three physical domai
 \end{itemize}
 
 \subsubsection{Empirical Selection and Final SkelGym-Aug Configuration}
-Evaluating candidate transformations on validation-window metrics (detailed in Section~\ref{sec:exp_aug}) reveals that combining all five operators degrades representation learning (Validation Window Macro F1 drops to 0.7882). Synthetic scaling perturbs absolute metric bone dimensions, sensor jitter corrupts velocity derivatives, and temporal warping disrupts phase duration ratios (concentric/eccentric cadence). Conversely, the paired configuration of \textbf{Sagittal Bilateral Reflection + Gravitational Yaw Rotation} strictly preserves pairwise Euclidean distances and gravitational verticality, achieving peak representation learning across all 13 experimental configurations (Validation Window Accuracy: \textbf{81.20\% $\pm$ 0.72\%}, Macro F1: \textbf{0.8119 $\pm$ 0.0072}, a decisive gain of +2.34\% F1 over unaugmented clean baseline). Therefore, the \textbf{final SkelGym-Aug configuration} is established as the 2-operator suite: \textit{Sagittal Bilateral Reflection + Gravitational Yaw Rotation ($\pm 15^\circ$)}.
+Evaluating candidate transformations on validation-window metrics (detailed in Section~\ref{sec:exp_aug}) reveals that combining all five operators degrades representation learning (Validation Window Macro F1 drops to 0.7882). Synthetic scaling perturbs absolute metric bone dimensions, sensor jitter corrupts velocity derivatives, and temporal warping disrupts phase duration ratios (concentric/eccentric cadence). Conversely, the paired configuration of \textbf{Sagittal Bilateral Reflection + Gravitational Yaw Rotation} strictly preserves pairwise Euclidean distances and gravitational verticality, achieving peak representation learning across all 13 experimental configurations tested (Validation Window Accuracy: \textbf{81.20\% $\pm$ 0.72\%}, Macro F1: \textbf{0.8119 $\pm$ 0.0072}, a decisive gain of +2.34\% F1 over unaugmented clean baseline). Therefore, the \textbf{final SkelGym-Aug configuration} is established as the 2-operator suite: \textit{Sagittal Bilateral Reflection + Gravitational Yaw Rotation ($\pm 15^\circ$)}.
 
 \paragraph{Zero Test-Time Data Corruption Protocol.}
 All transformations within the SkelGym-Aug pipeline are executed \textit{strictly on-the-fly during training forward passes} as stochastic data regularization. Validation and held-out test splits remain completely pristine and unaugmented throughout model selection, hyperparameter tuning, and final evaluation, ensuring zero test-time corruption and guaranteeing that reported metrics reflect authentic generalization to unmanipulated video recordings.
@@ -618,16 +639,175 @@ To ensure fair scientific comparison, all individual model backbones were constr
 }
 \end{table*}
 
-\subsection{Ablation of Landmark Feature Representations}
-Table~\ref{tab:table1} presents a systematic ablation comparing three temporal sequence architectures (LSTM, BiLSTM, and Transformer) across foundational landmark representations, contrasting metric World 3D (39-d) against the proposed Biomechanical Mix v2 (63-d). To enforce strict zero-leakage validation screening, model selection and feature space exploration were conducted strictly on the validation partition ($N=2,075$ windows). Across all architectures, the proposed 63-dimensional Biomechanical Mix v2 consistently achieves peak validation performance, confirming that combining metric Euclidean offsets with scale-invariant angular orientations provides an effective and robust kinematic representation. Below, we discuss the key empirical findings:
+\subsection{Master Benchmark Evaluation across Baselines and Proposed Methods}
+\label{sec:master_benchmark}
 
-\paragraph{2D versus 3D Coordinates and World Metric Grounding.} Across all baseline architectures, 3D representations consistently outperform 2D counterparts. In resistance training, compound movements---such as squats, deadlifts, and bench presses---operate predominantly within the sagittal or transverse anatomical planes. When captured from oblique angles, monocular 2D projections collapse depth variations along the optical axis ($z$), inducing visual ambiguity. Utilizing MediaPipe World coordinates measured in physical meters anchors limb trajectories to estimated metric scale, providing consistent metric distances regardless of camera zoom.
+Table~\ref{tab:master_benchmark} presents the comprehensive master benchmark comparing single-window inference ($T=32$ frames, $\approx 1.07\text{s}$) against temporal video consensus across all baseline models, external architectures, and our proposed SkelGym frameworks. To ensure fair and rigorous scientific evaluation, all results in Table~\ref{tab:master_benchmark} are reported strictly on the held-out test partition ($N=2,743$ test windows, $N=233$ test videos) across three independent random seeds ($\text{seed} \in \{42, 123, 3407\}$). We structure the benchmarked models into three distinct methodological categories:
+\begin{enumerate}
+    \item \textbf{Category 1: Baseline Architectures on Default / Raw 3D Coordinates:} Evaluates standard sequence and graph architectures trained on raw Euclidean coordinates without coordinate recentering or engineered biomechanical encodings. This category includes baseline ST-GCN \cite{yan2018}, the strong external baseline BlockGCN (CVPR 2024 Adapted) \cite{blockgcn2024}, and sequential backbones (LSTM, BiLSTM, Transformer) operating on 39-d raw Cartesian landmark coordinates.
+    \item \textbf{Category 2: Sequential and Graph Backbones on Biomechanical Representations:} Evaluates individual sequential and multi-stream graph backbones trained on metric World 3D and our proposed 63-d Biomechanical Mix v2 representations, both with and without data augmentation.
+    \item \textbf{Category 3: Proposed Cross-Paradigm Frameworks (SkelGym-Lite and SkelGym-Full):} Evaluates our multi-stream cross-paradigm ensembles that synergistically unite self-attention temporal modeling with adaptive spatial-temporal graph convolutions.
+\end{enumerate}
 
-\paragraph{Pelvic Coordinate Centering.} Subtracting the pelvic hip midpoint centroid ($p_i - p_{\text{hip\_mid}}$) yields substantial performance gains across all sequence backbones. Raw coordinates tie features directly to the camera frame, forcing models to expend parameter capacity memorizing subject location and bounding-box translations. Centering all joints relative to the pelvic midpoint eliminates global translation bias and anchors the skeleton to the bodily center of mass, allowing the network to focus purely on relative joint dynamics.
+\begin{table*}[!t]
+\centering
+\caption{Comprehensive Master Benchmark comparison across baseline architectures and proposed SkelGym frameworks evaluated strictly on the held-out test partition ($N=2,743$ windows, $N=233$ videos). Results are reported as $\text{Mean} \pm \text{SD}$ across 3 independent random seeds ($42, 123, 3407$).}
+\label{tab:master_benchmark}
+\label{tab:table7}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l l l c c c c c c}
+\toprule
+\textbf{Model Architecture} & \textbf{Feature Representation} & \textbf{Paradigm / Modality} & \textbf{Params} & \textbf{FLOPs} & \textbf{Test Win Acc (\%)} & \textbf{Test Win F1} & \textbf{Test Vid Acc (\%)} & \textbf{Test Vid F1} \\
+\midrule
+\multicolumn{9}{l}{\textit{\textbf{Category 1: Baseline Models on Default / Raw 3D Coordinates}}} \\
+ST-GCN (Raw 3D Clean) \cite{yan2018} & Raw 3D Landmarks & Fixed Graph Convolutional & 350K & 184.20 M & 48.35\% $\pm$ 0.94\% & 0.4701 $\pm$ 0.0141 & 58.65\% $\pm$ 1.76\% & 0.5432 $\pm$ 0.0208 \\
+BlockGCN (CVPR 2024 Adapted) \cite{blockgcn2024} & 33 Raw 3D Joints & Multi-Order Spatial-Temporal Graph & 1.35M & 212.40 M & 54.24\% $\pm$ 1.04\% & 0.5576 $\pm$ 0.0047 & 70.48\% $\pm$ 0.40\% & 0.6948 $\pm$ 0.0024 \\
+LSTM (Raw 3D Coordinates) & Raw 3D Coordinates (39-d) & Recurrent Sequential & 362K & 11.58 M & 52.77\% $\pm$ 1.77\% & 0.5041 $\pm$ 0.0250 & — & — \\
+BiLSTM (Raw 3D Coordinates) & Raw 3D Coordinates (39-d) & Bidirectional Recurrent & 360K & 13.90 M & 53.25\% $\pm$ 0.88\% & 0.5120 $\pm$ 0.0087 & — & — \\
+Transformer (Raw 3D Coordinates) & Raw 3D Coordinates (39-d) & Self-Attention Sequential & 301K & 7.64 M & 65.01\% $\pm$ 0.27\% & 0.6375 $\pm$ 0.0027 & — & — \\
+\midrule
+\multicolumn{9}{l}{\textit{\textbf{Category 2: Sequential and Graph Backbones on Biomechanical Representations}}} \\
+LSTM (Biomechanical Mix v2) & Biomechanical Mix v2 (63-d) & Recurrent Sequential & 362K & 11.58 M & 62.80\% $\pm$ 0.83\% & 0.6171 $\pm$ 0.0089 & 72.39\% $\pm$ 1.76\% & 0.7077 $\pm$ 0.0172 \\
+BiLSTM (Biomechanical Mix v2) & Biomechanical Mix v2 (63-d) & Bidirectional Recurrent & 360K & 13.90 M & 64.82\% $\pm$ 0.37\% & 0.6316 $\pm$ 0.0027 & 75.39\% $\pm$ 1.46\% & 0.7342 $\pm$ 0.0144 \\
+Transformer (Mix v2 Clean) & Biomechanical Mix v2 (63-d) & Self-Attention Sequential & 301K & 7.71 M & 69.24\% $\pm$ 0.20\% & 0.6815 $\pm$ 0.0017 & 79.83\% $\pm$ 1.27\% & 0.7806 $\pm$ 0.0214 \\
+Transformer (Mix v2 + SkelGym-Aug) & Biomechanical Mix v2 (63-d) & Self-Attention Sequential & 301K & 7.71 M & 73.14\% $\pm$ 0.90\% & 0.7253 $\pm$ 0.0106 & 82.69\% $\pm$ 1.66\% & 0.8187 $\pm$ 0.0196 \\
+AAGCN (Bone 3D + SkelGym-Aug) & Bone 3D Vector ($V=13$) & Adaptive Graph Convolutional & 378K & 202.86 M & 66.36\% $\pm$ 1.41\% & 0.6548 $\pm$ 0.0173 & 75.39\% $\pm$ 2.33\% & 0.7440 $\pm$ 0.0335 \\
+Four-Stream AAGCN (Uniform Soft) & 4 Kinematic Streams ($V=13$) & Unified Graph Ensemble (4 Streams) & 1.51M & 811.44 M & 74.50\% $\pm$ 0.65\% & 0.7341 $\pm$ 0.0048 & 84.41\% $\pm$ 1.01\% & 0.8308 $\pm$ 0.0179 \\
+\midrule
+\multicolumn{9}{l}{\textit{\textbf{Category 3: Proposed Cross-Paradigm Framework (SkelGym)}}} \\
+\textbf{SkelGym-Lite (2 Streams)} & \textbf{Transformer Mix + Bone AAGCN} & \textbf{Compact Hybrid (2 Streams)} & \textbf{679K} & \textbf{221.72 M} & \textbf{73.74\% $\pm$ 0.63\%} & \textbf{0.7310 $\pm$ 0.0058} & \textbf{82.12\% $\pm$ 0.40\%} & \textbf{0.8198 $\pm$ 0.0030} \\
+\textbf{SkelGym-Full (5 Streams)} & \textbf{Transformer Mix + 4-Stream AAGCN} & \textbf{Full Cross-Paradigm (5 Streams)} & \textbf{1.81M} & \textbf{830.29 M} & \textbf{76.19\% $\pm$ 0.16\%} & \textbf{0.7537 $\pm$ 0.0014} & \textbf{85.27\% $\pm$ 0.41\%} & \textbf{0.8386 $\pm$ 0.0075} \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
 
-\paragraph{Pairwise Angles versus Angle Triplets.} Full three-joint angle triplets computed across all combinations yield $\binom{13}{3} = 286$ features. Although theoretically capturing intra-limb joint angles, angle triplets introduce severe dimensional multicollinearity, high vulnerability to multi-joint tracking errors ($P_{\text{err}} \approx 3p_{\text{err}}$), and numerical instability at full joint lockout where $d/dx \arccos(x) \to \infty$. In contrast, our 24-d kinematic formulation distills 10 essential joint triplets alongside 14 limb elevation angles computed via $\arctan2(\Delta y, r)$. This formulation remains bounded everywhere, avoids gradient singularities, and intrinsically preserves horizontal camera yaw invariance.
+\paragraph{Analysis of Empirical Baseline Disparities.}
+As evidenced in Category~1 of Table~\ref{tab:master_benchmark}, standard vision baselines trained directly on raw coordinates exhibit substantial performance degradation. Static ST-GCN \cite{yan2018} achieves merely 48.35\% window accuracy and 58.65\% video consensus accuracy (Video Macro F1: 0.5432). Because resistance training involves non-local physical interactions (e.g., wrist-ankle stabilization during deadlifts), a static anatomical adjacency graph restricts 1-hop message passing, preventing the network from modeling compound limb coordination. Similarly, the strong external baseline BlockGCN \cite{blockgcn2024} (adapted faithfully to 33 raw MediaPipe landmarks from CVPR 2024) achieves 54.24\% window accuracy and 70.48\% video consensus accuracy (Video Macro F1: 0.6948). While BlockGCN's multi-order graph convolutions outperform ST-GCN by +11.83\% on video accuracy, its reliance on raw Cartesian coordinates leaves it vulnerable to camera distance and perspective distortion.
 
-\paragraph{Synergy of the 63-d Biomechanical Mix v2.} Concatenating metric World 3D coordinates (39-d) with kinematic angles (24-d) provides strong complementary synergy. As shown in Table~\ref{tab:table1}, upgrading from pure World 3D to Mix v2 elevates LSTM validation accuracy from 73.64\% to \textbf{75.90\%} (+0.0297 Macro F1), BiLSTM from 74.72\% to \textbf{76.90\%} (+0.0258 Macro F1), and Transformer from 78.76\% to \textbf{79.52\%} (+0.0104 Macro F1). This empirical evidence confirms that Euclidean spatial scale and directional orientation represent mutually complementary facets of human kinematics.
+\paragraph{Efficacy of Proposed Biomechanical Representations.}
+Transitioning from raw coordinates to our proposed 63-dimensional Biomechanical Mix v2 representation (Category~2) yields dramatic performance gains across all model families. For sequential backbones, replacing raw 3D coordinates with Biomechanical Mix v2 elevates LSTM window accuracy from 52.77\% to \textbf{62.80\% $\pm$ 0.83\%} (+10.03\% absolute surge) and video accuracy to 72.39\%, BiLSTM from 53.25\% to \textbf{64.82\% $\pm$ 0.37\%} (+11.57\% surge) and video accuracy to 75.39\%, and Transformer from 65.01\% to \textbf{69.24\% $\pm$ 0.20\%} under clean training, reaching \textbf{73.14\% $\pm$ 0.90\%} window accuracy and \textbf{82.69\% $\pm$ 1.66\%} video accuracy when augmented with SkelGym-Aug.
+
+\paragraph{Temporal Video Consensus Gains.}
+Across every evaluated architecture in Table~\ref{tab:master_benchmark}, transitioning from isolated single-window predictions ($T=32$ frames) to temporal video consensus produces a substantial performance surge, ranging from $+8.59\%$ to $+10.77\%$ in absolute test accuracy. For SkelGym-Full, temporal consensus elevates test accuracy from \textbf{76.19\% $\pm$ 0.16\%} up to \textbf{85.27\% $\pm$ 0.41\%} (+9.08\% surge) and Macro F1 from 0.7537 to 0.8386, correctly classifying 200 out of 233 held-out test videos (85.84\% accuracy on the canonical seed 42 run). Temporal consensus acts as an effective posterior probability filter that cancels out transient pose estimation tracking jitter, boundary transition noise (e.g., racking and un-racking weights), and brief limb occlusions.
+
+\paragraph{Superiority of Proposed SkelGym Ensembles.}
+The proposed SkelGym-Full ensemble achieves the highest performance across all evaluated metrics: \textbf{76.19\% $\pm$ 0.16\%} test window accuracy and \textbf{85.27\% $\pm$ 0.41\%} test video consensus accuracy (Video Macro F1: \textbf{0.8386 $\pm$ 0.0075}). Compared to baseline ST-GCN, SkelGym-Full achieves an absolute advantage of \textbf{+26.62\%} in video consensus accuracy; compared to Strong Baseline BlockGCN, SkelGym-Full delivers an advantage of \textbf{+14.79\%} in video consensus accuracy (+0.1438 Video Macro F1), while maintaining an ultra-compact footprint of 1.81M parameters. For resource-constrained edge devices, SkelGym-Lite requires merely 679K parameters and 221.72 MFLOPs while delivering \textbf{82.12\% $\pm$ 0.40\%} test video consensus accuracy, surpassing all standalone sequential backbones and rivaling complex 4-stream graph models.
+
+\subsection{Per-Class Performance Breakdown — SkelGym-Full}
+\label{sec:per_class_breakdown}
+
+Table~\ref{tab:table6_compact} presents a fine-grained per-class breakdown of the proposed SkelGym-Full ensemble (Uniform Soft Voting), reporting Precision, Recall, F1-Score, and Support independently across both the 2,743 held-out test windows and the 233 test videos (200 of 233 videos correctly classified, achieving 85.84\% canonical accuracy). Fig.~\ref{fig:confmatr} illustrates the corresponding normalized confusion matrix. Analyzing the empirical metrics across all 22 resistance exercises reveals three distinct performance tiers:
+
+\paragraph{High-Precision Distinctive Movements ($\text{F1} \ge 0.90$).} Exercises characterized by unique joint articulation achieve near-perfect video consensus classification, including \textit{leg extension} (Recall: 1.0000, F1: 1.0000 across 13 videos), \textit{lateral raise} (Recall: 1.0000, F1: 1.0000 across 15 videos), \textit{leg raises} (Recall: 1.0000, F1: 1.0000 across 11 videos), \textit{russian twist} (Recall: 1.0000, F1: 1.0000 across 6 videos), \textit{squat} (Recall: 1.0000, F1: 1.0000 across 15 videos), \textit{push-up} (Recall: 1.0000, F1: 0.9600 across 12 videos), \textit{chest fly machine} (Recall: 1.0000, F1: 0.9412 across 8 videos), and \textit{hip thrust} (Recall: 0.8889, F1: 0.9412 across 9 videos). These movements operate in isolated topological subspaces---such as seated tibial rotation against a static femur in leg extensions, or bilateral transverse torso rotation in Russian twists---which prevents kinematic confusion.
+
+\paragraph{Robust Compound Resistance Exercises ($\text{F1} \in [0.70, 0.90)$).} Movements involving standard planar flexion-extension trajectories exhibit strong, reliable recognition: \textit{lat pulldown} (Recall: 1.0000, F1: 0.8966 across 13 videos), \textit{tricep dips} (Recall: 0.8889, F1: 0.8889 across 9 videos), \textit{tricep pushdown} (Recall: 0.9167, F1: 0.8462 across 12 videos), \textit{pull-up} (Recall: 0.7000, F1: 0.8235 across 10 videos), \textit{t-bar row} (Recall: 0.7000, F1: 0.8235 across 10 videos), \textit{barbell biceps curl} (Recall: 1.0000, F1: 0.8000 across 14 videos), \textit{plank} (Recall: 1.0000, F1: 0.8000 across 2 videos), \textit{deadlift} (Recall: 0.9000, F1: 0.7826 across 10 videos), \textit{incline bench press} (Recall: 0.7778, F1: 0.7778 across 9 videos), \textit{decline bench press} (Recall: 0.7500, F1: 0.7500 across 8 videos), and \textit{shoulder press} (Recall: 0.6923, F1: 0.7200 across 13 videos). For these compound exercises, temporal consensus effectively resolves transitional pauses, elevating recall by 15\% to 30\% over isolated windows.
+
+\paragraph{Kinematic Ambiguity and Fine-Grained Error Clusters ($\text{F1} < 0.70$).} The remaining error mass is concentrated within three tightly coupled biomechanical exercise clusters. Specifically, \textit{hammer curl} (Video Recall: 0.5000, F1: 0.6364 across 14 videos) experiences confusion with \textit{barbell biceps curl} (Video Recall: 1.0000, F1: 0.8000), where hammer curl test windows are misclassified as biceps curls due to identical sagittal elbow flexion profiles. Similarly, \textit{Romanian deadlift} (Video Recall: 0.5000, F1: 0.6000 across 6 videos) exhibits mutual confusion with conventional \textit{deadlift} (Video Recall: 0.9000, F1: 0.7826) whenever athletes perform sub-optimal knee travel. Finally, pressing angle variations within the bench press family produce directional ambiguity across flat \textit{bench press} (Video Recall: 0.6429, F1: 0.6923 across 14 videos), \textit{decline bench press} (Video Recall: 0.7500, F1: 0.7500), and \textit{incline bench press} (Video Recall: 0.7778, F1: 0.7778). In Section~\ref{sec:biomechanical_analysis}, we conduct an exhaustive anatomical and kinetic investigation into the physiological drivers behind these specific error patterns.
+
+\begin{table*}[!t]
+\centering
+\caption{Per-class performance breakdown of the proposed SkelGym-Full ensemble (Uniform Soft Voting) evaluated on held-out test partitions at temporal window level ($N=2,743$) and video consensus level ($N=233$, 200 correct videos = 85.84\%).}
+\label{tab:table6_compact}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l c c c c | c c c c}
+\toprule
+\multirow{2}{*}{\textbf{Exercise Class}} & \multicolumn{4}{c|}{\textbf{Window Level ($N=2,743$)}} & \multicolumn{4}{c}{\textbf{Video Consensus Level ($N=233$)}} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9}
+ & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\
+\midrule
+barbell biceps curl  & 0.4069 & 0.8551 & 0.5514 & 69  & 0.6667 & 1.0000 & 0.8000 & 14 \\
+bench press          & 0.4091 & 0.6562 & 0.5040 & 96  & 0.7500 & 0.6429 & 0.6923 & 14 \\
+chest fly machine    & 0.9213 & 1.0000 & 0.9591 & 82  & 0.8889 & 1.0000 & 0.9412 & 8 \\
+deadlift             & 0.4046 & 0.7910 & 0.5354 & 67  & 0.6923 & 0.9000 & 0.7826 & 10 \\
+decline bench press  & 0.6270 & 0.5896 & 0.6077 & 134 & 0.7500 & 0.7500 & 0.7500 & 8 \\
+hammer curl          & 0.5932 & 0.4348 & 0.5018 & 161 & 0.8750 & 0.5000 & 0.6364 & 14 \\
+hip thrust           & 0.9245 & 0.6229 & 0.7443 & 236 & 1.0000 & 0.8889 & 0.9412 & 9 \\
+incline bench press  & 0.7397 & 0.7105 & 0.7248 & 76  & 0.7778 & 0.7778 & 0.7778 & 9 \\
+lat pulldown         & 0.6691 & 0.9300 & 0.7782 & 100 & 0.8125 & 1.0000 & 0.8966 & 13 \\
+lateral raise        & 1.0000 & 0.9484 & 0.9735 & 155 & 1.0000 & 1.0000 & 1.0000 & 15 \\
+leg extension        & 0.9542 & 1.0000 & 0.9766 & 125 & 1.0000 & 1.0000 & 1.0000 & 13 \\
+leg raises           & 0.9898 & 0.8509 & 0.9151 & 114 & 1.0000 & 1.0000 & 1.0000 & 11 \\
+plank                & 0.7925 & 0.7500 & 0.7706 & 56  & 0.6667 & 1.0000 & 0.8000 & 2 \\
+pull Up              & 0.7971 & 0.6707 & 0.7285 & 82  & 1.0000 & 0.7000 & 0.8235 & 10 \\
+push-up              & 0.9062 & 1.0000 & 0.9508 & 87  & 0.9231 & 1.0000 & 0.9600 & 12 \\
+romanian deadlift    & 0.6792 & 0.4932 & 0.5714 & 146 & 0.7500 & 0.5000 & 0.6000 & 6 \\
+russian twist        & 0.9844 & 0.9197 & 0.9509 & 137 & 1.0000 & 1.0000 & 1.0000 & 6 \\
+shoulder press       & 0.7101 & 0.6447 & 0.6759 & 152 & 0.7500 & 0.6923 & 0.7200 & 13 \\
+squat                & 0.9384 & 0.8319 & 0.8820 & 238 & 1.0000 & 1.0000 & 1.0000 & 15 \\
+t bar row            & 0.8400 & 0.5385 & 0.6562 & 117 & 1.0000 & 0.7000 & 0.8235 & 10 \\
+tricep Pushdown      & 0.6083 & 0.7849 & 0.6854 & 93  & 0.7857 & 0.9167 & 0.8462 & 12 \\
+tricep dips          & 0.8987 & 0.9682 & 0.9322 & 220 & 0.8889 & 0.8889 & 0.8889 & 9 \\
+\midrule
+\textbf{Macro Average} & \textbf{0.7634} & \textbf{0.7723} & \textbf{0.7534} & \textbf{2,743} & \textbf{0.8626} & \textbf{0.8572} & \textbf{0.8491} & \textbf{233} \\
+\textbf{Overall Accuracy} & \multicolumn{3}{c}{\textbf{76.41\%}} & \textbf{2,743} & \multicolumn{3}{c}{\textbf{85.84\% (200/233)}} & \textbf{233} \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.92\textwidth]{images/cm_ensemble_T5.1_weighted_soft.pdf}
+\caption{Normalized confusion matrix of the proposed SkelGym-Full cross-paradigm ensemble evaluated on held-out test windows ($N=2,743$).}
+\label{fig:confmatr}
+\end{figure*}
+
+\subsection{Ablation Studies and Kinematic Modeling Analysis}
+\label{sec:ablations}
+
+To adhere strictly to zero-leakage experimental protocols, all model selection decisions, feature encodings, augmentation protocols, and fusion strategies were audited strictly on the **Validation Set** ($N=2,075$ windows, $N=208$ videos). In this section, we systematically analyze the empirical findings across our ablation suites.
+
+\subsubsection{Ablation of Landmark Feature Representations}
+\label{sec:feature_ablation}
+
+Table~\ref{tab:feature_screening_27} presents the complete 27 preliminary feature screening runs across three sequential architectures (LSTM, BiLSTM, Dual-Branch Transformer) and nine distinct kinematic encodings, evaluated strictly on validation window metrics across 3 random seeds ($42, 123, 3407$). Table~\ref{tab:table1} further presents the temporal architecture comparison between metric World 3D (39-d) and our proposed Biomechanical Mix v2 (63-d).
+
+\begin{table*}[!t]
+\centering
+\caption{Systematic exploration of kinematic encodings (Preliminary Feature Screening — 27 Experiments) across 3 sequence backbones and 9 feature representations evaluated strictly on the validation partition ($N=2,075$ windows). Reported as $\text{Mean} \pm \text{SD}$ across 3 independent random seeds ($42, 123, 3407$).}
+\label{tab:feature_screening_27}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{c l l c c c c}
+\toprule
+\textbf{Exp ID} & \textbf{Model Backbone} & \textbf{Feature Representation} & \textbf{Dim} & \textbf{Val Win Acc (\%)} & \textbf{Val Win Macro F1} & \textbf{Validation Status} \\
+\midrule
+\multicolumn{7}{l}{\textit{LSTM Backbone Family}} \\
+T1.1 & LSTM & Raw 2D Coordinates & 26 & 67.49\% $\pm$ 0.75\% & 0.6556 $\pm$ 0.0075 & Verified \\
+T1.2 & LSTM & Relative 2D (Mid-Hip) & 26 & 72.40\% $\pm$ 1.07\% & 0.7131 $\pm$ 0.0110 & Verified \\
+T1.3 & LSTM & Angle 2D (Triplets) & 286 & 64.74\% $\pm$ 2.62\% & 0.6310 $\pm$ 0.0278 & Verified \\
+T1.4 & LSTM & Angle2 2D (Pairs) & 78 & 65.88\% $\pm$ 1.61\% & 0.6468 $\pm$ 0.0142 & Verified \\
+T1.5 & LSTM & Raw 3D Coordinates & 39 & 65.32\% $\pm$ 2.25\% & 0.6323 $\pm$ 0.0293 & Verified \\
+T1.6 & LSTM & Relative 3D (Mid-Hip) & 39 & 72.24\% $\pm$ 0.99\% & 0.7096 $\pm$ 0.0097 & Verified \\
+T1.7 & LSTM & Angle 3D (Triplets) & 286 & 65.73\% $\pm$ 1.02\% & 0.6398 $\pm$ 0.0083 & Verified \\
+T1.8 & LSTM & Angle2 3D (Pair Elevation) & 78 & 70.31\% $\pm$ 3.35\% & 0.6901 $\pm$ 0.0408 & Verified \\
+\textbf{T1.9} & \textbf{LSTM} & \textbf{Biomechanical Mix (Ours)} & \textbf{117} & \textbf{74.28\% $\pm$ 0.50\%} & \textbf{0.7348 $\pm$ 0.0063} & \textbf{Verified Winner (LSTM)} \\
+\midrule
+\multicolumn{7}{l}{\textit{BiLSTM Backbone Family}} \\
+T1.10 & BiLSTM & Raw 2D Coordinates & 26 & 65.12\% $\pm$ 3.22\% & 0.6272 $\pm$ 0.0331 & Verified \\
+T1.11 & BiLSTM & Relative 2D (Mid-Hip) & 26 & 64.98\% $\pm$ 6.30\% & 0.6411 $\pm$ 0.0516 & Verified \\
+T1.12 & BiLSTM & Angle 2D (Triplets) & 286 & 65.82\% $\pm$ 0.63\% & 0.6523 $\pm$ 0.0046 & Verified \\
+T1.13 & BiLSTM & Angle2 2D (Pairs) & 78 & 69.59\% $\pm$ 2.28\% & 0.6929 $\pm$ 0.0223 & Verified \\
+T1.14 & BiLSTM & Raw 3D Coordinates & 39 & 67.63\% $\pm$ 0.11\% & 0.6659 $\pm$ 0.0039 & Verified \\
+T1.15 & BiLSTM & Relative 3D (Mid-Hip) & 39 & 72.47\% $\pm$ 1.39\% & 0.7172 $\pm$ 0.0103 & Verified \\
+T1.16 & BiLSTM & Angle 3D (Triplets) & 286 & 64.37\% $\pm$ 0.83\% & 0.6293 $\pm$ 0.0075 & Verified \\
+T1.17 & BiLSTM & Angle2 3D (Pair Elevation) & 78 & 72.58\% $\pm$ 1.06\% & 0.7204 $\pm$ 0.0087 & Verified \\
+\textbf{T1.18} & \textbf{BiLSTM} & \textbf{Biomechanical Mix (Ours)} & \textbf{117} & \textbf{74.39\% $\pm$ 0.26\%} & \textbf{0.7371 $\pm$ 0.0043} & \textbf{Verified Winner (BiLSTM)} \\
+\midrule
+\multicolumn{7}{l}{\textit{Transformer Backbone Family}} \\
+T1.19 & Transformer & Raw 2D Coordinates & 26 & 77.82\% $\pm$ 0.22\% & 0.7700 $\pm$ 0.0008 & Verified \\
+T1.20 & Transformer & Relative 2D (Mid-Hip) & 26 & 76.45\% $\pm$ 0.41\% & 0.7539 $\pm$ 0.0033 & Verified \\
+T1.21 & Transformer & Angle 2D (Triplets) & 286 & 71.78\% $\pm$ 0.55\% & 0.7107 $\pm$ 0.0077 & Verified \\
+T1.22 & Transformer & Angle2 2D (Pairs) & 78 & 69.65\% $\pm$ 0.68\% & 0.6877 $\pm$ 0.0111 & Verified \\
+T1.23 & Transformer & Raw 3D Coordinates & 39 & 79.65\% $\pm$ 0.80\% & 0.7888 $\pm$ 0.0080 & Verified \\
+T1.24 & Transformer & Relative 3D (Mid-Hip) & 39 & 77.69\% $\pm$ 0.69\% & 0.7692 $\pm$ 0.0107 & Verified \\
+T1.25 & Transformer & Angle 3D (Triplets) & 286 & 70.33\% $\pm$ 1.10\% & 0.6842 $\pm$ 0.0096 & Verified \\
+T1.26 & Transformer & Angle2 3D (Pair Elevation) & 78 & 73.61\% $\pm$ 0.66\% & 0.7325 $\pm$ 0.0083 & Verified \\
+\textbf{T1.27} & \textbf{Transformer} & \textbf{Biomechanical Mix (Dual-Branch)} & \textbf{117} & \textbf{78.14\% $\pm$ 0.61\%} & \textbf{0.7774 $\pm$ 0.0071} & \textbf{Verified Winner (Transformer)} \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
 
 \begin{table*}[!t]
 \centering
@@ -649,7 +829,17 @@ Transformer (world\_3d)   & Skeletal World 3D  & 39-d & 301K & 78.76\% $\pm$ 0.4
 }
 \end{table*}
 
-\subsection{Ablation of Candidate Augmentations and Empirical Selection}\label{sec:exp_aug}
+\paragraph{2D versus 3D Coordinates and World Metric Grounding.} Across all baseline architectures, 3D representations consistently outperform 2D counterparts. In resistance training, compound movements---such as squats, deadlifts, and bench presses---operate predominantly within the sagittal or transverse anatomical planes. When captured from oblique angles, monocular 2D projections collapse depth variations along the optical axis ($z$), inducing visual ambiguity. Utilizing MediaPipe World coordinates measured in physical meters anchors limb trajectories to estimated metric scale, providing consistent metric distances regardless of camera zoom.
+
+\paragraph{Pelvic Coordinate Centering.} Subtracting the pelvic hip midpoint centroid ($p_i - p_{\text{hip\_mid}}$) yields substantial performance gains across all sequence backbones. Raw coordinates tie features directly to the camera frame, forcing models to expend parameter capacity memorizing subject location and bounding-box translations. Centering all joints relative to the pelvic midpoint eliminates global translation bias and anchors the skeleton to the bodily center of mass, allowing the network to focus purely on relative joint dynamics.
+
+\paragraph{Pairwise Angles versus Angle Triplets.} Full three-joint angle triplets computed across all combinations yield $\binom{13}{3} = 286$ features. Although theoretically capturing intra-limb joint angles, angle triplets introduce severe dimensional multicollinearity, high vulnerability to multi-joint tracking errors ($P_{\text{err}} \approx 3p_{\text{err}}$), and numerical instability at full joint lockout where $d/dx \arccos(x) \to \infty$. In contrast, our 24-d kinematic formulation distills 10 essential joint triplets alongside 14 limb elevation angles computed via $\arctan2(\Delta y, r)$. This formulation remains bounded everywhere, avoids gradient singularities, and intrinsically preserves horizontal camera yaw invariance.
+
+\paragraph{Synergy of the 63-d Biomechanical Mix v2.} Concatenating metric World 3D coordinates (39-d) with kinematic angles (24-d) provides strong complementary synergy. As shown in Table~\ref{tab:table1}, upgrading from pure World 3D to Mix v2 elevates LSTM validation accuracy from 73.64\% to \textbf{75.90\%} (+0.0297 Macro F1), BiLSTM from 74.72\% to \textbf{76.90\%} (+0.0258 Macro F1), and Transformer from 78.76\% to \textbf{79.52\%} (+0.0104 Macro F1). This empirical evidence confirms that Euclidean spatial scale and directional orientation represent mutually complementary facets of human kinematics.
+
+\subsubsection{Ablation of Candidate Augmentations and Empirical Selection}
+\label{sec:exp_aug}
+
 To rigorously validate our augmentation design and isolate the individual versus synergistic contributions of each operator without data leakage, we execute two complementary ablation studies on the candidate augmentation pool across three independent random seeds ($\text{seed} \in \{42, 123, 3407\}$) using the sequence backbone (\texttt{Transformer mix}). To preserve post-validation test integrity, all design selection is grounded strictly on **Validation Window Metrics**:
 \begin{enumerate}
     \item \textbf{Systematic Leave-One-Out (LOO) Component Ablation (Table~\ref{tab:table2}):} Evaluates operator necessity within the full multi-operator suite by subtracting one operator at a time from Candidate Full (5-op).
@@ -683,13 +873,13 @@ In strict adherence to validation-driven selection, the paired configuration of 
 \toprule
 \textbf{Augmentation Configuration} & \textbf{Excluded Operator / Domain} & \textbf{Val Loss} & \textbf{Val Win Acc (\%)} & \textbf{Val Win Macro F1} & \textbf{Validation Verdict} \\
 \midrule
-Clean Baseline                    & All Operators Excluded & N/A & 79.52\% $\pm$ 0.80\% & 0.7885 $\pm$ 0.0101 & Unaugmented Baseline Control \\
-Candidate Full 5Op                & None (Reference 5-Op Suite) & N/A & 79.19\% $\pm$ 1.26\% & 0.7882 $\pm$ 0.0152 & Reference 5-Op Suite \\
-Candidate Minus Mirror            & Sagittal Bilateral Reflection ($p=0.5$) & N/A & 78.78\% $\pm$ 1.44\% & 0.7757 $\pm$ 0.0197 & Weakest LOO performance ($-1.25\%$ Win F1) \\
-Candidate Minus Yaw               & Gravitational Yaw Rotation ($\pm 15^\circ$) & N/A & 80.06\% $\pm$ 0.32\% & 0.7964 $\pm$ 0.0026 & Moderate window gain over 5-op (+0.82\% F1) \\
-Candidate Minus Scale             & Proportional Scale Variation ($\pm 10\%$) & N/A & 80.13\% $\pm$ 0.13\% & 0.7985 $\pm$ 0.0022 & Peak window gain in LOO (+1.03\% F1) \\
-Candidate Minus Time              & Temporal Resampling ($0.8\times\text{--}1.2\times$) & 1.0010 & 79.54\% $\pm$ 0.57\% & 0.7926 $\pm$ 0.0060 & Lowest 4-op Val Loss (+0.44\% F1) \\
-Candidate Minus Jitter            & Gaussian Coordinate Jitter ($\sigma=0.008$) & N/A & 79.68\% $\pm$ 0.22\% & 0.7937 $\pm$ 0.0048 & Minor window gain (+0.55\% F1) \\
+Clean Baseline                    & All Operators Excluded & 1.0483 $\pm$ 0.0084 & 79.52\% $\pm$ 0.80\% & 0.7885 $\pm$ 0.0101 & Unaugmented Baseline Control \\
+Candidate Full 5Op                & None (Reference 5-Op Suite) & 0.9669 $\pm$ 0.0175 & 79.19\% $\pm$ 1.26\% & 0.7882 $\pm$ 0.0152 & Reference 5-Op Suite \\
+Candidate Minus Mirror            & Sagittal Bilateral Reflection ($p=0.5$) & 1.0670 $\pm$ 0.0316 & 78.78\% $\pm$ 1.44\% & 0.7757 $\pm$ 0.0197 & Weakest LOO performance ($-1.25\%$ Win F1) \\
+Candidate Minus Yaw               & Gravitational Yaw Rotation ($\pm 15^\circ$) & 1.0054 $\pm$ 0.0197 & 80.06\% $\pm$ 0.32\% & 0.7964 $\pm$ 0.0026 & Moderate window gain over 5-op (+0.82\% F1) \\
+Candidate Minus Scale             & Proportional Scale Variation ($\pm 10\%$) & 1.0032 $\pm$ 0.0228 & 80.13\% $\pm$ 0.13\% & 0.7985 $\pm$ 0.0022 & Peak window gain in LOO (+1.03\% F1) \\
+Candidate Minus Time              & Temporal Resampling ($0.8\times\text{--}1.2\times$) & 1.0010 $\pm$ 0.0160 & 79.54\% $\pm$ 0.57\% & 0.7926 $\pm$ 0.0060 & Lowest 4-op Val Loss (+0.44\% F1) \\
+Candidate Minus Jitter            & Gaussian Coordinate Jitter ($\sigma=0.008$) & 1.0124 $\pm$ 0.0240 & 79.68\% $\pm$ 0.22\% & 0.7937 $\pm$ 0.0048 & Minor window gain (+0.55\% F1) \\
 \bottomrule
 \end{tabular}
 }
@@ -704,19 +894,21 @@ Candidate Minus Jitter            & Gaussian Coordinate Jitter ($\sigma=0.008$) 
 \toprule
 \textbf{Augmentation Strategy} & \textbf{Isolated Operator Description} & \textbf{Val Loss} & \textbf{Val Win Acc (\%)} & \textbf{Val Win Macro F1} & \textbf{Standalone Validation Effect} \\
 \midrule
-Clean Baseline            & Unaugmented Native Window Sequences & N/A & 79.52\% $\pm$ 0.80\% & 0.7885 $\pm$ 0.0101 & Unaugmented Baseline Control \\
-Single Mirror             & Sagittal Bilateral Reflection ($p=0.5$) & N/A & 80.45\% $\pm$ 0.45\% & 0.8001 $\pm$ 0.0067 & Decisive window gain across single ops (+1.16\% F1) \\
-Single Yaw                & Gravitational Yaw Perturbation ($\pm 15^\circ$) & N/A & 80.29\% $\pm$ 0.34\% & 0.7977 $\pm$ 0.0031 & Strong standalone window gain (+0.92\% F1) \\
+Clean Baseline            & Unaugmented Native Window Sequences & 1.0483 $\pm$ 0.0084 & 79.52\% $\pm$ 0.80\% & 0.7885 $\pm$ 0.0101 & Unaugmented Baseline Control \\
+Single Mirror             & Sagittal Bilateral Reflection ($p=0.5$) & 1.0047 $\pm$ 0.0188 & 80.45\% $\pm$ 0.45\% & 0.8001 $\pm$ 0.0067 & Decisive window gain across single ops (+1.16\% F1) \\
+Single Yaw                & Gravitational Yaw Perturbation ($\pm 15^\circ$) & 1.0657 $\pm$ 0.0236 & 80.29\% $\pm$ 0.34\% & 0.7977 $\pm$ 0.0031 & Strong standalone window gain (+0.92\% F1) \\
 \textbf{Pair Mirror + Yaw (Proposed)} & \textbf{Bilateral Reflection + Gravitational Yaw} & \textbf{1.0465 $\pm$ 0.0327} & \textbf{81.20\% $\pm$ 0.72\%} & \textbf{0.8119 $\pm$ 0.0072} & \textbf{All-Time Peak Val Win Acc \& F1 (+2.34\% F1)} \\
-Single Scale              & Proportional Scale Jitter ($\pm 10\%$) & N/A & 79.68\% $\pm$ 0.22\% & 0.7904 $\pm$ 0.0066 & Marginal window gain (+0.19\% F1) \\
-Single Time               & Linear Sequence Resampling ($0.8\times\text{--}1.2\times$) & N/A & 79.74\% $\pm$ 0.24\% & 0.7920 $\pm$ 0.0039 & Marginal window gain over clean (+0.35\% F1) \\
-Single Jitter             & Gaussian Noise ($\sigma=0.008$) & N/A & 79.55\% $\pm$ 0.82\% & 0.7884 $\pm$ 0.0093 & Neutral window performance ($-0.01\%$ F1) \\
+Single Scale              & Proportional Scale Jitter ($\pm 10\%$) & 1.0519 $\pm$ 0.0030 & 79.68\% $\pm$ 0.22\% & 0.7904 $\pm$ 0.0066 & Marginal window gain (+0.19\% F1) \\
+Single Time               & Linear Sequence Resampling ($0.8\times\text{--}1.2\times$) & 1.0567 $\pm$ 0.0225 & 79.74\% $\pm$ 0.24\% & 0.7920 $\pm$ 0.0039 & Marginal window gain over clean (+0.35\% F1) \\
+Single Jitter             & Gaussian Noise ($\sigma=0.008$) & 1.0520 $\pm$ 0.0262 & 79.55\% $\pm$ 0.82\% & 0.7884 $\pm$ 0.0093 & Neutral window performance ($-0.01\%$ F1) \\
 \bottomrule
 \end{tabular}
 }
 \end{table*}
 
-\subsection{Multi-Stream Graph Modeling and Late Fusion}
+\subsubsection{Multi-Stream Graph Architecture and Stream Selection}
+\label{sec:graph_ablation}
+
 Table~\ref{tab:table4} systematically investigates spatial-temporal graph kinematic streams on Adaptive Graph Convolutional Networks (AAGCN) \cite{shi2020skeleton}, isolating the four complementary streams under SkelGym-Aug (Mirror + Yaw) and analyzing multi-stream graph late fusion. To enforce strict post-validation test separation, stream screening is grounded on validation window metrics:
 
 \paragraph{Static versus Adaptive Graph Topology.} Baseline ST-GCN \cite{yan2018} with a fixed physical adjacency matrix achieves 63.01\% validation window accuracy on raw coordinates and 73.75\% on metric World 3D (Table~\ref{tab:table4}). In resistance exercises, critical biomechanical synergies frequently occur between physically disconnected limbs (e.g., wrist-ankle synchronization during deadlifts). Fixed anatomical adjacency prevents direct 1-hop communication between distant keypoints. In contrast, Adaptive Graph Convolutions (AAGCN) introduce learnable and data-driven attention topologies, elevating unaugmented Bone stream validation accuracy to 76.00\% (0.7542 Macro F1) and reaching \textbf{79.30\% $\pm$ 0.22\%} (0.7858 Macro F1) when trained with SkelGym-Aug.
@@ -747,217 +939,45 @@ T3.8 & Two-Stream AAGCN (Joint + Bone)   & AAGCN  & Graph Late Fusion       & 82
 }
 \end{table*}
 
-\subsection{Cross-Paradigm Ensemble and Video Consensus}
-Table~\ref{tab:table5} evaluates cross-paradigm ensemble configurations coupling self-attention sequence modeling with spatial-temporal graph convolutions, comparing discrete versus continuous probability fusion protocols across multi-seed evaluations ($42, 123, 3407$).
+\subsubsection{Cross-Paradigm Ensemble and Late Fusion Protocol Ablation}
+\label{sec:fusion_ablation}
 
-\paragraph{Ensemble Selection Protocol (Zero Test-Leakage).} To enforce strict separation, test metrics are revealed \textit{strictly for the validation winners} selected via primary Validation Window Macro-F1 followed by Validation Window Accuracy:
+Table~\ref{tab:table5} systematically evaluates cross-paradigm ensemble configurations coupling self-attention sequence modeling with spatial-temporal graph convolutions, comparing discrete versus continuous probability fusion protocols strictly across the **Validation Set** ($N=2,075$ windows, $N=208$ videos) across 3 seeds ($42, 123, 3407$).
+
+\begin{table*}[!t]
+\centering
+\caption{Systematic cross-paradigm ensemble comparison across fusion mechanisms on the validation partition ($N=2,075$ windows, $N=208$ videos). Reported as $\text{Mean} \pm \text{SD}$ across 3 seeds ($42, 123, 3407$).}
+\label{tab:table5}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l l c c c c}
+\toprule
+\textbf{Architecture / Config} & \textbf{Fusion Protocol \& Weighting} & \textbf{Val Win Acc (\%)} & \textbf{Val Win Macro F1} & \textbf{Val Vid Acc (\%)} & \textbf{Val Vid Macro F1} \\
+\midrule
+\multicolumn{6}{l}{\textit{Reference Backbone}} \\
+Transformer Mix (63-d) & Single Sequence Backbone (Mirror+Yaw) & 81.20\% $\pm$ 0.72\% & 0.8119 $\pm$ 0.0072 & 84.70\% $\pm$ 0.82\% & 0.8469 $\pm$ 0.0105 \\
+\midrule
+\multicolumn{6}{l}{\textit{SkelGym-Lite (2 Streams: Transformer Mix + AAGCN Bone, 679K Params)}} \\
+SkelGym-Lite & Hard Majority Voting (Discrete Baseline) & 79.47\% $\pm$ 0.81\% & 0.7883 $\pm$ 0.0084 & 82.93\% $\pm$ 0.60\% & 0.8277 $\pm$ 0.0065 \\
+\textbf{SkelGym-Lite} & \textbf{Accuracy-Weighted Soft Voting (Validation-calibrated)} & \textbf{83.47\% $\pm$ 0.14\%} & \textbf{0.8351 $\pm$ 0.0021} & \textbf{85.67\% $\pm$ 1.14\%} & \textbf{0.8634 $\pm$ 0.0066} \\
+SkelGym-Lite & Uniform Average Soft Voting ($w_i = 1/2$) & 83.26\% $\pm$ 0.06\% & 0.8327 $\pm$ 0.0008 & 85.67\% $\pm$ 1.14\% & 0.8634 $\pm$ 0.0066 \\
+\midrule
+\multicolumn{6}{l}{\textit{SkelGym-Full (5 Streams: Transformer + 4 AAGCN Streams, 1.81M Params)}} \\
+SkelGym-Full & Hard Majority Voting (Discrete Baseline) & 84.11\% $\pm$ 0.30\% & 0.8411 $\pm$ 0.0041 & 86.15\% $\pm$ 1.21\% & 0.8660 $\pm$ 0.0090 \\
+SkelGym-Full & Accuracy-Weighted Soft Voting (Validation-calibrated) & 84.85\% $\pm$ 0.29\% & 0.8475 $\pm$ 0.0024 & 87.28\% $\pm$ 1.27\% & 0.8821 $\pm$ 0.0113 \\
+\textbf{SkelGym-Full} & \textbf{Uniform Average Soft Voting ($w_i = 1/5$)} & \textbf{85.05\% $\pm$ 0.47\%} & \textbf{0.8487 $\pm$ 0.0046} & \textbf{87.92\% $\pm$ 1.37\%} & \textbf{0.8886 $\pm$ 0.0126} \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+\paragraph{Ensemble Selection Protocol (Zero Test-Leakage).} To enforce strict separation, test metrics reported in the Master Benchmark (Table~\ref{tab:master_benchmark}) were revealed \textit{strictly for the validation winners} selected via primary Validation Window Macro-F1 followed by Validation Window Accuracy:
 \begin{enumerate}
-    \item \textbf{SkelGym-Lite Winner:} For the 2-model tier (Transformer Mix + AAGCN Bone), \textit{Accuracy-Weighted Soft Voting} emerges as the validation winner with \textbf{83.47\% $\pm$ 0.14\%} Val Win Acc and \textbf{0.8351 $\pm$ 0.0021} Val Win Macro F1. When evaluated on the held-out test partition, SkelGym-Lite achieves \textbf{73.74\% $\pm$ 0.63\% window accuracy} (0.7310 Macro F1) and \textbf{82.12\% $\pm$ 0.40\% video consensus accuracy} (0.8198 Macro F1) with an ultra-compact footprint of 679K parameters.
-    \item \textbf{SkelGym-Full Winner:} For the full 5-stream cross-paradigm configuration, \textit{Uniform Average Soft Voting} ($w_i = 1/5$) achieves peak validation performance with \textbf{85.05\% $\pm$ 0.47\%} Val Win Acc and \textbf{0.8487 $\pm$ 0.0046} Val Win Macro F1. On the held-out test partition, SkelGym-Full establishes the top-performing configuration in our benchmark: \textbf{76.19\% $\pm$ 0.16\% window accuracy} (Window Macro F1: \textbf{0.7537 $\pm$ 0.0014}) and \textbf{85.27\% $\pm$ 0.41\% video consensus accuracy} (Video Macro F1: \textbf{0.8386 $\pm$ 0.0075}).
+    \item \textbf{SkelGym-Lite Winner:} For the 2-model tier (Transformer Mix + AAGCN Bone), \textit{Accuracy-Weighted Soft Voting} emerges as the validation winner with \textbf{83.47\% $\pm$ 0.14\%} Val Win Acc and \textbf{0.8351 $\pm$ 0.0021} Val Win Macro F1.
+    \item \textbf{SkelGym-Full Winner:} For the full 5-stream cross-paradigm configuration, \textit{Uniform Average Soft Voting} ($w_i = 1/5$) achieves peak validation performance with \textbf{85.05\% $\pm$ 0.47\%} Val Win Acc and \textbf{0.8487 $\pm$ 0.0046} Val Win Macro F1 (and 87.92\% $\pm$ 1.37\% Val Vid Acc).
 \end{enumerate}
 
 \paragraph{Effectiveness of Parameter-Free Cross-Paradigm Fusion.}
 While prior ensemble frameworks often attempt parameterized meta-classifiers or constrained non-linear optimization weighting, such approaches introduce additional parameter complexity that can risk overfitting validation splits. In contrast, zero-parameter uniform averaging treats all five complementary kinematic perspectives equally. Because sequence self-attention captures long-range temporal phase progression across coordinates and angles while adaptive graph convolutions capture instantaneous topological limb interactions, their prediction errors are largely uncorrelated. Combining them via uniform probability averaging provides a robust regularizing effect that eliminates meta-parameter estimation variance.
-
-\begin{table*}[!t]
-\centering
-\caption{Systematic cross-paradigm ensemble comparison across fusion mechanisms on validation ($N=2,075$) and held-out test partitions ($N=2,743$ windows, $N=233$ videos). Test metrics are displayed strictly for the Validation Winners to prevent test-snooping bias. Reported as $\text{Mean} \pm \text{SD}$ across 3 seeds ($42, 123, 3407$).}
-\label{tab:table5}
-\resizebox{\textwidth}{!}{
-\begin{tabular}{l l c c c c | c c c c}
-\toprule
-\multirow{2}{*}{\textbf{Architecture / Config}} & \multirow{2}{*}{\textbf{Fusion Protocol \& Weighting}} & \multicolumn{4}{c|}{\textbf{Validation Set}} & \multicolumn{4}{c}{\textbf{Held-Out Test Set (Revealed for Winners)}} \\
-\cmidrule(lr){3-6} \cmidrule(lr){7-10}
- & & \textbf{Val Win Acc} & \textbf{Val Win F1} & \textbf{Val Vid Acc} & \textbf{Val Vid F1} & \textbf{Test Win Acc} & \textbf{Test Win F1} & \textbf{Test Vid Acc} & \textbf{Test Vid F1} \\
-\midrule
-\multicolumn{10}{l}{\textit{Reference Backbone}} \\
-Transformer Mix (63-d) & Single Sequence Backbone (Mirror+Yaw) & 81.20\% $\pm$ 0.72\% & 0.8119 $\pm$ 0.0072 & 84.70\% $\pm$ 0.82\% & 0.8469 $\pm$ 0.0105 & — & — & — & — \\
-\midrule
-\multicolumn{10}{l}{\textit{SkelGym-Lite (2 Streams: Transformer Mix + AAGCN Bone, 679K Params)}} \\
-SkelGym-Lite & Hard Majority Voting (Discrete) & 79.47\% $\pm$ 0.81\% & 0.7883 $\pm$ 0.0084 & 82.93\% $\pm$ 0.60\% & 0.8277 $\pm$ 0.0065 & — & — & — & — \\
-\textbf{SkelGym-Lite} & \textbf{Accuracy-Weighted Soft Voting} & \textbf{83.47\% $\pm$ 0.14\%} & \textbf{0.8351 $\pm$ 0.0021} & \textbf{85.67\% $\pm$ 1.14\%} & \textbf{0.8634 $\pm$ 0.0066} & \textbf{73.74\% $\pm$ 0.63\%} & \textbf{0.7310 $\pm$ 0.0058} & \textbf{82.12\% $\pm$ 0.40\%} & \textbf{0.8198 $\pm$ 0.0030} \\
-SkelGym-Lite & Uniform Average Soft Voting ($w_i = 1/2$) & 83.26\% $\pm$ 0.06\% & 0.8327 $\pm$ 0.0008 & 85.67\% $\pm$ 1.14\% & 0.8634 $\pm$ 0.0066 & — & — & — & — \\
-\midrule
-\multicolumn{10}{l}{\textit{SkelGym-Full (5 Streams: Transformer + 4 AAGCN Streams, 1.81M Params)}} \\
-SkelGym-Full & Hard Majority Voting (Discrete) & 84.11\% $\pm$ 0.30\% & 0.8411 $\pm$ 0.0041 & 86.15\% $\pm$ 1.21\% & 0.8660 $\pm$ 0.0090 & — & — & — & — \\
-SkelGym-Full & Accuracy-Weighted Soft Voting & 84.85\% $\pm$ 0.29\% & 0.8475 $\pm$ 0.0024 & 87.28\% $\pm$ 1.27\% & 0.8821 $\pm$ 0.0113 & — & — & — & — \\
-\textbf{SkelGym-Full} & \textbf{Uniform Average Soft Voting ($w_i = 1/5$)} & \textbf{85.05\% $\pm$ 0.47\%} & \textbf{0.8487 $\pm$ 0.0046} & \textbf{87.92\% $\pm$ 1.37\%} & \textbf{0.8886 $\pm$ 0.0126} & \textbf{76.19\% $\pm$ 0.16\%} & \textbf{0.7537 $\pm$ 0.0014} & \textbf{85.27\% $\pm$ 0.41\%} & \textbf{0.8386 $\pm$ 0.0075} \\
-\bottomrule
-\end{tabular}
-}
-\end{table*}
-
-\paragraph{Master Benchmark Comparison and Temporal Consensus Gains (Table~\ref{tab:table7}).}
-Table~\ref{tab:table7} compares single-window inference ($T=32$ frames, $\approx 1.07\text{s}$) against temporal video consensus across all audited architectures alongside their trainable parameter footprints. Across every evaluated architecture, transitioning from single windows to video consensus produces a substantial performance surge, ranging from $+8.59\%$ to $+10.77\%$ in absolute test accuracy. For SkelGym-Full, temporal consensus elevates test accuracy from \textbf{76.19\% $\pm$ 0.16\%} up to \textbf{85.27\% $\pm$ 0.41\%} (+9.08\% surge) and Macro F1 from 0.7537 to 0.8386, correctly classifying 200 out of 233 held-out test videos (85.84\% accuracy on the canonical seed run). Crucially, this high consensus accuracy is achieved with an ultra-compact parameter footprint: standalone sequence backbones require only 301K--362K parameters, SkelGym-Lite requires 679K, and the full 5-stream ensemble totals 1.81M parameters.
-
-\begin{table*}[!t]
-\centering
-\caption{Comprehensive benchmark comparison of window-level versus video consensus predictions alongside parameter footprints across all audited architectures ($N=233$ held-out test videos, $N=2,743$ test windows). Reported as $\text{Mean} \pm \text{SD}$ across 3 seeds ($42, 123, 3407$).}
-\label{tab:table7}
-\resizebox{\textwidth}{!}{
-\begin{tabular}{l l c c c c c c c}
-\toprule
-\textbf{Model Architecture} & \textbf{Input Modality} & \textbf{Params} & \textbf{Val Win Acc} & \textbf{Val Win F1} & \textbf{Test Win Acc} & \textbf{Test Win F1} & \textbf{Test Vid Acc} & \textbf{Test Vid F1} \\
-\midrule
-LSTM (World 3D Clean)             & Skeletal World 3D    & 362K & 73.64\% $\pm$ 1.26\% & 0.7244 $\pm$ 0.0128 & 61.41\% $\pm$ 0.80\% & 0.6002 $\pm$ 0.0063 & 71.10\% $\pm$ 2.33\% & 0.6941 $\pm$ 0.0294 \\
-LSTM (Biomechanical Mix v2)       & Biomechanical Mix v2 & 362K & 75.90\% $\pm$ 1.60\% & 0.7541 $\pm$ 0.0173 & 62.80\% $\pm$ 0.83\% & 0.6171 $\pm$ 0.0089 & 72.39\% $\pm$ 1.76\% & 0.7077 $\pm$ 0.0172 \\
-BiLSTM (Biomechanical Mix v2)     & Biomechanical Mix v2 & 360K & 76.90\% $\pm$ 0.30\% & 0.7599 $\pm$ 0.0050 & 64.82\% $\pm$ 0.37\% & 0.6316 $\pm$ 0.0027 & 75.39\% $\pm$ 1.46\% & 0.7342 $\pm$ 0.0144 \\
-Transformer (Mix v2 Clean)        & Biomechanical Mix v2 & 301K & 79.52\% $\pm$ 0.80\% & 0.7885 $\pm$ 0.0101 & 69.24\% $\pm$ 0.20\% & 0.6815 $\pm$ 0.0017 & 79.83\% $\pm$ 1.27\% & 0.7806 $\pm$ 0.0214 \\
-Transformer (Mix v2 + Aug)        & Biomechanical Mix v2 & 301K & 81.20\% $\pm$ 0.72\% & 0.8119 $\pm$ 0.0072 & 73.14\% $\pm$ 0.90\% & 0.7253 $\pm$ 0.0106 & 82.69\% $\pm$ 1.66\% & 0.8187 $\pm$ 0.0196 \\
-ST-GCN (Raw 3D Clean)             & Raw 3D Landmarks     & 350K & 63.01\% $\pm$ 1.86\% & 0.6255 $\pm$ 0.0224 & 48.35\% $\pm$ 0.94\% & 0.4701 $\pm$ 0.0141 & 58.65\% $\pm$ 1.76\% & 0.5432 $\pm$ 0.0208 \\
-BlockGCN (CVPR 2024 Adapted) \cite{blockgcn2024} & Raw 3D Landmarks & 1.35M & — & — & 54.24\% $\pm$ 1.04\% & 0.5576 $\pm$ 0.0047 & 70.48\% $\pm$ 0.40\% & 0.6948 $\pm$ 0.0024 \\
-AAGCN (Bone 3D + Aug)             & Bone 3D Vectors      & 378K & 79.30\% $\pm$ 0.22\% & 0.7858 $\pm$ 0.0032 & 66.36\% $\pm$ 1.41\% & 0.6548 $\pm$ 0.0173 & 75.39\% $\pm$ 2.33\% & 0.7440 $\pm$ 0.0335 \\
-Four-Stream AAGCN (Uniform Soft)  & Unified Graph        & 1.51M & 84.34\% $\pm$ 0.26\% & 0.8414 $\pm$ 0.0030 & 74.50\% $\pm$ 0.65\% & 0.7341 $\pm$ 0.0048 & 84.41\% $\pm$ 1.01\% & 0.8308 $\pm$ 0.0179 \\
-\midrule
-\textbf{SkelGym-Lite (2 Streams)} & \textbf{Hybrid Seq+Graph} & \textbf{679K} & \textbf{83.47\% $\pm$ 0.14\%} & \textbf{0.8351 $\pm$ 0.0021} & \textbf{73.74\% $\pm$ 0.63\%} & \textbf{0.7310 $\pm$ 0.0058} & \textbf{82.12\% $\pm$ 0.40\%} & \textbf{0.8198 $\pm$ 0.0030} \\
-\textbf{SkelGym-Full (5 Streams)} & \textbf{Hybrid Seq+Graph} & \textbf{1.81M} & \textbf{85.05\% $\pm$ 0.47\%} & \textbf{0.8487 $\pm$ 0.0046} & \textbf{76.19\% $\pm$ 0.16\%} & \textbf{0.7537 $\pm$ 0.0014} & \textbf{85.27\% $\pm$ 0.41\%} & \textbf{0.8386 $\pm$ 0.0075} \\
-\bottomrule
-\end{tabular}
-}
-\end{table*}
-
-\paragraph{Statistical Hypothesis Testing (Table~\ref{tab:statistical_tests}).}
-To provide rigorous inferential verification of the observed performance deltas, we conducted paired statistical hypothesis testing across both evaluation grains: McNemar's test with continuity correction \cite{mcnemar1947} across the 2,743 test windows, and Wilcoxon signed-rank tests \cite{wilcoxon1945} paired with two-tailed paired $t$-tests across the 233 video clusters (Table~\ref{tab:statistical_tests}). All five pairwise window comparisons remain statistically significant after Holm-Bonferroni step-down correction ($p_{\text{adj}} \le 0.0001$) and Benjamini-Hochberg False Discovery Rate control ($\text{FDR} \le 5.88 \times 10^{-5}$). Video-level Wilcoxon signed-rank and paired $t$-tests evaluate paired differences in ground-truth class posterior confidence across video clusters ($N=233$); statistical significance varies across model comparisons, reflecting convergence towards consensus on unambiguous movement patterns.
-
-\begin{table*}[!t]
-\centering
-\caption{Statistical hypothesis testing evaluating pairwise performance differences across held-out test windows ($N=2,743$, McNemar's test) and test video consensus confidence ($N=233$, Wilcoxon signed-rank and paired $t$-test).}
-\label{tab:statistical_tests}
-\resizebox{\textwidth}{!}{
-\begin{tabular}{l c c c | c c c c}
-\toprule
-\multirow{2}{*}{\textbf{Pairwise Hypothesis Comparison ($M_A$ vs. $M_B$)}} & \multicolumn{3}{c|}{\textbf{Window Level ($N=2,743$)}} & \multicolumn{4}{c}{\textbf{Video Consensus Level ($N=233$)}} \\
-\cmidrule(lr){2-4} \cmidrule(lr){5-8}
- & \textbf{$\chi^2$ (McNemar)} & \textbf{$p$-value} & \textbf{Odds Ratio} & \textbf{Wilcoxon $W$} & \textbf{$p$-value} & \textbf{Paired $t$} & \textbf{Cohen's $d$} \\
-\midrule
-Unaugmented Trans vs SkelGym-Aug Trans       & 16.65  & $4.21 \times 10^{-5}$  & 1.57 & 10432.5 & 0.0019               & 0.0022               & +0.203 \\
-Fixed ST-GCN vs Adaptive Four-Stream AAGCN    & 118.62 & $1.46 \times 10^{-28}$ & 2.63 & 12666.0 & 0.3491               & 0.1026               & +0.107 \\
-Single Sequence (Trans) vs SkelGym-Full       & 42.44  & $3.84 \times 10^{-11}$ & 2.42 & 6086.0  & $2.39 \times 10^{-13}$ & $2.12 \times 10^{-11}$ & -0.461 \\
-Single Graph (AAGCN Bone) vs SkelGym-Full     & 137.47 & $5.60 \times 10^{-34}$ & 4.21 & 11026.0 & 0.0115               & 0.2098               & -0.082 \\
-Four-Stream Graph AAGCN vs SkelGym-Full       & 15.82  & $5.88 \times 10^{-5}$  & 2.12 & 6086.0  & $2.39 \times 10^{-13}$ & $2.12 \times 10^{-11}$ & +0.461 \\
-\bottomrule
-\end{tabular}
-}
-\end{table*}
-
-\paragraph{Bootstrap Confidence Intervals (Table~\ref{tab:bootstrap_ci}).}
-To quantify sampling stability, we conducted non-parametric video-cluster bootstrap resampling ($B=1,000$ iterations, clustered by video ID to eliminate intra-video temporal autocorrelation bias) across the held-out test partition (Table~\ref{tab:bootstrap_ci}). At the temporal window level, SkelGym-Full yields a 95\% confidence interval of $[70.03\%, 81.90\%]$ for window accuracy and $[0.6785, 0.7969]$ for Macro F1. At the video consensus level, SkelGym-Full provides a 95\% confidence interval of $[81.12\%, 90.13\%]$ for video accuracy and $[0.7848, 0.8937]$ for Macro F1. Both empirical point estimates fall squarely within their respective 95\% confidence intervals, substantiating the high stability of our reported benchmarks.
-
-\begin{table*}[!t]
-\centering
-\caption{Non-parametric video-level cluster bootstrap evaluation ($B=1,000$ resamples) reporting empirical mean and 95\% confidence intervals across held-out test partitions ($N=2,743$ temporal windows, $N=233$ videos).}
-\label{tab:bootstrap_ci}
-\resizebox{\textwidth}{!}{
-\begin{tabular}{l c c | c c}
-\toprule
-\multirow{2}{*}{\textbf{Model Architecture}} & \multicolumn{2}{c|}{\textbf{Temporal Window Level ($N=2,743$)}} & \multicolumn{2}{c}{\textbf{Video Consensus Level ($N=233$)}} \\
-\cmidrule(lr){2-3} \cmidrule(lr){4-5}
- & \textbf{Window Acc [95\% CI]} & \textbf{Window Macro F1 [95\% CI]} & \textbf{Video Acc [95\% CI]} & \textbf{Video Macro F1 [95\% CI]} \\
-\midrule
-LSTM (Mix v2 63-d)               & 61.48\% [55.12\%, 67.40\%] & 0.5962 [0.5375, 0.6507] & 74.31\% [69.09\%, 79.83\%] & 0.7209 [0.6606, 0.7828] \\
-BiLSTM (Mix v2 63-d)             & 64.57\% [58.54\%, 70.37\%] & 0.6112 [0.5514, 0.6765] & 76.93\% [71.24\%, 81.97\%] & 0.7358 [0.6688, 0.7969] \\
-ST-GCN (World 3D)                & 65.07\% [58.49\%, 71.17\%] & 0.6115 [0.5610, 0.6657] & 76.63\% [70.82\%, 81.98\%] & 0.7267 [0.6703, 0.7861] \\
-Transformer (Mix v2 Clean)       & 69.91\% [63.40\%, 75.76\%] & 0.6723 [0.6093, 0.7365] & 79.88\% [74.68\%, 84.98\%] & 0.7788 [0.7219, 0.8325] \\
-Transformer (Mix v2 SkelGym-Aug) & 72.60\% [66.60\%, 78.19\%] & 0.6996 [0.6390, 0.7548] & 82.03\% [76.81\%, 86.70\%] & 0.7985 [0.7349, 0.8521] \\
-AAGCN (Bone 3D)                  & 68.20\% [62.11\%, 74.12\%] & 0.6621 [0.6017, 0.7195] & 78.51\% [72.96\%, 83.69\%] & 0.7792 [0.7274, 0.8297] \\
-Four-Stream AAGCN                & 74.67\% [68.69\%, 80.33\%] & 0.7222 [0.6647, 0.7769] & 85.75\% [81.12\%, 90.13\%] & 0.8478 [0.7998, 0.8927] \\
-\midrule
-\textbf{SkelGym-Lite}            & \textbf{73.63\% [67.68\%, 79.13\%]} & \textbf{0.7143 [0.6543, 0.7677]} & \textbf{82.42\% [77.25\%, 87.12\%]} & \textbf{0.8093 [0.7513, 0.8584]} \\
-\textbf{SkelGym-Full (Uniform Soft)} & \textbf{76.34\% [70.03\%, 81.90\%]} & \textbf{0.7412 [0.6785, 0.7969]} & \textbf{85.83\% [81.12\%, 90.13\%]} & \textbf{0.8409 [0.7848, 0.8937]} \\
-\bottomrule
-\end{tabular}
-}
-\end{table*}
-
-\subsection{Per-Class Performance Breakdown and Error Taxonomy}
-Table~\ref{tab:table6_compact} presents a fine-grained per-class breakdown of the proposed SkelGym-Full ensemble, reporting Recall, F1-Score, and Support independently across both the 2,743 test windows and the 233 held-out test videos. Fig.~\ref{fig:confmatr} illustrates the corresponding normalized confusion matrix. Analyzing the empirical metrics across categories reveals three distinct performance tiers:
-
-\paragraph{High-Precision Distinctive Movements ($\text{F1} \ge 0.90$).} Exercises characterized by unique joint articulation achieve near-perfect video consensus classification, including \textit{leg extension} (Recall: 1.0000, F1: 1.0000 across 13 videos), \textit{lateral raise} (Recall: 1.0000, F1: 1.0000 across 15 videos), \textit{leg raises} (Recall: 1.0000, F1: 1.0000 across 11 videos), \textit{russian twist} (Recall: 1.0000, F1: 1.0000 across 6 videos), \textit{squat} (Recall: 1.0000, F1: 1.0000 across 15 videos), \textit{push-up} (Recall: 1.0000, F1: 0.9600 across 12 videos), \textit{chest fly machine} (Recall: 1.0000, F1: 0.9412 across 8 videos), and \textit{hip thrust} (Recall: 0.8889, F1: 0.9412 across 9 videos). These movements operate in isolated topological subspaces---such as seated tibial rotation against a static femur in leg extensions, or bilateral transverse torso rotation in Russian twists---which prevents kinematic confusion.
-
-\paragraph{Robust Compound Resistance Exercises ($\text{F1} \in [0.70, 0.90)$).} Movements involving standard planar flexion-extension trajectories exhibit strong, reliable recognition: \textit{lat pulldown} (Recall: 1.0000, F1: 0.8966 across 13 videos), \textit{tricep dips} (Recall: 0.8889, F1: 0.8889 across 9 videos), \textit{tricep pushdown} (Recall: 0.9167, F1: 0.8462 across 12 videos), \textit{pull-up} (Recall: 0.7000, F1: 0.8235 across 10 videos), \textit{t-bar row} (Recall: 0.7000, F1: 0.8235 across 10 videos), \textit{barbell biceps curl} (Recall: 1.0000, F1: 0.8000 across 14 videos), \textit{plank} (Recall: 1.0000, F1: 0.8000 across 2 videos), \textit{deadlift} (Recall: 0.9000, F1: 0.7826 across 10 videos), \textit{incline bench press} (Recall: 0.7778, F1: 0.7778 across 9 videos), \textit{decline bench press} (Recall: 0.7500, F1: 0.7500 across 8 videos), and \textit{shoulder press} (Recall: 0.6923, F1: 0.7200 across 13 videos). For these compound exercises, temporal consensus effectively resolves transitional pauses, elevating recall by 15\% to 30\% over isolated windows.
-
-\paragraph{Kinematic Ambiguity and Fine-Grained Error Clusters ($\text{F1} < 0.70$).} The remaining error mass is concentrated within three tightly coupled biomechanical exercise clusters. Specifically, \textit{hammer curl} (Video Recall: 0.5000, F1: 0.6364 across 14 videos) experiences confusion with \textit{barbell biceps curl} (Video Recall: 1.0000, F1: 0.8000), where hammer curl test windows are misclassified as biceps curls due to identical sagittal elbow flexion profiles. Similarly, \textit{Romanian deadlift} (Video Recall: 0.5000, F1: 0.6000 across 6 videos) exhibits mutual confusion with conventional \textit{deadlift} (Video Recall: 0.9000, F1: 0.7826) whenever athletes perform sub-optimal knee travel. Finally, pressing angle variations within the bench press family produce directional ambiguity across flat \textit{bench press} (Video Recall: 0.6429, F1: 0.6923 across 14 videos), \textit{decline bench press} (Video Recall: 0.7500, F1: 0.7500), and \textit{incline bench press} (Video Recall: 0.7778, F1: 0.7778). In Section~\ref{sec:biomechanical_analysis}, we conduct an exhaustive anatomical and kinetic investigation into the physiological drivers behind these specific error patterns.
-
-\begin{table*}[!t]
-\centering
-\caption{Per-class performance breakdown of the proposed SkelGym-Full ensemble (Uniform Soft Voting) evaluated on held-out test partitions at temporal window level ($N=2,743$) and video consensus level ($N=233$, 200 correct videos = 85.84\%).}
-\label{tab:table6_compact}
-\resizebox{\textwidth}{!}{
-\begin{tabular}{l c c c | c c c}
-\toprule
-\multirow{2}{*}{\textbf{Exercise Class}} & \multicolumn{3}{c|}{\textbf{Window Level ($N=2,743$)}} & \multicolumn{3}{c}{\textbf{Video Consensus Level ($N=233$)}} \\
-\cmidrule(lr){2-4} \cmidrule(lr){5-7}
- & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\
-\midrule
-barbell biceps curl  & 0.8551          & 0.5514            & 69               & 1.0000          & 0.8000            & 14 \\
-bench press          & 0.6562          & 0.5040            & 96               & 0.6429          & 0.6923            & 14 \\
-chest fly machine    & 1.0000          & 0.9591            & 82               & 1.0000          & 0.9412            & 8 \\
-deadlift             & 0.7910          & 0.5354            & 67               & 0.9000          & 0.7826            & 10 \\
-decline bench press  & 0.5896          & 0.6077            & 134              & 0.7500          & 0.7500            & 8 \\
-hammer curl          & 0.4348          & 0.5018            & 161              & 0.5000          & 0.6364            & 14 \\
-hip thrust           & 0.6229          & 0.7443            & 236              & 0.8889          & 0.9412            & 9 \\
-incline bench press  & 0.7105          & 0.7248            & 76               & 0.7778          & 0.7778            & 9 \\
-lat pulldown         & 0.9300          & 0.7782            & 100              & 1.0000          & 0.8966            & 13 \\
-lateral raise        & 0.9484          & 0.9735            & 155              & 1.0000          & 1.0000            & 15 \\
-leg extension        & 1.0000          & 0.9766            & 125              & 1.0000          & 1.0000            & 13 \\
-leg raises           & 0.8509          & 0.9151            & 114              & 1.0000          & 1.0000            & 11 \\
-plank                & 0.7500          & 0.7706            & 56               & 1.0000          & 0.8000            & 2 \\
-pull Up              & 0.6707          & 0.7285            & 82               & 0.7000          & 0.8235            & 10 \\
-push-up              & 1.0000          & 0.9508            & 87               & 1.0000          & 0.9600            & 12 \\
-romanian deadlift    & 0.4932          & 0.5714            & 146              & 0.5000          & 0.6000            & 6 \\
-russian twist        & 0.9197          & 0.9509            & 137              & 1.0000          & 1.0000            & 6 \\
-shoulder press       & 0.6447          & 0.6759            & 152              & 0.6923          & 0.7200            & 13 \\
-squat                & 0.8319          & 0.8820            & 238              & 1.0000          & 1.0000            & 15 \\
-t bar row            & 0.5385          & 0.6562            & 117              & 0.7000          & 0.8235            & 10 \\
-tricep Pushdown      & 0.7849          & 0.6854            & 93               & 0.9167          & 0.8462            & 12 \\
-tricep dips          & 0.9682          & 0.9322            & 220              & 0.8889          & 0.8889            & 9 \\
-\midrule
-\textbf{Macro Average} & \textbf{0.7723} & \textbf{0.7534} & \textbf{2,743} & \textbf{0.8572} & \textbf{0.8491} & \textbf{233} \\
-\textbf{Overall Accuracy} & \multicolumn{2}{c}{\textbf{76.41\%}} & \textbf{2,743} & \multicolumn{2}{c}{\textbf{85.84\% (200/233)}} & \textbf{233} \\
-\bottomrule
-\end{tabular}
-}
-\end{table*}
-
-\begin{figure*}[!t]
-\centering
-\includegraphics[width=0.92\textwidth]{images/cm_ensemble_T5.1_weighted_soft.pdf}
-\caption{Normalized confusion matrix of the proposed SkelGym-Full cross-paradigm ensemble evaluated on held-out test windows ($N=2,743$).}
-\label{fig:confmatr}
-\end{figure*}
-
-\subsection{Inference Latency and Real-Time Edge Viability}
-\label{sec:latency}
-
-A critical requirement for automated virtual fitness assistants is achieving real-time responsiveness on consumer-grade and edge hardware. Table~\ref{tab:hardware_latency} provides a rigorous benchmark of theoretical computational complexity (FLOPs per 32-frame window), parameter footprint, and empirical inference latency and throughput across three distinct computing environments: an NVIDIA RTX PRO 6000 Blackwell GPU (CUDA, cloud server), an Apple Silicon M4 processor running Metal Performance Shaders (MPS, on-device edge acceleration), and host CPU execution on the Apple Silicon M4 chip without hardware acceleration (edge CPU baseline).
-
-\begin{table*}[!t]
-\centering
-\caption{Computational complexity (Parameters, FLOPs per 32-frame window) and inference latency across server and edge hardware platforms.}
-\label{tab:hardware_latency}
-\resizebox{\textwidth}{!}{
-\begin{tabular}{l c c c c c}
-\toprule
-\textbf{Model Architecture} & \textbf{Parameters} & \textbf{FLOPs per Window} & \textbf{RTX PRO 6000 (CUDA)} & \textbf{Apple M4 (MPS)} & \textbf{Apple M4 (CPU)} \\
-\midrule
-Transformer Mix v2 (63-d)       & 301K                & \textbf{18.87 MFLOPs} & \textbf{0.59~ms (1,685 FPS)} & \textbf{1.36~ms (738 FPS)} & \textbf{0.49~ms (2,041 FPS)} \\
-AAGCN Joint Stream              & 378K                & 202.86 MFLOPs         & 1.01~ms (987 FPS)            & 1.89~ms (530 FPS)          & 0.90~ms (1,115 FPS) \\
-AAGCN Bone Stream               & 378K                & 202.86 MFLOPs         & 1.02~ms (976 FPS)            & 1.72~ms (581 FPS)          & 0.88~ms (1,138 FPS) \\
-AAGCN Joint-Motion Stream       & 378K                & 202.86 MFLOPs         & 1.01~ms (990 FPS)            & 1.90~ms (527 FPS)          & 1.02~ms (978 FPS) \\
-AAGCN Bone-Motion Stream        & 378K                & 202.86 MFLOPs         & 1.02~ms (980 FPS)            & 1.90~ms (527 FPS)          & 1.03~ms (975 FPS) \\
-\midrule
-SkelGym-Lite (Transformer + Bone)  & 679K             & \textbf{221.72 MFLOPs}& \textbf{1.66~ms (603 FPS)}   & \textbf{2.55~ms (393 FPS)} & \textbf{1.49~ms (671 FPS)} \\
-SkelGym-Full (Transformer + 4 AAGCN) & 1.81M          & \textbf{830.29 MFLOPs}& \textbf{4.65~ms (215 FPS)}   & \textbf{5.86~ms (171 FPS)} & \textbf{3.96~ms (253 FPS)} \\
-\bottomrule
-\end{tabular}
-}
-\end{table*}
-
-As documented in Table~\ref{tab:hardware_latency}, the theoretical complexity of our models is exceptionally modest: the Transformer Mix v2 requires merely \textbf{18.87 MFLOPs} (0.0189 GFLOPs), while each spatial-temporal AAGCN stream consumes 202.86 MFLOPs. Consequently, SkelGym-Lite totals 221.72 MFLOPs (0.2217 GFLOPs) and SkelGym-Full requires 830.29 MFLOPs (0.8303 GFLOPs) with a total parameter footprint of 1.81M.
-In terms of wall-clock latency, the Transformer Mix v2 model achieves an ultra-rapid latency of 0.59~ms on CUDA, 1.36~ms on Apple Silicon MPS, and 0.49~ms on host CPU. Even when executing the complete SkelGym-Full model across all five constituent backbone streams, total sequential inference requires only 4.65~ms on CUDA ($\approx 215$ FPS), 5.86~ms on Apple MPS ($\approx 171$ FPS under explicit hardware synchronization), and 3.96~ms on host CPU ($\approx 253$ FPS). When paired with Google MediaPipe Pose \cite{chuankun2019,bazarevsky2020}, which extracts 3D skeletal landmarks in $\approx 8-15$~ms per frame on mobile chipsets, the entire SkelGym perception-and-classification pipeline operates well within the 33.3~ms real-time budget of standard 30 FPS video streams (incremental feedback latency: $\approx 12.0\text{--}19.0$~ms per frame). For resource-constrained microcontroller or mobile deployments, the SkelGym-Lite configuration (Transformer Mix + AAGCN Bone, 679K parameters, 221.72 MFLOPs) offers a practical operational compromise, delivering \textbf{82.12\% $\pm$ 0.40\%} video consensus accuracy with an execution latency of merely 1.49~ms on host CPU (671 FPS, 1.66~ms on CUDA, 2.55~ms on MPS).
-
-\paragraph{Analysis of the Edge CPU vs. GPU Latency Profile (The Batch-Size 1 Dispatch Boundary).}
-An apparent characteristic in Table~\ref{tab:hardware_latency} is that host CPU execution on the Apple M4 processor (0.49~ms for Transformer, 3.96~ms for SkelGym-Full) achieves lower wall-clock latency than GPU acceleration via Metal Performance Shaders (MPS: 1.36~ms and 5.86~ms, respectively). Rather than an implementation deficiency, this behavior is a well-established architectural characteristic of ultra-compact neural networks operating under strict single-sample streaming inference ($\text{batch size} = 1$). For lightweight architectures requiring merely $18.87\text{--}202.9\text{ MFLOPs}$ per window, the pure arithmetic execution time on modern silicon is under 0.1~ms. However, delegating computation to the GPU via Apple Metal requires host-to-device command buffer encoding, kernel dispatch scheduling, threadgroup management, and device synchronization barriers (\texttt{torch.mps.synchronize()}), incurring an intrinsic latency floor of $\approx 0.8\text{--}1.5\text{ ms}$ per model invocation regardless of computational volume. Conversely, Apple M4 high-performance CPU cores (P-cores) integrate wide superscalar execution pipelines, dedicated vector execution units, and large private L1/L2 caches (16~MB shared L2) that effortlessly accommodate the entire 1.5--7.5~MB parameter and activation footprint in cache. Without kernel dispatch serialization or cross-subsystem synchronization overhead, CPU execution achieves sub-millisecond latency. While batched offline inference ($\text{batch size} \ge 32$) enables the GPU to amortize dispatch overhead and achieve higher cumulative throughput, for real-time edge streaming where sliding windows arrive sequentially, direct CPU execution provides the optimal low-latency deployment configuration.
 
 \subsection{Comparative Analysis on Strength and Conditioning Exercises (Deyzel et al. Subset)}
 \label{sec:external_benchmark}
@@ -1004,6 +1024,96 @@ A central limitation reported by Deyzel et al. \cite{deyzel2023} on the Stellenb
 
 \paragraph{One-Shot Metric Prototype Classification Simulation Protocol.}
 Deyzel et al. \cite{deyzel2023} evaluated a 1-shot learning scenario using single-exemplar support matching via cosine similarity, reporting an accuracy of 87.4\% on SU-EMD. To benchmark metric generalizability under an identical one-shot evaluation protocol without task-specific fine-tuning or parameter adaptation, we evaluated our pre-trained backbones on the 54 held-out S\&C test videos across 100 stochastic trials (random seed 42). In each trial, $K=1$ random exemplar video was sampled per class as the support set (yielding 4 support videos total across the 4 S\&C classes: squat, deadlift, barbell biceps curl, and lateral raise), while the remaining 50 test videos served as query samples. Query classification was executed via nearest-neighbor prototype matching using cosine similarity over $L_2$-normalized temporal mean-aggregated feature embeddings. Under this zero-adaptation 1-shot classification simulation, Transformer Mix achieves a mean video accuracy of \textbf{90.36\% $\pm$ 7.35\%} (95\% CI: $[68.95\%, 98.00\%]$, with individual trial peaks reaching \textbf{98.00\%}), SkelGym-Full reaches \textbf{86.18\% $\pm$ 9.50\%} (95\% CI: $[60.95\%, 98.00\%]$), and AAGCN Bone reaches \textbf{68.82\% $\pm$ 11.14\%} (95\% CI: $[48.95\%, 89.05\%]$). These results demonstrate that the proposed 63-d compound representation provides a well-clustered metric space that enables reliable nearest-neighbor recognition even under extreme single-sample constraints, matching and outperforming literature baselines.
+
+\subsection{Inference Latency and Real-Time Edge Viability}
+\label{sec:latency}
+
+A critical requirement for automated virtual fitness assistants is achieving real-time responsiveness on consumer-grade and edge hardware. Table~\ref{tab:hardware_latency} provides a rigorous benchmark of theoretical computational complexity (FLOPs per 32-frame window), parameter footprint, and empirical inference latency and throughput across three distinct computing environments: an NVIDIA RTX PRO 6000 Blackwell GPU (CUDA, cloud server), an Apple Silicon M4 processor running Metal Performance Shaders (MPS, on-device edge acceleration), and host CPU execution on the Apple Silicon M4 chip without hardware acceleration (edge CPU baseline).
+
+\begin{table*}[!t]
+\centering
+\caption{Computational complexity (Parameters, FLOPs per 32-frame window) and inference latency across server and edge hardware platforms.}
+\label{tab:hardware_latency}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l c c c c c}
+\toprule
+\textbf{Model Architecture} & \textbf{Parameters} & \textbf{FLOPs per Window} & \textbf{RTX PRO 6000 (CUDA)} & \textbf{Apple M4 (MPS)} & \textbf{Apple M4 (CPU)} \\
+\midrule
+Transformer Mix v2 (63-d)       & 301K                & \textbf{18.87 MFLOPs} & \textbf{0.59~ms (1,685 FPS)} & \textbf{1.36~ms (738 FPS)} & \textbf{0.49~ms (2,041 FPS)} \\
+AAGCN Joint Stream              & 378K                & 202.86 MFLOPs         & 1.01~ms (987 FPS)            & 1.89~ms (530 FPS)          & 0.90~ms (1,115 FPS) \\
+AAGCN Bone Stream               & 378K                & 202.86 MFLOPs         & 1.02~ms (976 FPS)            & 1.72~ms (581 FPS)          & 0.88~ms (1,138 FPS) \\
+AAGCN Joint-Motion Stream       & 378K                & 202.86 MFLOPs         & 1.01~ms (990 FPS)            & 1.90~ms (527 FPS)          & 1.02~ms (978 FPS) \\
+AAGCN Bone-Motion Stream        & 378K                & 202.86 MFLOPs         & 1.02~ms (980 FPS)            & 1.90~ms (527 FPS)          & 1.03~ms (975 FPS) \\
+\midrule
+SkelGym-Lite (Transformer + Bone)  & 679K             & \textbf{221.72 MFLOPs}& \textbf{1.66~ms (603 FPS)}   & \textbf{2.55~ms (393 FPS)} & \textbf{1.49~ms (671 FPS)} \\
+SkelGym-Full (Transformer + 4 AAGCN) & 1.81M          & \textbf{830.29 MFLOPs}& \textbf{4.65~ms (215 FPS)}   & \textbf{5.86~ms (171 FPS)} & \textbf{3.96~ms (253 FPS)} \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+As documented in Table~\ref{tab:hardware_latency}, the theoretical complexity of our models is exceptionally modest: the Transformer Mix v2 requires merely \textbf{18.87 MFLOPs} (0.0189 GFLOPs), while each spatial-temporal AAGCN stream consumes 202.86 MFLOPs. Consequently, SkelGym-Lite totals 221.72 MFLOPs (0.2217 GFLOPs) and SkelGym-Full requires 830.29 MFLOPs (0.8303 GFLOPs) with a total parameter footprint of 1.81M.
+In terms of wall-clock latency, the Transformer Mix v2 model achieves an ultra-rapid latency of 0.59~ms on CUDA, 1.36~ms on Apple Silicon MPS, and 0.49~ms on host CPU. Even when executing the complete SkelGym-Full model across all five constituent backbone streams, total sequential inference requires only 4.65~ms on CUDA ($\approx 215$ FPS), 5.86~ms on Apple MPS ($\approx 171$ FPS under explicit hardware synchronization), and 3.96~ms on host CPU ($\approx 253$ FPS). When paired with Google MediaPipe Pose \cite{chuankun2019,bazarevsky2020}, which extracts 3D skeletal landmarks in $\approx 8-15$~ms per frame on mobile chipsets, the entire SkelGym perception-and-classification pipeline operates well within the 33.3~ms real-time budget of standard 30 FPS video streams (incremental feedback latency: $\approx 12.0\text{--}19.0$~ms per frame). For resource-constrained microcontroller or mobile deployments, the SkelGym-Lite configuration (Transformer Mix + AAGCN Bone, 679K parameters, 221.72 MFLOPs) offers a practical operational compromise, delivering \textbf{82.12\% $\pm$ 0.40\%} video consensus accuracy with an execution latency of merely 1.49~ms on host CPU (671 FPS, 1.66~ms on CUDA, 2.55~ms on MPS).
+
+\paragraph{Analysis of the Edge CPU vs. GPU Latency Profile (The Batch-Size 1 Dispatch Boundary).}
+An apparent characteristic in Table~\ref{tab:hardware_latency} is that host CPU execution on the Apple M4 processor (0.49~ms for Transformer, 3.96~ms for SkelGym-Full) achieves lower wall-clock latency than GPU acceleration via Metal Performance Shaders (MPS: 1.36~ms and 5.86~ms, respectively). Rather than an implementation deficiency, this behavior is a well-established architectural characteristic of ultra-compact neural networks operating under strict single-sample streaming inference ($\text{batch size} = 1$). For lightweight architectures requiring merely $18.87\text{--}202.9\text{ MFLOPs}$ per window, the pure arithmetic execution time on modern silicon is under 0.1~ms. However, delegating computation to the GPU via Apple Metal requires host-to-device command buffer encoding, kernel dispatch scheduling, threadgroup management, and device synchronization barriers (\texttt{torch.mps.synchronize()}), incurring an intrinsic latency floor of $\approx 0.8\text{--}1.5\text{ ms}$ per model invocation regardless of computational volume. Conversely, Apple M4 high-performance CPU cores (P-cores) integrate wide superscalar execution pipelines, dedicated vector execution units, and large private L1/L2 caches (16~MB shared L2) that effortlessly accommodate the entire 1.5--7.5~MB parameter and activation footprint in cache. Without kernel dispatch serialization or cross-subsystem synchronization overhead, CPU execution achieves sub-millisecond latency. While batched offline inference ($\text{batch size} \ge 32$) enables the GPU to amortize dispatch overhead and achieve higher cumulative throughput, for real-time edge streaming where sliding windows arrive sequentially, direct CPU execution provides the optimal low-latency deployment configuration.
+
+\subsection{Statistical Significance and Inferential Hypothesis Testing}
+\label{sec:statistics}
+
+To provide rigorous inferential verification of the observed performance deltas across the held-out test partition, we conducted paired statistical hypothesis testing across both evaluation grains: McNemar's test with continuity correction \cite{mcnemar1947} across the 2,743 test windows, and Wilcoxon signed-rank tests \cite{wilcoxon1945} paired with two-tailed paired $t$-tests across the 233 video clusters (Table~\ref{tab:statistical_tests}).
+
+\begin{table*}[!t]
+\centering
+\caption{Statistical hypothesis testing evaluating pairwise performance differences across held-out test windows ($N=2,743$, McNemar's test) and test video consensus confidence ($N=233$, Wilcoxon signed-rank and paired $t$-test).}
+\label{tab:statistical_tests}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l c c c | c c c c}
+\toprule
+\multirow{2}{*}{\textbf{Pairwise Hypothesis Comparison ($M_A$ vs. $M_B$)}} & \multicolumn{3}{c|}{\textbf{Window Level ($N=2,743$)}} & \multicolumn{4}{c}{\textbf{Video Consensus Level ($N=233$)}} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-8}
+ & \textbf{$\chi^2$ (McNemar)} & \textbf{$p$-value} & \textbf{Odds Ratio} & \textbf{Wilcoxon $W$} & \textbf{$p$-value} & \textbf{Paired $t$} & \textbf{Cohen's $d$} \\
+\midrule
+Unaugmented Trans vs SkelGym-Aug Trans       & 16.65  & $4.21 \times 10^{-5}$  & 1.57 & 10432.5 & 0.0019               & 0.0022               & +0.203 \\
+Fixed ST-GCN vs Adaptive Four-Stream AAGCN    & 118.62 & $1.46 \times 10^{-28}$ & 2.63 & 12666.0 & 0.3491               & 0.1026               & +0.107 \\
+Single Sequence (Trans) vs SkelGym-Full       & 42.44  & $3.84 \times 10^{-11}$ & 2.42 & 6086.0  & $2.39 \times 10^{-13}$ & $2.12 \times 10^{-11}$ & -0.461 \\
+Single Graph (AAGCN Bone) vs SkelGym-Full     & 137.47 & $5.60 \times 10^{-34}$ & 4.21 & 11026.0 & 0.0115               & 0.2098               & -0.082 \\
+Four-Stream Graph AAGCN vs SkelGym-Full       & 15.82  & $5.88 \times 10^{-5}$  & 2.12 & 6086.0  & $2.39 \times 10^{-13}$ & $2.12 \times 10^{-11}$ & +0.461 \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+All five pairwise window comparisons in Table~\ref{tab:statistical_tests} remain statistically significant after Holm-Bonferroni step-down correction ($p_{\text{adj}} \le 0.0001$) and Benjamini-Hochberg False Discovery Rate control ($\text{FDR} \le 5.88 \times 10^{-5}$). Video-level Wilcoxon signed-rank and paired $t$-tests evaluate paired differences in ground-truth class posterior confidence across video clusters ($N=233$); statistical significance varies across model comparisons, reflecting convergence towards consensus on unambiguous movement patterns.
+
+\paragraph{Bootstrap Confidence Intervals (Table~\ref{tab:bootstrap_ci}).}
+To quantify sampling stability, we conducted non-parametric video-cluster bootstrap resampling ($B=1,000$ iterations, clustered by video ID to eliminate intra-video temporal autocorrelation bias) across the held-out test partition (Table~\ref{tab:bootstrap_ci}). At the temporal window level, SkelGym-Full yields a 95\% confidence interval of $[70.03\%, 81.90\%]$ for window accuracy and $[0.6785, 0.7969]$ for Macro F1. At the video consensus level, SkelGym-Full provides a 95\% confidence interval of $[81.12\%, 90.13\%]$ for video accuracy and $[0.7848, 0.8937]$ for Macro F1. Both empirical point estimates fall squarely within their respective 95\% confidence intervals, substantiating the high stability of our reported benchmarks.
+
+\begin{table*}[!t]
+\centering
+\caption{Non-parametric video-level cluster bootstrap evaluation ($B=1,000$ resamples) reporting empirical mean and 95\% confidence intervals across held-out test partitions ($N=2,743$ temporal windows, $N=233$ videos).}
+\label{tab:bootstrap_ci}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l c c | c c}
+\toprule
+\multirow{2}{*}{\textbf{Model Architecture}} & \multicolumn{2}{c|}{\textbf{Temporal Window Level ($N=2,743$)}} & \multicolumn{2}{c}{\textbf{Video Consensus Level ($N=233$)}} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+ & \textbf{Window Acc [95\% CI]} & \textbf{Window Macro F1 [95\% CI]} & \textbf{Video Acc [95\% CI]} & \textbf{Video Macro F1 [95\% CI]} \\
+\midrule
+LSTM (Mix v2 63-d)               & 61.48\% [55.12\%, 67.40\%] & 0.5962 [0.5375, 0.6507] & 74.31\% [69.09\%, 79.83\%] & 0.7209 [0.6606, 0.7828] \\
+BiLSTM (Mix v2 63-d)             & 64.57\% [58.54\%, 70.37\%] & 0.6112 [0.5514, 0.6765] & 76.93\% [71.24\%, 81.97\%] & 0.7358 [0.6688, 0.7969] \\
+ST-GCN (World 3D)                & 65.07\% [58.49\%, 71.17\%] & 0.6115 [0.5610, 0.6657] & 76.63\% [70.82\%, 81.98\%] & 0.7267 [0.6703, 0.7861] \\
+Transformer (Mix v2 Clean)       & 69.91\% [63.40\%, 75.76\%] & 0.6723 [0.6093, 0.7365] & 79.88\% [74.68\%, 84.98\%] & 0.7788 [0.7219, 0.8325] \\
+Transformer (Mix v2 SkelGym-Aug) & 72.60\% [66.60\%, 78.19\%] & 0.6996 [0.6390, 0.7548] & 82.03\% [76.81\%, 86.70\%] & 0.7985 [0.7349, 0.8521] \\
+AAGCN (Bone 3D)                  & 68.20\% [62.11\%, 74.12\%] & 0.6621 [0.6017, 0.7195] & 78.51\% [72.96\%, 83.69\%] & 0.7792 [0.7274, 0.8297] \\
+Four-Stream AAGCN                & 74.67\% [68.69\%, 80.33\%] & 0.7222 [0.6647, 0.7769] & 85.75\% [81.12\%, 90.13\%] & 0.8478 [0.7998, 0.8927] \\
+\midrule
+\textbf{SkelGym-Lite}            & \textbf{73.63\% [67.68\%, 79.13\%]} & \textbf{0.7143 [0.6543, 0.7677]} & \textbf{82.42\% [77.25\%, 87.12\%]} & \textbf{0.8093 [0.7513, 0.8584]} \\
+\textbf{SkelGym-Full (Uniform Soft)} & \textbf{76.34\% [70.03\%, 81.90\%]} & \textbf{0.7412 [0.6785, 0.7969]} & \textbf{85.83\% [81.12\%, 90.13\%]} & \textbf{0.8409 [0.7848, 0.8937]} \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
 
 \section{Biomechanical Kinematics and Error Analysis}
 \label{sec:biomechanical_analysis}

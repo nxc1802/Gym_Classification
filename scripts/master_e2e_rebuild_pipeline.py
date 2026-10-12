@@ -140,7 +140,7 @@ def update_results_final_markdown():
     with open(outputs_dir / "bootstrap_confidence_intervals.json") as f: boot_ci = json.load(f)
     with open(outputs_dir / "per_class_results.json") as f: per_class = json.load(f)["classes"]
 
-    # --- Render Table 1 (27 runs preliminary feature screening) ---
+    # --- Render Table 1 (Unified Kinematic Encodings & Sequence Backbones Benchmark - 30 Experiments) ---
     t1_path = outputs_dir / "table1_feature_screening_multiseed.json"
     if not t1_path.exists():
         t1_path = ROOT_DIR / "artifacts" / "results" / "table1_feature_screening_multiseed.json"
@@ -162,6 +162,7 @@ def update_results_final_markdown():
         vw_f1 = f"{r.get('val_macro_f1_mean', 0):.4f} ± {r.get('val_macro_f1_sd', 0):.4f}"
         tw_acc = f"{r.get('test_win_acc_mean', 0):.2f}% ± {r.get('test_win_acc_sd', 0):.2f}%"
         tw_f1 = f"{r.get('macro_f1_mean', 0):.4f} ± {r.get('macro_f1_sd', 0):.4f}"
+        status = r.get("status", "Verified")
         
         if "mix" in r.get("feature", ""):
             feat_name = f"**{feat_name}**"
@@ -169,42 +170,14 @@ def update_results_final_markdown():
             vw_f1 = f"**{vw_f1}**"
             tw_acc = f"**{tw_acc}**"
             tw_f1 = f"**{tw_f1}**"
+            status = f"**{status}**"
             
-        t1_rows.append(f"| **{eid}** | {mod} | {feat_name} | {dim} | {vw_acc} | {vw_f1} | {tw_acc} | {tw_f1} | Verified |")
+        t1_rows.append(f"| **{eid}** | {mod} | {feat_name} | {dim} | {vw_acc} | {vw_f1} | {tw_acc} | {tw_f1} | {status} |")
     t1_text = "\n".join(t1_rows)
 
-    # --- Render Table 2 ---
+    # --- Render Table 4 (now Table 2 LOO) ---
     # Hide Test metrics and video-level metrics
     t2_rows = [
-        "| Architecture / Model | Input Modality | Dim | Params | Val Loss | Val Win Acc (%) | Val Win F1 | Validation Status |",
-        "| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |"
-    ]
-    for k, v in t2.items():
-        arch = v.get("model", k.split("_")[0])
-        modality = v.get("feature", "World 3D")
-        dim = "63-d" if "mix" in k else "39-d"
-        params = "362K" if "LSTM" in arch else ("301K" if "Trans" in arch else "350K")
-        v_loss, v_wacc, v_wf1 = get_val_metrics(v)
-        t2_rows.append(f"| **{arch} ({modality})** | {modality} | {dim} | {params} | {v_loss} | {v_wacc} | {v_wf1} | Verified |")
-    t2_text = "\n".join(t2_rows)
-
-    # --- Render Table 3 ---
-    # Hide Test metrics and video-level metrics
-    t3_rows = [
-        "| Stream ID | Stream / Configuration | Model Backbone | Input Modality | Val Win Acc (%) | Val Win F1 | Validation Status |",
-        "| :--- | :--- | :--- | :--- | :---: | :---: | :--- |"
-    ]
-    for k, v in t3.items():
-        desc = v.get("description", v.get("fusion_name", k))
-        model = v.get("model", "AAGCN")
-        feat = v.get("feature", "Graph")
-        v_loss, v_wacc, v_wf1 = get_val_metrics(v)
-        t3_rows.append(f"| **{k}** | {desc} | {model} | {feat} | {v_wacc} | {v_wf1} | Verified |")
-    t3_text = "\n".join(t3_rows)
-
-    # --- Render Table 4 ---
-    # Hide Test metrics and video-level metrics
-    t4_rows = [
         "| Augmentation Configuration | Excluded Operator / Domain | Val Loss | Val Win Acc (%) | Val Win F1 | Validation Verdict |",
         "| :--- | :--- | :---: | :---: | :---: | :--- |"
     ]
@@ -221,16 +194,16 @@ def update_results_final_markdown():
         op_info, verdict = loo_descriptions.get(k, ("Ablated Operator", "Verified"))
         name = k.replace("_", " ").title()
         v_loss, v_wacc, v_wf1 = get_val_metrics(v)
-        t4_rows.append(f"| **{name}** | {op_info} | {v_loss} | {v_wacc} | {v_wf1} | {verdict} |")
-    t4_text = "\n".join(t4_rows)
+        t2_rows.append(f"| **{name}** | {op_info} | {v_loss} | {v_wacc} | {v_wf1} | {verdict} |")
+    t2_text = "\n".join(t2_rows)
 
-    # --- Render Table 5 ---
+    # --- Render Table 5 (now Table 3 Single/Paired) ---
     # Hide Test metrics and video-level metrics
-    t5_rows = [
+    t3_rows = [
         "| Augmentation Strategy | Isolated Operator Description | Val Loss | Val Win Acc (%) | Val Win F1 | Standalone Validation Effect |",
         "| :--- | :--- | :---: | :---: | :---: | :--- |"
     ]
-    t5_desc = {
+    t3_desc = {
         "clean": ("Unaugmented Native Window Sequences", "Unaugmented Baseline Control"),
         "single_mirror": ("Sagittal Bilateral Reflection (p=0.5)", "🏆 Decisive window gain across single ops (+1.16% Win F1)"),
         "single_yaw": ("3D Yaw Perturbation (±15°)", "Strong standalone window gain (+0.92% Win F1)"),
@@ -239,27 +212,41 @@ def update_results_final_markdown():
         "single_time": ("Linear Sequence Resampling (0.8x - 1.2x)", "Marginal window gain over clean (+0.35% Win F1)"),
         "single_jitter": ("Gaussian Noise (σ=0.008)", "Neutral window performance (-0.01% Win F1)")
     }
-    for k, (op_desc, effect) in t5_desc.items():
+    for k, (op_desc, effect) in t3_desc.items():
         if k in t5:
             v = t5[k]
             name = k.replace("_", " ").title()
             v_loss, v_wacc, v_wf1 = get_val_metrics(v)
-            t5_rows.append(f"| **{name}** | {op_desc} | {v_loss} | {v_wacc} | {v_wf1} | {effect} |")
-    t5_text = "\n".join(t5_rows)
+            t3_rows.append(f"| **{name}** | {op_desc} | {v_loss} | {v_wacc} | {v_wf1} | {effect} |")
+    t3_text = "\n".join(t3_rows)
 
-    # --- Render Table 6 ---
+    # --- Render Table 3 (now Table 4 Graph Streams) ---
+    # Hide Test metrics and video-level metrics
+    t4_rows = [
+        "| Stream ID | Stream / Configuration | Model Backbone | Input Modality | Val Win Acc (%) | Val Win F1 | Validation Status |",
+        "| :--- | :--- | :--- | :--- | :---: | :---: | :--- |"
+    ]
+    for k, v in t3.items():
+        desc = v.get("description", v.get("fusion_name", k))
+        model = v.get("model", "AAGCN")
+        feat = v.get("feature", "Graph")
+        v_loss, v_wacc, v_wf1 = get_val_metrics(v)
+        t4_rows.append(f"| **{k}** | {desc} | {model} | {feat} | {v_wacc} | {v_wf1} | Verified |")
+    t4_text = "\n".join(t4_rows)
+
+    # --- Render Table 6 (now Table 5 Ensemble Fusion) ---
     # Keep Video-level metrics for all protocols, but reveal Test metrics ONLY for Validation Winners of Lite and Full
     winner_lite = t6.get("winners", {}).get("SkelGym-Lite", "accuracy_weighted_soft")
     winner_full = t6.get("winners", {}).get("SkelGym-Full", "uniform_soft")
 
-    t6_rows = [
+    t5_rows = [
         "| Architecture / Configuration | Fusion Protocol & Weighting | Val Win Acc (%) | Val Win F1 | Val Vid Acc (%) | Val Vid F1 | Test Win Acc (%) | Test Win F1 | Test Vid Acc (%) | Test Vid F1 | Status |",
         "| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |"
     ]
     # Single Sequence Baseline row
     if "pair_mirror_yaw" in t5:
         pmy = t5["pair_mirror_yaw"]
-        t6_rows.append(f"| **Transformer Mix (63-d)** | Single Sequence Backbone (Mirror+Yaw) | {pmy['val_win_acc']} | {pmy['val_win_f1']} | {pmy['val_vid_acc']} | {pmy['val_vid_f1']} | - | - | - | - | Reference Backbone |")
+        t5_rows.append(f"| **Transformer Mix (63-d)** | Single Sequence Backbone (Mirror+Yaw) | {pmy['val_win_acc']} | {pmy['val_win_f1']} | {pmy['val_vid_acc']} | {pmy['val_vid_f1']} | - | - | - | - | Reference Backbone |")
 
     for arch in ["SkelGym-Lite", "SkelGym-Full"]:
         w_key = winner_lite if arch == "SkelGym-Lite" else winner_full
@@ -272,61 +259,61 @@ def update_results_final_markdown():
             test_v = f"**{m_rep['test_vid_acc']}**" if is_winner else "-"
             test_vf1 = f"**{m_rep['test_vid_f1']}**" if is_winner else "-"
             status_str = f"🏆 Validation Winner ({arch})" if is_winner else "Verified"
-            t6_rows.append(f"| **{arch}** | {m_rep['description']} | {m_rep['val_win_acc']} | {m_rep['val_win_f1']} | {m_rep['val_vid_acc']} | {m_rep['val_vid_f1']} | {test_w} | {test_wf1} | {test_v} | {test_vf1} | {status_str} |")
-    t6_text = "\n".join(t6_rows)
+            t5_rows.append(f"| **{arch}** | {m_rep['description']} | {m_rep['val_win_acc']} | {m_rep['val_win_f1']} | {m_rep['val_vid_acc']} | {m_rep['val_vid_f1']} | {test_w} | {test_wf1} | {test_v} | {test_vf1} | {status_str} |")
+    t5_text = "\n".join(t5_rows)
 
-    # --- Render Table 7 ---
-    t7_rows = [
+    # --- Render Table 7 (now Table 6 Master Benchmark) ---
+    t6_rows = [
         "| Model Architecture | Input Modality / Paradigm | Trainable Params | Val Win Acc (%) | Val Win F1 | Test Win Acc (%) | Test Win Macro F1 | Test Vid Acc (%) | Test Vid Macro F1 | Status |",
         "| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |"
     ]
     for r in t7.get("table7_rows", []):
-        t7_rows.append(f"| **{r['model']}** | {r.get('input', 'Skeletal Motion')} | {r['params']} | {r.get('val_win_acc', '-')} | {r.get('val_win_f1', '-')} | {r['test_win_acc']} | {r['test_win_f1']} | **{r['test_vid_acc']}** | **{r['test_vid_f1']}** | Verified |")
-    t7_text = "\n".join(t7_rows)
+        t6_rows.append(f"| **{r['model']}** | {r.get('input', 'Skeletal Motion')} | {r['params']} | {r.get('val_win_acc', '-')} | {r.get('val_win_f1', '-')} | {r['test_win_acc']} | {r['test_win_f1']} | **{r['test_vid_acc']}** | **{r['test_vid_f1']}** | Verified |")
+    t6_text = "\n".join(t6_rows)
 
-    # --- Render Table 8 ---
-    t8_rows = [
+    # --- Render Table 8 (now Table 7 Statistical Hypothesis Testing) ---
+    t7_rows = [
         "| Pairwise Comparison ($M_A$ vs. $M_B$) | Window McNemar $\\chi^2$ | Window $p$-value | Window Odds Ratio | Video Wilcoxon $W$ | Video $p$-value | Video Paired $t$ | Video Cohen's $d$ | Status |",
         "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |"
     ]
     for pair, metrics in stat_tests.items():
         sig = f"Verified ({metrics['significance']})" if metrics.get('significance') else "Verified"
         row = f"| **{pair}** | {metrics['win_chi2']:.2f} | {metrics['win_p']} | {metrics['win_odds_ratio']:.2f} | {metrics['vid_wilcoxon_w']} | {metrics['vid_wilcoxon_p']} | {metrics['vid_paired_t_p']} | {metrics['vid_cohens_d']} | {sig} |"
-        t8_rows.append(row)
-    t8_text = "\n".join(t8_rows)
+        t7_rows.append(row)
+    t7_text = "\n".join(t7_rows)
 
-    # --- Render Table 9 ---
-    t9_rows = [
+    # --- Render Table 9 (now Table 8 Bootstrap CIs) ---
+    t8_rows = [
         "| Model Architecture | Window Test Acc [95% CI] | Window Macro F1 [95% CI] | Video Consensus Acc [95% CI] | Video Macro F1 [95% CI] | Status |",
         "| :--- | :---: | :---: | :---: | :---: | :---: |"
     ]
     for model_name, m in boot_ci.items():
         is_best = "SkelGym-Full" in model_name
         bold = "**" if is_best else ""
-        t9_rows.append(f"| **{model_name}** | {bold}{m['w_acc_str']}{bold} | {bold}{m['w_f1_str']}{bold} | {bold}{m['v_acc_str']}{bold} | {bold}{m['v_f1_str']}{bold} | Verified |")
-    t9_text = "\n".join(t9_rows)
+        t8_rows.append(f"| **{model_name}** | {bold}{m['w_acc_str']}{bold} | {bold}{m['w_f1_str']}{bold} | {bold}{m['v_acc_str']}{bold} | {bold}{m['v_f1_str']}{bold} | Verified |")
+    t8_text = "\n".join(t8_rows)
 
-    # --- Render Table 10 ---
-    t10_rows = [
+    # --- Render Table 10 (now Table 9 Per-Class Breakdown) ---
+    t9_rows = [
         "| Exercise Class | Window Precision | Window Recall | Window F1 | Window Support | Video Precision | Video Recall | Video F1 | Video Support | Status |",
         "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |"
     ]
     for cls_name, m in per_class.items():
         is_summary = cls_name in ["Overall Accuracy", "Macro Average"]
         bold = "**" if is_summary else ""
-        t10_rows.append(f"| {bold}{cls_name}{bold} | {m['win_precision']:.4f} | {m['win_recall']:.4f} | {m['win_f1']:.4f} | {bold}{m['win_support']}{bold} | {m['vid_precision']:.4f} | {m['vid_recall']:.4f} | {m['vid_f1']:.4f} | {bold}{m['vid_support']}{bold} | {bold}Verified{bold} |")
-    t10_text = "\n".join(t10_rows)
+        t9_rows.append(f"| {bold}{cls_name}{bold} | {m['win_precision']:.4f} | {m['win_recall']:.4f} | {m['win_f1']:.4f} | {bold}{m['win_support']}{bold} | {m['vid_precision']:.4f} | {m['vid_recall']:.4f} | {m['vid_f1']:.4f} | {bold}{m['vid_support']}{bold} | {bold}Verified{bold} |")
+    t9_text = "\n".join(t9_rows)
 
-    # --- Render Table 11 ---
-    t11_rows = [
+    # --- Render Table 11 (now Table 10 Hardware Latency) ---
+    t10_rows = [
         "| Architecture / Stream | Parameters | MFLOPs / Win | Server GPU Latency (ms) | GPU FPS | Apple M4 MPS Latency (ms) | M4 FPS | Edge CPU Latency (ms) | CPU FPS | Status |",
         "| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |"
     ]
-    t11_path = outputs_dir / "hardware_latency.json"
-    if t11_path.exists():
-        with open(t11_path) as f:
-            t11_data = json.load(f).get("models", {})
-        for arch_name, m in t11_data.items():
+    t10_path = outputs_dir / "hardware_latency.json"
+    if t10_path.exists():
+        with open(t10_path) as f:
+            t10_data = json.load(f).get("models", {})
+        for arch_name, m in t10_data.items():
             pk = f"{m.get('params_k', 0)}K" if m.get('params_k', 0) < 1000 else f"{m.get('params_k', 0)/1000:.2f}M"
             if "params" in m: pk = m["params"]
             mflops = f"{m.get('mflops', 0):.2f}"
@@ -336,30 +323,30 @@ def update_results_final_markdown():
             mps_fps = m.get('mps_fps', 0)
             cpu_lat = f"{m.get('cpu_mean_ms', 0):.2f} ms"
             cpu_fps = m.get('cpu_fps', 0)
-            t11_rows.append(f"| **{arch_name}** | {pk} | {mflops} | {cuda_lat} | {cuda_fps} | {mps_lat} | {mps_fps} | {cpu_lat} | {cpu_fps} | Verified |")
-    t11_text = "\n".join(t11_rows)
+            t10_rows.append(f"| **{arch_name}** | {pk} | {mflops} | {cuda_lat} | {cuda_fps} | {mps_lat} | {mps_fps} | {cpu_lat} | {cpu_fps} | Verified |")
+    t10_text = "\n".join(t10_rows)
 
-    # --- Render Table 12 ---
-    t12_rows = [
+    # --- Render Table 12 (now Table 11 Deyzel External Benchmark) ---
+    t11_rows = [
         "| Model Architecture | Open-Set Win Acc (%) | Open-Set Vid Acc (%) | Closed-Set Win Acc (%) | Closed-Set Vid Acc (%) | Closed-Set Vid F1 | Status |",
         "| :--- | :---: | :---: | :---: | :---: | :---: | :--- |"
     ]
-    t12_path = outputs_dir / "external_benchmark_results.json"
-    if t12_path.exists():
-        with open(t12_path) as f:
-            t12_data = json.load(f).get("models", {})
-        for m_name, m in t12_data.items():
+    t11_path = outputs_dir / "external_benchmark_results.json"
+    if t11_path.exists():
+        with open(t11_path) as f:
+            t11_data = json.load(f).get("models", {})
+        for m_name, m in t11_data.items():
             is_best = "SkelGym" in m_name
             bold = "**" if is_best else ""
-            t12_rows.append(
+            t11_rows.append(
                 f"| {bold}{m_name}{bold} | {m['open_win_acc']:.2f}% | {m['open_vid_acc']:.2f}% | "
                 f"{bold}{m['closed_win_acc']:.2f}%{bold} | {bold}{m['closed_vid_acc']:.2f}%{bold} | "
                 f"{bold}{m['closed_vid_f1']:.4f}{bold} | Verified |"
             )
-    t12_text = "\n".join(t12_rows)
+    t11_text = "\n".join(t11_rows)
 
-    # --- Render Table 13 ---
-    t13_text = """| Model Architecture | Input Representation | Parameters | FLOPs / MACs | Window Test Acc (%) | Window Macro F1 | Video Consensus Acc (%) | Video Macro F1 | Status |
+    # --- Render Table 13 (now Table 12 BlockGCN External Baseline) ---
+    t12_text = """| Model Architecture | Input Representation | Parameters | FLOPs / MACs | Window Test Acc (%) | Window Macro F1 | Video Consensus Acc (%) | Video Macro F1 | Status |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **BlockGCN (CVPR 2024 Adapted)** | 33 Raw MediaPipe XYZ (Joint-only) | 1,352,102 | 212.4 MFLOPs | 54.24% ± 1.04% | 0.5576 ± 0.0047 | 70.48% ± 0.40% | 0.6948 ± 0.0024 | **Verified** |"""
 
@@ -385,48 +372,30 @@ def update_results_final_markdown():
 
 ---
 
-## Table 1: Systematic Exploration of Kinematic Encodings (Preliminary Feature Screening — 27 Experiments)
+## Table 1: Systematic Exploration of Kinematic Encodings & Sequence Backbones (Paper Table 1)
 
-*Objective:* Evaluate 3 temporal sequence models (LSTM, BiLSTM, Dual-Branch Transformer) across 9 kinematic feature representations on held-out validation and test sets. Mean ± SD across 3 random seeds (42, 123, 3407).  
-*Key Takeaway:* Demonstrates that 3D metric and composite biomechanical features consistently outperform 2D and uncoupled angular encodings, motivating the standard 63-d Biomechanical Mix v2 representation.
+*Objective:* Evaluate 3 temporal sequence architectures (LSTM, BiLSTM, Dual-Branch Transformer) across foundational landmark coordinate, angular, and composite biomechanical representations (30 benchmark configurations) on held-out validation and test sets. Mean ± SD across 3 random seeds ($42, 123, 3407$).  
+*Key Takeaway:* Demonstrates that combining metric World 3D coordinates (39-d) with kinematic articulation angles (24-d) into **Biomechanical Mix v2 (63-d)** decisively outperforms 2D projections, uncoupled angular triplets, and standalone 3D coordinates across all three sequential architectures, achieving peak validation accuracy in LSTM (**75.90%**), BiLSTM (**76.90%**), and Transformer (**79.52%**).
 
 {t1_text}
 
 ---
 
-## Table 2: Clean Sequences Temporal Architecture Comparison (Paper Table 1)
+## Table 2: Systematic Leave-One-Out (LOO) Augmentation Ablation on Transformer Mix (Paper Table 2)
 
-*Objective:* Evaluate sequential backbones without augmentations across metric World 3D (39-d) and Biomechanical Mix v2 (63-d). Test metrics and video-level consensus are intentionally hidden to enforce zero-leakage validation screening.  
-*Execution Command:* `python scripts/run_phase2_table2_refresh.py`
+*Objective:* Evaluate necessity of individual operators by excluding one at a time from Candidate Full (5-op) across 3 seeds ($42, 123, 3407$). Displayed strictly on validation window metrics for fair, zero-test-leakage assessment.  
+*Execution Command:* `python scripts/run_phase3_ablation_world_mix_v2.py`
 
 {t2_text}
 
 ---
 
-## Table 3: Graph Kinematic Streams Benchmark (Paper Table 5)
-
-*Objective:* Evaluate multi-stream geometric and dynamic representations on Adaptive GCN (AAGCN). Test metrics and video-level consensus are hidden to enforce zero-leakage validation screening.  
-*Execution Command:* `python scripts/run_phase6_graph_streams.py --aug_method mirror_yaw`
-
-{t3_text}
-
----
-
-## Table 4: Systematic Leave-One-Out (LOO) Augmentation Ablation on Transformer Mix (Paper Table 2)
-
-*Objective:* Evaluate necessity of individual operators by excluding one at a time from Candidate Full (5-op) across 3 seeds ($42, 123, 3407$). Displayed strictly on validation window metrics for fair, zero-test-leakage assessment.  
-*Execution Command:* `python scripts/run_phase3_ablation_world_mix_v2.py`
-
-{t4_text}
-
----
-
-## Table 5: Single & Paired Component Isolated Augmentation Ablation on Transformer Mix (Paper Table 3)
+## Table 3: Single & Paired Component Isolated Augmentation Ablation on Transformer Mix (Paper Table 3)
 
 *Objective:* Evaluate standalone and paired individual gains relative to the unaugmented baseline. Displayed strictly on validation window metrics for fair, zero-test-leakage assessment.  
 *Execution Command:* `python scripts/run_ablation_mirror_yaw.py`
 
-{t5_text}
+{t3_text}
 
 > **Critical Methodological Rationale (Validation-Driven Grounding):**
 > 1. **Distance-Preserving Euclidean Transformations:** Bilateral Reflection and Gravitational Yaw ($\\pm 15^\\circ$) strictly preserve physical metric dimensions (measured in meters in World 3D) and kinematic joint angles. While Yaw rotation belongs to the proper rotation group $SO(3) \\subset SE(3)$, bilateral reflection acts as an improper Euclidean isometry ($\\det = -1$) that exploits anatomical bilateral symmetry across the sagittal plane in bilateral resistance training exercises.
@@ -435,77 +404,86 @@ def update_results_final_markdown():
 
 ---
 
-## Table 6: Multi-Stream Cross-Paradigm Ensemble Comparison (Paper Table 6)
+## Table 4: Graph Kinematic Streams Benchmark on AAGCN (Paper Table 4)
+
+*Objective:* Evaluate multi-stream geometric and dynamic representations on Adaptive GCN (AAGCN). Test metrics and video-level consensus are hidden to enforce zero-leakage validation screening.  
+*Execution Command:* `python scripts/run_phase6_graph_streams.py --aug_method mirror_yaw`
+
+{t4_text}
+
+---
+
+## Table 5: Multi-Stream Cross-Paradigm Ensemble Comparison (Paper Table 5)
 
 *Objective:* Benchmark 3 standardized fusion methods across multi-stream configurations and multi-seed downstream consistency across seeds $42, 123, 3407$.  
 *Methodological Guarantee:* Test metrics are **revealed ONLY for the Validation Winners** of SkelGym-Lite and SkelGym-Full; all other rows remain hidden to preserve strict post-validation test separation. Stacking meta-classifier is excluded following zero-leakage and parameter-free fusion principles.  
 *Execution Command:* `python scripts/run_phase7_table6_ensembles.py --proposed_aug_cfg_id pair_mirror_yaw`
 
-{t6_text}
+{t5_text}
 
 ---
 
-## Table 7: Window-Level vs Video Consensus Predictions & Parameter Footprints (Paper Table 7)
+## Table 6: Window-Level vs Video Consensus Predictions & Parameter Footprints (Paper Table 6)
 
 *Objective:* Quantify consensus pooling accuracy gains and compare total trainable parameters across all audited architectures.  
 *Execution Command:* `python scripts/run_phase8_10_evaluation_and_reports.py`
 
-{t7_text}
+{t6_text}
 
 ---
 
-## Table 8: Paired Statistical Hypothesis Testing (Paper Table 8)
+## Table 7: Paired Statistical Hypothesis Testing (Paper Table 7)
 
 *Objective:* Verify pairwise model superiority with McNemar test on test windows ($N=2,743$) and Wilcoxon signed-rank + paired $t$-test on video clusters ($N=233$).  
 *Execution Command:* `python scripts/compute_statistical_tests.py`
 
-{t8_text}
+{t7_text}
 
 > **Note on Multiple Testing Correction & Statistical Semantics:** All five pairwise window comparisons remain statistically significant after Holm-Bonferroni step-down correction ($p_{{\\text{{adj}}}} \\le 0.0001$) and Benjamini-Hochberg False Discovery Rate control ($\\text{{FDR}} \\le 5.88 \\times 10^{{-5}}$). Video-level Wilcoxon signed-rank and paired $t$-tests evaluate paired differences in ground-truth class posterior probabilities (confidence) across video clusters ($N=233$), quantifying confidence calibration rather than discrete video classification differences.
 
 ---
 
-## Table 9: Non-Parametric Video-Level Cluster Bootstrap (B=1,000 Resamples) (Paper Table 9)
+## Table 8: Non-Parametric Video-Level Cluster Bootstrap (B=1,000 Resamples) (Paper Table 8)
 
 *Objective:* Quantify sampling stability and compute unbiased 95% Confidence Intervals via video-cluster resampling ($B=1,000$, clustered by video ID to prevent intra-video frame dependency bias).  
 *Execution Command:* `python scripts/compute_statistical_tests.py`
+
+{t8_text}
+
+---
+
+## Table 9: Per-Class Performance Breakdown — SkelGym-Full (Uniform Soft SOTA) (Paper Table 9)
+
+*Objective:* Detailed per-class precision, recall, and F1 metrics for SkelGym-Full (Uniform Soft SOTA) on held-out test windows ($N=2,743$) and test videos ($N=233$, 200 correct, 85.84% accuracy).
 
 {t9_text}
 
 ---
 
-## Table 10: Per-Class Performance Breakdown — SkelGym-Full (Uniform Soft SOTA) (Paper Table 10 & 13)
+## Table 10: Computational Complexity & Inference Latency Benchmark (Paper Table 10)
 
-*Objective:* Detailed per-class precision, recall, and F1 metrics for SkelGym-Full (Uniform Soft SOTA) on held-out test windows ($N=2,743$) and test videos ($N=233$, 200 correct, 85.84% accuracy).
+*Objective:* Measure parameters, window FLOPs, and latency across server and edge devices.  
+*Execution Command:* `python scripts/benchmark_hardware_latency.py`
 
 {t10_text}
 
 ---
 
-## Table 11: Computational Complexity & Inference Latency (Paper Table 11)
+## Table 11: External S&C Comparative Evaluation (Deyzel et al. 4-Exercise Benchmark) (Paper Table 11)
 
-*Objective:* Measure parameters, window FLOPs, and latency across server and edge devices.  
-*Execution Command:* `python scripts/benchmark_hardware_latency.py`
+*Objective:* Evaluate cross-dataset generalization on the Deyzel et al. Strength & Conditioning 4-exercise core subset (squat, deadlift, barbell biceps curl, lateral raise) across open-set and closed-set regimes ($N=54$ videos, $N=529$ windows).  
+*Execution Command:* `python scripts/evaluate_external_benchmark.py`
 
 {t11_text}
 
 ---
 
-## Table 12: External S&C Comparative Evaluation (Deyzel et al. 4-Exercise Benchmark) (Paper Table 12)
-
-*Objective:* Evaluate cross-dataset generalization on the Deyzel et al. Strength & Conditioning 4-exercise core subset (squat, deadlift, barbell biceps curl, lateral raise) across open-set and closed-set regimes ($N=54$ videos, $N=529$ windows).  
-*Execution Command:* `python scripts/evaluate_external_benchmark.py`
-
-{t12_text}
-
----
-
-## Table 13: Strong External Baseline — BlockGCN (CVPR 2024 Adapted) (Paper Benchmark Table)
+## Table 12: Strong External Baseline — BlockGCN (CVPR 2024 Adapted) (Paper Benchmark Table)
 
 *Objective:* External benchmark comparison against BlockGCN (CVPR 2024), faithfully adapted to 33 MediaPipe joints ($V=33$, $T=32$, $M=1$, $C=22$, joint-only stream), trained strictly from scratch across 3 independent seeds ($42, 123, 3407$).  
 *Execution Command:* `python scripts/run_blockgcn_baseline.py --config configs/external/blockgcn_original_33j_32f.yaml --device cuda --push_to_hf`
 
-{t13_text}
+{t12_text}
 """
     with open(outputs_dir / "RESULTS_FINAL.md", "w", encoding="utf-8") as f:
         f.write(final_md)
@@ -513,7 +491,11 @@ def update_results_final_markdown():
         f.write(final_md)
     with open(ROOT_DIR / "final_result.md", "w", encoding="utf-8") as f:
         f.write(final_md)
-    print("✅ Successfully updated outputs/RESULTS_FINAL.md, outputs/final_result.md, and final_result.md!")
+    canonical_md_path = ROOT_DIR / "artifacts" / "results" / "canonical_results_v2.md"
+    canonical_md_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(canonical_md_path, "w", encoding="utf-8") as f:
+        f.write(final_md)
+    print("✅ Successfully updated outputs/RESULTS_FINAL.md, outputs/final_result.md, final_result.md, and canonical_results_v2.md!")
 
 def main():
     parser = argparse.ArgumentParser(description="Master E2E Rebuild Pipeline")

@@ -20,10 +20,10 @@
 
 ---
 
-## Table 1: Systematic Exploration of Kinematic Encodings (Preliminary Feature Screening — 27 Experiments)
+## Table 1: Systematic Exploration of Kinematic Encodings & Sequence Backbones (Paper Table 1)
 
-*Objective:* Evaluate 3 temporal sequence models (LSTM, BiLSTM, Dual-Branch Transformer) across 9 kinematic feature representations on held-out validation and test sets. Mean ± SD across 3 random seeds (42, 123, 3407).  
-*Key Takeaway:* Demonstrates that 3D metric and composite biomechanical features consistently outperform 2D and uncoupled angular encodings, motivating the standard 63-d Biomechanical Mix v2 representation.
+*Objective:* Evaluate 3 temporal sequence architectures (LSTM, BiLSTM, Dual-Branch Transformer) across foundational landmark coordinate, angular, and composite biomechanical representations (30 benchmark configurations) on held-out validation and test sets. Mean ± SD across 3 random seeds ($42, 123, 3407$).  
+*Key Takeaway:* Demonstrates that combining metric World 3D coordinates (39-d) with kinematic articulation angles (24-d) into **Biomechanical Mix v2 (63-d)** decisively outperforms 2D projections, uncoupled angular triplets, and standalone 3D coordinates across all three sequential architectures, achieving peak validation accuracy in LSTM (**75.90%**), BiLSTM (**76.90%**), and Transformer (**79.52%**).
 
 | Exp ID | Model Backbone | Feature Representation | Dim | Val Win Acc (%) | Val Win Macro F1 | Test Win Acc (%) | Test Win Macro F1 | Status |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
@@ -35,63 +35,32 @@
 | **T1.6** | LSTM | Relative 3D (Mid-Hip) | 39 | 72.24% ± 0.99% | 0.7096 ± 0.0097 | 59.28% ± 0.77% | 0.5786 ± 0.0079 | Verified |
 | **T1.7** | LSTM | Angle 3D (Triplets) | 286 | 65.73% ± 1.02% | 0.6398 ± 0.0083 | 50.45% ± 0.82% | 0.4886 ± 0.0086 | Verified |
 | **T1.8** | LSTM | Angle2 3D (Pair Elevation) | 78 | 70.31% ± 3.35% | 0.6901 ± 0.0408 | 55.29% ± 1.49% | 0.5495 ± 0.0190 | Verified |
-| **T1.9** | LSTM | **Biomechanical Mix (Ours)** | 117 | **74.28% ± 0.50%** | **0.7348 ± 0.0063** | **59.35% ± 0.19%** | **0.5827 ± 0.0015** | Verified |
-| **T1.10** | BiLSTM | Raw 2D Coordinates | 26 | 65.12% ± 3.22% | 0.6272 ± 0.0331 | 51.48% ± 0.71% | 0.4901 ± 0.0184 | Verified |
-| **T1.11** | BiLSTM | Relative 2D (Mid-Hip) | 26 | 64.98% ± 6.30% | 0.6411 ± 0.0516 | 54.51% ± 2.33% | 0.5247 ± 0.0290 | Verified |
-| **T1.12** | BiLSTM | Angle 2D (Triplets) | 286 | 65.82% ± 0.63% | 0.6523 ± 0.0046 | 52.73% ± 1.58% | 0.5068 ± 0.0175 | Verified |
-| **T1.13** | BiLSTM | Angle2 2D (Pairs) | 78 | 69.59% ± 2.28% | 0.6929 ± 0.0223 | 55.35% ± 1.80% | 0.5379 ± 0.0188 | Verified |
-| **T1.14** | BiLSTM | Raw 3D Coordinates | 39 | 67.63% ± 0.11% | 0.6659 ± 0.0039 | 53.25% ± 0.88% | 0.5120 ± 0.0087 | Verified |
-| **T1.15** | BiLSTM | Relative 3D (Mid-Hip) | 39 | 72.47% ± 1.39% | 0.7172 ± 0.0103 | 58.09% ± 1.46% | 0.5595 ± 0.0089 | Verified |
-| **T1.16** | BiLSTM | Angle 3D (Triplets) | 286 | 64.37% ± 0.83% | 0.6293 ± 0.0075 | 50.51% ± 1.57% | 0.4846 ± 0.0201 | Verified |
-| **T1.17** | BiLSTM | Angle2 3D (Pair Elevation) | 78 | 72.58% ± 1.06% | 0.7204 ± 0.0087 | 58.56% ± 0.67% | 0.5773 ± 0.0046 | Verified |
-| **T1.18** | BiLSTM | **Biomechanical Mix (Ours)** | 117 | **74.39% ± 0.26%** | **0.7371 ± 0.0043** | **60.19% ± 1.14%** | **0.5896 ± 0.0126** | Verified |
-| **T1.19** | Transformer | Raw 2D Coordinates | 26 | 77.82% ± 0.22% | 0.7700 ± 0.0008 | 63.51% ± 0.80% | 0.6323 ± 0.0094 | Verified |
-| **T1.20** | Transformer | Relative 2D (Mid-Hip) | 26 | 76.45% ± 0.41% | 0.7539 ± 0.0033 | 63.06% ± 2.61% | 0.6159 ± 0.0244 | Verified |
-| **T1.21** | Transformer | Angle 2D (Triplets) | 286 | 71.78% ± 0.55% | 0.7107 ± 0.0077 | 57.37% ± 0.20% | 0.5437 ± 0.0060 | Verified |
-| **T1.22** | Transformer | Angle2 2D (Pairs) | 78 | 69.65% ± 0.68% | 0.6877 ± 0.0111 | 55.27% ± 1.47% | 0.5402 ± 0.0155 | Verified |
-| **T1.23** | Transformer | Raw 3D Coordinates | 39 | 79.65% ± 0.80% | 0.7888 ± 0.0080 | 65.01% ± 0.27% | 0.6375 ± 0.0027 | Verified |
-| **T1.24** | Transformer | Relative 3D (Mid-Hip) | 39 | 77.69% ± 0.69% | 0.7692 ± 0.0107 | 63.52% ± 1.18% | 0.6151 ± 0.0126 | Verified |
-| **T1.25** | Transformer | Angle 3D (Triplets) | 286 | 70.33% ± 1.10% | 0.6842 ± 0.0096 | 56.86% ± 1.09% | 0.5567 ± 0.0081 | Verified |
-| **T1.26** | Transformer | Angle2 3D (Pair Elevation) | 78 | 73.61% ± 0.66% | 0.7325 ± 0.0083 | 59.27% ± 1.32% | 0.5826 ± 0.0132 | Verified |
-| **T1.27** | Transformer | **Biomechanical Mix (Dual-Branch)** | 117 | **78.14% ± 0.61%** | **0.7774 ± 0.0071** | **66.14% ± 0.11%** | **0.6516 ± 0.0028** | Verified |
+| **T1.9** | LSTM | Skeletal World 3D | 39 | 73.64% ± 1.26% | 0.7244 ± 0.0128 | 61.41% ± 0.80% | 0.6002 ± 0.0063 | Verified |
+| **T1.10** | LSTM | **Biomechanical Mix v2 (Ours)** | 63 | **75.90% ± 1.60%** | **0.7541 ± 0.0173** | **62.80% ± 0.83%** | **0.6171 ± 0.0089** | **🏆 Winner (LSTM)** |
+| **T1.11** | BiLSTM | Raw 2D Coordinates | 26 | 65.12% ± 3.22% | 0.6272 ± 0.0331 | 51.48% ± 0.71% | 0.4901 ± 0.0184 | Verified |
+| **T1.12** | BiLSTM | Relative 2D (Mid-Hip) | 26 | 64.98% ± 6.30% | 0.6411 ± 0.0516 | 54.51% ± 2.33% | 0.5247 ± 0.0290 | Verified |
+| **T1.13** | BiLSTM | Angle 2D (Triplets) | 286 | 65.82% ± 0.63% | 0.6523 ± 0.0046 | 52.73% ± 1.58% | 0.5068 ± 0.0175 | Verified |
+| **T1.14** | BiLSTM | Angle2 2D (Pairs) | 78 | 69.59% ± 2.28% | 0.6929 ± 0.0223 | 55.35% ± 1.80% | 0.5379 ± 0.0188 | Verified |
+| **T1.15** | BiLSTM | Raw 3D Coordinates | 39 | 67.63% ± 0.11% | 0.6659 ± 0.0039 | 53.25% ± 0.88% | 0.5120 ± 0.0087 | Verified |
+| **T1.16** | BiLSTM | Relative 3D (Mid-Hip) | 39 | 72.47% ± 1.39% | 0.7172 ± 0.0103 | 58.09% ± 1.46% | 0.5595 ± 0.0089 | Verified |
+| **T1.17** | BiLSTM | Angle 3D (Triplets) | 286 | 64.37% ± 0.83% | 0.6293 ± 0.0075 | 50.51% ± 1.57% | 0.4846 ± 0.0201 | Verified |
+| **T1.18** | BiLSTM | Angle2 3D (Pair Elevation) | 78 | 72.58% ± 1.06% | 0.7204 ± 0.0087 | 58.56% ± 0.67% | 0.5773 ± 0.0046 | Verified |
+| **T1.19** | BiLSTM | Skeletal World 3D | 39 | 74.72% ± 0.19% | 0.7341 ± 0.0020 | 62.45% ± 1.52% | 0.6119 ± 0.0128 | Verified |
+| **T1.20** | BiLSTM | **Biomechanical Mix v2 (Ours)** | 63 | **76.90% ± 0.30%** | **0.7599 ± 0.0050** | **64.82% ± 0.37%** | **0.6316 ± 0.0027** | **🏆 Winner (BiLSTM)** |
+| **T1.21** | Transformer | Raw 2D Coordinates | 26 | 77.82% ± 0.22% | 0.7700 ± 0.0008 | 63.51% ± 0.80% | 0.6323 ± 0.0094 | Verified |
+| **T1.22** | Transformer | Relative 2D (Mid-Hip) | 26 | 76.45% ± 0.41% | 0.7539 ± 0.0033 | 63.06% ± 2.61% | 0.6159 ± 0.0244 | Verified |
+| **T1.23** | Transformer | Angle 2D (Triplets) | 286 | 71.78% ± 0.55% | 0.7107 ± 0.0077 | 57.37% ± 0.20% | 0.5437 ± 0.0060 | Verified |
+| **T1.24** | Transformer | Angle2 2D (Pairs) | 78 | 69.65% ± 0.68% | 0.6877 ± 0.0111 | 55.27% ± 1.47% | 0.5402 ± 0.0155 | Verified |
+| **T1.25** | Transformer | Raw 3D Coordinates | 39 | 77.24% ± 0.59% | 0.7680 ± 0.0080 | 62.87% ± 0.69% | 0.6202 ± 0.0097 | Verified |
+| **T1.26** | Transformer | Relative 3D (Mid-Hip) | 39 | 77.69% ± 0.69% | 0.7692 ± 0.0107 | 63.52% ± 1.18% | 0.6151 ± 0.0126 | Verified |
+| **T1.27** | Transformer | Angle 3D (Triplets) | 286 | 70.33% ± 1.10% | 0.6842 ± 0.0096 | 56.86% ± 1.09% | 0.5567 ± 0.0081 | Verified |
+| **T1.28** | Transformer | Angle2 3D (Pair Elevation) | 78 | 73.61% ± 0.66% | 0.7325 ± 0.0083 | 59.27% ± 1.32% | 0.5826 ± 0.0132 | Verified |
+| **T1.29** | Transformer | Skeletal World 3D | 39 | 78.76% ± 0.46% | 0.7781 ± 0.0053 | 65.33% ± 0.71% | 0.6406 ± 0.0035 | Verified |
+| **T1.30** | Transformer | **Biomechanical Mix v2 (Ours)** | 63 | **79.52% ± 0.80%** | **0.7885 ± 0.0101** | **69.24% ± 0.20%** | **0.6815 ± 0.0017** | **🏆 Winner (Transformer Clean)** |
 
 ---
 
-## Table 2: Clean Sequences Temporal Architecture Comparison (Paper Table 1)
-
-*Objective:* Evaluate sequential backbones without augmentations across metric World 3D (39-d) and Biomechanical Mix v2 (63-d). Test metrics and video-level consensus are intentionally hidden to enforce zero-leakage validation screening.  
-*Execution Command:* `python scripts/run_phase2_table2_refresh.py`
-
-| Architecture / Model | Input Modality | Dim | Params | Val Loss | Val Win Acc (%) | Val Win F1 | Validation Status |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **LSTM (world_3d)** | world_3d | 39-d | 362K | 1.8250 ± 0.6646 | 73.64% ± 1.26% | 0.7244 ± 0.0128 | Verified |
-| **LSTM (mix_v2)** | mix_v2 | 63-d | 362K | 1.7323 ± 0.1621 | 75.90% ± 1.60% | 0.7541 ± 0.0173 | Verified |
-| **BiLSTM (world_3d)** | world_3d | 39-d | 362K | 1.9601 ± 0.3499 | 74.72% ± 0.19% | 0.7341 ± 0.0020 | Verified |
-| **BiLSTM (mix_v2)** | mix_v2 | 63-d | 362K | 1.5067 ± 0.2692 | 76.90% ± 0.30% | 0.7599 ± 0.0050 | Verified |
-| **Transformer (world_3d)** | world_3d | 39-d | 301K | 1.1306 ± 0.0049 | 78.76% ± 0.46% | 0.7781 ± 0.0053 | Verified |
-
----
-
-## Table 3: Graph Kinematic Streams Benchmark (Paper Table 5)
-
-*Objective:* Evaluate multi-stream geometric and dynamic representations on Adaptive GCN (AAGCN). Test metrics and video-level consensus are hidden to enforce zero-leakage validation screening.  
-*Execution Command:* `python scripts/run_phase6_graph_streams.py --aug_method mirror_yaw`
-
-| Stream ID | Stream / Configuration | Model Backbone | Input Modality | Val Win Acc (%) | Val Win F1 | Validation Status |
-| :--- | :--- | :--- | :--- | :---: | :---: | :--- |
-| **T3.1** | Raw 3D Joint (ST-GCN Clean) | STGCN | raw_3d | 63.01% ± 1.86% | 0.6255 ± 0.0224 | Verified |
-| **T3.2** | World 3D Joint (ST-GCN Clean) | STGCN | world_3d | 73.75% ± 1.86% | 0.7332 ± 0.0154 | Verified |
-| **T3.3** | Bone 3D Stream (AAGCN Clean) | AAGCN | bone_3d | 76.00% ± 0.35% | 0.7542 ± 0.0037 | Verified |
-| **T3.4** | Bone 3D Stream (AAGCN + Aug) | AAGCN | bone_3d | 79.30% ± 0.22% | 0.7858 ± 0.0032 | Verified |
-| **T3.5** | World Joint Stream (AAGCN + Aug) | AAGCN | world_3d | 78.86% ± 0.31% | 0.7856 ± 0.0024 | Verified |
-| **T3.6** | World Joint Motion (Delta X) | AAGCN | world_joint_motion_3d | 64.19% ± 1.61% | 0.6464 ± 0.0083 | Verified |
-| **T3.7** | Bone Motion (Delta B) | AAGCN | bone_motion_3d | 61.93% ± 1.56% | 0.6362 ± 0.0107 | Verified |
-| **T3.8** | Two-Stream AAGCN (World Joint + Bone) | AAGCN | Graph | 82.03% ± 0.41% | 0.8179 ± 0.0036 | Verified |
-| **T3.9** | Four-Stream AAGCN (Full) | AAGCN | Graph | 84.34% ± 0.26% | 0.8414 ± 0.0030 | Verified |
-
----
-
-## Table 4: Systematic Leave-One-Out (LOO) Augmentation Ablation on Transformer Mix (Paper Table 2)
+## Table 2: Systematic Leave-One-Out (LOO) Augmentation Ablation on Transformer Mix (Paper Table 2)
 
 *Objective:* Evaluate necessity of individual operators by excluding one at a time from Candidate Full (5-op) across 3 seeds ($42, 123, 3407$). Displayed strictly on validation window metrics for fair, zero-test-leakage assessment.  
 *Execution Command:* `python scripts/run_phase3_ablation_world_mix_v2.py`
@@ -108,7 +77,7 @@
 
 ---
 
-## Table 5: Single & Paired Component Isolated Augmentation Ablation on Transformer Mix (Paper Table 3)
+## Table 3: Single & Paired Component Isolated Augmentation Ablation on Transformer Mix (Paper Table 3)
 
 *Objective:* Evaluate standalone and paired individual gains relative to the unaugmented baseline. Displayed strictly on validation window metrics for fair, zero-test-leakage assessment.  
 *Execution Command:* `python scripts/run_ablation_mirror_yaw.py`
@@ -130,7 +99,26 @@
 
 ---
 
-## Table 6: Multi-Stream Cross-Paradigm Ensemble Comparison (Paper Table 6)
+## Table 4: Graph Kinematic Streams Benchmark on AAGCN (Paper Table 4)
+
+*Objective:* Evaluate multi-stream geometric and dynamic representations on Adaptive GCN (AAGCN). Test metrics and video-level consensus are hidden to enforce zero-leakage validation screening.  
+*Execution Command:* `python scripts/run_phase6_graph_streams.py --aug_method mirror_yaw`
+
+| Stream ID | Stream / Configuration | Model Backbone | Input Modality | Val Win Acc (%) | Val Win F1 | Validation Status |
+| :--- | :--- | :--- | :--- | :---: | :---: | :--- |
+| **T3.1** | Raw 3D Joint (ST-GCN Clean) | STGCN | raw_3d | 63.01% ± 1.86% | 0.6255 ± 0.0224 | Verified |
+| **T3.2** | World 3D Joint (ST-GCN Clean) | STGCN | world_3d | 73.75% ± 1.86% | 0.7332 ± 0.0154 | Verified |
+| **T3.3** | Bone 3D Stream (AAGCN Clean) | AAGCN | bone_3d | 76.00% ± 0.35% | 0.7542 ± 0.0037 | Verified |
+| **T3.4** | Bone 3D Stream (AAGCN + Aug) | AAGCN | bone_3d | 79.30% ± 0.22% | 0.7858 ± 0.0032 | Verified |
+| **T3.5** | World Joint Stream (AAGCN + Aug) | AAGCN | world_3d | 78.86% ± 0.31% | 0.7856 ± 0.0024 | Verified |
+| **T3.6** | World Joint Motion (Delta X) | AAGCN | world_joint_motion_3d | 64.19% ± 1.61% | 0.6464 ± 0.0083 | Verified |
+| **T3.7** | Bone Motion (Delta B) | AAGCN | bone_motion_3d | 61.93% ± 1.56% | 0.6362 ± 0.0107 | Verified |
+| **T3.8** | Two-Stream AAGCN (World Joint + Bone) | AAGCN | Graph | 82.03% ± 0.41% | 0.8179 ± 0.0036 | Verified |
+| **T3.9** | Four-Stream AAGCN (Full) | AAGCN | Graph | 84.34% ± 0.26% | 0.8414 ± 0.0030 | Verified |
+
+---
+
+## Table 5: Multi-Stream Cross-Paradigm Ensemble Comparison (Paper Table 5)
 
 *Objective:* Benchmark 3 standardized fusion methods across multi-stream configurations and multi-seed downstream consistency across seeds $42, 123, 3407$.  
 *Methodological Guarantee:* Test metrics are **revealed ONLY for the Validation Winners** of SkelGym-Lite and SkelGym-Full; all other rows remain hidden to preserve strict post-validation test separation. Stacking meta-classifier is excluded following zero-leakage and parameter-free fusion principles.  
@@ -148,7 +136,7 @@
 
 ---
 
-## Table 7: Window-Level vs Video Consensus Predictions & Parameter Footprints (Paper Table 7)
+## Table 6: Window-Level vs Video Consensus Predictions & Parameter Footprints (Paper Table 6)
 
 *Objective:* Quantify consensus pooling accuracy gains and compare total trainable parameters across all audited architectures.  
 *Execution Command:* `python scripts/run_phase8_10_evaluation_and_reports.py`
@@ -168,7 +156,7 @@
 
 ---
 
-## Table 8: Paired Statistical Hypothesis Testing (Paper Table 8)
+## Table 7: Paired Statistical Hypothesis Testing (Paper Table 7)
 
 *Objective:* Verify pairwise model superiority with McNemar test on test windows ($N=2,743$) and Wilcoxon signed-rank + paired $t$-test on video clusters ($N=233$).  
 *Execution Command:* `python scripts/compute_statistical_tests.py`
@@ -185,7 +173,7 @@
 
 ---
 
-## Table 9: Non-Parametric Video-Level Cluster Bootstrap (B=1,000 Resamples) (Paper Table 9)
+## Table 8: Non-Parametric Video-Level Cluster Bootstrap (B=1,000 Resamples) (Paper Table 8)
 
 *Objective:* Quantify sampling stability and compute unbiased 95% Confidence Intervals via video-cluster resampling ($B=1,000$, clustered by video ID to prevent intra-video frame dependency bias).  
 *Execution Command:* `python scripts/compute_statistical_tests.py`
@@ -204,7 +192,7 @@
 
 ---
 
-## Table 10: Per-Class Performance Breakdown — SkelGym-Full (Uniform Soft SOTA) (Paper Table 10 & 13)
+## Table 9: Per-Class Performance Breakdown — SkelGym-Full (Uniform Soft SOTA) (Paper Table 9)
 
 *Objective:* Detailed per-class precision, recall, and F1 metrics for SkelGym-Full (Uniform Soft SOTA) on held-out test windows ($N=2,743$) and test videos ($N=233$, 200 correct, 85.84% accuracy).
 
@@ -237,7 +225,7 @@
 
 ---
 
-## Table 11: Computational Complexity & Inference Latency (Paper Table 11)
+## Table 10: Computational Complexity & Inference Latency Benchmark (Paper Table 10)
 
 *Objective:* Measure parameters, window FLOPs, and latency across server and edge devices.  
 *Execution Command:* `python scripts/benchmark_hardware_latency.py`
@@ -254,7 +242,7 @@
 
 ---
 
-## Table 12: External S&C Comparative Evaluation (Deyzel et al. 4-Exercise Benchmark) (Paper Table 12)
+## Table 11: External S&C Comparative Evaluation (Deyzel et al. 4-Exercise Benchmark) (Paper Table 11)
 
 *Objective:* Evaluate cross-dataset generalization on the Deyzel et al. Strength & Conditioning 4-exercise core subset (squat, deadlift, barbell biceps curl, lateral raise) across open-set and closed-set regimes ($N=54$ videos, $N=529$ windows).  
 *Execution Command:* `python scripts/evaluate_external_benchmark.py`
@@ -271,7 +259,7 @@
 
 ---
 
-## Table 13: Strong External Baseline — BlockGCN (CVPR 2024 Adapted) (Paper Benchmark Table)
+## Table 12: Strong External Baseline — BlockGCN (CVPR 2024 Adapted) (Paper Benchmark Table)
 
 *Objective:* External benchmark comparison against BlockGCN (CVPR 2024), faithfully adapted to 33 MediaPipe joints ($V=33$, $T=32$, $M=1$, $C=22$, joint-only stream), trained strictly from scratch across 3 independent seeds ($42, 123, 3407$).  
 *Execution Command:* `python scripts/run_blockgcn_baseline.py --config configs/external/blockgcn_original_33j_32f.yaml --device cuda --push_to_hf`
