@@ -89,7 +89,7 @@ def run_stage(cmd: List[str], desc: str, stage_num: int, start_time: float, est_
 
 def update_results_final_markdown():
     """
-    Re-renders outputs/RESULTS_FINAL.md, outputs/final_result.md, and final_result.md
+    Re-renders outputs/RESULTS_FINAL.md
     according to strict zero-leakage display rules and comprehensive paper-freeze standards:
       - Trainable Parameter Footprints table at the top.
       - Table 1: Full preliminary feature screening benchmark (27 runs).
@@ -487,15 +487,11 @@ def update_results_final_markdown():
 """
     with open(outputs_dir / "RESULTS_FINAL.md", "w", encoding="utf-8") as f:
         f.write(final_md)
-    with open(outputs_dir / "final_result.md", "w", encoding="utf-8") as f:
-        f.write(final_md)
-    with open(ROOT_DIR / "final_result.md", "w", encoding="utf-8") as f:
-        f.write(final_md)
     canonical_md_path = ROOT_DIR / "artifacts" / "results" / "canonical_results_v2.md"
     canonical_md_path.parent.mkdir(parents=True, exist_ok=True)
     with open(canonical_md_path, "w", encoding="utf-8") as f:
         f.write(final_md)
-    print("✅ Successfully updated outputs/RESULTS_FINAL.md, outputs/final_result.md, final_result.md, and canonical_results_v2.md!")
+    print("✅ Successfully updated outputs/RESULTS_FINAL.md and canonical_results_v2.md!")
 
 def main():
     parser = argparse.ArgumentParser(description="Master E2E Rebuild Pipeline")
