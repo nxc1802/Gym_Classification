@@ -41,6 +41,7 @@ mm-fit/
 *.npy
 *.zip
 *.tar.gz
+!artifacts/reference/*.tar.gz
 *.mp4
 *.avi
 *.mov
