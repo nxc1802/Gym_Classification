@@ -13,12 +13,13 @@
 2. Remove the old checkpoint matching/verification workflow. Historical HF match rate is too low to justify reuse.
 3. Full retrain from scratch all trainable model/configurations required by `final.tex` and the final benchmark.
 4. Before retraining, clear the HF model repository `Cuong2004/gym-exercise-classification`.
-5. Never touch the protected dataset repository `Cuong2004/gym-exercise-landmarks`.
-6. Every retrained model must be archived with checkpoint + metrics + predictions + per-class + provenance so normal paper work never needs training or inference again.
-7. Update `outputs/RESULTS_FINAL.md` before touching `final.tex`.
-8. `final.tex` must be edited with strict minimal diff.
-9. If new results materially change a claim/discussion/conclusion, report the impact before rewriting prose.
-10. Never store Marimo/HF tokens in source code, Markdown, logs, JSON, checkpoints, or git history.
+5. Use the **existing landmark dataset directly** as the canonical training input. **Do not re-run raw-video → MediaPipe/landmark extraction.**
+6. Never delete, clear, overwrite, or modify the protected dataset repository `Cuong2004/gym-exercise-landmarks`; it may be downloaded/read as the fixed input dataset.
+7. Every retrained model must be archived with checkpoint + metrics + predictions + per-class + provenance so normal paper work never needs training or inference again.
+8. Update `outputs/RESULTS_FINAL.md` before touching `final.tex`.
+9. `final.tex` must be edited with strict minimal diff.
+10. If new results materially change a claim/discussion/conclusion, report the impact before rewriting prose.
+11. Never store Marimo/HF tokens in source code, Markdown, logs, JSON, checkpoints, or git history.
 
 ---
 
@@ -31,7 +32,9 @@ git checkout main
 git pull origin main
 ```
 
-Record current Git SHA, dataset metadata hash, environment, current `RESULTS_FINAL.md`, current root `final.tex`, experiment configs/scripts, and current HF model repo revision for archival reference only.
+Record current Git SHA, **existing landmark dataset/metadata hash**, environment, current `RESULTS_FINAL.md`, current root `final.tex`, experiment configs/scripts, and current HF model repo revision for archival reference only.
+
+The retraining data source is the **already-extracted landmark dataset** (local or downloaded from `Cuong2004/gym-exercise-landmarks`). Raw videos are out of scope for this campaign. Do **not** run MediaPipe, pose extraction, landmark regeneration, or raw-video preprocessing.
 
 The manuscript source of truth is fixed as:
 
@@ -77,11 +80,13 @@ Clear only:
 Cuong2004/gym-exercise-classification
 ```
 
-Never delete or modify:
+Never delete, clear, overwrite, or modify:
 
 ```text
 Cuong2004/gym-exercise-landmarks
 ```
+
+This dataset repo remains the fixed canonical input and may be **read/downloaded directly for training**. No raw-video-to-landmark regeneration is required.
 
 Goal: rebuild HF from a clean state so every model/checkpoint/artifact belongs to this new canonical full-retrain generation.
 
@@ -100,10 +105,12 @@ export HF_TOKEN=...
 
 Training policy:
 
-- Full retrain from scratch.
+- Full retrain model weights from scratch.
+- **Use the existing landmark dataset directly; do not regenerate landmarks from raw videos.**
+- Do not run MediaPipe / pose extraction / raw-video preprocessing.
 - Do not resume old weights.
 - Use seeds 42, 123, 3407.
-- Keep train/val/test split fixed.
+- Keep train/val/test split fixed from the existing landmark metadata.
 - Preserve canonical normalization, seq_len, strides, feature definitions, augmentation and model variants.
 
 ---
@@ -387,7 +394,7 @@ NO FINAL.TEX EDITS STARTED YET
 
 # Non-Negotiable Rules
 
-- Full retrain means from scratch; do not resume old model weights.
+- Full retrain means model weights from scratch; **the landmark dataset is reused as-is and is not regenerated from raw video**.
 - Do not spend the campaign trying to match legacy checkpoints/results.
 - Never touch the protected HF dataset repository.
 - No fabricated metrics.
