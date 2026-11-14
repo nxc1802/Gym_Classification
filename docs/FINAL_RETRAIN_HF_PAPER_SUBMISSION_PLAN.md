@@ -117,15 +117,28 @@ Training policy:
 
 # Phase 4 — Parallel Training
 
-Preferred: run 3 seeds of the same config simultaneously:
+Default strategy: run **2 model/configurations at the same time, each with all 3 seeds in parallel**:
 
 ```text
 Config A: seed42 + seed123 + seed3407
+Config B: seed42 + seed123 + seed3407
 ```
 
-Alternative: run 3 different models simultaneously when this gives better server utilization.
+This gives a target concurrency of:
 
-Default max concurrency: 3 jobs, reduced only if GPU VRAM/RAM/CPU/disk limits require it.
+```text
+2 configs × 3 seeds = 6 training jobs
+```
+
+This is the preferred mode because it completes two full multiseed configurations per batch and allows immediate aggregation when the batch finishes.
+
+Resource-aware fallback:
+
+- If the server safely supports 6 jobs → run full `2 × 3`.
+- If VRAM/RAM/CPU pressure is too high → reduce to `1 × 3`.
+- If even 3 parallel seeds are unsafe → reduce concurrency further while preserving the same seed set.
+
+Do not force 6 jobs when it risks OOM or unstable training.
 
 Before each batch inspect GPU memory, RAM, CPU load, model footprint, and disk space.
 
@@ -139,11 +152,12 @@ Each job reports `RUNNING`, `SUCCESS`, or `FAILED`.
 
 When a batch finishes:
 
-1. confirm expected outputs exist;
+1. confirm outputs for both configurations and all completed seeds exist;
 2. calculate/save full metrics and predictions;
-3. archive locally;
-4. upload the completed permanent package to HF;
-5. immediately start the next pending batch.
+3. aggregate each completed 3-seed configuration;
+4. archive locally;
+5. upload the completed permanent packages to HF;
+6. immediately start the next pair of pending configurations.
 
 Every 30 minutes check process state, epoch/log progress, checkpoint timestamp, GPU/RAM/disk usage, and stalled jobs.
 
@@ -351,7 +365,7 @@ Final status: `READY_TO_SUBMIT`, `READY_WITH_MINOR_WARNINGS`, or `NOT_READY`.
 5. Clear Cuong2004/gym-exercise-classification
 6. Keep Cuong2004/gym-exercise-landmarks untouched
 7. Full retrain on Marimo
-8. Prefer 3 seeds/config in parallel
+8. Prefer 2 configs × 3 seeds in parallel (up to 6 training jobs)
 9. Event-driven chaining + 30-minute heartbeat
 10. Save complete checkpoint + metrics + predictions + per-class artifacts
 11. Upload completed batches to HF
@@ -379,7 +393,7 @@ FINAL PAPER SOURCE: final.tex (repository root)
 TOTAL TRAINABLE CONFIGURATIONS: ...
 TOTAL PLANNED TRAINING RUNS: ...
 MULTISEED POLICY: 42 / 123 / 3407
-PLANNED PARALLEL BATCHES: ...
+PLANNED PARALLEL BATCHES: 2 configs × 3 seeds per batch where resources allow
 DERIVED RESULTS TO RECOMPUTE: ...
 HF MODEL REPO TO CLEAR: Cuong2004/gym-exercise-classification
 PROTECTED HF DATASET REPO: Cuong2004/gym-exercise-landmarks
